@@ -1,0 +1,1082 @@
+/* ═══════════════════════════════════════════════════════════════════════════
+   fg3-components.css — Fluid Design Open · controls, containers, overlays
+   ───────────────────────────────────────────────────────────────────────────
+   Load after lg3.css and fg3-motion.css (SPEC §1). Consumes core tokens, colour
+   roles, springs and the geometry module's material; names no colour except the small
+   component-token block in §0 (the white knob and two shadows). Behaviour
+   lives in ui.js (UI); everything here renders without it.
+
+   Measured, not invented: sizes, fonts and paddings are measured; control behaviour follows
+   platform conventions. Where a number is ours it says so.
+
+   CLASS CONTRACT (page builders code against these names)
+   Buttons   .btn  (bare = the neutral ink pill)  + .btn-primary .btn-secondary
+             .btn-plain (link + chevron: goes somewhere) .btn-text (link ink, no
+             chevron: an action; = .btn-plain.btn-nochevron) .btn-tinted
+             .btn-glass .btn-icon .btn-block
+             sizes .btn-s .btn-m .btn-l .btn-xl  = 24 / 36 / 44 / 56 tall
+             states :hover :active :focus-visible :disabled [aria-disabled="true"]
+             [aria-busy="true"] (loading: label hidden, spinner, width kept)
+             .btn-glass needs data-lg3 (+ data-lg3-interactive); .btn-glass.btn-primary
+             = the one tinted glass primary. Text-bearing glass (btn-glass, segmented-
+             glass, toast, menu, popover, alert) is stamped data-lg3-text by UI
+             (LG3's legibility veil); unstamped, it takes a fixed fallback share
+   Links     .link-chevron (inline, inherits size)  · .btn-plain (a control)
+   Fields    input.field (.field-s 36 / default 44 / .field-l 56) · textarea.textarea
+             .search > input[type=search] · select.select · .form-field > label +
+             control + .field-help | .field-error · [aria-invalid="true"]
+   Toggles   input.switch[role=switch] · input.check · input.radio · label.choice
+   Slider    input.slider[type=range] (UI writes --v) · .slider-detent (MOTION.detent)
+             + .slider-detent-labels right after it: children at their detents
+             via --at 0..1 (UI.detent writes it from data-detents; set
+             --detent-thumb on the row too if the thumb is resized)
+   Stepper   .stepper > button + output? + button (UI wires; data-min/max/step/value)
+   Segmented .segmented[role=tablist|radiogroup] > button…  (+ .segmented-indicator,
+             made by UI) · .segmented-l · .segmented-glass (one LG3 host with
+             data-lg3-container: .segmented-track + .segmented-indicator shapes)
+             [data-seg-ready] [data-seg-armed] [data-seg-press] [data-overflow]
+   Small     .chip (.chip-s) [aria-pressed|aria-selected|aria-checked] · .token
+             (+ .token-remove) · .badge (.badge-ok/-warn/-bad/-accent/-solid/-count/-new)
+             · .pill-status[data-state="live|ok|warn|bad|idle"] · .avatar
+             (.avatar-s/-l/-xl, [data-status]) · .avatar-stack · .kbd · .divider
+   Surfaces  .card (.card-hover, .card-action) · .tile · .card-media
+             .list .list-inset > .row (.row-icon .row-title .row-sub .row-detail
+             .row-value) · .list-header .list-footer · .table (.table-scroll: may
+             bleed with negative margins; .table-stack: ≤ 734 rows become blocks,
+             cells labelled by data-label) · .stat
+             (.stat-caption .stat-value .stat-delta.up|.down)
+   Progress  progress.progress · .progress-ring (--value 0..1 | [data-indeterminate];
+             arc --ring-color, number in --label) · .spinner (.spinner-l,
+             .spinner-12) · .skeleton (-text, -circle)
+   Overlays  .toasts > .toast · .banner (-ok -warn -bad -inset) · dialog.alert
+             ([data-alert-scoped] + .alert-scrim when UI.alert has a container)
+             · .popover · .tooltip · .menu > .menu-item (.menu-separator,
+             .menu-header, .menu-item-destructive) · .empty-state
+   CUSTOM PROPERTIES (override per instance)
+     --btn-bg --btn-bg-hover --btn-bg-active --btn-ink --btn-line --btn-glow
+     --switch-on · --slider-fill · --seg-platter --seg-ind --seg-ink
+     --row-inset --row-icon-bg --row-icon-ink · --card-pad --card-scale
+     --value (ring/progress) --ring-w --ring-color · --at (detent label)
+     --toast-offset · --c-surface --c-scrim (read)
+   A class is not an affordance: .btn/.chip/.menu-item/.token-remove/
+   .toast-action show the hand only on an element a keyboard can reach.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* ── 0 · COMPONENT TOKENS ────────────────────────────────────────────────────
+   The only colours this file names. The switch/slider knob is white in BOTH
+   tones (no palette role is white in both — a colour-role gap); the two
+   shadows are the measured knob and fold-thumb shadows. Everything else
+   below is a role. */
+:root{
+  --c-knob:#fff;
+  --c-knob-shadow:0 3px 8px rgba(0,0,0,.15),0 1px 1px rgba(0,0,0,.16),0 0 0 .5px rgba(0,0,0,.04);
+  --c-thumb-shadow:0 2px 7px rgba(0,0,0,.35);               /* fold thumb */
+  /* glyph masks (inline data, no request): stroke art drawn in currentColor */
+  --c-chevron:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 8 14'%3E%3Cpath d='M1.4 1.4 6.6 7l-5.2 5.6' fill='none' stroke='%23000' stroke-width='1.7' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  --c-chevron-down:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 14 8'%3E%3Cpath d='M1.4 1.4 7 6.6l5.6-5.2' fill='none' stroke='%23000' stroke-width='1.7' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  --c-tick:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 22 22'%3E%3Cpath d='M6 11.6 9.4 15 16.2 7.4' fill='none' stroke='%23000' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  --c-chevrons:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 18 12'%3E%3Cpath d='M6 1.5 1.8 6 6 10.5M12 1.5 16.2 6 12 10.5' fill='none' stroke='%23000' stroke-width='1.7' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  --c-magnifier:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M10.5 17a6.5 6.5 0 1 1 0-13 6.5 6.5 0 0 1 0 13zM15.3 15.3 20 20' fill='none' stroke='%23000' stroke-width='2.2' stroke-linecap='round'/%3E%3C/svg%3E");
+  --c-xmark:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20'%3E%3Cpath d='M5.5 5.5l9 9M14.5 5.5l-9 9' fill='none' stroke='%23000' stroke-width='2.2' stroke-linecap='round'/%3E%3C/svg%3E");
+  /* UIActivityIndicatorView: 8 capsule spokes, the head full, the trail
+     fading counter-clockwise; the whole mask turns in 8 discrete steps */
+  --c-spokes-8:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'%3E%3Cg%3E%3Crect x='18.1' y='2' width='3.8' height='11' rx='1.9'/%3E%3Crect x='18.1' y='2' width='3.8' height='11' rx='1.9' opacity='.86' transform='rotate(315 20 20)'/%3E%3Crect x='18.1' y='2' width='3.8' height='11' rx='1.9' opacity='.72' transform='rotate(270 20 20)'/%3E%3Crect x='18.1' y='2' width='3.8' height='11' rx='1.9' opacity='.6' transform='rotate(225 20 20)'/%3E%3Crect x='18.1' y='2' width='3.8' height='11' rx='1.9' opacity='.49' transform='rotate(180 20 20)'/%3E%3Crect x='18.1' y='2' width='3.8' height='11' rx='1.9' opacity='.4' transform='rotate(135 20 20)'/%3E%3Crect x='18.1' y='2' width='3.8' height='11' rx='1.9' opacity='.33' transform='rotate(90 20 20)'/%3E%3Crect x='18.1' y='2' width='3.8' height='11' rx='1.9' opacity='.3' transform='rotate(45 20 20)'/%3E%3C/g%3E%3C/svg%3E");
+  --c-spokes-12:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'%3E%3Cg%3E%3Crect x='18.6' y='2' width='2.8' height='10' rx='1.4'/%3E%3Crect x='18.6' y='2' width='2.8' height='10' rx='1.4' opacity='.9' transform='rotate(330 20 20)'/%3E%3Crect x='18.6' y='2' width='2.8' height='10' rx='1.4' opacity='.8' transform='rotate(300 20 20)'/%3E%3Crect x='18.6' y='2' width='2.8' height='10' rx='1.4' opacity='.7' transform='rotate(270 20 20)'/%3E%3Crect x='18.6' y='2' width='2.8' height='10' rx='1.4' opacity='.61' transform='rotate(240 20 20)'/%3E%3Crect x='18.6' y='2' width='2.8' height='10' rx='1.4' opacity='.53' transform='rotate(210 20 20)'/%3E%3Crect x='18.6' y='2' width='2.8' height='10' rx='1.4' opacity='.46' transform='rotate(180 20 20)'/%3E%3Crect x='18.6' y='2' width='2.8' height='10' rx='1.4' opacity='.4' transform='rotate(150 20 20)'/%3E%3Crect x='18.6' y='2' width='2.8' height='10' rx='1.4' opacity='.35' transform='rotate(120 20 20)'/%3E%3Crect x='18.6' y='2' width='2.8' height='10' rx='1.4' opacity='.31' transform='rotate(90 20 20)'/%3E%3Crect x='18.6' y='2' width='2.8' height='10' rx='1.4' opacity='.28' transform='rotate(60 20 20)'/%3E%3Crect x='18.6' y='2' width='2.8' height='10' rx='1.4' opacity='.26' transform='rotate(30 20 20)'/%3E%3C/g%3E%3C/svg%3E");
+  --dir:1;                                /* transforms cannot be logical: ×−1 in RTL */
+  --c-hit:44px;                           /* minimum target */
+}
+[dir="rtl"]{--dir:-1}
+
+/* Per-tone derived roles. Declared on every tone carrier so var() resolves
+   against that band's own values (a :root alias would freeze the page tone). */
+:root,[data-tone="light"]{
+  /* The modal scrim is black .48 on its LIGHT pages too (measured:
+     #f5f5f7 under it composites to 128,128,129) — the colour module's role */
+  --c-scrim:var(--scrim);
+  /* a soft two-layer shadow lifts white tiles on light bands; dark: none */
+  --c-card-shadow:var(--shadow-tile);
+}
+[data-tone="dark"]{
+  --c-scrim:var(--scrim);                                          /* black .48 */
+  --c-card-shadow:none;
+}
+/* The content SURFACE a card or grouped list takes on its band: The cards
+   are #f5f5f7 on white and #fff on #f5f5f7, #1d1d1f on
+   black and #000 on #1d1d1f. */
+:root,[data-tone]{--c-surface:var(--bg-2)}
+.band[data-band="utility"]{--c-surface:var(--bg-1)}
+/* Ink for fills that sit ON glass (menus, alerts, toasts): the host's own
+   monochrome ink, never the band's (LG3 writes the appearance). */
+.lg3[data-lg3-appearance="dark"]{--c-on-glass:var(--lg3-ink-on-dark)}
+.lg3[data-lg3-appearance="light"]{--c-on-glass:var(--lg3-ink-on-light)}
+
+/* A 44px target around anything drawn smaller ("a 36 px circle inside
+   a 44 px hit target"). Invisible, centred, never shrinks a bigger box. */
+:where(.btn,.chip,.link-chevron,.token-remove,.stepper>button,.switch,.check,.radio,.segmented>button)::before{
+  content:"";position:absolute;left:50%;top:50%;width:max(100%,var(--c-hit));height:max(100%,var(--c-hit));
+  translate:-50% -50%;pointer-events:auto}
+
+/* ═══ 1 · BUTTONS ═══════════════════════════════════════════════════════════
+   .button: a 980px pill, 14/18 400
+   Text, padding (9 × 16) minus a 1px transparent border → 36 tall. Sizes are
+   The reduced / base / elevated / super → 24 / 36 / 44 / 56. Colours swap
+   INSTANTLY on hover/active (no button transition) and are fixed
+   values, never opacity or filters. Variants set variables; one rule paints
+   them, scoped :not([data-lg3]) so a glass host keeps the engine's surface. */
+.btn{
+  --btn-h:var(--h-m); --btn-bw:1px; --btn-pb:9px; --btn-pi:16px; --btn-minw:60px;
+  --btn-fs:var(--t-14); --btn-lh:var(--t-14-lh); --btn-ls:var(--t-14-ls); --btn-fw:400;
+  /* bare .btn = the .button-neutral: the ink pill (a primary
+     with "emphasis by fill") */
+  --btn-bg:var(--label); --btn-ink:var(--label-inv); --btn-line:transparent;
+  --btn-bg-hover:var(--btn-bg); --btn-bg-active:var(--btn-bg);
+  --btn-ink-hover:var(--btn-ink); --btn-line-hover:var(--btn-line); --btn-glow:none;
+  position:relative;display:inline-flex;align-items:center;justify-content:center;gap:.45em;
+  box-sizing:border-box;min-width:var(--btn-minw);min-height:var(--btn-h);
+  padding:calc(var(--btn-pb) - var(--btn-bw)) calc(var(--btn-pi) - var(--btn-bw));
+  border:var(--btn-bw) solid transparent;border-radius:var(--r-pill);corner-shape:round;
+  font-family:var(--font-text);font-size:var(--btn-fs);line-height:var(--btn-lh);
+  letter-spacing:var(--btn-ls);font-weight:var(--btn-fw);
+  text-align:center;text-decoration:none;white-space:nowrap;vertical-align:middle;
+  cursor:pointer;user-select:none;-webkit-user-select:none;touch-action:manipulation;
+  -webkit-tap-highlight-color:transparent}
+/* The pre-computed hover (+~10 RGB) and active (−~5) for the neutral ink
+   pill: #1d1d1f → #272729 → #18181a, and #f5f5f7 → #fff → #f0f0f2 on dark.
+   Relative colour keeps them roles; engines without it keep the rest fill. */
+@supports (color:rgb(from red r g b)){
+  .btn{--btn-bg-hover:rgb(from var(--label) calc(r + 10) calc(g + 10) calc(b + 10));
+       --btn-bg-active:rgb(from var(--label) calc(r - 5) calc(g - 5) calc(b - 5))}
+}
+.btn>:where(svg,.sym,img){flex:none;width:1.15em;height:1.15em}
+
+/* sizes: padding (V × H) and min-width are fixed; heights follow */
+.btn-s {--btn-h:var(--h-s); --btn-pb:4px;  --btn-pi:11px; --btn-minw:45px;
+        --btn-fs:var(--t-12); --btn-lh:var(--t-12-lh); --btn-ls:var(--t-12-ls)}
+.btn-m {--btn-h:var(--h-m); --btn-pb:9px;  --btn-pi:16px; --btn-minw:60px}
+.btn-l {--btn-h:var(--h-l); --btn-pb:12px; --btn-pi:22px; --btn-minw:70px;
+        --btn-fs:var(--t-17); --btn-lh:var(--t-17-lh-button); --btn-ls:var(--t-17-ls)}
+.btn-xl{--btn-h:var(--h-xl);--btn-pb:18px; --btn-pi:31px; --btn-minw:90px;
+        --btn-fs:var(--t-17); --btn-lh:var(--t-17-lh-button); --btn-ls:var(--t-17-ls)}
+
+/* variants — colours only */
+.btn-primary{
+  /* colour: the dusty brand fill as a gradient, its fixed hover/active twins, and
+     the own-tone glow under it */
+  --btn-bg:var(--accent-fill); --btn-bg-hover:var(--accent-fill-hover); --btn-bg-active:var(--accent-fill-active);
+  --btn-ink:var(--accent-ink); --btn-glow:0 8px 24px -8px var(--accent-glow)}
+.btn-secondary{
+  /* The outline pill: 1px link-coloured ring and label; hover FILLS with
+     the primary, never a tint */
+  --btn-bg:transparent; --btn-ink:var(--accent); --btn-line:var(--accent);
+  --btn-bg-hover:var(--accent-fill-hover); --btn-bg-active:var(--accent-fill-active);
+  --btn-ink-hover:var(--accent-ink); --btn-line-hover:transparent}
+.btn-tinted{
+  /* "tinted": the accent as a wash under an accent label. The accent
+     alone holds 4.5:1 on the bare page only (4.17 on its own wash, measured),
+     so the label is the colour module's --accent-ink-on-tint, or else the accent pulled 30%
+     toward the ink (80% measured 4.41:1 PRESSED in light): still the brand
+     hue, ≥ 4.5:1 on every wash state, in both tones. .token and .badge-accent
+     use the same ink on the same 12% wash. */
+  --btn-bg:color-mix(in srgb,var(--accent) 12%,transparent);
+  --btn-bg-hover:color-mix(in srgb,var(--accent) 16%,transparent);
+  --btn-bg-active:color-mix(in srgb,var(--accent) 22%,transparent);
+  --btn-ink:var(--accent-ink-on-tint,color-mix(in oklab,var(--accent) 70%,var(--label)))}
+.btn-plain,.btn-text{
+  /* text + chevron: sits on the text column (no inline padding); the hit
+     area still reaches 44 through ::before. The chevron says "this goes
+     somewhere": an ACTION (Clear, Skip, Reconnect) is .btn-text, the same
+     link-ink label with no chevron (.btn-plain.btn-nochevron is its alias) */
+  --btn-bg:transparent; --btn-ink:var(--link); --btn-bg-hover:transparent; --btn-bg-active:transparent;
+  --btn-pi:0px; --btn-minw:0px; gap:.2em}
+.btn-plain:hover,.btn-text:hover{text-decoration:underline;text-underline-offset:.14em}
+.btn-plain::after,.link-chevron::after{
+  content:"";display:inline-block;flex:none;width:.4em;height:.68em;margin-inline-start:.22em;
+  background:currentColor;-webkit-mask:var(--c-chevron) center/contain no-repeat;mask:var(--c-chevron) center/contain no-repeat;
+  scale:var(--dir) 1}
+.btn-plain.btn-nochevron:not([aria-busy="true"])::after{display:none}   /* the busy spinner is ::after too */
+.btn-icon{
+  /* round controls: The icon-control/paddle alpha fill with its fixed
+     hover/active and the .56 ink */
+  --btn-bg:var(--mat-control-bg); --btn-bg-hover:var(--mat-control-bg-hover); --btn-bg-active:var(--mat-control-bg-active);
+  --btn-ink:var(--mat-control-ink); --btn-pb:0px; --btn-pi:0px; --btn-minw:0px;
+  width:var(--btn-h);height:var(--btn-h);min-height:0;padding:0;font-size:calc(var(--btn-h) * .47);line-height:1;
+  border-radius:50%;
+  /* media buttons press to .95 — on a spring, interruptible */
+  transition:scale var(--sp-press-ms,271ms) var(--sp-press,ease)}
+.btn-icon>:where(svg,.sym,img){width:1em;height:1em}
+/* order matters: variant colours below .btn-icon win the combination */
+.btn-icon.btn-primary{--btn-bg:var(--accent-fill); --btn-bg-hover:var(--accent-fill-hover); --btn-bg-active:var(--accent-fill-active);
+  --btn-ink:var(--accent-ink); --btn-glow:0 8px 24px -8px var(--accent-glow)}
+.btn-icon.btn-secondary{--btn-bg:transparent; --btn-ink:var(--accent); --btn-line:var(--accent);
+  --btn-bg-hover:var(--accent-fill-hover); --btn-bg-active:var(--accent-fill-active); --btn-ink-hover:var(--accent-ink); --btn-line-hover:transparent}
+.btn-icon.btn-tinted{--btn-bg:color-mix(in srgb,var(--accent) 12%,transparent);
+  --btn-bg-hover:color-mix(in srgb,var(--accent) 16%,transparent);
+  --btn-bg-active:color-mix(in srgb,var(--accent) 22%,transparent); --btn-ink:var(--accent-ink-on-tint,color-mix(in oklab,var(--accent) 70%,var(--label)))}
+.btn-icon:where(:not([data-lg3])):active{scale:.95;transition-duration:90ms}
+/* rounded rectangles for vertical STACKS:
+   block radii 5 / 8 / 10 / 12 on the continuous corner */
+.btn-block{display:flex;width:100%;border-radius:calc(8px * var(--r-scale));corner-shape:superellipse(var(--k-continuous))}
+.btn-block.btn-s{border-radius:calc(5px * var(--r-scale))}
+.btn-block.btn-l{border-radius:calc(10px * var(--r-scale))}
+.btn-block.btn-xl{border-radius:calc(12px * var(--r-scale))}
+
+/* the one paint rule (glass hosts excluded: LG3 owns their surface + ink) */
+.btn:where(:not([data-lg3])){background:var(--btn-bg);color:var(--btn-ink);border-color:var(--btn-line);box-shadow:var(--btn-glow)}
+@media (hover:hover){
+  .btn:where(:not([data-lg3])):hover{background:var(--btn-bg-hover);color:var(--btn-ink-hover);border-color:var(--btn-line-hover)}
+}
+.btn:where(:not([data-lg3])):active{background:var(--btn-bg-active);color:var(--btn-ink-hover);border-color:var(--btn-line-hover)}
+
+/* GLASS — a floating control over media or art. LG3
+   draws the lens, press lift and glow; this is geometry + label. No border
+   (the layers sit on the padding box), labels 600 for legibility on glass. */
+.btn-glass{--btn-bw:0px;--btn-fw:600}
+/* before LG3 runs (or with no script): The platter, from tokens, in
+   the band's own ink (the bare .btn's inverse ink measured 1.2:1 on it); the
+   tinted primary falls back to its solid body */
+.btn-glass:not(.lg3):not([data-lg3]){background:var(--mat-platter-bg);-webkit-backdrop-filter:var(--mat-platter-filter);backdrop-filter:var(--mat-platter-filter);
+  --btn-ink:var(--label)}
+.btn-glass.btn-primary:not(.lg3):not([data-lg3]){background:var(--accent-solid);--btn-ink:var(--accent-ink)}
+/* LEGIBILITY: a label on small glass over MID-tone art has the worst ground
+   for either ink — measured 3.0–4.2:1 on the lab's violet art. answers
+   with a denser material where there is text; so does LG3: a host marked
+   data-lg3-text gets a veil of its reduce-transparency fill at the smallest
+   share that holds 4.5:1 over what is actually behind it (lg3.css). UI stamps
+   it on the text-bearing glass here — .btn-glass (not icon-only: glyphs need
+   3:1; not the tinted primary: its body is the accent), .segmented-glass,
+   .toast; menus, popovers and alerts get "dense" (§12).
+   FLOOR: the veil shows max(LG3's share, the components' measured share). The engine's
+   own reading ran low over the violet art (pixels 3.6–3.9:1 on components
+   and index at shares ≤ .13); these floors held ≥ 4.5:1 there. lg3.css hides
+   the veil under Reduce Transparency, Increase Contrast and forced colours,
+   so their own fills win without any specificity here.
+   FALLBACK for such glass UI has not stamped (created after UI.mount, or no
+   ui.js): the same share in the tint layer. It is the material's NORMAL mode
+   only, so each arm is guarded on <html>; the media form of Reduce
+   Transparency (no selector can see it) hands LG3's answer back in one rule
+   after §12. */
+:is(.btn-glass:not(.btn-icon):not(.btn-primary),.segmented-glass,.toast).lg3[data-lg3-text][data-lg3-appearance="dark"]>.lg3__veil{opacity:calc(max(var(--lg3-legible,0),.34) * var(--lg3-mat,1))}
+:is(.btn-glass:not(.btn-icon):not(.btn-primary),.segmented-glass,.toast).lg3[data-lg3-text][data-lg3-appearance="light"]>.lg3__veil{opacity:calc(max(var(--lg3-legible,0),.40) * var(--lg3-mat,1))}
+@media not (prefers-contrast:more){
+  html:not([data-reduce-transparency]:not([data-reduce-transparency="off"])):not([data-contrast="more"]) :is(.btn-glass:not(.btn-icon):not(.btn-primary),.segmented-glass,.toast).lg3:not([data-lg3-text])[data-lg3-appearance="dark"]>.lg3__tint{background:color-mix(in srgb,var(--lg3-rt-dark) 34%,transparent)}
+  html:not([data-reduce-transparency]:not([data-reduce-transparency="off"])):not([data-contrast="more"]) :is(.btn-glass:not(.btn-icon):not(.btn-primary),.segmented-glass,.toast).lg3:not([data-lg3-text])[data-lg3-appearance="light"]>.lg3__tint{background:color-mix(in srgb,var(--lg3-rt-light) 40%,transparent)}
+}
+/* the ONE tinted primary: tint the glass body, not the label. The tint layer sits under the label and over the lens. */
+.btn-glass.btn-primary.lg3{color:var(--accent-ink)}
+/* the one tinted glass primary is an OPAQUE brand fill with glass edges: the dusty fill carries its white ink at >=4.5:1 (a 92% tint
+   let the frost and the plus-lighter highlight lift the ground to ~1.8:1), and
+   the highlight is quieter so it cannot wash the label out */
+.btn-glass.btn-primary.lg3[data-lg3-appearance]>.lg3__tint{background:var(--accent-fill)}  /* beats the legibility dim */
+.btn-glass.btn-primary.lg3>.lg3__spec{opacity:.28}
+html[data-reduce-transparency]:not([data-reduce-transparency="off"]) .btn-glass.btn-primary.lg3>.lg3__tint,
+html[data-contrast="more"] .btn-glass.btn-primary.lg3>.lg3__tint{background:var(--accent-solid)}
+@media (prefers-reduced-transparency:reduce){ html:not([data-reduce-transparency="off"]) .btn-glass.btn-primary.lg3>.lg3__tint{background:var(--accent-solid)} }
+@media (prefers-contrast:more){ .btn-glass.btn-primary.lg3[data-lg3-appearance]>.lg3__tint{background:var(--accent-solid)} }
+
+/* DISABLED — dims to .42 (paddles, buttons). Never opacity on a glass
+   host (it would flatten the lens): glass dims its ink instead. */
+.btn:where(:disabled,[aria-disabled="true"]){cursor:default;
+  --btn-bg-hover:var(--btn-bg);--btn-bg-active:var(--btn-bg);--btn-ink-hover:var(--btn-ink);--btn-line-hover:var(--btn-line)}
+.btn:where(:disabled,[aria-disabled="true"]):where(:not([data-lg3])){opacity:.42}
+.btn:where(:disabled,[aria-disabled="true"]):where(:not([data-lg3])):active{scale:none}
+.btn-glass.lg3:where(:disabled,[aria-disabled="true"])>:not([class^="lg3__"]){opacity:.42}
+
+/* LOADING — the label keeps its width (no reflow) and an activity indicator
+   takes its place, in the label's own ink. */
+.btn[aria-busy="true"]{cursor:progress;-webkit-text-fill-color:transparent}
+.btn[aria-busy="true"]>:not([class^="lg3__"]){visibility:hidden}
+.btn[aria-busy="true"]::after{
+  content:"";position:absolute;left:50%;top:50%;width:1.3em;height:1.3em;margin:-.65em 0 0 -.65em;
+  background:currentColor;-webkit-mask:var(--c-spokes-8) center/contain no-repeat;mask:var(--c-spokes-8) center/contain no-repeat;
+  animation:c-spin 800ms steps(8) infinite;scale:1}
+
+/* Inline link with the chevron ("Learn more ›"): the prose link ink,
+   underline on hover, the size of the text it sits in. */
+.link-chevron{position:relative;color:var(--link);text-decoration:none;white-space:nowrap}
+.link-chevron:hover{text-decoration:underline;text-underline-offset:.14em}
+.link-chevron:focus-visible{outline-offset:var(--focus-offset-inline);border-radius:2px}
+
+/* ═══ 2 · FIELDS ════════════════════════════════════════════════════════════
+   The form pill/field: 1px #86868b ring (--label-3 is that value and
+   holds 3:1 for a control boundary), white on grey bands, 17px text. Height
+   44 like the compare dropdown; .field-l is the 56px
+   checkout field. Radius: continuous 12 (the field) — 8 at 36px. */
+.field,.textarea,.search>input,.select{
+  --field-h:var(--h-l); --field-bg:var(--bg-elevated);
+  box-sizing:border-box;width:100%;min-height:var(--field-h);margin:0;
+  padding:0 15px;border:1px solid var(--label-3);background:var(--field-bg);color:var(--label);
+  border-radius:var(--r-sm);corner-shape:superellipse(var(--k-continuous));
+  font-family:var(--font-text);font-size:var(--t-17);line-height:var(--t-17-lh);letter-spacing:var(--t-17-ls);
+  transition:border-color var(--d-200) linear,background-color var(--d-200) linear}
+.band[data-band="utility"] :is(.field,.textarea,.search>input,.select){--field-bg:var(--bg-1)}
+.field-s{--field-h:var(--h-m);border-radius:var(--r-xs);font-size:var(--t-14);line-height:var(--t-14-lh);letter-spacing:var(--t-14-ls)}
+.field-l{--field-h:var(--h-xl);padding-inline:17px}
+.textarea{min-height:96px;padding:11px 15px;resize:vertical;display:block}
+:is(.field,.textarea,.search>input)::placeholder{color:var(--label-2);opacity:1}
+:is(.field,.textarea,.search>input,.select):hover{border-color:var(--label-2)}
+/* focus: the accent ring 1px off the field (inline offset) + accent boundary */
+:is(.field,.textarea,.search>input,.select):focus-visible{border-color:var(--accent);outline-offset:var(--focus-offset-inline)}
+:is(.field,.textarea,.search>input,.select):disabled{border-color:var(--separator);color:var(--label-2);background:var(--c-surface);cursor:not-allowed}
+:is(.field,.textarea,.search>input,.select)[aria-invalid="true"]{border-color:var(--bad);
+  background:color-mix(in srgb,var(--bad) 5%,var(--field-bg))}
+:is(.field,.textarea,.search>input,.select)[aria-invalid="true"]:focus-visible{--focus-color:var(--bad)}
+
+/* SEARCH: a capsule with the magnifier leading (glyph at 3:1 is
+   fine — it is not text); the native clear control is hidden, Esc clears. */
+.search{position:relative;display:flex;align-items:center;width:100%}
+.search::before{content:"";position:absolute;inset-inline-start:14px;top:50%;width:17px;height:17px;translate:0 -50%;
+  background:var(--label-3);-webkit-mask:var(--c-magnifier) center/contain no-repeat;mask:var(--c-magnifier) center/contain no-repeat;pointer-events:none;z-index:1}
+.search>input{border-radius:var(--r-pill);corner-shape:round;padding-inline:40px 16px;border-color:transparent;
+  --field-bg:var(--fill-1);-webkit-appearance:none;appearance:none}
+.band[data-band="utility"] .search>input{--field-bg:var(--fill-1)}
+.search>input:hover{border-color:transparent}
+.search>input:focus-visible{border-color:var(--accent);--field-bg:var(--bg-elevated)}
+.search>input::-webkit-search-cancel-button,.search>input::-webkit-search-decoration{-webkit-appearance:none;appearance:none}
+
+/* SELECT: The compare dropdown — a 44px capsule, 24 start / 45 end
+   padding, a stroked ⌄ at the end. The chevron is two gradient strokes so it
+   takes currentColor (a background image cannot). */
+.select{-webkit-appearance:none;appearance:none;cursor:pointer;border-radius:var(--r-pill);corner-shape:round;
+  padding:0 45px 0 24px;
+  background-image:linear-gradient(45deg,transparent calc(50% - .9px),currentColor calc(50% - .9px) calc(50% + .9px),transparent calc(50% + .9px)),
+                   linear-gradient(-45deg,transparent calc(50% - .9px),currentColor calc(50% - .9px) calc(50% + .9px),transparent calc(50% + .9px));
+  background-size:7px 7px,7px 7px;background-repeat:no-repeat;
+  background-position:calc(100% - 26px) 55%,calc(100% - 20px) 55%}
+[dir="rtl"] .select{padding:0 24px 0 45px;background-position:20px 55%,26px 55%}
+
+/* form layout: label, control, then help — or the error that replaces it.
+   align-content:start: when a grid row stretches the field (a neighbour
+   carries help text), the spare height stays below, not in the control */
+.form-field{display:grid;gap:8px;min-width:0;align-content:start}
+.form-field>label{font-size:var(--t-14);line-height:var(--t-14-lh);letter-spacing:var(--t-14-ls);font-weight:600;color:var(--label)}
+.field-help{font-size:var(--t-12);line-height:var(--t-12-lh);letter-spacing:var(--t-12-ls);color:var(--label-2)}
+.field-error{font-size:var(--t-12);line-height:var(--t-12-lh);letter-spacing:var(--t-12-ls);color:var(--bad);display:flex;gap:6px;align-items:flex-start}
+.form-field:has([aria-invalid="true"]) .field-help{display:none}
+
+/* ═══ 3 · SWITCH · CHECK · RADIO ═══════════════════════════════════════════
+   Real inputs (role, label, keyboard for free) with appearance:none, drawn
+   by their own pseudo-elements. */
+
+/* SWITCH — a 63×28 capsule, a 37×24 capsule knob 2px
+   in (travel 22). Track colour flips between two FIXED colours. While
+   pressed the knob lifts into a lens: it stretches toward the travel,
+   swells and clears (the liquid thumb), on the held spring; release returns
+   on the lift spring, and the travel itself is the toggle spring. */
+.switch{
+  --switch-off:var(--fill-1); --switch-on:var(--sys-green);
+  -webkit-appearance:none;appearance:none;position:relative;display:inline-block;flex:none;
+  width:63px;height:28px;margin:0;border:0;vertical-align:middle;cursor:pointer;
+  border-radius:var(--r-pill);corner-shape:round;background:var(--switch-off);
+  transition:background-color var(--d-200) linear}
+.switch:checked{background:var(--switch-on)}
+.switch-accent{--switch-on:var(--accent-solid)}
+.switch::after{
+  content:"";position:absolute;top:2px;inset-inline-start:2px;width:37px;height:24px;box-sizing:border-box;
+  border-radius:var(--r-pill);background:var(--c-knob);box-shadow:var(--c-knob-shadow);
+  translate:0 0;
+  transition:translate var(--sp-toggle-ms,412ms) var(--sp-toggle,ease),
+             width var(--sp-lift-ms,337ms) var(--sp-lift,ease),scale var(--sp-lift-ms,337ms) var(--sp-lift,ease),
+             background-color var(--d-120) linear}
+.switch:checked::after{translate:calc(var(--dir) * 22px) 0}
+.switch:active::after{width:45px;scale:1.14;background:color-mix(in srgb,var(--c-knob) 66%,transparent);
+  -webkit-backdrop-filter:blur(2px) saturate(1.6);backdrop-filter:blur(2px) saturate(1.6);
+  transition:translate var(--sp-hold-ms,557ms) var(--sp-hold,ease),
+             width var(--sp-hold-ms,557ms) var(--sp-hold,ease),scale var(--sp-hold-ms,557ms) var(--sp-hold,ease),
+             background-color var(--d-120) linear}
+.switch:checked:active::after{translate:calc(var(--dir) * 14px) 0}
+.switch:disabled{opacity:.5;cursor:default}
+.switch:disabled:active::after{width:37px;scale:none;background:var(--c-knob)}
+
+/* CHECK and RADIO — 22px, a 3:1 ring at rest, the accent solid when on; the
+   tick DRAWS (clip sweeps left→right) because a tick that draws is an
+   acknowledgement, one that appears is only a state. */
+.check,.radio{
+  -webkit-appearance:none;appearance:none;position:relative;display:inline-grid;place-items:center;flex:none;
+  width:22px;height:22px;margin:0;vertical-align:middle;cursor:pointer;
+  background:var(--bg-elevated);box-shadow:inset 0 0 0 1.5px var(--label-4);
+  transition:background-color var(--d-120) linear,box-shadow var(--d-120) linear}
+.check{border-radius:calc(6px * var(--r-scale));corner-shape:superellipse(var(--k-continuous))}
+.radio{border-radius:50%}
+.check::after{content:"";grid-area:1/1;width:22px;height:22px;background:var(--accent-ink);
+  -webkit-mask:var(--c-tick) center/contain no-repeat;mask:var(--c-tick) center/contain no-repeat;
+  clip-path:inset(0 100% 0 0);transition:clip-path var(--d-200) var(--ease-out-cubic)}
+.check:is(:checked,:indeterminate),.radio:checked{background:var(--accent-solid);box-shadow:none}
+.check:checked::after{clip-path:inset(0 0 0 0)}
+.check:indeterminate::after{-webkit-mask:none;mask:none;width:10px;height:2.2px;border-radius:2px;clip-path:none}
+.radio::after{content:"";width:8px;height:8px;border-radius:50%;background:var(--accent-ink);scale:0;
+  transition:scale var(--sp-bouncy-ms,730ms) var(--sp-bouncy,ease)}
+.radio:checked::after{scale:1}
+:is(.check,.radio):disabled{opacity:.42;cursor:default}
+/* a label row that gives a small control its 44px target and its words */
+.choice{display:inline-flex;align-items:center;gap:12px;min-height:var(--c-hit);cursor:pointer;
+  font-size:var(--t-17);line-height:var(--t-17-lh);letter-spacing:var(--t-17-ls)}
+.choice:has(:disabled){cursor:default;color:var(--label-2)}
+
+/* ═══ 4 · SLIDER ════════════════════════════════════════════════════════════
+   slider on a native range: a 6px capsule track filled to --v (UI
+   writes it), a white capsule thumb that lifts into a lens while dragged. */
+.slider{
+  --v:50%; --slider-fill:var(--accent-solid); --slider-track:var(--fill-1);
+  -webkit-appearance:none;appearance:none;display:block;width:100%;height:var(--c-hit);margin:0;
+  background:transparent;cursor:pointer;touch-action:pan-y}
+.slider::-webkit-slider-runnable-track{height:6px;border-radius:3px;
+  background:linear-gradient(to right,var(--slider-fill) 0 var(--v),var(--slider-track) var(--v) 100%)}
+[dir="rtl"] .slider::-webkit-slider-runnable-track{background:linear-gradient(to left,var(--slider-fill) 0 var(--v),var(--slider-track) var(--v) 100%)}
+.slider::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;width:38px;height:24px;margin-top:-9px;
+  border-radius:12px;background:var(--c-knob);box-shadow:var(--c-knob-shadow);
+  transition:scale var(--sp-lift-ms,337ms) var(--sp-lift,ease),background-color var(--d-120) linear}
+.slider:active::-webkit-slider-thumb{scale:1.22;background:color-mix(in srgb,var(--c-knob) 70%,transparent);
+  transition:scale var(--sp-hold-ms,557ms) var(--sp-hold,ease),background-color var(--d-120) linear}
+.slider::-moz-range-track{height:6px;border-radius:3px;background:var(--slider-track)}
+.slider::-moz-range-progress{height:6px;border-radius:3px;background:var(--slider-fill)}
+.slider::-moz-range-thumb{width:38px;height:24px;border:0;border-radius:12px;background:var(--c-knob);box-shadow:var(--c-knob-shadow);
+  transition:scale var(--sp-lift-ms,337ms) var(--sp-lift,ease)}
+.slider:active::-moz-range-thumb{scale:1.22}
+.slider:focus-visible{outline-offset:2px;border-radius:var(--r-pill)}
+.slider:disabled{opacity:.42;cursor:default}
+
+/* DETENT SLIDER — the fold slider on MOTION.detent's
+   variables: a 17px track, a 60×40 capsule thumb in the brand solid with a 2px
+   ring cut from the surface, magnets at the detents; pulled past one the
+   thumb WIDENS by --detent-stretch (px), anchors on the trailing side and
+   squashes to scaleY(1 − .0025·t). */
+.slider-detent{
+  --detent-thumb:60px; --detent-h:40px;
+  position:relative;height:var(--detent-h);width:100%;max-width:367px;touch-action:none;
+  -webkit-user-select:none;user-select:none}
+/* the hand goes on what takes the press (the rail jumps, the thumb grabs),
+   not on the root: the root is not focusable, the thumb (role=slider) is */
+.slider-detent::before{content:"";position:absolute;left:0;right:0;top:50%;height:17px;translate:0 -50%;cursor:pointer;
+  border-radius:var(--r-pill);background:var(--separator-opaque);box-shadow:inset 0 0 0 .5px var(--separator)}
+.slider-detent [data-detent-thumb]{
+  position:absolute;top:0;height:var(--detent-h);box-sizing:border-box;display:grid;place-items:center;
+  left:calc(var(--detent-value,0) * (100% - var(--detent-thumb)));
+  width:calc(var(--detent-thumb) + var(--detent-stretch,0px));
+  translate:calc(min(0, var(--detent-dir,1)) * var(--detent-stretch,0px)) 0;
+  scale:1 var(--detent-squash,1);
+  border-radius:var(--r-pill);background:var(--accent-solid);color:var(--accent-ink);
+  box-shadow:0 0 0 2px var(--detent-ring,var(--c-surface)),var(--c-thumb-shadow);cursor:grab;outline-offset:4px}
+.slider-detent[data-m-dragging] [data-detent-thumb]{cursor:grabbing}
+.slider-detent [data-detent-thumb]::before{content:"";width:17px;height:12px;background:currentColor;
+  -webkit-mask:var(--c-chevrons) center/contain no-repeat;mask:var(--c-chevrons) center/contain no-repeat}
+.slider-detent [data-detent-thumb]>*{pointer-events:none}
+/* labels under their DETENTS, not spread: a child with --at (its detent,
+   0..1; UI.detent writes it from data-detents when missing) is centred where
+   the thumb centre lands — v·(100% − thumb) + thumb/2 — and the two ends are
+   anchored to the rail's edges. One grid cell, so the row keeps its height. */
+.slider-detent-labels{display:grid;width:100%;max-width:367px;margin-top:8px;
+  font-size:var(--t-12);line-height:var(--t-12-lh);letter-spacing:var(--t-12-ls);color:var(--label-2-on-fill)}
+.slider-detent-labels>*{grid-area:1/1;justify-self:left;white-space:nowrap;
+  margin-left:calc(var(--at,0) * (100% - var(--detent-thumb,60px)) + var(--detent-thumb,60px) / 2);translate:-50% 0}
+.slider-detent-labels>:first-child{translate:calc(var(--detent-thumb,60px) / -2) 0}
+.slider-detent-labels>:last-child:not(:first-child){translate:calc(var(--detent-thumb,60px) / 2 - 100%) 0;
+  margin-left:calc(var(--at,1) * (100% - var(--detent-thumb,60px)) + var(--detent-thumb,60px) / 2)}
+
+/* ═══ 5 · STEPPER ═══════════════════════════════════════════════════════════
+   A capsule of two halves, − and +, over a fill; the value lives beside
+   it (or in the optional <output>). Buttons repeat while held (UI). */
+.stepper{
+  display:inline-flex;align-items:stretch;height:var(--h-m);border-radius:var(--r-pill);corner-shape:round;
+  color:var(--label);vertical-align:middle;isolation:isolate}
+.stepper>button{position:relative;width:48px;padding:0;border:0;border-radius:var(--r-pill);corner-shape:round;
+  background:transparent;color:inherit;cursor:pointer;display:grid;place-items:center}
+.stepper>button::after{content:"";width:14px;height:14px;
+  background:linear-gradient(currentColor,currentColor) center/14px 2px no-repeat}
+.stepper>button:last-child::after{background:linear-gradient(currentColor,currentColor) center/14px 2px no-repeat,
+  linear-gradient(currentColor,currentColor) center/2px 14px no-repeat}
+/* each half is half a capsule (straight inner edge), so its press fill
+   stops at the divider; the divider is a short hairline */
+.stepper>button:first-child{border-start-end-radius:0;border-end-end-radius:0}
+.stepper>button:last-child{border-start-start-radius:0;border-end-start-radius:0}
+.stepper{background:linear-gradient(var(--separator),var(--separator)) center/1px 18px no-repeat,var(--fill-1)}
+.stepper:has(>output){background:var(--fill-1)}
+.stepper>output{display:grid;place-items:center;min-width:44px;padding:0 6px;
+  background:linear-gradient(var(--separator),var(--separator)) left center/1px 18px no-repeat,linear-gradient(var(--separator),var(--separator)) right center/1px 18px no-repeat;
+  font-size:var(--t-17);letter-spacing:var(--t-17-ls);font-variant-numeric:tabular-nums;font-weight:600}
+@media (hover:hover){ .stepper>button:hover{background:var(--fill-3)} }
+.stepper>button:active{background:var(--fill-1)}
+.stepper>button:is(:disabled,[aria-disabled="true"]){color:var(--label-4);cursor:default;background:transparent}
+
+/* ═══ 6 · SEGMENTED ═════════════════════════════════════════════════════════
+   The .tabnav: a 44px capsule
+   platter, 4px padding, a 36px ink pill that slides by LEFT and WIDTH over
+   320ms ease-out; the active label inverts after 160ms over 160ms ease-in,
+   i.e. only once the pill has arrived. Labels 14/18 at .8, 1 on hover.
+   Platter: #f5f5f7 on white (this is the duo page), #e8e8ed on grey bands.
+   The highlight never depends on measurement: until UI has placed the
+   indicator ([data-seg-ready]) the selected item paints the fill itself. */
+.segmented{
+  --seg-h:var(--h-l); --seg-pad:4px; --seg-pi:16px;
+  --seg-fs:var(--t-14); --seg-lh:var(--t-14-lh); --seg-ls:var(--t-14-ls);
+  --seg-platter:var(--bg-2); --seg-ind:var(--label); --seg-ink:var(--label-inv);
+  --seg-rest:color-mix(in srgb,var(--label) 80%,transparent);
+  position:relative;display:inline-flex;align-items:stretch;box-sizing:border-box;max-width:100%;
+  height:var(--seg-h);padding:var(--seg-pad);border-radius:var(--r-pill);corner-shape:round;
+  background:var(--seg-platter);overflow-x:auto;overflow-y:hidden;scrollbar-width:none;
+  overscroll-behavior-x:contain;vertical-align:middle}
+.segmented::-webkit-scrollbar{display:none}
+.band[data-band="utility"] .segmented{--seg-platter:var(--mat-control-fill-solid)}
+.segmented-l{--seg-h:var(--h-xl); --seg-pad:6px; --seg-pi:22px;
+  --seg-fs:var(--t-17); --seg-lh:var(--t-17-lh); --seg-ls:var(--t-17-ls)}
+.segmented>:is(button,a){
+  position:relative;z-index:1;flex:none;display:inline-flex;align-items:center;justify-content:center;
+  padding:0 var(--seg-pi);margin:0;border:0;border-radius:var(--r-pill);corner-shape:round;background:transparent;
+  color:var(--seg-rest);font-family:var(--font-text);font-size:var(--seg-fs);line-height:var(--seg-lh);
+  letter-spacing:var(--seg-ls);font-weight:400;white-space:nowrap;cursor:pointer;text-decoration:none;
+  transition:color var(--d-100) linear}
+@media (hover:hover){ .segmented>:is(button,a):hover{color:var(--label)} }
+.segmented>:is([aria-selected="true"],[aria-checked="true"],[aria-pressed="true"],[aria-current="true"],[aria-current="page"]){
+  color:var(--seg-ink);background:var(--seg-ind)}
+.segmented>:focus-visible{outline-offset:-2px;outline-color:currentColor}   /* inside the segment: its own ink (the accent read 2.2:1 on the selected thumb) */
+/* the pill, once placed: items go clear and the indicator slides */
+.segmented-indicator{position:absolute;z-index:0;top:var(--seg-pad);bottom:var(--seg-pad);left:0;
+  width:var(--seg-w,0px);translate:var(--seg-x,0px) 0;border-radius:var(--r-pill);corner-shape:round;
+  background:var(--seg-ind);pointer-events:none;visibility:hidden}
+.segmented[data-seg-ready]>.segmented-indicator{visibility:visible}
+.segmented[data-seg-ready]>:is(button,a){background:transparent}
+.segmented[data-seg-armed]:not([data-seg-snap])>.segmented-indicator{
+  transition:translate var(--d-320) ease-out,width var(--d-320) ease-out}
+.segmented[data-seg-armed]:not([data-seg-snap])>:is([aria-selected],[aria-checked],[aria-pressed],[aria-current]){
+  transition:color var(--d-100) linear}
+.segmented[data-seg-armed]:not([data-seg-snap])>:is([aria-selected="true"],[aria-checked="true"],[aria-pressed="true"],[aria-current="true"],[aria-current="page"]){
+  transition:color 160ms ease-in 160ms}
+/* overflow (phones): the platter scrolls under a 22px fade */
+.segmented[data-overflow="end"]{-webkit-mask:linear-gradient(to right,#000 calc(100% - 22px),transparent);mask:linear-gradient(to right,#000 calc(100% - 22px),transparent)}
+.segmented[data-overflow="start"]{-webkit-mask:linear-gradient(to left,#000 calc(100% - 22px),transparent);mask:linear-gradient(to left,#000 calc(100% - 22px),transparent)}
+.segmented[data-overflow="both"]{-webkit-mask:linear-gradient(to right,transparent,#000 22px calc(100% - 22px),transparent);mask:linear-gradient(to right,transparent,#000 22px calc(100% - 22px),transparent)}
+
+/* GLASS — one LG3 host (data-lg3-container) whose track and indicator are two
+   SHAPES of one lens: the indicator fuses into the track by smooth union and
+   swells it where they meet. The
+   host is 5px larger than the track all round so the swell has room.
+   Travel is the selection spring (select .4/.15); the
+   press lifts the indicator (grows 3px each way on the held spring). */
+.segmented-glass{
+  --seg-slack:5px; --seg-pad:3px; --seg-track:var(--h-l);
+  height:calc(var(--seg-track) + 2 * var(--seg-slack));padding:calc(var(--seg-slack) + var(--seg-pad));
+  background:none;overflow:visible;--seg-rest:currentColor}
+.segmented-glass:not(.lg3):not([data-lg3]){background:var(--mat-platter-bg)}
+.segmented-glass.segmented-l{--seg-track:var(--h-xl)}
+.segmented-track{position:absolute;inset:var(--seg-slack);border-radius:var(--r-pill);pointer-events:none}
+.segmented-glass>.segmented-indicator{top:calc(var(--seg-slack) + var(--seg-pad));bottom:calc(var(--seg-slack) + var(--seg-pad));
+  visibility:visible;background:transparent}
+/* on glass every label is the full monochrome ink (legibility); the lens
+   thumb, not a dimmer label, shows which one is selected */
+.segmented-glass>:is(button,a){font-weight:600;color:var(--seg-rest)}
+.segmented-glass>:is([aria-selected="true"],[aria-checked="true"],[aria-pressed="true"],[aria-current="true"],[aria-current="page"]){
+  color:inherit;background:transparent}
+.segmented-glass:not([data-seg-ready])>:is([aria-selected="true"],[aria-checked="true"],[aria-pressed="true"],[aria-current="true"],[aria-current="page"]){
+  background:color-mix(in srgb,currentColor 16%,transparent)}
+@media (hover:hover){ .segmented-glass>:is(button,a):hover{color:inherit} }
+/* the indicator's own body: a brighter lens on dark glass, a white thumb on
+   light glass, a touch denser while it travels (density follows motion) */
+.segmented-glass[data-lg3-appearance="dark"]>.segmented-indicator{background:color-mix(in srgb,var(--lg3-ink-on-dark) 11%,transparent)}
+.segmented-glass[data-lg3-appearance="light"]>.segmented-indicator{background:color-mix(in srgb,var(--lg3-ink-on-dark) 62%,transparent)}
+.segmented-glass[data-lg3-appearance="dark"][data-m-moving]>.segmented-indicator{background:color-mix(in srgb,var(--lg3-ink-on-dark) 17%,transparent)}
+.segmented-glass[data-seg-armed]:not([data-seg-snap])>.segmented-indicator{
+  transition:translate var(--sp-select-ms,514ms) var(--sp-select,ease-out),width var(--sp-select-ms,514ms) var(--sp-select,ease-out),
+             top var(--sp-lift-ms,337ms) var(--sp-lift,ease),bottom var(--sp-lift-ms,337ms) var(--sp-lift,ease),
+             margin var(--sp-lift-ms,337ms) var(--sp-lift,ease),background-color var(--d-200) linear}
+.segmented-glass[data-seg-press]>.segmented-indicator{
+  top:calc(var(--seg-slack) + var(--seg-pad) - 3px);bottom:calc(var(--seg-slack) + var(--seg-pad) - 3px);margin-inline:-3px;
+  transition:translate var(--sp-follow-ms,181ms) var(--sp-follow,ease-out),width var(--sp-follow-ms,181ms) var(--sp-follow,ease-out),
+             top var(--sp-hold-ms,557ms) var(--sp-hold,ease),bottom var(--sp-hold-ms,557ms) var(--sp-hold,ease),
+             margin var(--sp-hold-ms,557ms) var(--sp-hold,ease),background-color var(--d-200) linear}
+.segmented-glass>:focus-visible{box-shadow:none;outline-offset:-3px;outline-color:currentColor}
+
+/* ═══ 7 · CHIP · TOKEN · BADGE · STATUS · AVATAR · KBD · DIVIDER ═══════════ */
+/* CHIP — page pills: padding 8 × 15, 1px ring,
+   18px line → 36 tall; rest a faint fill, hover the #e8e8ed, CURRENT the
+   ink pill with the inverse label. Toggle it with aria-pressed. */
+.chip{
+  position:relative;display:inline-flex;align-items:center;justify-content:center;gap:6px;box-sizing:border-box;
+  min-height:var(--h-m);padding:0 15px;border:1px solid var(--separator);border-radius:var(--r-pill);corner-shape:round;
+  background:var(--fill-2);color:var(--label);font-family:var(--font-text);
+  font-size:var(--t-14);line-height:var(--t-14-lh);letter-spacing:var(--t-14-ls);font-weight:400;
+  white-space:nowrap;text-decoration:none;cursor:pointer;vertical-align:middle;
+  transition:background-color .15s var(--ease-nav),color .15s var(--ease-nav),border-color .15s var(--ease-nav)}
+@media (hover:hover){ .chip:hover{background:var(--fill-1)} }
+.chip:is([aria-pressed="true"],[aria-selected="true"],[aria-checked="true"],[aria-current="true"],[aria-current="page"]){
+  background:var(--label);color:var(--label-inv);border-color:transparent}
+.chip-s{min-height:28px;padding:0 11px;font-size:var(--t-12);line-height:var(--t-12-lh);letter-spacing:var(--t-12-ls)}
+.chip>:where(svg,.sym){width:1.1em;height:1.1em}
+.chip:is(:disabled,[aria-disabled="true"]){opacity:.42;cursor:default}
+
+/* TOKEN — an entered value (recipient, filter): a tinted capsule with its
+   own remove button. */
+.token{display:inline-flex;align-items:center;gap:2px;height:28px;box-sizing:border-box;padding-inline:12px 4px;
+  border-radius:var(--r-pill);corner-shape:round;background:color-mix(in srgb,var(--accent) 12%,transparent);color:var(--accent-ink-on-tint,color-mix(in oklab,var(--accent) 70%,var(--label)));
+  font-size:var(--t-14);line-height:var(--t-14-lh);letter-spacing:var(--t-14-ls);vertical-align:middle;white-space:nowrap}
+.token:not(:has(.token-remove)){padding-inline-end:12px}
+.token-remove{position:relative;display:grid;place-items:center;width:22px;height:22px;padding:0;border:0;border-radius:50%;
+  background:transparent;color:inherit;cursor:pointer}
+.token-remove::after{content:"";width:12px;height:12px;background:currentColor;
+  -webkit-mask:var(--c-xmark) center/contain no-repeat;mask:var(--c-xmark) center/contain no-repeat}
+@media (hover:hover){ .token-remove:hover{background:color-mix(in srgb,var(--accent) 16%,transparent)} }
+.token-remove:focus-visible{outline-offset:-1px;outline-color:currentColor}   /* the token ink on the token's own wash (the accent read 2.9:1 there) */
+
+/* BADGE — 12/16 600, radius 6 (continuous here), neutral on
+   rgba(29,29,31,.07) in #424245 (= --fill-2 + --label-2-on-fill); semantic
+   tints pair -fill with -strong (colour contract); solid pairs X with X-ink. */
+.badge{display:inline-flex;align-items:center;gap:4px;box-sizing:border-box;min-height:22px;padding:3px 9px;
+  border-radius:calc(6px * var(--r-scale));corner-shape:superellipse(var(--k-continuous));
+  background:var(--fill-2);color:var(--label-2-on-fill);
+  font-family:var(--font-text);font-size:var(--t-12);line-height:var(--t-12-lh);letter-spacing:var(--t-12-ls);font-weight:600;
+  white-space:nowrap;vertical-align:middle;font-variant-numeric:tabular-nums}
+.badge-ok{background:var(--ok-fill);color:var(--ok-strong)}
+.badge-warn{background:var(--warn-fill);color:var(--warn-strong)}
+.badge-bad{background:var(--bad-fill);color:var(--bad-strong)}
+.badge-accent{background:color-mix(in srgb,var(--accent) 12%,transparent);color:var(--accent-ink-on-tint,color-mix(in oklab,var(--accent) 70%,var(--label)))}
+.badge-solid{background:var(--label);color:var(--label-inv)}
+.badge-solid.badge-ok{background:var(--ok);color:var(--ok-ink)}
+.badge-solid.badge-warn{background:var(--warn);color:var(--warn-ink)}
+.badge-solid.badge-bad{background:var(--bad);color:var(--bad-ink)}
+.badge-solid.badge-accent{background:var(--accent-solid);color:var(--accent-ink)}
+/* a count on an icon: a red capsule, tabular so 9 → 99 does not shift */
+.badge-count{min-width:20px;min-height:20px;height:20px;padding:0 6px;justify-content:center;border-radius:var(--r-pill);corner-shape:round;
+  background:var(--bad);color:var(--bad-ink);font-size:var(--t-12);line-height:1}
+/* The "New": text only, the warm ink */
+.badge-new{background:none;padding:0;min-height:0;color:var(--warn-strong)}
+
+/* STATUS PILL — a capsule with a state dot. The live dot pulses: that is
+   state, so reduced motion keeps it (slower, no growth). */
+.pill-status{--ps-dot:var(--label-3);display:inline-flex;align-items:center;gap:7px;box-sizing:border-box;height:28px;padding:0 12px 0 10px;
+  border-radius:var(--r-pill);corner-shape:round;background:var(--fill-2);color:var(--label-2-on-fill);
+  font-size:var(--t-12);line-height:var(--t-12-lh);letter-spacing:var(--t-12-ls);font-weight:600;white-space:nowrap;vertical-align:middle}
+.pill-status::before{content:"";width:8px;height:8px;flex:none;border-radius:50%;background:var(--ps-dot)}
+.pill-status[data-state="live"]{background:var(--ok-fill);color:var(--ok-strong);--ps-dot:var(--ok)}
+.pill-status[data-state="ok"]{background:var(--ok-fill);color:var(--ok-strong);--ps-dot:var(--ok)}
+.pill-status[data-state="warn"]{background:var(--warn-fill);color:var(--warn-strong);--ps-dot:var(--warn)}
+.pill-status[data-state="bad"]{background:var(--bad-fill);color:var(--bad-strong);--ps-dot:var(--bad)}
+.pill-status[data-state="live"]::before{animation:c-live 1.6s var(--ease-out-cubic) infinite}
+@keyframes c-live{0%{box-shadow:0 0 0 0 color-mix(in srgb,var(--ps-dot) 60%,transparent)}
+  70%,100%{box-shadow:0 0 0 7px color-mix(in srgb,var(--ps-dot) 0%,transparent)}}
+@keyframes c-live-calm{0%,100%{opacity:1}50%{opacity:.35}}
+
+/* AVATAR — circles; initials on the grey fill in the on-fill ink (a
+   neutral readable in both tones); photos get a hairline. The
+   fill is the OPAQUE twin of --fill-1 (#e8e8ed / #333336): a stack overlaps. */
+.avatar{--av:36px;position:relative;display:inline-grid;place-items:center;flex:none;width:var(--av);height:var(--av);
+  border-radius:50%;background:var(--mat-control-fill-solid);color:var(--label-2-on-fill);vertical-align:middle;
+  font-family:var(--font-text);font-weight:600;font-size:calc(var(--av) * .4);line-height:1;letter-spacing:0;
+  box-shadow:inset 0 0 0 .5px var(--separator);user-select:none}
+.avatar>img{width:100%;height:100%;border-radius:50%;object-fit:cover}
+.avatar-s{--av:24px}.avatar-l{--av:44px}.avatar-xl{--av:56px}
+.avatar[data-status]::after{content:"";position:absolute;right:0;bottom:0;width:28%;height:28%;border-radius:50%;
+  background:var(--label-3);box-shadow:0 0 0 2px var(--avatar-ring,var(--bg-1))}
+.avatar[data-status="online"]::after{background:var(--ok)}
+.avatar[data-status="busy"]::after{background:var(--bad)}
+.avatar[data-status="away"]::after{background:var(--warn)}
+.avatar-stack{display:inline-flex;align-items:center;flex-direction:row;vertical-align:middle}
+.avatar-stack>.avatar{box-shadow:0 0 0 2px var(--avatar-ring,var(--bg-1))}
+.avatar-stack>.avatar+.avatar{margin-inline-start:calc(var(--av) * -.28)}
+.card .avatar-stack,.list-inset .avatar-stack{--avatar-ring:var(--c-surface)}
+
+/* KBD — a key cap in the on-fill ink (4.5:1 on --fill-2) */
+.kbd{display:inline-grid;place-items:center;box-sizing:border-box;min-width:22px;height:22px;padding:0 6px;
+  border-radius:calc(5px * var(--r-scale));corner-shape:superellipse(var(--k-continuous));
+  background:var(--fill-2);color:var(--label-2-on-fill);box-shadow:inset 0 -1px 0 var(--separator);
+  font-family:var(--font-text);font-size:var(--t-12);line-height:1;letter-spacing:0;font-weight:500;vertical-align:middle}
+
+/* DIVIDER — the accordion rule: 1px #d2d2d7 / #424245 */
+.divider{height:0;margin:var(--s-7) 0;border:0;border-top:1px solid var(--separator-opaque)}
+.divider-inset{margin-inline:var(--s-4)}
+.divider-v{display:inline-block;align-self:stretch;width:0;height:auto;min-height:1em;margin:0 var(--s-3);border:0;border-inline-start:1px solid var(--separator-opaque)}
+
+/* ═══ 8 · CARD · TILE · MEDIA ═══════════════════════════════════════════════
+   Opaque content surfaces (glass is chrome, never a card). THE content radius
+   --r-lg on the continuous corner; the band decides the surface (§0). Copy
+   padding 32 / 28 / 24 (feature-card). Hover: a
+   card grows by a CONSTANT 6px — scale (w + 6)/w, computed by UI into --card-scale —
+   over .3s cubic-bezier(0,0,.5,1), pointer devices only. */
+.card,.tile{
+  --card-pad:32px;
+  position:relative;display:block;box-sizing:border-box;padding:var(--card-pad);
+  border-radius:var(--r-lg);corner-shape:superellipse(var(--k-continuous));
+  background:var(--c-surface);color:var(--label);box-shadow:var(--c-card-shadow);
+  text-decoration:none;isolation:isolate}
+@media (max-width:1068px){ .card,.tile{--card-pad:28px} }
+@media (max-width:734px){ .card,.tile{--card-pad:24px} }
+/* a TILE is the bento cell: The tile padding (60px × 8.333%), centred */
+.tile{padding:60px 8.333%;text-align:center;overflow:hidden}
+.card-hover{transition:scale .3s var(--ease-card),background-color .344s ease}
+@media (hover:hover){ .card-hover:hover{scale:var(--card-scale,1.0161)} }
+/* the affordance: a 36px circle in a 44px target, 16px from the corner */
+.card-action{position:absolute;inset-inline-end:16px;bottom:16px;z-index:2}
+/* media inside a card: clip 1px INSIDE the edge so the image never
+   meets the anti-aliased seam. The clip is the equal-mass
+   circle of the token radius (the own corner). */
+.card-media{display:block;overflow:hidden;clip-path:inset(1px round calc(var(--r-lg) / var(--r-scale)));
+  border-radius:var(--r-lg);corner-shape:superellipse(var(--k-continuous));background:var(--c-surface)}
+.card-media>:where(img,video,canvas,picture){display:block;width:100%;height:100%;object-fit:cover}
+.card>.card-media:first-child{margin:calc(-1 * var(--card-pad)) calc(-1 * var(--card-pad)) var(--card-pad);border-end-start-radius:0;border-end-end-radius:0;
+  clip-path:inset(1px 1px 0 1px round calc(var(--r-lg) / var(--r-scale)) calc(var(--r-lg) / var(--r-scale)) 0 0)}
+
+/* ═══ 9 · LISTS · ROWS ══════════════════════════════════════════════════════
+   inset-grouped: a section on the band's surface with the content
+   radius (raised it to match controls; a one-row section clamps to a
+   capsule). Rows 44 minimum, 16px margins, 17/22 body; hairline
+   separators start at the TEXT's leading edge (after an icon). */
+.list{--row-inset:16px;list-style:none;margin:0;padding:0;color:var(--label)}
+.list-inset{border-radius:var(--r-lg);corner-shape:superellipse(var(--k-continuous));background:var(--c-surface);overflow:hidden}
+.list>*{position:relative}
+.list>*+*::before{content:"";position:absolute;top:0;inset-inline-start:var(--row-inset);inset-inline-end:0;height:1px;
+  background:var(--separator);z-index:1;pointer-events:none}
+@media (min-resolution:2dppx){ .list>*+*::before{height:.5px} }
+.list>*:has(.row-icon){--row-inset:calc(16px + 29px + 14px)}
+.list>*:has(.row>.avatar:first-child){--row-inset:calc(16px + 36px + 14px)}
+.row{display:flex;align-items:center;gap:14px;box-sizing:border-box;width:100%;min-height:var(--c-hit);
+  padding:11px 16px;margin:0;border:0;background:transparent;color:inherit;text-align:start;text-decoration:none;
+  font-family:var(--font-text);font-size:var(--t-ui-body-fs);line-height:var(--t-ui-body-lh);letter-spacing:var(--t-ui-body-ls)}
+.list>li>.row{border-radius:0}
+:is(a,button,label).row{cursor:pointer;transition:background-color var(--d-100) linear}
+@media (hover:hover){ :is(a,button,label).row:hover{background:var(--fill-4)} }
+:is(a,button,label).row:active{background:var(--fill-2);transition-duration:0s}
+:is(a,button,label).row:focus-visible{outline-offset:-3px;border-radius:var(--r-sm)}
+.row-icon{display:grid;place-items:center;flex:none;width:29px;height:29px;border-radius:calc(7px * var(--r-scale));
+  corner-shape:superellipse(var(--k-continuous));background:var(--row-icon-bg,var(--accent-solid));color:var(--row-icon-ink,var(--accent-ink));font-size:17px}
+.row-icon>:where(svg,.sym){width:1em;height:1em}
+.row-body{display:grid;min-width:0;flex:1}
+.row-title{flex:1;min-width:0}
+.row-sub{font-size:var(--t-ui-subhead-fs);line-height:var(--t-ui-subhead-lh);letter-spacing:var(--t-ui-subhead-ls);color:var(--label-2)}
+.row-detail,.row-value{margin-inline-start:auto;color:var(--label-2);white-space:nowrap;text-align:end}
+.row-value{font-variant-numeric:tabular-nums}
+.row>:last-child:is(.switch,.stepper,.btn,.chip,.badge,.pill-status,.segmented){margin-inline-start:auto}
+/* the disclosure chevron of a navigation row: the 3:1 glyph ink */
+a.row::after,.row-nav::after{content:"";flex:none;width:8px;height:13px;margin-inline-start:auto;background:var(--label-3);
+  -webkit-mask:var(--c-chevron) center/contain no-repeat;mask:var(--c-chevron) center/contain no-repeat;scale:var(--dir) 1}
+a.row:has(.row-detail)::after,.row-nav:has(.row-detail)::after{margin-inline-start:0}
+.list-header{padding:0 16px 8px;font-size:var(--t-ui-subhead-fs);line-height:var(--t-ui-subhead-lh);letter-spacing:var(--t-ui-subhead-ls);
+  font-weight:600;color:var(--label)}
+.list-footer{padding:8px 16px 0;font-size:var(--t-ui-footnote-fs);line-height:var(--t-ui-footnote-lh);letter-spacing:var(--t-ui-footnote-ls);color:var(--label-2)}
+.list-header+.list,.list+.list-footer{margin-top:0}
+
+/* ═══ 10 · TABLE · STAT ═════════════════════════════════════════════════════ */
+.table{width:100%;border-collapse:collapse;font-size:var(--t-14);line-height:var(--t-14-lh);letter-spacing:var(--t-14-ls);color:var(--label)}
+.table th,.table td{padding:12px 16px 12px 0;text-align:start;vertical-align:top;border-bottom:1px solid var(--separator)}
+.table th:last-child,.table td:last-child{padding-inline-end:0}
+.table th{font-size:var(--t-12);line-height:var(--t-12-lh);letter-spacing:var(--t-12-ls);font-weight:600;color:var(--label-2);border-bottom-color:var(--separator-opaque)}
+.table :is(td,th).num{text-align:end;font-variant-numeric:tabular-nums}
+.table tbody tr:last-child>*{border-bottom:0}
+.table-hover tbody tr{transition:background-color var(--d-100) linear}
+@media (hover:hover){ .table-hover tbody tr:hover{background:var(--fill-4)} }
+.table-sticky thead th{position:sticky;top:0;z-index:1;background:var(--table-bg,var(--band-bg,var(--bg-1)))}
+/* a block frame that scrolls sideways. No max-width: in flow it already
+   fills its column, and a cap only ever bit the bleed-to-the-card-edge frame
+   (margin-inline: calc(-1 * var(--card-pad)); padding-inline: var(--card-pad)) */
+.table-scroll{overflow-x:auto;-webkit-overflow-scrolling:touch}
+.table-scroll>.table{min-width:max-content}
+/* STACK — at ≤ 734 each row becomes a block: the first cell is the row's
+   title, every other cell shows its column name from data-label above the
+   value; the header row is kept for assistive tech but not drawn. */
+@media (max-width:734px){
+  .table-stack,.table-stack>tbody,.table-stack>tbody>tr,.table-stack>tbody>tr>:is(td,th){display:block}
+  .table-stack>thead{display:block;position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
+  .table-stack>tbody>tr{padding:12px 0;border-bottom:1px solid var(--separator)}
+  .table-stack>tbody>tr:last-child{border-bottom:0}
+  .table-stack>tbody>tr>:is(td,th),.table-stack>tbody>tr>:is(td,th).num{padding:0;border:0;text-align:start}
+  .table-stack>tbody>tr>:is(td,th)+:is(td,th){margin-top:8px}
+  .table-stack>tbody>tr>:first-child:not([data-label]){font-weight:600}
+  .table-stack>tbody>tr>[data-label]::before{content:attr(data-label);display:block;margin-bottom:2px;
+    font-size:var(--t-12);line-height:var(--t-12-lh);letter-spacing:var(--t-12-ls);font-weight:600;color:var(--label-2)}
+  .table-scroll>.table-stack{min-width:0}
+}
+
+/* STAT — the stat grammar (duo .stat-reduced): 14/18 caption, a 40/40 600
+   value, 14/18 caption; values align on a shared baseline row. */
+.stat{display:flex;flex-direction:column;gap:4px;min-width:0}
+.stat-value{font-family:var(--t-stat-ff);font-size:var(--t-stat-fs);line-height:var(--t-stat-lh);letter-spacing:var(--t-stat-ls);
+  font-weight:600;color:var(--label);font-variant-numeric:tabular-nums}
+.stat-caption{font-family:var(--t-stat-caption-ff);font-size:var(--t-stat-caption-fs);line-height:var(--t-stat-caption-lh);
+  letter-spacing:var(--t-stat-caption-ls);color:var(--label)}
+.stat-delta{display:inline-flex;align-items:center;gap:3px;font-size:var(--t-14);line-height:var(--t-14-lh);font-weight:600;font-variant-numeric:tabular-nums;color:var(--label-2)}
+.stat-delta.up{color:var(--ok)}.stat-delta.down{color:var(--bad)}
+.stat-delta.up::before,.stat-delta.down::before{content:"";width:.7em;height:.7em;background:currentColor;
+  -webkit-mask:var(--c-chevron-down) center/contain no-repeat;mask:var(--c-chevron-down) center/contain no-repeat}
+.stat-delta.up::before{rotate:180deg}
+
+/* ═══ 11 · PROGRESS · RING · SPINNER · SKELETON ═════════════════════════════
+   State-reporting motion (spinner, indeterminate, shimmer) KEEPS moving under
+   reduced motion, slower; only displacement goes (SPEC §5). */
+@property --c-ring{syntax:"<number>";inherits:true;initial-value:0}
+@keyframes c-spin{to{rotate:360deg}}
+@keyframes c-shimmer{from{background-position:100% 0}to{background-position:-100% 0}}
+@keyframes c-sweep{from{translate:-100% 0}to{translate:250% 0}}
+
+/* PROGRESS: a 4px capsule; the bar travels on the smooth spring */
+.progress{-webkit-appearance:none;appearance:none;display:block;width:100%;height:4px;border:0;border-radius:2px;overflow:hidden;
+  background:var(--fill-1);color:var(--accent-solid)}
+.progress::-webkit-progress-bar{background:var(--fill-1);border-radius:2px}
+.progress::-webkit-progress-value{background:var(--accent-solid);border-radius:2px;
+  transition:inline-size var(--sp-smooth-ms,674ms) var(--sp-smooth,ease),width var(--sp-smooth-ms,674ms) var(--sp-smooth,ease)}
+.progress::-moz-progress-bar{background:var(--accent-solid);border-radius:2px}
+.progress-l{height:6px;border-radius:3px}
+/* indeterminate: a 40% bar sweeping — it means "working", so it stays */
+.progress:indeterminate{position:relative;background:var(--fill-1)}
+.progress:indeterminate::-webkit-progress-bar{background:transparent}
+.progress:indeterminate::after{content:"";position:absolute;top:0;bottom:0;left:0;width:40%;border-radius:inherit;
+  background:var(--accent-solid);animation:c-sweep 1.4s var(--ease-in-out-cubic) infinite}
+.progress:indeterminate::-moz-progress-bar{background:transparent}
+
+/* RING — determinate: a conic arc masked to a ring, round caps drawn by the
+   two pseudo-dots, value on the smooth spring (--c-ring is registered so the
+   number itself transitions). --value 0..1; [data-indeterminate] spins. */
+.progress-ring{--value:0;--ring-w:4px;--ring-size:36px;--c-ring:var(--value);
+  position:relative;display:inline-grid;place-items:center;flex:none;width:var(--ring-size);height:var(--ring-size);vertical-align:middle;
+  /* the ARC is --ring-color (default --accent-solid; a graphic, 3:1 is its
+     bar; set it here or on any ancestor); the NUMBER inside is text at ~11px,
+     so it takes the label ink (the arc colour measured 4.19:1 light / 3.69:1
+     dark on a card) */
+  color:var(--label);font-size:calc(var(--ring-size) * .3);font-weight:600;font-variant-numeric:tabular-nums;
+  transition:--c-ring var(--sp-smooth-ms,674ms) var(--sp-smooth,ease)}
+.progress-ring::before{content:"";position:absolute;inset:0;border-radius:50%;
+  background:conic-gradient(var(--ring-color,var(--accent-solid)) calc(var(--c-ring) * 1turn),var(--fill-1) 0);
+  -webkit-mask:radial-gradient(farthest-side,transparent calc(100% - var(--ring-w) - .5px),#000 calc(100% - var(--ring-w)));
+          mask:radial-gradient(farthest-side,transparent calc(100% - var(--ring-w) - .5px),#000 calc(100% - var(--ring-w)))}
+/* round end cap at the head of the arc (the tail cap sits at 12 o'clock) */
+.progress-ring::after{content:"";position:absolute;left:50%;top:50%;width:var(--ring-w);height:var(--ring-w);margin:calc(var(--ring-w) / -2);
+  border-radius:50%;background:var(--ring-color,var(--accent-solid));
+  translate:calc(sin(var(--c-ring) * 1turn) * (var(--ring-size) - var(--ring-w)) / 2) calc(cos(var(--c-ring) * 1turn) * (var(--ring-size) - var(--ring-w)) / -2);
+  opacity:min(1, calc(var(--c-ring) * 100));
+  box-shadow:calc(sin(var(--c-ring) * -1turn) * (var(--ring-size) - var(--ring-w)) / 2) calc((cos(var(--c-ring) * 1turn) - 1) * (var(--ring-size) - var(--ring-w)) / 2) 0 0 var(--ring-color,var(--accent-solid))}
+.progress-ring-l{--ring-size:56px;--ring-w:6px}
+.progress-ring-s{--ring-size:24px;--ring-w:3px}
+.progress-ring[data-indeterminate]{--c-ring:.28;transition:none;animation:c-spin 1s linear infinite}
+.progress-ring[data-indeterminate]::after{display:none}
+
+/* SPINNER — the activity indicator: 8 capsule spokes turning in 8
+   discrete steps (1 turn / 800ms); .spinner-12 is the 12-spoke face. Default ink: the secondary label. */
+.spinner{display:inline-block;flex:none;width:20px;height:20px;vertical-align:middle;color:var(--label-2);background:currentColor;
+  -webkit-mask:var(--c-spokes-8) center/contain no-repeat;mask:var(--c-spokes-8) center/contain no-repeat;
+  animation:c-spin 800ms steps(8) infinite}
+.spinner-l{width:37px;height:37px}
+.spinner-12{-webkit-mask-image:var(--c-spokes-12);mask-image:var(--c-spokes-12);animation:c-spin 1s steps(12) infinite}
+
+/* SKELETON — the shimmer says "loading", so it slows under reduced motion
+   rather than stopping. Pair the container with aria-busy="true". */
+.skeleton{display:block;border-radius:calc(8px * var(--r-scale));corner-shape:superellipse(var(--k-continuous));
+  background:linear-gradient(100deg,var(--fill-3) 30%,var(--fill-1) 50%,var(--fill-3) 70%) 0 0/200% 100%;
+  animation:c-shimmer 1.5s linear infinite;color:transparent;user-select:none;pointer-events:none}
+.skeleton-text{height:1em;margin-block:.28em;border-radius:var(--r-pill);corner-shape:round}
+.skeleton-text:last-child:not(:first-child){width:62%}
+.skeleton-circle{border-radius:50%;corner-shape:round;aspect-ratio:1}
+
+/* ═══ 12 · OVERLAYS ═════════════════════════════════════════════════════════
+   Built on popover / <dialog>: top layer, focus return and Escape for free.
+   UI drives entrances with springs (glass: LG3.morph from its trigger or
+   LG3.materialize; opaque: a spring scale from the trigger), so the default
+   popover fade from fg3-motion.css is switched off on these classes. */
+.menu,.popover,.tooltip,.alert,.toast{transition:none}
+
+/* MENU — the context menu is CHROME, so it is glass (data-lg3); without it
+   (or in a content layer) it is the opaque elevated surface. 44pt
+   rows, 17pt text, icons on the LEADING edge, destructive in red, groups
+   split by a hairline; highlight is concentric with the menu corner. */
+.menu{
+  --menu-pad:6px;
+  position:fixed;inset:auto;margin:0;box-sizing:border-box;min-width:220px;max-width:min(320px,calc(100vw - 16px));
+  max-height:min(70vh,560px);overflow:auto;padding:var(--menu-pad);border:0;
+  border-radius:var(--r-lg);corner-shape:superellipse(var(--k-continuous));color:var(--label);
+  font-family:var(--font-text);font-size:var(--t-ui-body-fs);line-height:var(--t-ui-body-lh);letter-spacing:var(--t-ui-body-ls);
+  overscroll-behavior:contain;transform-origin:top left}
+.menu:where(:not([data-lg3])),.popover:where(:not([data-lg3])){background:var(--bg-elevated);
+  box-shadow:var(--shadow-lift),inset 0 0 0 .5px var(--separator)}
+.menu[data-lg3]{overflow:hidden}
+/* Text-bearing large glass is DENSER (regular glass "when legibility is
+   at risk or there is a lot of text — alerts, popovers, menus"). The engine's tint layer takes a share of its own reduce-transparency
+   fill, so 15–17px labels hold 4.5:1 over saturated art (measured in the lab).
+   UI stamps them data-lg3-text="dense" (LG3's veil, held for the secondary
+   inks too: headers, trails, the destructive label) with these shares as the
+   veil's floor (§1); for glass UI has not stamped they are the fallback in
+   the tint layer, guarded like §1's. */
+:is(.menu,.popover).lg3[data-lg3-text][data-lg3-appearance="dark"]>.lg3__veil{opacity:calc(max(var(--lg3-legible,0),.48) * var(--lg3-mat,1))}
+:is(.menu,.popover).lg3[data-lg3-text][data-lg3-appearance="light"]>.lg3__veil{opacity:calc(max(var(--lg3-legible,0),.52) * var(--lg3-mat,1))}
+.alert.lg3[data-lg3-text][data-lg3-appearance="dark"]>.lg3__veil{opacity:calc(max(var(--lg3-legible,0),.60) * var(--lg3-mat,1))}
+.alert.lg3[data-lg3-text][data-lg3-appearance="light"]>.lg3__veil{opacity:calc(max(var(--lg3-legible,0),.62) * var(--lg3-mat,1))}
+@media not (prefers-contrast:more){
+  html:not([data-reduce-transparency]:not([data-reduce-transparency="off"])):not([data-contrast="more"]) :is(.menu,.popover).lg3:not([data-lg3-text])[data-lg3-appearance="dark"]>.lg3__tint{background:color-mix(in srgb,var(--lg3-rt-dark) 48%,transparent)}
+  html:not([data-reduce-transparency]:not([data-reduce-transparency="off"])):not([data-contrast="more"]) :is(.menu,.popover).lg3:not([data-lg3-text])[data-lg3-appearance="light"]>.lg3__tint{background:color-mix(in srgb,var(--lg3-rt-light) 52%,transparent)}
+  html:not([data-reduce-transparency]:not([data-reduce-transparency="off"])):not([data-contrast="more"]) .alert.lg3:not([data-lg3-text])[data-lg3-appearance="dark"]>.lg3__tint{background:color-mix(in srgb,var(--lg3-rt-dark) 60%,transparent)}
+  html:not([data-reduce-transparency]:not([data-reduce-transparency="off"])):not([data-contrast="more"]) .alert.lg3:not([data-lg3-text])[data-lg3-appearance="light"]>.lg3__tint{background:color-mix(in srgb,var(--lg3-rt-light) 62%,transparent)}
+}
+/* …and the media form of Reduce Transparency, which the <html> guard cannot
+   see: every fallback share above hands back LG3's own fill. This must stay
+   AFTER the share rules and at least as specific (0,10,1) as the strongest.
+   With both settings on, LG3 lets contrast win, so this steps aside. */
+@media (prefers-reduced-transparency:reduce){ @media not (prefers-contrast:more){
+  html:not([data-reduce-transparency="off"]):not([data-contrast="more"]) :is(.btn-glass:not(.btn-icon):not(.btn-primary),.segmented-glass,.toast,.menu,.popover,.alert).lg3:not([data-lg3-text])[data-lg3-kind][data-lg3-appearance]>.lg3__tint{background:var(--lg3-rt-dark)}
+  html:not([data-reduce-transparency="off"]):not([data-contrast="more"]) :is(.btn-glass:not(.btn-icon):not(.btn-primary),.segmented-glass,.toast,.menu,.popover,.alert).lg3:not([data-lg3-text])[data-lg3-kind][data-lg3-appearance="light"]>.lg3__tint{background:var(--lg3-rt-light)}
+} }
+.menu-item{position:relative;display:flex;align-items:center;gap:12px;box-sizing:border-box;width:100%;min-height:var(--c-hit);
+  padding:0 14px;margin:0;border:0;background:transparent;color:inherit;font:inherit;letter-spacing:inherit;text-align:start;text-decoration:none;
+  border-radius:max(var(--r-min),calc(var(--r-lg) - var(--menu-pad)));corner-shape:superellipse(var(--k-continuous));cursor:pointer;outline:0}
+.menu-item>:where(svg,.sym){flex:none;width:1.05em;height:1.05em}
+.menu-item>.kbd,.menu-item>.menu-trail{margin-inline-start:auto}
+.menu-trail{color:color-mix(in srgb,currentColor 62%,transparent);font-size:var(--t-14)}
+.menu-item:is(:hover,:focus-visible,[data-active]){background:color-mix(in srgb,var(--c-on-glass,var(--label)) 10%,transparent)}
+.menu:where(:not([data-lg3])) .menu-item:is(:hover,:focus-visible,[data-active]){background:var(--fill-2)}
+.menu-item:focus-visible{box-shadow:inset 0 0 0 2px var(--focus-color,var(--accent))}
+.menu-item:active{background:color-mix(in srgb,var(--c-on-glass,var(--label)) 16%,transparent)}
+.menu-item:is(:disabled,[aria-disabled="true"]){opacity:.42;cursor:default;background:transparent}
+.menu-item-destructive{color:var(--bad)}
+/* on glass raw red drowns in a saturated backdrop (measured on the violet art):
+   the destructive label is the glass's own ink pulled toward red instead */
+.menu.lg3 .menu-item-destructive,.alert.lg3 .btn[data-role="destructive"]{color:color-mix(in oklab,var(--bad) 45%,var(--c-on-glass))}
+.menu-item[aria-checked="true"]::after{content:"";margin-inline-start:auto;width:14px;height:14px;flex:none;background:currentColor;
+  -webkit-mask:var(--c-tick) center/150% no-repeat;mask:var(--c-tick) center/150% no-repeat}
+.menu-separator{height:1px;margin:5px 14px;border:0;background:color-mix(in srgb,var(--c-on-glass,var(--label)) 14%,transparent)}
+.menu:where(:not([data-lg3])) .menu-separator{background:var(--separator)}
+.menu-header{padding:8px 14px 4px;font-size:var(--t-ui-footnote-fs);line-height:var(--t-ui-footnote-lh);font-weight:600;
+  color:color-mix(in srgb,var(--c-on-glass,var(--label)) 70%,transparent)}
+.menu:where(:not([data-lg3])) .menu-header{color:var(--label-2)}
+
+/* POPOVER — anchored free content: opaque elevated by default, glass when it
+   is chrome (data-lg3). Same corner as a card. */
+.popover{position:fixed;inset:auto;margin:0;box-sizing:border-box;max-width:min(340px,calc(100vw - 16px));padding:20px;border:0;
+  border-radius:var(--r-lg);corner-shape:superellipse(var(--k-continuous));color:var(--label);
+  font-size:var(--t-ui-subhead-fs);line-height:var(--t-ui-subhead-lh);letter-spacing:var(--t-ui-subhead-ls)}
+
+/* TOOLTIP — the smallest thing, inverted ink, never interactive */
+.tooltip{position:fixed;inset:auto;margin:0;max-width:240px;padding:6px 10px;border:0;pointer-events:none;
+  border-radius:var(--r-xs);corner-shape:superellipse(var(--k-continuous));background:var(--label);color:var(--label-inv);
+  font-family:var(--font-text);font-size:var(--t-12);line-height:var(--t-12-lh);letter-spacing:var(--t-12-ls);font-weight:500;
+  z-index:var(--z-tooltip)}
+.tooltip:popover-open{animation:c-tip-in var(--d-120) linear both}
+@keyframes c-tip-in{from{opacity:0}}
+
+/* TOASTS — floating chrome, so glass capsules (UI adds data-lg3); they rise
+   on a spring and leave by dematerializing. A toast never blocks and never
+   asks: a decision is an alert. */
+.toasts{position:fixed;inset:auto;left:50%;translate:-50% 0;bottom:calc(env(safe-area-inset-bottom,0px) + var(--toast-offset,24px));
+  z-index:var(--z-toast);display:flex;flex-direction:column-reverse;align-items:center;gap:8px;width:min(460px,calc(100vw - 32px));
+  pointer-events:none;margin:0;padding:0;border:0;background:none;overflow:visible;color:inherit}
+.toast{pointer-events:auto;display:flex;align-items:center;gap:10px;box-sizing:border-box;min-height:var(--h-l);max-width:100%;
+  padding:10px 20px 10px 14px;border-radius:var(--r-pill);corner-shape:round;
+  font-family:var(--font-text);font-size:var(--t-ui-subhead-fs);line-height:var(--t-ui-subhead-lh);letter-spacing:var(--t-ui-subhead-ls);font-weight:600}
+.toast:where(:not([data-lg3])){background:var(--label);color:var(--label-inv);box-shadow:var(--shadow-lift)}
+.toast>:where(svg,.sym){flex:none;width:20px;height:20px}
+.toast-action{margin-inline-start:6px;padding:0 4px;border:0;background:none;color:inherit;font:inherit;text-decoration:underline;
+  text-underline-offset:.16em;cursor:pointer;position:relative}
+.toast-action::before{content:"";position:absolute;inset:-12px -8px}
+
+/* BANNER — the in-flow notice (the ribbon: 14px text, 16px padding,
+   centred on the alt band); tinted variants carry a status, the inset one is
+   a rounded strip inside the column. Opaque content, never glass. */
+.banner{display:flex;align-items:center;justify-content:center;gap:10px;flex-wrap:wrap;padding:16px var(--s-5);
+  background:var(--bg-2);color:var(--label);text-align:center;
+  font-size:var(--t-14);line-height:var(--t-14-lh-loose);letter-spacing:var(--t-14-ls)}
+.banner-inset{border-radius:var(--r-sm);corner-shape:superellipse(var(--k-continuous));justify-content:flex-start;text-align:start}
+.banner-ok{background:var(--ok-fill)}.banner-warn{background:var(--warn-fill)}.banner-bad{background:var(--bad-fill)}
+.banner>:where(svg,.sym){flex:none;width:18px;height:18px}
+.banner-ok>:where(svg,.sym){color:var(--ok-strong)}.banner-warn>:where(svg,.sym){color:var(--warn-strong)}.banner-bad>:where(svg,.sym){color:var(--bad-strong)}
+.banner .link-chevron{color:var(--link)}
+
+/* ALERT — a centred glass panel (large glass: adapts, never
+   flips), title and message bolder and LEFT-aligned,
+   capsule actions side by side (stacked from three). It grows out of the
+   control that presented it (UI.alert). The scrim is the modal scrim. */
+.alert{position:fixed;inset:0;margin:auto;box-sizing:border-box;width:min(320px,calc(100vw - 40px));height:fit-content;max-height:calc(100vh - 40px);
+  padding:22px 20px 20px;border:0;border-radius:var(--r-xl);corner-shape:superellipse(var(--k-continuous));
+  color:var(--label);overflow:hidden;font-family:var(--font-text)}
+.alert:where(:not([data-lg3])){background:var(--bg-elevated);box-shadow:var(--shadow-lift)}
+.alert::backdrop{background:var(--c-scrim)}
+/* SCOPED (UI.alert({container})): centred in its pane or device screen over
+   a scrim that covers only that box (it takes the taps; the alert still needs
+   an answer). The container should not scroll: absolute boxes ride its
+   scrolled content. */
+.alert[data-alert-scoped]{position:absolute;z-index:var(--z-modal);width:min(320px,calc(100% - 40px));max-height:calc(100% - 40px)}
+.alert-scrim{position:absolute;inset:0;z-index:var(--z-scrim);background:var(--c-scrim);opacity:0;transition:opacity var(--d-240) linear}
+.alert-scrim[data-open]{opacity:1}
+.alert-title{margin:0;font-size:var(--t-ui-headline-fs);line-height:var(--t-ui-headline-lh);letter-spacing:var(--t-ui-headline-ls);font-weight:600}
+.alert-message{margin:6px 0 0;font-size:var(--t-ui-subhead-fs);line-height:var(--t-ui-subhead-lh);letter-spacing:var(--t-ui-subhead-ls)}
+.alert-actions{display:grid;grid-auto-flow:column;grid-auto-columns:1fr;gap:10px;margin-top:20px}
+.alert-actions:has(>:nth-child(3)){grid-auto-flow:row}
+.alert-actions>.btn{--btn-h:var(--h-l);--btn-pb:12px;--btn-fs:var(--t-17);--btn-lh:var(--t-17-lh-button);--btn-ls:var(--t-17-ls);width:100%}
+/* actions ON glass are fills of the glass's own ink, not new surfaces */
+.alert .btn:not(.btn-primary){--btn-bg:color-mix(in srgb,var(--c-on-glass,var(--label)) 11%,transparent);
+  --btn-bg-hover:color-mix(in srgb,var(--c-on-glass,var(--label)) 16%,transparent);
+  --btn-bg-active:color-mix(in srgb,var(--c-on-glass,var(--label)) 22%,transparent);--btn-ink:var(--c-on-glass,var(--label));font-weight:600}
+.alert .btn[data-role="destructive"]{--btn-ink:var(--bad)}
+.alert.lg3 .btn[data-role="destructive"]{--btn-ink:color-mix(in oklab,var(--bad) 45%,var(--c-on-glass))}
+.alert .btn-primary{font-weight:600}
+
+/* EMPTY STATE — what goes here, and the way to put it there */
+.empty-state{display:grid;justify-items:center;gap:var(--s-3);max-width:420px;margin-inline:auto;padding:var(--s-9) var(--s-5);text-align:center}
+.empty-state-glyph{display:grid;place-items:center;width:64px;height:64px;margin-bottom:var(--s-2);border-radius:50%;
+  background:var(--fill-2);color:var(--label-3);font-size:28px}
+.empty-state-glyph>:where(svg,.sym){width:1em;height:1em}
+.empty-state-title{margin:0;font-family:var(--t-ui-title3-ff);font-size:var(--t-ui-title3-fs);line-height:var(--t-ui-title3-lh);
+  letter-spacing:var(--t-ui-title3-ls);font-weight:600;color:var(--label)}
+.empty-state-body{margin:0;color:var(--label-2);font-size:var(--t-17);line-height:var(--t-17-lh-loose);letter-spacing:var(--t-17-ls);text-wrap:pretty}
+.empty-state-actions{display:flex;flex-wrap:wrap;justify-content:center;gap:var(--s-3);margin-top:var(--s-2)}
+
+/* AFFORDANCE — a class is not a control. The hand belongs to what a keyboard
+   can also reach: a .btn / .chip drawn on a <span> as a picture (a specimen,
+   a tile preview) keeps the arrow, so it never promises a click it cannot
+   take. Anything inside a real control keeps that control's hand. */
+:is(.btn,.chip,.token-remove,.toast-action,.menu-item):not(:where(a[href],button,input,select,textarea,summary,label,[tabindex],[role="button"],[role="link"],[role="tab"],[role="option"],[role="radio"],[role="checkbox"],[role="switch"],[role^="menuitem"])):not(:where(a[href],button,summary,label,[tabindex],[role="button"],[role="link"],[role="tab"],[role="option"],[role^="menuitem"]) *){cursor:default}
+
+/* ═══ 13 · REDUCED MOTION — an equivalent, not a deletion ══════════════════
+   Displacement goes (knob travel, indicator slide, press growth, hover
+   scale); state-reporting motion stays and slows (spinner, ring, sweep,
+   shimmer, live dot). Colour changes stay, briefly. Layout is identical. */
+@media (prefers-reduced-motion:reduce){
+  .btn-icon:where(:not([data-lg3])):active{scale:none}
+  .card-hover:hover{scale:none}
+  .switch::after,.switch:active::after{transition:background-color var(--d-120) linear}
+  .switch:active::after{width:37px;scale:none}
+  .switch:checked:active::after{translate:calc(var(--dir) * 22px) 0}
+  .check::after{transition:none}
+  .radio::after{transition:none}
+  .slider::-webkit-slider-thumb,.slider:active::-webkit-slider-thumb{transition:none;scale:none}
+  .slider:active::-moz-range-thumb{scale:none}
+  /* same selectors as the rules they answer (equal specificity, later wins) */
+  .segmented[data-seg-armed]:not([data-seg-snap])>.segmented-indicator,
+  .segmented-glass[data-seg-armed]:not([data-seg-snap])>.segmented-indicator,
+  .segmented-glass[data-seg-press]>.segmented-indicator{transition:background-color var(--d-200) linear}
+  .segmented[data-seg-armed]:not([data-seg-snap])>:is([aria-selected],[aria-checked],[aria-pressed],[aria-current]),
+  .segmented[data-seg-armed]:not([data-seg-snap])>:is([aria-selected="true"],[aria-checked="true"],[aria-pressed="true"],[aria-current="true"],[aria-current="page"]){transition:color var(--d-100) linear}
+  .segmented-glass[data-seg-press]>.segmented-indicator{top:calc(var(--seg-slack) + var(--seg-pad));bottom:calc(var(--seg-slack) + var(--seg-pad));margin-inline:0}
+  .progress::-webkit-progress-value{transition:none}
+  .progress-ring{transition:none}
+  /* state: kept moving, slower */
+  .spinner,.btn[aria-busy="true"]::after{animation-duration:1600ms}
+  .spinner-12{animation-duration:2s}
+  .progress-ring[data-indeterminate]{animation-duration:2.4s}
+  .progress:indeterminate::after{animation-duration:2.8s}
+  .skeleton{animation-duration:3s}
+  .pill-status[data-state="live"]::before{animation:c-live-calm 3.2s var(--ease-in-out-cubic) infinite}
+}
+
+/* ═══ 14 · FORCED COLOURS — edges come back as system colours ══════════════ */
+@media (forced-colors:active){
+  .switch,.check,.radio,.stepper,.segmented,.chip,.progress-ring::before{border:1px solid CanvasText}
+  .switch:checked,.check:checked,.radio:checked{background:Highlight}
+  /* the knob is the text colour of whatever it sits on: CanvasText on the off
+     track, HighlightText on the Highlight track — held too (the pressed lens
+     is a colour-mix, which the UA forces to Canvas: the knob vanished) */
+  .switch::after,.switch:active::after{background:CanvasText;box-shadow:none}
+  .switch:checked::after{background:HighlightText}
+  /* the selection in system colours: the indicator is the Highlight pill and
+     the chosen label its HighlightText. !important because the glass
+     variant's own indicator/label rules (up to 0,4,0) and page-local
+     overrides would otherwise leave HighlightText on Canvas (it vanished).
+     Before the indicator is placed, the chosen item paints the pill itself. */
+  .segmented-indicator{background:Highlight !important;forced-color-adjust:none}
+  .segmented>:is([aria-selected="true"],[aria-checked="true"],[aria-pressed="true"],[aria-current="true"],[aria-current="page"]){
+    color:HighlightText !important;forced-color-adjust:none}
+  .segmented:not([data-seg-ready])>:is([aria-selected="true"],[aria-checked="true"],[aria-pressed="true"],[aria-current="true"],[aria-current="page"]){
+    background:Highlight !important}
+  /* the UA drops a gradient background-image here, and with it the arc: draw
+     it in system colours instead (the value must not live only in the number) */
+  .progress-ring{--ring-color:CanvasText}
+  .progress-ring::before{forced-color-adjust:none;background:conic-gradient(CanvasText calc(var(--c-ring) * 1turn),Canvas 0)}
+  .progress-ring::after{forced-color-adjust:none}
+  .progress{border:1px solid CanvasText;box-sizing:content-box}
+  .progress::-webkit-progress-value{background:CanvasText;forced-color-adjust:none}
+  .progress::-moz-progress-bar{background:CanvasText;forced-color-adjust:none}
+  .progress:indeterminate::after{background:CanvasText;forced-color-adjust:none}
+  .chip:is([aria-pressed="true"],[aria-selected="true"]){background:Highlight;color:HighlightText;forced-color-adjust:none}
+  .spinner,.btn[aria-busy="true"]::after{background:CanvasText;forced-color-adjust:none}
+  .card,.tile,.list-inset,.menu,.popover,.alert,.toast{border:1px solid CanvasText}
+}

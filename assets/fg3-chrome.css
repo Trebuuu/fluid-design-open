@@ -1,0 +1,1017 @@
+/* ═══════════════════════════════════════════════════════════════════════════
+   fg3-chrome.css — bars, tab bars, sidebars, sheets, the live capsule
+   ───────────────────────────────────────────────────────────────────────────
+   The look of chrome.js's components. Glass is chrome: every surface here
+   either IS a material host (data-lg3 — glass for floating capsules, sheets
+   and panels; chrome for edge-spanning bars; platter for small controls on
+   media) or sits on one. Nothing here names a colour: roles and the
+   material tokens only (the block below derives what the palette lacks).
+
+   ONE NUMBER PER MORPH. Each component reads the spring-driven custom
+   property chrome.js writes and derives its shape with calc():
+     .localnav__capsule  --progress   0 pill → 1 Explore panel
+     .tabbar             --tb-min     0 full → 1 minimised
+     .navbar             --nb-collapse (scroll, 0..1) · --nb-min (0..1)
+     .sidebar            --sb-fold · .inspector --insp-fold
+     .sheet              --m-y (px below the large detent) → height;
+                         --sheet-full 0 medium → 1 large (glass → opaque);
+                         --sheet-vis (scrim)
+     .live-capsule       --lc-p 0 compact → 1 expanded; --lc-w0n/h0n/w1n/h1n (px numbers)
+     .control-bar        --cb-* (the drop → bubbles intro), --cb-p (sprung index)
+   Labels on glass read the GLASS: chrome.js mirrors [data-lg3-appearance]
+   into data-tone on each host, so --label-2, --accent and --fill-* inside
+   resolve for the material the text is actually on, and marks every
+   text-bearing host data-lg3-text (LG3 densifies it just enough to read).
+
+   INPUTS AN AUTHOR MAY SET: --tb-max (tab bar max width) · --tab-selected-ink
+   (the selected tab's glyph; default --accent) · --sheet-max · --sheet-top ·
+   --sheet-inset · --edge-h · --edge-ground (on the edge or any container) /
+   --edge-ground-in (a container's) · --sb-w · --insp-w · --lc-hue (account
+   hue, a role such as var(--series-1)) · --lc-r1 · --lc-detail-w · --cb-pill.
+   ATTRIBUTES: .sheet[data-sheet-contained] · .live-capsule[data-expanded] ·
+   .control-bar[data-loop="false"] (chrome.js). A toolbar holding a .command
+   is a size container (fg3-toolbar): the pill sheds its label ≤ 540 px.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* ── 0 · DERIVED ROLES ───────────────────────────────────────────────────────
+   Declared on every tone carrier so the NEAREST band wins by inheritance.
+   --scrim is the colour module's role when it exists (requested); until then the modal
+   scrim (black .48) is derived from the darkest role of each tone. */
+@property --tb-lift { syntax: "<number>"; inherits: true; initial-value: 0; }
+:root, [data-tone="light"]{
+  --chrome-scrim: var(--scrim, color-mix(in srgb, var(--label) 48%, transparent));
+  --chrome-curtain: color-mix(in srgb, var(--mat-platter-fill-solid) 40%, transparent);   /* rgba(232,232,237,.4) */
+  --chrome-lens: color-mix(in srgb, var(--label) 14%, transparent);   /* selected platter: black 14% */
+  --chrome-link: color-mix(in srgb, var(--label) 80%, transparent);   /* global nav rgba(0,0,0,.8) */
+}
+/* Text on glass is text on a fill: secondary labels take the colour module's on-fill role
+   (#424245 / #d2d2d7) — #6e6e73 has no headroom once the ground is a wash
+   over media. chrome.js marks every glass host it mirrors a tone onto. */
+[data-chrome-tone]{ --label-2: var(--label-2-on-fill); }
+/* TEXT-BEARING glass (command pill, capsule, tab bar and its accessory,
+   toolbar groups with words, local nav, sidebar, inspector, palette, sheet)
+   is marked data-lg3-text by chrome.js: LG3 raises the host's veil by the
+   smallest share that holds 4.5:1 over what is behind it, and hides it
+   under reduce transparency / increased contrast, whose fills replace it.
+   "dense" hosts hold their SECONDARY ink — this label-2, which a brand may
+   set dimmer than LG3's default, so the engine is told which it is. */
+[data-chrome-tone].lg3[data-lg3-appearance]{ --lg3-ink-2: var(--label-2); }
+/* LARGE glass (sidebar, inspector, palette) "adapts but does not flip, and is
+   more opaque": a wash of the elevated ground under the
+   content, heavier on dark glass, where the measured recipe alone reads as a
+   grey slab. Keyed on the mirrored appearance. */
+.sidebar::before, .inspector::before, .command__panel::before{
+  content: ""; position: absolute; inset: 0; z-index: -1; border-radius: inherit; pointer-events: none;
+  background: var(--bg-elevated); opacity: var(--chrome-wash, .12);
+}
+:is(.sidebar, .inspector, .command__panel)[data-tone="dark"]{ --chrome-wash: .72; }
+.localnav__capsule[data-tone="dark"]{ --ln-wash: .72; }
+[data-tone="dark"]{
+  --chrome-scrim: var(--scrim, color-mix(in srgb, var(--bg-1) 48%, transparent));
+  --chrome-curtain: color-mix(in srgb, var(--bg-1) 40%, transparent);
+  --chrome-lens: color-mix(in srgb, var(--bg-1) 26%, transparent);
+  --chrome-link: color-mix(in srgb, var(--label) 80%, transparent);
+}
+
+/* ═══ 1 · GLOBAL NAV ═════════════════════════════════════════════════════════
+   The globalheader. Product pages: transparent,
+   scrolls away. data-globalnav="fixed" + data-lg3="chrome" = home's sticky
+   scrim bar. Links 12/1 400 at label·.8 → label over .32 s standard. */
+.globalnav{
+  --gn-h: 44px; --gn-fh: 0px; --gn-rate: 320ms;
+  position: relative; z-index: var(--z-chrome);
+  height: var(--gn-h);
+  font-family: var(--font-text); font-size: var(--t-12); line-height: 1; letter-spacing: var(--t-12-ls);
+  color: var(--label);
+}
+.globalnav[data-globalnav="fixed"]{ position: sticky; top: 0; }
+.globalnav__bar{
+  position: relative; z-index: 3;
+  display: flex; align-items: center; justify-content: space-between;
+  max-width: 1024px; height: var(--gn-h); margin-inline: auto;
+  padding-inline: max(22px, env(safe-area-inset-left));
+}
+.globalnav__brand, .globalnav__link, .globalnav__icon, .globalnav__menu{
+  display: flex; align-items: center; justify-content: center;
+  height: var(--gn-h); padding: 0 8px;
+  color: var(--chrome-link); text-decoration: none;
+  transition: color var(--d-320) var(--ease-standard);
+}
+.globalnav__brand:hover, .globalnav__link:hover, .globalnav__icon:hover, .globalnav__menu:hover,
+.globalnav__item:has(.globalnav__trigger[aria-expanded="true"]) .globalnav__link{ color: var(--label); }
+.globalnav__brand .sym{ font-size: 17px; }
+.globalnav__icon .sym, .globalnav__menu .sym{ font-size: 15px; }
+.globalnav .globalnav__list{ display: flex; flex: 1; justify-content: space-between; align-items: center; margin: 0 8px; padding: 0; list-style: none; }
+.globalnav__item{ position: relative; display: flex; align-items: center; }
+.globalnav__tools{ display: flex; align-items: center; }
+.globalnav__menu{ display: none; width: 48px; padding: 0; }
+/* the submenu opener for keyboards: the default one is invisible until it has focus
+   (a rendered-but-invisible control is only a trap while it is NOT focused) */
+.globalnav__trigger{
+  position: absolute; right: -6px; bottom: 7px;
+  width: 12px; height: 12px; display: grid; place-items: center;
+  color: var(--chrome-link); opacity: 0;
+}
+.globalnav__trigger::before{ content: ""; width: 5px; height: 5px; border: solid currentColor; border-width: 0 1.2px 1.2px 0; rotate: 45deg; translate: 0 -1px; }
+.globalnav__trigger:focus-visible, .globalnav__trigger[aria-expanded="true"]{ opacity: 1; }
+/* the sheet: grows by the flyout's height at clamp(240, h/2, 480) ms */
+.globalnav__sheet{
+  position: absolute; z-index: 1; inset: 0 0 auto;
+  height: calc(var(--gn-h) + var(--gn-fh));
+  background: transparent; pointer-events: none;
+  transition: height var(--gn-rate) var(--ease-standard), background-color var(--d-120) linear;
+}
+.globalnav[data-gn-open] > .globalnav__sheet{ background: var(--bg-3); }
+/* while it moves it is the blurred scrim; at rest it is opaque (#fafafc) */
+.globalnav[data-gn-animating] > .globalnav__sheet{ background: var(--mat-chrome-bg); -webkit-backdrop-filter: var(--mat-chrome-filter); backdrop-filter: var(--mat-chrome-filter); }
+.globalnav__flyout{ position: absolute; z-index: 2; inset: var(--gn-h) 0 auto; }
+.globalnav__flyout-content{
+  display: flex; max-width: 1024px; margin-inline: auto;
+  padding: 40px max(22px, env(safe-area-inset-left)) 84px;
+}
+.globalnav__group{ flex: 0 1 25%; padding-inline-end: 44px; }
+.globalnav__group[data-elevated]{ flex-basis: 50%; padding-inline-end: 88px; }
+.globalnav__group ul{ margin: 0; padding: 0; list-style: none; display: grid; gap: 8px; }
+.globalnav__group-title{
+  margin: 0 0 14px; font: 400 var(--t-12)/1.3333 var(--font-text); letter-spacing: var(--t-12-ls);
+  color: var(--label-2);
+}
+.globalnav__flyout-link{
+  display: inline-block; color: var(--label); text-decoration: none;
+  font: 600 var(--t-12)/1.3333 var(--font-text); letter-spacing: var(--t-12-ls);
+}
+.globalnav__group[data-elevated] .globalnav__flyout-link{
+  font: 600 var(--t-24)/1.1666 var(--font-display); letter-spacing: var(--t-24-ls);
+}
+.globalnav__group[data-elevated] ul{ gap: 10px; }
+.globalnav__flyout-link:hover{ color: var(--link); }
+/* the cascade: in at groupDelay + i·20 + 80 ms over .32 s; out bottom-first, ≤ .24 s */
+.globalnav__flyout :is(.globalnav__group-title, .globalnav__flyout-link){
+  opacity: 0; translate: 0 -4px;
+  transition: opacity var(--gn-out, 160ms) var(--ease-standard), translate var(--gn-out, 160ms) var(--ease-standard);
+}
+.globalnav__flyout[data-open] :is(.globalnav__group-title, .globalnav__flyout-link),
+.globalnav__flyout[data-drilled] :is(.globalnav__group-title, .globalnav__flyout-link){
+  opacity: 1; translate: 0 0;
+  transition: opacity var(--d-320) var(--ease-standard) var(--gn-in, 80ms), translate var(--d-320) var(--ease-standard) var(--gn-in, 80ms);
+}
+.globalnav__back{ display: none; }
+.globalnav__curtain{
+  position: fixed; inset: 0; z-index: calc(var(--z-chrome) - 1);
+  background: var(--chrome-curtain);
+  -webkit-backdrop-filter: blur(20px); backdrop-filter: blur(20px);
+  opacity: 0; visibility: hidden;
+  transition: opacity var(--d-320) var(--ease-standard) 80ms, visibility 0s linear .4s;
+}
+.globalnav__curtain[data-open]{ opacity: 1; visibility: visible; transition: opacity var(--d-320) var(--ease-standard) 80ms, visibility 0s; }
+html[data-localnav-open] .globalnav{ opacity: 0; visibility: hidden; transition: opacity var(--d-240) var(--ease-standard), visibility 0s linear var(--d-240); }
+html[data-gn-menu]{ overflow: hidden; }
+
+/* ≤833: the hamburger and a full-height #fafafc sheet; items 28/1.143 600
+   dropping 8 px in at .2 s + i·20 ms; sub-menus slide sideways (±8 px) */
+@media (max-width: 833px){
+  .globalnav{ --gn-h: 48px; }
+  .globalnav__bar{ padding-inline: max(16px, env(safe-area-inset-left)); }
+  .globalnav__menu{ display: flex; }
+  /* the appearance switch has no other home on a phone: it stays beside the
+     menu button, as search and bag stay */
+  .globalnav__icon:not([data-keep], [data-tone-toggle]){ display: none; }
+  .globalnav .globalnav__list{
+    position: fixed; z-index: 2; inset: var(--gn-h) 0 0; margin: 0;
+    display: flex; flex-direction: column; justify-content: flex-start; align-items: stretch;
+    padding: 12px 48px 48px; overflow: auto; visibility: hidden;
+  }
+  .globalnav[data-gn-menu] .globalnav__list{ visibility: visible; }
+  .globalnav[data-gn-drill] .globalnav__list{ visibility: hidden; }
+  .globalnav__item{ opacity: 0; translate: 0 -8px; transition: opacity var(--d-240) var(--ease-standard), translate var(--d-240) var(--ease-standard); }
+  .globalnav[data-gn-menu] .globalnav__item{ opacity: 1; translate: 0 0; transition-delay: calc(200ms + var(--gn-i, 0) * 20ms); }
+  .globalnav__link{ height: auto; padding: 8px 0; flex: 1; justify-content: flex-start; color: var(--label);
+    font: 600 var(--t-28)/1.1428 var(--font-display); letter-spacing: var(--t-28-ls); }
+  .globalnav__trigger{ position: static; width: 44px; height: 44px; opacity: 1; color: var(--label-2); }
+  .globalnav__trigger::before{ rotate: -45deg; translate: -2px 0; width: 9px; height: 9px; border-width: 0 2px 2px 0; }
+  .globalnav[data-gn-menu] > .globalnav__sheet{ height: 100dvh; background: var(--bg-3); transition: height var(--d-320) var(--ease-standard); }
+  .globalnav__flyout{ position: fixed; inset: var(--gn-h) 0 0; overflow: auto; background: var(--bg-3); opacity: 0; translate: 8px 0;
+    transition: opacity var(--d-240) var(--ease-standard), translate var(--d-240) var(--ease-standard); }
+  .globalnav__flyout[data-drilled]{ opacity: 1; translate: 0 0; }
+  .globalnav__flyout-content{ flex-direction: column; gap: 32px; padding: 8px 48px 48px; }
+  .globalnav__group, .globalnav__group[data-elevated]{ flex: none; padding: 0; }
+  .globalnav__flyout-link{ font: 600 var(--t-17)/1.47 var(--font-text); }
+  .globalnav__group[data-elevated] .globalnav__flyout-link{ font: 600 var(--t-28)/1.1428 var(--font-display); }
+  .globalnav__back{ display: grid; place-items: center; width: 44px; height: 44px; margin: 4px 0 0 36px; color: var(--label-2); font-size: 20px; }
+}
+
+/* ═══ 2 · LOCAL NAV — the floating capsule that becomes the Explore panel ═══
+   1024 × 52 at top 10 · radius calc(32 − 14·(1 − p)):
+   The CIRCULAR radius, verbatim — a continuous 18 cannot fit a 52 px bar
+   (its scaled extent clamps to a capsule; a continuous corner would visibly not be one).
+   Reveal: translateY(−72px) → 0 over .23 s ease once the anchor has passed. */
+.localnav{
+  position: sticky; top: 0; z-index: var(--z-chrome);
+  display: flex; justify-content: center;
+  height: 72px; margin-bottom: -72px;
+  padding: 10px 10px 0;
+  pointer-events: none;
+}
+/* focus, keyboard focus and anchor jumps stop below the bar, not under it (a
+   focused error summary landed behind the capsule; WCAG 2.4.11). 72 px is
+   The --localnav-total-height (52 + 2 × 10), which its :target clears. */
+html:has(.localnav){ scroll-padding-top: 72px; }
+.localnav__capsule{
+  --p: var(--progress, 0);
+  position: relative; pointer-events: auto;
+  width: 100%; max-width: 1024px;
+  height: calc(52px + (var(--ln-h1, 52px) - 52px) * var(--p));
+  border-radius: calc(32px - 14px * (1 - var(--p)));
+  overflow: hidden;
+  font-family: var(--font-text);
+  translate: 0 -72px; visibility: hidden;
+  transition: translate 230ms ease, visibility 0s linear 230ms;
+}
+.localnav[data-revealed] .localnav__capsule{ translate: 0 0; visibility: visible; transition: translate 230ms ease, visibility 0s; }
+/* the fill becomes solid white as it opens; a base wash keeps the
+   collapsed pill at the density over busy media */
+.localnav__capsule::before{
+  content: ""; position: absolute; inset: 0; z-index: -1; border-radius: inherit; pointer-events: none;
+  background: var(--bg-elevated);
+  opacity: calc(var(--ln-wash, .3) + (1 - var(--ln-wash, .3)) * var(--p));
+}
+.localnav__title{
+  position: absolute; z-index: 2;
+  left: calc(20px + (var(--ln-title-x1, 50px) - 20px) * var(--p));
+  top: calc(12px + (var(--ln-title-y1, 12px) - 12px) * var(--p));
+  font-family: var(--font-display); font-weight: 600;
+  font-size: calc(var(--t-19) + (var(--t-title-fs) - var(--t-19)) * var(--p));
+  line-height: calc(28px + (var(--ln-title-lh1, 44px) - 28px) * var(--p));
+  letter-spacing: calc(.012em * (1 - var(--p)));
+  color: inherit; text-decoration: none; white-space: nowrap;
+}
+.localnav__explore, .localnav__cta{
+  position: absolute; z-index: 3;
+  display: inline-flex; align-items: center; justify-content: center;
+  border-radius: 999px; white-space: nowrap; text-decoration: none;
+  font-family: var(--font-text);
+}
+.localnav__explore{
+  top: calc(12px + 2px * var(--p));
+  right: calc(var(--ln-ex-r0, 108px) + (15px - var(--ln-ex-r0, 108px)) * var(--p));
+  width: calc(var(--ln-ex-w0, 64px) + (36px - var(--ln-ex-w0, 64px)) * var(--p));
+  height: calc(28px + 8px * var(--p));
+  padding: 0 10px; overflow: hidden;
+  font-size: var(--t-12); letter-spacing: var(--t-12-ls); line-height: 1;
+  color: var(--label);
+  /* outlined pill (1px #86868b) → a dark close disc */
+  background: color-mix(in srgb, var(--label) calc(var(--p) * 100%), transparent);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--label-3) calc((1 - var(--p)) * 100%), transparent);
+}
+.localnav__explore:hover{ background: color-mix(in srgb, var(--label) calc(var(--p) * 100%), var(--fill-3)); }
+.localnav__explore-label{ opacity: clamp(0, 1 - 3 * var(--p), 1); }
+.localnav__close-glyph{
+  position: absolute; inset: 0; margin: auto; width: 17px; height: 17px;
+  color: var(--label-inv); stroke-width: 3; opacity: clamp(0, 3 * var(--p) - 1.5, 1);
+}
+.localnav__cta{
+  top: calc(12px + (var(--ln-cta-y1, 12px) - 12px) * var(--p));
+  right: calc(20px + (var(--ln-cta-r1, 20px) - 20px) * var(--p));
+  padding: calc(6px + 4px * var(--p)) calc(10px + 10px * var(--p));
+  font-size: calc(var(--t-12) + (var(--t-17) - var(--t-12)) * var(--p));
+  line-height: calc(16px + 4px * var(--p));
+  background: var(--accent-fill); color: var(--accent-ink);
+}
+.localnav__cta:hover{ background: var(--accent-fill-hover); }
+.localnav__cta:active{ background: var(--accent-fill-active); }
+/* the panel is laid out whole at all times (it is measured), hidden until opened */
+.localnav__panel{ position: absolute; inset: 0 0 auto; padding: 26px 50px 44px; visibility: hidden; }
+.localnav[data-open] .localnav__panel, .localnav[data-closing] .localnav__panel{ visibility: visible; }
+.localnav .localnav__tiles{
+  display: flex; gap: 26px; margin: 0 0 0 -18px; padding: 16px 18px 26px; list-style: none;
+  overflow-x: auto; scroll-snap-type: x mandatory; scrollbar-width: none;
+}
+.localnav__tiles::-webkit-scrollbar{ display: none; }
+.localnav__tile{
+  flex: none; scroll-snap-align: start;
+  display: grid; justify-items: center; gap: 6px; min-width: 96px;
+  color: var(--label); text-decoration: none; text-align: center;
+  font-size: var(--t-14); line-height: 1.2857; letter-spacing: var(--t-14-ls);
+  /* thumbnails rise from −100 px with opacity = progress, 32 ms apart */
+  opacity: 0; translate: 0 -100px;
+  /* leaving, the words go first (120 ms) so nothing lingers on the closing pill */
+  transition: opacity var(--d-120) linear, translate var(--sp-nav-out-ms) var(--sp-nav-out);
+}
+.localnav[data-open] .localnav__tile{
+  opacity: 1; translate: 0 0;
+  transition: opacity var(--sp-nav-in-ms) linear calc(var(--i, 0) * 32ms), translate var(--sp-nav-in-ms) var(--sp-nav-in) calc(var(--i, 0) * 32ms);
+}
+.localnav__thumb{ display: grid; place-items: center; width: 66px; height: 66px; border-radius: calc(14px * var(--r-scale)); corner-shape: superellipse(var(--k-continuous)); background: var(--fill-2); color: var(--tile-hue, var(--label)); font-size: 34px; }
+.localnav__tile small{ display: block; font-size: var(--t-12); line-height: 1.33; color: var(--label-2); }
+.localnav__tile .is-new{ color: var(--warn-strong); font-weight: 600; }
+.localnav__rule{ height: 1px; margin: 0; border: 0; background: var(--separator-opaque); }
+.localnav__slot{ display: flex; align-items: center; gap: 20px; padding: 36px 0 44px; }
+.localnav__title-slot{ flex: 1; height: var(--ln-title-lh1, 44px); }
+.localnav__price{
+  text-align: end; font-size: var(--t-14); line-height: 1.43; letter-spacing: var(--t-14-ls); color: var(--label);
+  opacity: clamp(0, 2 * var(--p) - 1, 1); translate: 0 calc(-200px * (1 - var(--p)));
+}
+.localnav__price b{ font-weight: 600; }
+.localnav__cta-slot{ flex: none; width: var(--ln-cta-w1, 120px); height: 40px; }
+.localnav__jump{ padding: 0 30px; }
+.localnav__jump-label{ display: inline-flex; align-items: center; gap: 4px; margin: 0 0 18px; color: var(--label-2);
+  font: 500 var(--t-19)/1.21 var(--font-display); letter-spacing: var(--t-19-ls); }
+.localnav__jump-grid{ display: grid; grid-template-columns: repeat(3, max-content); column-gap: 90px; row-gap: 6px; margin: 0; padding: 0; list-style: none; }
+.localnav__jump-item, .localnav__link{
+  opacity: 0; translate: 0 -8px;
+  transition: opacity var(--d-120) linear, translate var(--sp-nav-out-ms) var(--sp-nav-out);
+}
+.localnav[data-open] :is(.localnav__jump-item, .localnav__link){
+  opacity: 1; translate: 0 0;
+  transition: opacity var(--sp-nav-in-ms) linear calc(120ms + var(--i, 0) * 24ms), translate var(--sp-nav-in-ms) var(--sp-nav-in) calc(120ms + var(--i, 0) * 24ms);
+}
+.localnav__jump-item a{
+  display: inline-flex; align-items: center; min-height: 44px; padding: 0 15px; border-radius: 999px;
+  color: var(--label); text-decoration: none; font: 500 var(--t-17)/1.47 var(--font-text); letter-spacing: var(--t-17-ls);
+}
+.localnav__jump-item a:hover{ background: var(--fill-3); }
+.localnav__jump-item a[aria-current]{ background: var(--label); color: var(--label-inv); }
+.localnav__links{ display: grid; gap: 6px; justify-items: start; margin-top: 30px; padding: 0 30px; }
+.localnav__link{ display: inline-flex; align-items: center; gap: 2px; min-height: 44px; color: var(--link); text-decoration: none;
+  font: 500 var(--t-19)/1.21 var(--font-display); letter-spacing: var(--t-19-ls); }
+.localnav__link .sym{ font-size: .75em; }
+.localnav__link:hover{ text-decoration: underline; }
+/* the page behind blurs */
+.localnav__overlay{
+  position: fixed; inset: 0; z-index: calc(var(--z-chrome) - 1);
+  -webkit-backdrop-filter: blur(20px); backdrop-filter: blur(20px);
+  opacity: 0; visibility: hidden; pointer-events: none;
+}
+.localnav__overlay[data-open], .localnav__overlay[data-closing]{ visibility: visible; }
+.localnav__overlay[data-open]{ pointer-events: auto; }
+html[data-localnav-open]{ overflow: hidden; }
+@media (max-width: 734px){
+  /* the rail starts below the close disc (top 14 + 36), so no tile scrolls under it */
+  .localnav__panel{ padding: 44px 20px 28px; }
+  .localnav__slot{ flex-wrap: wrap; row-gap: 12px; padding: 24px 0 28px; }
+  .localnav__title-slot{ flex: 1 0 100%; }
+  .localnav__price{ flex: 1; text-align: start; }
+  .localnav__jump, .localnav__links{ padding: 0; }
+  .localnav__jump-grid{ grid-template-columns: repeat(2, max-content); column-gap: 24px; }
+  .localnav .localnav__tiles{ gap: 16px; }
+}
+@media (max-width: 376px){
+  .localnav{ padding: 0; }
+  .localnav__capsule{ border-radius: 0; }
+}
+
+/* ═══ 3 · NAVIGATION BAR (app) ═══════════════════════════════════════════════
+   Transparent bar; glass only on its controls; the large title (34/41 700)
+   scrolls under it and the inline title (17 semibold) fades in. Minimise:
+   the controls shrink on scroll-down. */
+.navbar{
+  --nb-min: 0; --nb-collapse: 0;
+  position: sticky; top: 0; z-index: var(--z-chrome);
+  color: var(--label);
+}
+.navbar__bar{
+  position: relative; z-index: 1;
+  display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: 8px;
+  height: calc(56px - 10px * var(--nb-min)); padding: 0 16px;
+}
+.navbar__leading{ justify-self: start; display: flex; gap: 8px; align-items: center; }
+.navbar__trailing{ justify-self: end; display: flex; gap: 8px; align-items: center; }
+.navbar__title{
+  margin: 0; max-width: 56vw; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  font: 600 calc(var(--t-ui-headline-fs) - 2px * var(--nb-min))/1.29 var(--font-text); letter-spacing: var(--t-ui-headline-ls);
+  opacity: 0; transition: opacity var(--d-200) linear;
+}
+.navbar[data-title-inline] .navbar__title{ opacity: 1; }
+.navbar__btn, .navbar__group{
+  scale: calc(1 - .14 * var(--nb-min));
+  transform-origin: center;
+}
+.navbar__btn{
+  display: inline-grid; place-items: center; width: 44px; height: 44px; border-radius: 50%;
+  color: inherit; font-size: 20px;
+}
+.navbar__group{ display: flex; align-items: center; height: 44px; padding: 0 2px; border-radius: 999px; }
+.navbar__group > .navbar__btn{ scale: none; }
+.navbar__btn:is(:hover, :focus-visible):not([data-lg3]){ background: var(--fill-3); }
+/* the bar's own edge spans the bar and dissolves 24 px below it */
+.navbar > .scroll-edge{ position: absolute; z-index: 0; inset: 0; height: auto; }   /* under the bar (z 1), in its own context */
+.navbar > .scroll-edge::before, .navbar > .scroll-edge::after{ inset: 0 0 -24px; height: auto; }
+.navbar-large{ padding: 2px 16px 10px; }
+.navbar-large__title{
+  margin: 0; font: 700 var(--t-ui-large-title-fs)/var(--t-ui-large-title-lh) var(--font-display);
+  letter-spacing: var(--t-ui-large-title-ls);
+}
+.navbar-large__subtitle{ margin: 2px 0 0; color: var(--label-2); font: 400 var(--t-ui-subhead-fs)/var(--t-ui-subhead-lh) var(--font-text); letter-spacing: var(--t-ui-subhead-ls); }
+
+/* ═══ 4 · TAB BAR — floating glass, a lens that travels, minimise on scroll ══
+   62 pt pill, lens ~94 × 54 sitting 4 pt in, 21 pt from
+   the screen edges, bold 10 pt titles. Minimised: a 50 px circle holding
+   the selected tab; the accessory moves inline; the prominent tab stays. */
+.tabbar{
+  --tb-h: 62px; --tb-hmin: 50px; --tb-pad: 4px; --tb-gap: 12px; --tb-acc-h: 48px;
+  --m: var(--tb-min, 0);
+  position: fixed; z-index: var(--z-float);
+  left: max(21px, env(safe-area-inset-left)); right: max(21px, env(safe-area-inset-right));
+  bottom: calc(21px + env(safe-area-inset-bottom));
+  height: var(--tb-h); pointer-events: none;
+}
+.tabbar[data-tabbar-position="absolute"]{ position: absolute; }
+.tabbar__row{ position: absolute; inset: auto 0 0; height: var(--tb-h); display: flex; align-items: flex-end; gap: var(--tb-gap); }
+.tabbar__bar{
+  pointer-events: auto; position: relative; flex: none;
+  width: calc(var(--tb-w, 100%) - (var(--tb-w, 100%) - var(--tb-hmin)) * var(--m));
+  height: calc(var(--tb-h) - (var(--tb-h) - var(--tb-hmin)) * var(--m));
+  border-radius: 999px;
+}
+.tabbar__tabs{ position: absolute; z-index: 1; inset: 0; display: flex; align-items: center; padding: 0 var(--tb-pad); overflow: hidden; border-radius: inherit; }
+.tab{
+  position: relative; flex: 0 0 var(--tab-w, 25%);
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1px;
+  height: calc(var(--tb-h) - 2 * var(--tb-pad));
+  color: inherit; text-decoration: none; border-radius: 999px;
+  -webkit-tap-highlight-color: transparent;
+}
+.tab > .sym{ font-size: 24px; translate: 0 calc(6px * var(--m)); }
+.tab__label{ font: 600 var(--t-10)/1.2 var(--font-text); letter-spacing: .01em; opacity: max(0, 1 - 2.5 * var(--m)); white-space: nowrap; }
+/* Every label, selected or not, is the GLASS's ink (keyed to the bar's
+   appearance): the lens already shows the selection, and a 10 px accent
+   label on it measured 1.8-3.4:1. The accent marks the selected GLYPH
+   (--tab-selected-ink; a brand that emphasises by fill sets var(--label)). */
+.tabbar__bar[data-lg3-appearance="dark"]{ --tab-ink: var(--lg3-ink-on-dark); }
+.tabbar__bar[data-lg3-appearance="light"]{ --tab-ink: var(--lg3-ink-on-light); }
+.tab__label{ color: var(--tab-ink, inherit); }
+.tab[aria-selected="true"]{ color: var(--tab-selected-ink, var(--accent)); }
+.tab:not([aria-selected="true"]){ opacity: max(0, 1 - 2 * var(--m)); }
+.tab[aria-selected="true"]{ translate: calc(var(--tb-sel-dx, 0px) * var(--m)) 0; }
+.tabbar[data-minimized] .tab:not([aria-selected="true"]){ visibility: hidden; transition: visibility 0s linear var(--d-200); }
+.tab:focus-visible{ outline-offset: -2px; outline-color: currentColor; }   /* inside the glass: the tab ink */
+/* the selection lens: the grey platter that travels ('select' .4/.15) and
+   LIFTS on press (+16 pt each way, platter fades to clear, 'lift' .25/0) */
+.tabbar__lens{
+  position: absolute; z-index: 0; left: 0; top: var(--tb-pad);
+  width: calc(var(--lens-w, 90px) + 32px * var(--tb-lift));
+  height: calc(var(--tb-h) - 2 * var(--tb-pad) + 32px * var(--tb-lift));
+  margin: calc(-16px * var(--tb-lift)) 0 0 calc(-16px * var(--tb-lift));
+  border-radius: 999px; pointer-events: none;
+  background: color-mix(in srgb, var(--chrome-lens) calc(100% - 100% * var(--tb-lift)), transparent);
+  box-shadow: inset 0 0 0 calc(1px * var(--tb-lift)) color-mix(in srgb, var(--lg3-ink-on-dark, currentColor) 45%, transparent);
+  opacity: max(0, 1 - 3 * var(--m));
+  transition: --tb-lift var(--sp-lift-ms) var(--sp-lift);
+}
+.tabbar__lens[data-lift]{ --tb-lift: 1; }
+.tab-prominent{
+  pointer-events: auto; flex: none; margin-left: auto;
+  width: calc(var(--tb-h) - (var(--tb-h) - var(--tb-hmin)) * var(--m));
+  height: calc(var(--tb-h) - (var(--tb-h) - var(--tb-hmin)) * var(--m));
+  display: grid; place-items: center; border-radius: 50%; color: inherit; font-size: 24px;
+}
+.tab-prominent[aria-selected="true"]{ color: var(--tab-selected-ink, var(--accent)); }
+.tabbar__accessory{
+  pointer-events: auto; position: absolute;
+  left: calc((var(--tb-hmin) + var(--tb-gap)) * var(--m));
+  right: calc(var(--tb-prom-w, 0px) * var(--m));
+  bottom: calc((var(--tb-h) + 8px) * (1 - var(--m)));
+  height: calc(var(--tb-acc-h) + (var(--tb-hmin) - var(--tb-acc-h)) * var(--m));
+  display: flex; align-items: center; gap: 10px; padding: 0 8px;
+  border-radius: 999px;
+}
+/* inline, the accessory keeps its essentials (reduce content when inline) */
+.tabbar[data-minimized] .tabbar__accessory [data-accessory-extra]{ display: none; }
+/* the accessory's own row (the live capsule's compact face, no second glass) */
+.tabbar__now{ flex: 1; min-width: 0; display: flex; align-items: center; gap: 10px; padding-left: 6px; }
+.tabbar__now > :nth-child(2){ flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+/* ═══ 5 · TOOLBAR — ≤ 3 glass groups, one tinted primary trailing ═══════════ */
+.toolbar{ display: flex; align-items: center; gap: 10px; min-height: 44px; color: var(--label); }
+.toolbar__group{ display: flex; align-items: center; height: 44px; padding: 0 2px; border-radius: 999px; color: inherit; }
+.toolbar__group[data-text]{ padding: 0 6px; }
+.toolbar__item{
+  display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+  min-width: 44px; height: 44px; padding: 0 10px; border-radius: 999px;
+  color: inherit; font: 500 var(--t-ui-body-fs)/1 var(--font-text); letter-spacing: var(--t-ui-body-ls);
+  white-space: nowrap; text-decoration: none;
+}
+.toolbar__item > .sym{ font-size: 20px; }
+.toolbar__item:hover{ background: var(--fill-3); }
+.toolbar__item[aria-pressed="true"]{ color: var(--accent); }
+.toolbar__title{ margin: 0 6px; font: 600 var(--t-ui-headline-fs)/1.2 var(--font-text); letter-spacing: var(--t-ui-headline-ls); white-space: nowrap; }
+.toolbar__spacer{ flex: 1; }
+/* THE tinted primary: colour on the background, never the label */
+.toolbar__primary{
+  position: relative; display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+  min-width: 44px; height: 44px; padding: 0 18px; border-radius: 999px;
+  color: var(--accent-ink); font: 600 var(--t-ui-body-fs)/1 var(--font-text); letter-spacing: var(--t-ui-body-ls);
+  white-space: nowrap;
+}
+.toolbar__primary > .sym{ font-size: 20px; }
+/* symbol-only primary (Done ✓): a circle, not a lozenge */
+.toolbar__primary[aria-label]:not(:has(> span:not([class^="lg3"]))){ width: 44px; padding: 0; }
+.toolbar__primary::before{
+  content: ""; position: absolute; inset: 0; z-index: -1; border-radius: inherit; pointer-events: none;
+  background: var(--accent-fill); opacity: 1;       /* full: at .92 over light glass white measured 4.25:1 */
+}
+.toolbar__primary:hover::before{ background: var(--accent-fill-hover); }
+/* The label is the FILL's ink in every appearance: LG3's monochrome ink
+   (.lg3[data-lg3-appearance], 0,2,0) put #1d1d1f on violet (2.8:1). */
+.toolbar__primary.lg3, .toolbar__primary.lg3[data-lg3-appearance]{ color: var(--accent-ink); }
+/* LG3's tint layer paints ABOVE ::before: its light ramp washes the fill, and
+   under reduce transparency / increased contrast its opaque fill covers it
+   (dark ink on the RT fill). The primary's body is its own opaque fill, so
+   its tint stays clear in every mode (the second selector outranks lg3.css's
+   RT and IC rules, (0,5,1)). */
+.toolbar__primary.lg3 > .lg3__tint,
+html .toolbar__primary.lg3[data-lg3-kind][data-lg3-appearance] > .lg3__tint{ background: transparent; }
+.toolbar__primary .lg3-text, .toolbar__primary > span{ position: relative; }
+/* side-mounted controls for large canvases */
+.toolbar[data-axis="vertical"]{ flex-direction: column; align-items: center; width: 60px; min-height: 0; }
+.toolbar[data-axis="vertical"] .toolbar__group{ flex-direction: column; height: auto; width: 44px; padding: 2px 0; }
+.toolbar[data-axis="vertical"] .toolbar__spacer{ flex: 1; min-height: 12px; }
+.toolbar[data-axis="vertical"] .toolbar__title{ writing-mode: vertical-rl; margin: 8px 0; }
+
+/* ═══ 6 · SIDEBAR + BACKGROUND EXTENSION ═════════════════════════════════════
+   floating (default): inset glass, concentric with its window.
+   edge (27): flush to the edge on the chrome material, icons in the accent. */
+.sidebar{
+  --sb-w: 248px; --sb-w-folded: 72px; --sb-fold: 0;
+  position: relative; display: flex; flex-direction: column; gap: 2px;
+  width: calc(var(--sb-w) - (var(--sb-w) - var(--sb-w-folded)) * var(--sb-fold));
+  padding: 10px; overflow: hidden;
+  border-radius: var(--r-lg); corner-shape: superellipse(var(--k-continuous));
+  color: var(--label);
+}
+.sidebar[data-sidebar="edge"]{ border-radius: 0; }
+.sidebar__head{ display: flex; align-items: center; gap: 10px; height: 44px; padding: 0 4px 0 8px; margin-bottom: 6px; }
+.sidebar__brand{ display: flex; align-items: center; gap: 10px; min-width: 0; font: 600 var(--t-ui-headline-fs)/1.2 var(--font-text); white-space: nowrap; }
+.sidebar__brand > .sym{ flex: none; font-size: 22px; color: var(--accent); }
+.sidebar__fold{
+  flex: none; margin-left: auto; display: grid; place-items: center; width: 36px; height: 36px; border-radius: 50%;
+  color: var(--label-2); font-size: 18px;
+}
+.sidebar__fold:hover{ background: var(--fill-3); color: inherit; }
+.sidebar[data-folded] .sidebar__head{ padding: 0; justify-content: center; }
+.sidebar[data-folded] .sidebar__brand{ display: none; }
+.sidebar[data-folded] .sidebar__fold{ margin: 0; }
+.sidebar__section{ display: grid; gap: 2px; }
+.sidebar__heading{
+  margin: 12px 10px 4px; white-space: nowrap;
+  font: 600 var(--t-ui-footnote-fs)/var(--t-ui-footnote-lh) var(--font-text); letter-spacing: var(--t-ui-footnote-ls);
+  color: var(--label-2); opacity: max(0, 1 - 2 * var(--sb-fold));
+}
+.sidebar__item{
+  position: relative; display: flex; align-items: center; gap: 12px;
+  height: 40px; padding: 0 12px; border-radius: var(--r-xs); corner-shape: superellipse(var(--k-continuous));
+  color: inherit; text-decoration: none; white-space: nowrap;
+  font: 400 var(--t-ui-subhead-fs)/1 var(--font-text); letter-spacing: var(--t-ui-subhead-ls);
+}
+.sidebar__item > .sym{ flex: none; font-size: 20px; color: var(--accent); }
+.sidebar__item:hover{ background: var(--fill-3); }
+.sidebar__item[aria-current="page"]{ background: var(--fill-1); font-weight: 600; }
+.sidebar__label, .sidebar__count{ opacity: max(0, 1 - 2.5 * var(--sb-fold)); }
+.sidebar__count{ margin-left: auto; color: var(--label-2); font-size: var(--t-ui-footnote-fs); font-variant-numeric: tabular-nums; }
+/* on the selected row's fill, label-2 over dark glass measured 3.4-3.9:1 */
+.sidebar__item[aria-current="page"] .sidebar__count{ color: var(--label); }
+.sidebar__foot{ margin-top: auto; padding-top: 10px; }
+.bg-extension{ position: absolute; overflow: hidden; pointer-events: none; }
+.bg-extension > canvas{ display: block; width: 100%; height: 100%; filter: blur(22px) saturate(1.15); scale: 1.12; }
+
+/* ═══ 7 · INSPECTOR — the trailing glass panel, folding to a 52 px strip ═════ */
+.inspector{
+  --insp-w: 320px; --insp-fold: 0;
+  position: relative; display: flex; flex-direction: column;
+  width: calc(var(--insp-w) - (var(--insp-w) - 52px) * var(--insp-fold));
+  overflow: hidden; color: var(--label);
+  border-radius: var(--r-lg); corner-shape: superellipse(var(--k-continuous));
+}
+.inspector__head{ display: flex; align-items: center; gap: 8px; height: 52px; padding: 0 8px 0 16px; flex: none; }
+.inspector__title{ margin: 0; white-space: nowrap; font: 600 var(--t-ui-headline-fs)/1.2 var(--font-text); letter-spacing: var(--t-ui-headline-ls);
+  opacity: max(0, 1 - 2.5 * var(--insp-fold)); }
+.inspector__fold{ flex: none; margin-left: auto; display: grid; place-items: center; width: 36px; height: 36px; border-radius: 50%; color: var(--label-2); font-size: 18px; }
+.inspector__fold:hover{ background: var(--fill-3); color: inherit; }
+.inspector[data-folded] .inspector__head{ padding: 0 8px; }
+.inspector__filters{ display: flex; gap: 4px; padding: 0 12px 10px; flex: none; opacity: max(0, 1 - 2.5 * var(--insp-fold)); }
+.inspector__filter{
+  height: 30px; padding: 0 12px; border-radius: 999px; white-space: nowrap;
+  font: 500 var(--t-ui-footnote-fs)/1 var(--font-text); color: var(--label-2);
+}
+.inspector__filter:hover{ background: var(--fill-3); }
+.inspector__filter[aria-checked="true"]{ background: var(--fill-1); color: var(--label); }
+.inspector__body{ flex: 1; overflow: auto; padding: 0 16px 16px; opacity: max(0, 1 - 2.5 * var(--insp-fold));
+  font: 400 var(--t-ui-footnote-fs)/var(--t-ui-footnote-lh) var(--font-text); letter-spacing: var(--t-ui-footnote-ls); }
+.inspector__row{ display: grid; grid-template-columns: auto 1fr; gap: 10px; padding: 8px 0; border-top: 1px solid var(--separator); }
+.inspector__row:first-child{ border-top: 0; }
+.inspector__row time{ font-family: var(--font-mono); font-size: .92em; color: var(--label-2); font-variant-numeric: tabular-nums; }
+.inspector__vlabel{
+  position: absolute; left: 0; right: 0; top: 64px; margin: auto; width: max-content;
+  writing-mode: vertical-rl; font: 600 var(--t-ui-footnote-fs)/1 var(--font-text); letter-spacing: .02em; color: var(--label-2);
+  opacity: clamp(0, 2 * var(--insp-fold) - 1, 1); pointer-events: none;
+}
+
+/* ═══ 8 · SHEET — detents; glass at partial height, opaque at full ═══════════
+   Height, not translate (chrome.js §9): at medium it is an
+   inset card with its bottom corners showing; at large it anchors to the
+   bottom and sides and the glass gradually becomes opaque. */
+.sheet{
+  --sheet-inset: 8px; --sheet-top: 10px; --sheet-r: var(--r-2xl);
+  --sheet-full: 0; --sheet-vis: 1;
+  --sf: var(--sheet-full);
+  position: fixed; z-index: var(--z-modal);
+  left: 0; right: 0; margin-inline: auto;
+  bottom: calc(var(--sheet-inset) * (1 - var(--sf)));
+  width: calc(100% - 2 * var(--sheet-inset) * (1 - var(--sf)));
+  max-width: var(--sheet-max, none);
+  height: calc(var(--sheet-hl, 90vh) - var(--m-y, 0px));
+  transform: none !important;          /* MOTION's translate is read as height */
+  display: flex; flex-direction: column;
+  border-radius: var(--sheet-r) var(--sheet-r) calc(var(--sheet-r) * (1 - var(--sf))) calc(var(--sheet-r) * (1 - var(--sf)));
+  corner-shape: superellipse(var(--k-continuous));
+  overflow: hidden; outline: none; color: var(--label);
+}
+@media (min-width: 735px){ .sheet{ --sheet-max: 720px; --sheet-inset: 16px; --sheet-top: 40px; } }
+.sheet::before{
+  content: ""; position: absolute; inset: 0; z-index: -1; border-radius: inherit; pointer-events: none;
+  /* partial height: a thick frost (sheets are the heavier material, and
+     sit over a dim); full height: opaque */
+  background: var(--bg-elevated); opacity: calc(var(--sheet-wash, .45) + (1 - var(--sheet-wash, .45)) * var(--sf));
+}
+.sheet__grabber{
+  flex: none; align-self: center; position: relative;
+  width: 64px; height: 24px; margin: 0 0 -10px; border-radius: 999px; cursor: grab; touch-action: none;   /* WCAG 2.2 target ≥ 24 px */
+}
+.sheet__grabber::before{ content: ""; position: absolute; inset: 0; margin: auto; width: 36px; height: 5px; border-radius: 999px; background: var(--label-3); opacity: .6; }
+.sheet__header{
+  flex: none; display: grid; grid-template-columns: 44px 1fr 44px; align-items: center; gap: 8px;
+  padding: 8px 12px 6px; touch-action: none; cursor: grab;
+}
+.sheet[data-dragging], .sheet[data-dragging] .sheet__header{ cursor: grabbing; }
+.sheet__title{ margin: 0; text-align: center; font: 600 var(--t-ui-headline-fs)/1.29 var(--font-text); letter-spacing: var(--t-ui-headline-ls); }
+.sheet__close, .sheet__done{ display: grid; place-items: center; width: 44px; height: 44px; border-radius: 50%; font-size: 18px; color: inherit; background: var(--fill-1); }
+.sheet__close:hover{ background: var(--fill-2); }
+.sheet__done{ background: var(--accent-fill); color: var(--accent-ink); }
+.sheet__done:hover{ background: var(--accent-fill-hover); }
+.sheet__close > .sym, .sheet__done > .sym{ stroke-width: 2.2; }
+.sheet__body{ flex: 1; min-height: 0; overflow: auto; overscroll-behavior: contain; padding: 6px 20px 28px; }
+.sheet-scrim{
+  position: fixed; inset: 0; z-index: calc(var(--z-modal) - 1);
+  background: var(--chrome-scrim);
+  -webkit-backdrop-filter: blur(calc(20px * var(--sheet-vis, 0))); backdrop-filter: blur(calc(20px * var(--sheet-vis, 0)));
+  opacity: var(--sheet-vis, 0); visibility: hidden; pointer-events: none;
+}
+.sheet-scrim[data-shown]{ visibility: visible; }
+.sheet-scrim[data-open]{ pointer-events: auto; }
+/* a sheet that runs in parallel does not dim */
+.sheet-scrim[data-clear]{ background: transparent; -webkit-backdrop-filter: none; backdrop-filter: none; }
+.sheet-scrim[data-clear][data-open]{ pointer-events: none; }
+/* [data-sheet-contained]: the sheet belongs to a positioned WINDOW (an app
+   mockup, a device screen), not the viewport — it and its scrim (chrome.js
+   copies the attribute) are absolute, and the detents measure the window. */
+.sheet[data-sheet-contained], .sheet-scrim[data-sheet-contained]{ position: absolute; }
+.sheet-scrim[data-sheet-contained]{ border-radius: inherit; }
+
+/* ═══ 9 · SCROLL EDGE EFFECT ═════════════════════════════════════════════════
+   soft: a progressive blur (two bands, each masked shorter) over a fade to
+   the ground — over a dark ground that fade IS the "subtle dimming".
+   hard: the chrome material, a nearly opaque linear band with a hairline.
+   The host is a ZERO-height sticky anchor, so it never takes (or collapses
+   into) the layout around it; its two layers hang off it. They fade
+   individually: an opacity on the host would make it a backdrop root and
+   blank the blur for the whole fade.
+   THE GROUND it fades to: --edge-ground (on the edge, or on any container:
+   it is not redeclared here, so it inherits) › --edge-ground-in (a
+   container's input) › --band-bg › --bg-1. --band-bg inherits as a COMPUTED
+   colour, so a light app nested in a dark stage band must set one of the
+   first two on its scroll container. */
+.scroll-edge{
+  --edge-h: 72px;
+  --edge-g: var(--edge-ground, var(--edge-ground-in, var(--band-bg, var(--bg-1))));
+  position: sticky; top: 0; z-index: var(--z-edge);
+  display: block; height: 0; margin: 0;
+  pointer-events: none;
+}
+.scroll-edge[data-edge="bottom"]{ top: auto; bottom: 0; }
+.scroll-edge[data-edge-fixed]{ position: fixed; inset: 0 0 auto; }
+.scroll-edge[data-edge="bottom"][data-edge-fixed]{ inset: auto 0 0; }
+.scroll-edge[data-edge-duplicate]{ display: none; }
+.scroll-edge::before, .scroll-edge::after{
+  content: ""; position: absolute; inset: 0 0 auto; height: var(--edge-h); opacity: 0;
+  transition: opacity var(--d-200) linear;
+}
+.scroll-edge[data-edge="bottom"]::before, .scroll-edge[data-edge="bottom"]::after{ inset: auto 0 0; }
+.scroll-edge[data-active]::before, .scroll-edge[data-active]::after{ opacity: 1; }
+/* the ground holds ~90% over the bar's own height, then dissolves: content
+   under a title must not read through it, content below it must */
+.scroll-edge[data-edge-resolved="soft"]::after{
+  z-index: 1;
+  background: linear-gradient(to bottom, color-mix(in srgb, var(--edge-g) 90%, transparent), color-mix(in srgb, var(--edge-g) 78%, transparent) 50%, color-mix(in srgb, var(--edge-g) 30%, transparent) 78%, transparent);
+}
+.scroll-edge[data-edge-resolved="soft"]::before{
+  -webkit-backdrop-filter: blur(12px); backdrop-filter: blur(12px);
+  -webkit-mask: linear-gradient(to bottom, #000 55%, transparent 90%); mask: linear-gradient(to bottom, #000 55%, transparent 90%);
+}
+.scroll-edge[data-edge="bottom"][data-edge-resolved="soft"]::after{
+  background: linear-gradient(to top, color-mix(in srgb, var(--edge-g) 90%, transparent), color-mix(in srgb, var(--edge-g) 78%, transparent) 50%, color-mix(in srgb, var(--edge-g) 30%, transparent) 78%, transparent);
+}
+.scroll-edge[data-edge="bottom"][data-edge-resolved="soft"]::before{
+  -webkit-mask: linear-gradient(to top, #000 55%, transparent 90%); mask: linear-gradient(to top, #000 55%, transparent 90%);
+}
+.scroll-edge[data-edge-resolved="hard"]{ --edge-h: var(--edge-bar-h, 56px); }
+.scroll-edge[data-edge-resolved="hard"]::before{
+  background: var(--mat-chrome-bg);
+  -webkit-backdrop-filter: var(--mat-chrome-filter); backdrop-filter: var(--mat-chrome-filter);
+  box-shadow: inset 0 -1px 0 var(--separator);
+}
+.scroll-edge[data-edge="bottom"][data-edge-resolved="hard"]::before{ box-shadow: inset 0 1px 0 var(--separator); }
+
+/* ═══ 10 · CONTROL BAR — the sticky media bar and its drop intro ═════
+   312 × 56: a dot bubble (240) + 16 + a 56 play bubble.
+   The bar's box is its FINAL size; the intro moves children inside it:
+   the drop at the centre; the dot bubble grows 40 → 240 while its centre
+   travels to its place; the play bubble slides out from the centre. */
+.control-bar{
+  --cb-pill: 48px; --cb-h: 56px; --cb-gap: 16px;
+  --cb-bw1: 240px;
+  --cb-total: calc(var(--cb-bw1) + var(--cb-gap) + var(--cb-h));
+  /* --z-sticky, not --z-float: once its gallery scrolls away the bar rides up
+     the viewport, and it passes UNDER the local nav (chrome, 300)
+     rather than painting over its title and CTA. Band content is ≤ --z-raised. */
+  position: sticky; bottom: 32px; z-index: var(--z-sticky);
+  width: var(--cb-total); height: var(--cb-h);
+  margin: 48px auto calc(120px - var(--band-pad-bar, 224px));
+  color: var(--label);
+}
+/* the rise (y +180 → 0) exists only while the intro runs: a bar parked
+   180 px low before it is seen would never be seen (IO reads the moved box) */
+.control-bar[data-cb-intro]{ translate: 0 calc(var(--cb-y, 180) * 1px); }
+/* the three platter surfaces: denser while they move — fill 1 − α·.28,
+   blur 7·(2 − α) (the .all-access-pass__background) */
+.control-bar :is(.control-bar__drop, .control-bar__dots, .control-bar__play)[data-lg3]{
+  background: color-mix(in srgb, var(--mat-platter-fill-solid) calc(100% - 28% * var(--cb-alpha, 0)), transparent);
+  -webkit-backdrop-filter: blur(calc(7px * (2 - var(--cb-alpha, 0)))); backdrop-filter: blur(calc(7px * (2 - var(--cb-alpha, 0))));
+  box-shadow: none;
+}
+.control-bar__drop{
+  position: absolute; left: 50%; top: 50%;
+  width: calc(30px + 26px * var(--cb-drop-w, 0)); height: calc(80px - 24px * var(--cb-drop-h, 0));
+  translate: -50% -50%; scale: var(--cb-drop-s, 1.3);
+  border-radius: 999px; visibility: hidden; pointer-events: none;
+}
+.control-bar[data-cb-drop] .control-bar__drop{ visibility: visible; }
+.control-bar__dots{
+  --w: calc(40px + (var(--cb-bw1) - 40px) * var(--cb-bw, 0));
+  --hh: calc(36px + 20px * var(--cb-bh, 0));
+  position: absolute; top: calc(50% - var(--hh) / 2);
+  left: calc(var(--cb-total) / 2 + (var(--cb-bw1) / 2 - var(--cb-total) / 2) * var(--cb-bw, 0) - var(--w) / 2);
+  width: var(--w); height: var(--hh);
+  display: flex; align-items: center; justify-content: center; padding: 0 16px;
+  border-radius: 999px; overflow: hidden;
+  scale: var(--cb-bs, 1); visibility: hidden;
+}
+.control-bar[data-cb-bubble] .control-bar__dots{ visibility: visible; }
+.control-bar__dot{
+  --e: max(0, 1 - max(var(--i, 0) - var(--cb-p, 0), var(--cb-p, 0) - var(--i, 0)));
+  position: relative; flex: none; display: grid; place-items: center;
+  height: 100%; padding: 0 8px; color: inherit;
+  opacity: var(--cb-alpha, 0); translate: calc(var(--dot-x, 36) * 1px) 0;
+}
+.control-bar__pip{
+  position: relative; display: block; overflow: hidden;
+  width: calc(8px + (var(--cb-pill) - 8px) * var(--e) * var(--cb-intro, 0)); height: 8px; border-radius: 10px;
+  background: color-mix(in srgb, var(--label) 42%, transparent);
+  transition: background-color var(--d-100) linear;
+}
+.control-bar__dot:hover .control-bar__pip{ background: color-mix(in srgb, var(--label) 54%, transparent); }
+.control-bar__dot:focus-visible{ outline-offset: -8px; border-radius: 999px; }
+.control-bar__fill{ position: absolute; inset: 0 auto 0 0; width: 0; border-radius: inherit; background: var(--label); }
+/* the autoplay clock: 0 → 115% linear over 6.15 s. It is PROGRESS (state),
+   so it survives reduced motion; it waits for the intro to finish. */
+.control-bar__dot[aria-current="true"] .control-bar__fill{ animation: cb-fill var(--cb-dur, 6.15s) linear forwards; }
+.control-bar[data-paused] .control-bar__fill, .control-bar:not([data-cb-ready]) .control-bar__fill{ animation-play-state: paused; }
+@keyframes cb-fill{ from{ width: 0; } to{ width: 115%; } }
+.control-bar__play{
+  position: absolute; top: 0;
+  left: calc(var(--cb-total) / 2 + (var(--cb-total) / 2 - var(--cb-h) / 2) * var(--cb-slide, 0) - var(--cb-h) / 2);
+  width: var(--cb-h); height: var(--cb-h); border-radius: 50%;
+  display: grid; place-items: center; color: inherit;
+  scale: var(--cb-play, 0); visibility: hidden;
+}
+.control-bar[data-cb-play] .control-bar__play{ visibility: visible; }
+.control-bar__icon{
+  grid-area: 1 / 1; font-size: 22px; opacity: 0; scale: .5;
+  transition: opacity var(--d-100) ease-in, scale var(--d-200) ease-out;
+}
+.control-bar__icon--pause{ stroke-width: 3.6; }
+.control-bar[data-cb-icon]:not([data-paused]) .control-bar__icon--pause,
+.control-bar[data-cb-icon][data-paused] .control-bar__icon--play{ opacity: 1; scale: 1; }
+@media (max-width: 734px){
+  .control-bar{ --cb-pill: 32px; --cb-bw1: 224px; bottom: 20px; margin: 32px auto calc(56px - var(--band-pad-bar, 144px)); }
+}
+
+/* ═══ 11 · LIVE CAPSULE — the Dynamic-Island "now" ═══════════════════════════
+   The slot keeps the compact size in flow; the glass grows over what is
+   below it. Inside DEVICE's island the glass is static, so the island (a
+   black pill that sizes to content) grows with it. */
+.live-capsule{
+  --lc-p: 0; --lc-r1: 30;
+  --lc-hue: var(--accent);
+  --lc-w: calc((var(--lc-w0n, 170) + (var(--lc-w1n, 360) - var(--lc-w0n, 170)) * var(--lc-p)) * 1px);
+  --lc-h: calc((var(--lc-h0n, 44) + (var(--lc-h1n, 150) - var(--lc-h0n, 44)) * var(--lc-p)) * 1px);
+  position: relative; z-index: var(--z-float); display: inline-block; vertical-align: middle;
+  width: calc(var(--lc-w0n, 170) * 1px); height: calc(var(--lc-h0n, 44) * 1px);
+  color: var(--label);
+}
+/* authored expanded (a lock-screen Live Activity): expanded before any
+   script runs; chrome.js keeps it there, static (the spring writes inline) */
+.live-capsule[data-expanded]{ --lc-p: 1; }
+.live-capsule__glass{
+  position: absolute; top: 0; left: 0;
+  width: var(--lc-w); height: var(--lc-h);
+  border-radius: calc((var(--lc-h0n, 44) / 2 + (var(--lc-r1) - var(--lc-h0n, 44) / 2) * var(--lc-p)) * 1px);
+  overflow: hidden;
+}
+.live-capsule[data-anchor="center"] .live-capsule__glass{ left: 50%; translate: -50% 0; }
+.live-capsule[data-anchor="end"] .live-capsule__glass{ left: auto; right: 0; }
+.live-capsule__face{
+  position: absolute; top: 0; left: 0; z-index: 1;
+  display: inline-flex; align-items: center; gap: 10px;
+  height: 44px; padding: 0 16px 0 10px; white-space: nowrap;
+  color: inherit; font: 600 var(--t-ui-subhead-fs)/1 var(--font-text); letter-spacing: var(--t-ui-subhead-ls);
+  opacity: clamp(0, 1 - 2.5 * var(--lc-p), 1);
+}
+/* the glass clips (overflow: hidden) and is exactly the face's box: the ring
+   goes inside, following the capsule's radius (as .tab's does) */
+.live-capsule__face:focus-visible{ outline-offset: -3px; border-radius: inherit; outline-color: currentColor; }
+.live-capsule[data-anchor="end"] .live-capsule__face{ left: auto; right: 0; }
+.live-capsule[data-anchor="center"] .live-capsule__face{ left: 50%; translate: -50% 0; }
+/* the account glyph sits on a disc of the account's own hue, as a Live
+   Activity's leading icon does: the hue painted straight onto glass as a
+   glyph measured 1.4-1.6:1. The disc keeps the canonical hex; the glyph is
+   white or black by the hue's own lightness (white 5.7:1 on aurora, black
+   6.9-10.8:1 on basil, cobalt, dune) */
+.live-capsule__lead{
+  display: grid; place-items: center; width: 24px; height: 24px; border-radius: 50%;
+  background: var(--lc-hue); color: oklch(from var(--lc-hue) clamp(0, (.6 - l) * 1000, 1) 0 0); font-size: 14px;
+}
+.live-capsule__lead .sym{ stroke-width: 2.2; }
+.live-capsule__summary{ color: var(--label-2); font-weight: 500; }
+.live-capsule__trail{ font-variant-numeric: tabular-nums; }
+.live-capsule[data-swap] :is(.live-capsule__lead, .live-capsule__summary, .live-capsule__trail, .live-capsule__line, .live-capsule__account){ opacity: 0; }
+.live-capsule :is(.live-capsule__lead, .live-capsule__summary, .live-capsule__trail, .live-capsule__line, .live-capsule__account){ transition: opacity 120ms linear; }
+.live-capsule__detail{
+  position: absolute; top: 0; left: 0; z-index: 1;
+  width: var(--lc-detail-w, 360px); padding: 14px 16px 16px;
+  display: grid; gap: 12px;
+  opacity: clamp(0, (var(--lc-p) - .45) * 2.2, 1);
+  translate: 0 calc(-8px * (1 - var(--lc-p)));
+}
+.live-capsule[data-anchor="end"] .live-capsule__detail{ left: auto; right: 0; }
+.live-capsule[data-anchor="center"] .live-capsule__detail{ left: 50%; translate: -50% calc(-8px * (1 - var(--lc-p))); }
+/* a detail with nothing to press takes focus itself (chrome.js): its ring
+   goes inside the clipping glass, on the expanded radius */
+.live-capsule__detail:focus-visible{ outline-offset: -3px; border-radius: calc(var(--lc-r1) * 1px); }
+.live-capsule__row{ display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 12px; }
+.live-capsule__glyph{
+  display: grid; place-items: center; width: 40px; height: 40px; border-radius: 50%;
+  background: var(--lc-hue); color: oklch(from var(--lc-hue) clamp(0, (.6 - l) * 1000, 1) 0 0); font-size: 22px;
+}
+/* no account behind a nap or a halt: the glyph is ink, on no disc */
+.live-capsule:is([data-kind="nap"], [data-kind="halted"]) .live-capsule__lead{ background: none; color: var(--lc-hue); font-size: 20px; }
+.live-capsule:is([data-kind="nap"], [data-kind="halted"]) .live-capsule__glyph{ background: color-mix(in srgb, var(--lc-hue) 20%, transparent); color: var(--lc-hue); }
+.live-capsule__glyph .sym{ stroke-width: 2.2; }
+.live-capsule__account{ display: block; font: 600 var(--t-ui-subhead-fs)/1.25 var(--font-text); }
+/* a real line ("Like ← followers of @sample.trailrunners") is longer than the
+   detail: it wraps, two lines at most */
+.live-capsule__line{
+  display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; line-clamp: 2; overflow: hidden; overflow-wrap: anywhere;
+  color: var(--label-2); font: 400 var(--t-ui-footnote-fs)/1.3 var(--font-text);
+}
+.live-capsule__elapsed{ font: 600 var(--t-ui-subhead-fs)/1 var(--font-text); font-variant-numeric: tabular-nums; }
+.live-capsule__meter{ position: relative; height: 6px; border-radius: 999px; background: var(--fill-1); overflow: hidden; }
+.live-capsule__meter > span{
+  position: absolute; inset: 0 auto 0 0; width: calc(var(--lc-meter, 0) * 100%);
+  border-radius: inherit; background: var(--lc-hue); transition: width var(--sp-snappy-ms) var(--sp-snappy);
+}
+.live-capsule__foot{ display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.live-capsule__count{ color: var(--label-2); font: 400 var(--t-ui-footnote-fs)/1 var(--font-text); font-variant-numeric: tabular-nums; }
+/* red only for Stop and errors */
+.live-capsule__stop{
+  display: inline-flex; align-items: center; gap: 6px; height: 34px; padding: 0 16px; border-radius: 999px;
+  background: var(--bad); color: var(--bad-ink); font: 600 var(--t-ui-subhead-fs)/1 var(--font-text);
+}
+.live-capsule__collapse{ display: grid; place-items: center; width: 32px; height: 32px; border-radius: 50%; color: var(--label-2); background: var(--fill-2); font-size: 14px; }
+.live-capsule[data-kind="halted"] .live-capsule__glass::before{
+  content: ""; position: absolute; inset: 0; z-index: 0; border-radius: inherit; background: var(--bad); opacity: 1;   /* solid: at .9 over the island the brand red darkened and its ink fell to 4.1:1 */
+}
+.live-capsule[data-kind="halted"] :is(.live-capsule__face, .live-capsule__detail){ color: var(--bad-ink); --label-2: var(--bad-ink); --lc-hue: var(--bad-ink); --focus-color: var(--bad-ink); }
+.live-capsule[data-kind="nap"] .live-capsule__lead{ color: var(--label-2); }
+/* in the island: no glass, the island's own black, a sensor gap in the middle */
+.live-capsule[data-island]{ display: block; width: auto; height: auto; --lc-r1: 42; }
+.live-capsule[data-island] .live-capsule__glass{ position: relative; background: var(--device-island, var(--bg-1)); color: var(--label); }
+.live-capsule[data-island] .live-capsule__face{ height: 36px; gap: 0; padding: 0 12px 0 7px; font-size: var(--t-ui-footnote-fs); }
+.live-capsule[data-island] .live-capsule__summary{ display: none; }
+.live-capsule[data-island] .live-capsule__trail{ margin-left: 86px; }
+/* expanded, the island is as wide as its screen allows (11 px each side):
+   chrome.js writes the width of the surface the island sits on (DEVICE's
+   screen or scaled viewport, an app root, a crop) as --lc-screen-w. Not a
+   container query: making the screen a container would re-resolve DEVICE's
+   100cqw-based --u for everything in it. */
+.live-capsule[data-island] .live-capsule__detail{ --lc-detail-w: min(372px, calc(var(--lc-screen-w, 100cqw) - 22px)); padding: 16px 18px 18px; }
+/* (the island itself stacks above every app layer in its screen: DEVICE
+   gives .device__island calc(--z-tooltip + 20), fg3-device.css) */
+
+/* ═══ 12 · COMMAND PALETTE — pill → panel ════════════════════════════════════ */
+.command{ position: relative; display: inline-block; }
+.command__pill{
+  display: inline-flex; align-items: center; gap: 8px;
+  height: 36px; min-width: 160px; padding: 0 8px 0 12px; border-radius: 999px;
+  color: inherit; font: 400 var(--t-ui-subhead-fs)/1 var(--font-text); letter-spacing: var(--t-ui-subhead-ls);
+}
+.command__pill > .sym{ font-size: 16px; color: var(--label-2); }
+/* the pill's words are the GLASS's ink (label-2 measured 1.8-2.8:1 on the
+   pill over art); chrome.js marks the pill data-lg3-text */
+.command__pill-label{ flex: 1; text-align: start; color: inherit; }
+.command kbd{
+  font: 500 var(--t-ui-caption1-fs)/1.4 var(--font-text); color: var(--label-2);
+  padding: 0 6px; border-radius: 6px; background: var(--fill-2);
+}
+.command__pill kbd{ color: inherit; }
+.command__panel{
+  position: fixed; z-index: var(--z-modal); top: 14vh; left: 0; right: 0; margin-inline: auto;
+  width: min(640px, calc(100% - 32px)); max-height: min(520px, 72vh);
+  display: flex; flex-direction: column; overflow: hidden;
+  border-radius: var(--r-xl); corner-shape: superellipse(var(--k-continuous));
+  color: var(--label);
+}
+.command__field{ flex: none; display: flex; align-items: center; gap: 12px; height: 60px; padding: 0 20px; border-bottom: 1px solid var(--separator); }
+.command__field > .sym{ font-size: 20px; color: var(--label-2); }
+.command__input{
+  flex: 1; min-width: 0; border: 0; background: none; outline: none; color: inherit;
+  font: 400 var(--t-ui-title3-fs)/1.25 var(--font-display); letter-spacing: var(--t-ui-title3-ls);
+}
+.command__input::placeholder{ color: var(--label-2); }
+.command .command__list{ flex: 1; min-height: 0; overflow: auto; margin: 0; padding: 6px 8px 10px; list-style: none; }
+.command__group, .command__group > ul{ margin: 0; padding: 0; list-style: none; }
+.command__group-title{ padding: 12px 12px 4px; font: 600 var(--t-ui-caption1-fs)/1.33 var(--font-text); color: var(--label-2); }
+.command__item{
+  display: flex; align-items: center; gap: 12px; min-height: 44px; padding: 0 12px;
+  border-radius: calc(10px * var(--r-scale)); corner-shape: superellipse(var(--k-continuous));
+  font: 400 var(--t-ui-body-fs)/1.2 var(--font-text); letter-spacing: var(--t-ui-body-ls); cursor: default;
+}
+.command__item > .sym{ font-size: 20px; color: var(--label-2); }
+.command__item kbd{ margin-left: auto; }
+.command__item[aria-selected="true"]{ background: var(--accent-fill); color: var(--accent-ink); }
+.command__item[aria-selected="true"] > .sym, .command__item[aria-selected="true"] kbd{ color: inherit; }
+.command__item[aria-selected="true"] kbd{ background: color-mix(in srgb, var(--accent-ink) 22%, transparent); }
+.command__empty{ padding: 24px 12px; color: var(--label-2); text-align: center; }
+/* Compact: the pill is a round glass button; the palette keeps its field.
+   In a toolbar it follows THE TOOLBAR's width too (a container): a narrow
+   pane at a wide viewport sheds the label, a wide toolbar keeps it. Phones
+   (the viewport) are always compact. */
+.toolbar:not([data-axis="vertical"]):has(.command){ container: fg3-toolbar / inline-size; }
+@container fg3-toolbar (max-width: 540px){
+  .command__pill{ min-width: 44px; width: 44px; height: 44px; justify-content: center; padding: 0; }
+  .command__pill-label, .command__pill kbd{ display: none; }
+}
+@media (max-width: 734px){
+  .command__pill{ min-width: 44px; width: 44px; height: 44px; justify-content: center; padding: 0; }
+  .command__pill-label, .command__pill kbd{ display: none; }
+  .live-capsule__summary{ display: none; }
+}
+
+/* ═══ 13 · ACCESSIBILITY MODES ═══════════════════════════════════════════════
+   Reduced motion: the springs already jump (MOTION); here the fire-and-
+   forget CSS travel goes too — the state (opacity, colour) still changes. */
+@media (prefers-reduced-motion: reduce){
+  .localnav__capsule, .localnav[data-revealed] .localnav__capsule{ transition: visibility 0s; }
+  .localnav__tile, .localnav[data-open] .localnav__tile,
+  .localnav__jump-item, .localnav__link,
+  .localnav[data-open] :is(.localnav__jump-item, .localnav__link){ translate: none; transition-property: opacity; transition-duration: var(--d-200); transition-delay: 0s; }
+  .localnav__price{ translate: none; }
+  .globalnav__flyout :is(.globalnav__group-title, .globalnav__flyout-link){ translate: none; }
+  .tabbar__lens{ transition: none; }
+  .control-bar__icon{ scale: 1; }
+  .live-capsule__detail{ translate: none; }
+}
+html.fd-reduced-motion .localnav__capsule{ transition: visibility 0s; }
+/* Increased contrast / Show Borders: chrome that relied on a hairline or a
+   wash draws a real edge */
+@media (prefers-contrast: more){
+  .localnav__explore{ box-shadow: inset 0 0 0 1px var(--label); }
+  .tabbar__lens{ box-shadow: inset 0 0 0 1.5px currentColor; }
+  .scroll-edge[data-edge-resolved="soft"]::after{ background: var(--edge-g); }
+}
+html[data-contrast="more"] .scroll-edge[data-edge-resolved="soft"]::after{ background: var(--edge-g); }
+@media (forced-colors: active){
+  .tabbar__lens{ background: Highlight; forced-color-adjust: none; opacity: .35; }
+  .tab[aria-selected="true"], .sidebar__item[aria-current="page"], .command__item[aria-selected="true"],
+  .inspector__filter[aria-checked="true"], .localnav__jump-item a[aria-current]{ outline: 2px solid Highlight; outline-offset: -2px; }
+  .localnav__cta, .toolbar__primary::before, .sheet__done, .command__item[aria-selected="true"]{ background: ButtonFace; background-image: none; color: ButtonText; }
+  .control-bar__pip{ background: GrayText; } .control-bar__fill{ background: CanvasText; }
+  /* fg3.css outlines every button here; the dots share one capsule (its
+     glass keeps the outline), so a boxed dot read as a row of cells */
+  .control-bar__dot:not(:focus-visible){ outline: none; }
+  /* a link has no button outline: the CTA's fill is forced away, so its edge comes back */
+  .localnav__cta:not(:focus-visible){ outline: 1px solid ButtonText; outline-offset: -1px; }
+  .sheet-scrim, .localnav__overlay, .globalnav__curtain{ background: transparent; -webkit-backdrop-filter: none; backdrop-filter: none; }
+  /* the edge becomes what it separates: an opaque band of the canvas */
+  .scroll-edge::before{ display: none; }
+  .scroll-edge[data-active]::after{ background: Canvas; opacity: 1; }
+}

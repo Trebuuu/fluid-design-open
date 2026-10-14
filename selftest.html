@@ -1,0 +1,1773 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Self-test &middot; Fluid Design Open</title>
+<!--
+  The Fluid Design Open page template. Every page of the site copies this skeleton VERBATIM
+  (head, site nav, footer, scripts) and replaces only: the <title>, the
+  aria-current link in the nav, the local-nav capsule's title/jump links, and
+  <main>. 
+
+  Do NOT put data-tone on <html> unless the page must be pinned: an author
+  tone beats the reader's appearance toggle (FG3 precedence).
+-->
+<script>
+/* Tone without a flash (fg3.js header): reader's choice › author › host › system. */
+try{var d=document.documentElement,t=localStorage.getItem('fg3-tone');
+if(!d.hasAttribute('data-tone')){d.setAttribute('data-tone',t||d.getAttribute(
+'data-theme')||(matchMedia('(prefers-color-scheme: dark)').matches?'dark':
+'light'));d.setAttribute('data-tone-auto','')}}catch(e){}
+</script>
+<link rel="stylesheet" href="assets/fg3-tokens.css">
+<link rel="stylesheet" href="assets/fg3-color.css">
+<link rel="stylesheet" href="assets/fg3-springs.css">
+<link rel="stylesheet" href="assets/fg3.css">
+<link rel="stylesheet" href="assets/lg3.css">
+<link rel="stylesheet" href="assets/fg3-motion.css">
+<link rel="stylesheet" href="assets/fg3-components.css">
+<link rel="stylesheet" href="assets/fg3-chrome.css">
+<link rel="stylesheet" href="assets/fg3-showcase.css">
+<link rel="stylesheet" href="assets/fg3-symbols.css">
+<link rel="stylesheet" href="assets/fg3-chart.css">
+<link rel="stylesheet" href="assets/fg3-device.css">
+<link rel="stylesheet" href="assets/fg3-docs.css">    <!-- documentation pages only -->
+<style>
+/* Page layout only: roles and tokens, never a colour value (SPEC §2).
+   Page-local classes are prefixed with the page's own short name (e.g. mo- on
+   motion.html) so they can never collide with a system class. */
+
+/* ── hero: the claim, then the rig the material assertions read ─────────── */
+.st-hero-copy{max-width:880px}
+.st-hero-copy .t-lede{margin-top:var(--s-6)}
+.st-rig{position:relative;margin-top:var(--s-12);min-height:560px;overflow:clip;isolation:isolate;
+  display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:var(--s-9);
+  padding:var(--s-11) var(--s-11) var(--s-11) var(--s-12)}
+.st-rig-art{position:absolute;inset:0;width:100%;height:100%;z-index:-1}
+/* the glass sits over the darker half of the art: white labels need a ground
+   the lens can bend but not wash out (measured by the audit, 4.5:1) */
+.st-rig-scrim{position:absolute;inset:0;z-index:-1;pointer-events:none;
+  background:linear-gradient(90deg,var(--scrim) 0%,var(--scrim) 42%,transparent 78%)}
+/* inline code on a fill: the page's ink, not the grey it sits in (fg3-docs
+   gives code a --fill-2 wash, under which --label-2 measures 4.13:1) */
+main :where(p,li,dd) > code{color:var(--label)}
+.st-rig-glass{display:grid;gap:var(--s-8);justify-items:start;align-content:center;min-width:0}
+.st-bar{display:flex;align-items:center;justify-content:space-between;gap:var(--s-6);height:50px;width:min(100%,440px);
+  padding:0 var(--s-6);font-size:var(--t-ui-headline-fs);line-height:1;letter-spacing:var(--t-ui-headline-ls);font-weight:600}
+.st-bar span:last-child{font-weight:400;font-size:var(--t-ui-subhead-fs);letter-spacing:var(--t-ui-subhead-ls)}
+.st-pills{display:flex;flex-wrap:wrap;gap:var(--s-3)}
+.st-pill{display:inline-grid;place-items:center;min-width:64px;height:44px;padding:0 var(--s-4);
+  font-size:var(--t-ui-headline-fs);line-height:1;font-weight:600;letter-spacing:var(--t-ui-headline-ls);font-variant-numeric:tabular-nums}
+.st-rig-phone{width:250px}
+.st-rig-phone .device{--device-width:100%}
+.st-rig-phone iframe{display:block;border:0;width:402px;height:874px;background:var(--bg-1)}
+.st-legend{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:var(--s-6) var(--grid-gap);margin-top:var(--s-7)}
+.st-legend p{font-size:var(--t-caption-fs);line-height:var(--t-caption-lh);letter-spacing:var(--t-caption-ls);color:var(--label-2)}
+.st-legend b{color:var(--label);font-weight:600}
+
+/* ── summary ───────────────────────────────────────────────────────────── */
+.st-sum-head{display:flex;flex-wrap:wrap;align-items:baseline;justify-content:space-between;gap:var(--s-5)}
+.st-sum .stat-grid{margin-top:var(--band-header-gap)}
+.st-sum .stat-value{font-variant-numeric:tabular-nums}
+.st-sum .stat-caption{color:var(--label-2)}
+.st-sum progress{width:100%;margin-top:var(--s-8)}
+.st-tools{display:flex;flex-wrap:wrap;align-items:center;gap:var(--s-4) var(--s-6);margin-top:var(--s-8)}
+.st-env{margin-top:var(--s-8);max-width:880px}
+.st-env dd{overflow-wrap:anywhere;font-variant-numeric:tabular-nums}
+
+/* ── results: one card per group, one row per assertion ────────────────── */
+.st-groups{display:grid;gap:var(--s-5);margin-top:var(--band-header-gap)}
+.st-group{display:grid;gap:var(--s-5)}
+.st-group[hidden]{display:none}
+.st-group-head{display:flex;flex-wrap:wrap;align-items:center;gap:var(--s-2) var(--s-4)}
+.st-group-head h3{font-family:var(--t-subtitle-ff);font-size:var(--t-subtitle-fs);line-height:var(--t-subtitle-lh);
+  letter-spacing:var(--t-subtitle-ls);font-weight:600;margin-inline-end:auto}
+.st-group-blurb{font-size:var(--t-body-fs);line-height:var(--t-body-lh);letter-spacing:var(--t-body-ls);color:var(--label-2);max-width:760px}
+.st-rows{list-style:none;margin:0;padding:0;display:grid}
+.st-row{display:grid;grid-template-columns:28px minmax(0,5fr) minmax(0,7fr);gap:var(--s-2) var(--s-5);align-items:start;
+  padding:var(--s-4) 0;border-top:1px solid var(--separator)}
+.st-row[hidden]{display:none}
+.st-row .sym{font-size:20px;margin-top:2px}
+.st-row[data-state="pass"] .sym{color:var(--ok)}
+.st-row[data-state="fail"] .sym{color:var(--bad)}
+.st-row[data-state="skip"] .sym,.st-row[data-state="wait"] .sym{color:var(--label-3)}
+.st-label{font-size:var(--t-ui-body-fs);line-height:var(--t-ui-body-lh);letter-spacing:var(--t-ui-body-ls);overflow-wrap:anywhere}
+.st-row[data-state="fail"] .st-label{font-weight:600}
+.st-note{font-family:var(--font-mono);font-size:var(--t-12);line-height:1.55;letter-spacing:0;color:var(--label-2);
+  white-space:pre-wrap;overflow-wrap:anywhere}
+.st-row[data-state="fail"] .st-note{color:var(--bad-strong,var(--bad))}
+
+/* ── the bench ─────────────────────────────────────────────────────────── */
+/* Rows fill: a flex row grows its cards to the full width (the 4-column grid
+   left two dead cells beside the charts and one beside the morph), and a
+   card's specimen takes the row's height so the captions line up. */
+.st-bench{margin-top:var(--band-header-gap);display:flex;flex-wrap:wrap}
+.st-bench > figure{flex:1 1 280px;min-width:0;display:flex;flex-direction:column}
+.st-bench > figure > .doc-specimen{flex:1 1 auto}
+.st-bench > figure > figcaption{min-block-size:2lh}
+.st-bench .doc-specimen{min-height:220px}
+.st-wide{grid-column:1 / -1}
+.st-bench > .st-wide{flex-basis:100%}
+.st-seg-wrap{display:grid;gap:var(--s-4);justify-items:center}
+.st-chart-bars{width:100%;height:96px}
+.st-chart-rings{width:132px;height:132px}
+.st-chart-dial{width:180px;aspect-ratio:1}
+.st-chart-strip{width:100%;height:80px}
+.st-chart-spark{width:100%;height:48px}
+.st-chart-row{display:flex;align-items:center;gap:var(--s-6);width:100%}
+.st-chart-row [data-chart-legend]{font-size:var(--t-caption-fs);display:grid;gap:var(--s-1);margin:0;padding:0;list-style:none}
+.st-refuse{width:100%;padding:var(--s-4);border-radius:var(--r-pill)}
+.st-syms{display:grid;grid-template-columns:repeat(auto-fill,minmax(40px,1fr));gap:var(--s-3);width:100%;font-size:22px;color:var(--label)}
+.st-syms .sym{justify-self:center}
+.st-rtl{display:flex;gap:var(--s-5);font-size:28px;color:var(--label)}
+.st-tabpane{position:relative;width:100%;height:300px;overflow:clip;border-radius:var(--r-lg);background:var(--bg-1);color:var(--label)}
+.st-tabscroll{position:absolute;inset:0;overflow:auto;padding:var(--s-5) var(--s-5) 120px}
+.st-tabscroll p{padding:var(--s-4) 0;border-bottom:1px solid var(--separator);font-size:var(--t-ui-body-fs);line-height:var(--t-ui-body-lh)}
+/* at rest the bar sits over the art, not over a row of text: text under the
+   rim refracts into a speckle at this size */
+.st-tabscroll .st-tabart{position:relative;height:280px;border-radius:var(--r-md);overflow:clip;margin-bottom:var(--s-4)}
+.st-tabscroll .st-tabart canvas{position:absolute;inset:0;width:100%;height:100%}
+.st-corners{display:flex;flex-wrap:wrap;gap:var(--s-5);align-items:center;justify-content:center}
+.st-snap{width:180px;height:40px;background:var(--fill-2)}
+.st-conc{width:180px;padding:8px;border-radius:30px;background:var(--fill-2)}
+.st-conc > div{height:64px;background:var(--bg-1)}
+.st-conc-cap{width:180px;height:48px;padding:6px;border-radius:999px;background:var(--fill-2)}
+.st-conc-cap > div{height:100%;background:var(--bg-1)}
+.st-anim-probe{width:100%;padding:var(--s-5);border-radius:var(--r-md);background:var(--fill-1);text-align:center;
+  font-size:var(--t-ui-body-fs);line-height:var(--t-ui-body-lh)}
+.st-frame{display:block;width:100%;height:420px;border:0;border-radius:var(--r-md);background:var(--bg-1)}
+/* tall enough to be a VALID viewport (the large-short validator is max-height 620px), so only reduced motion can put it in the base experience */
+.st-frame-tall{height:660px}
+.st-motion-probe{position:relative;width:100%;height:8px;border-radius:4px;background:var(--fill-2);overflow:hidden}
+.st-motion-probe::after{content:"";position:absolute;inset:0 auto 0 0;width:calc(var(--progress,0) * 100%);border-radius:inherit;background:var(--accent)}
+
+/* ── method ────────────────────────────────────────────────────────────── */
+.st-method{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:var(--s-9) var(--s-10);margin-top:var(--band-header-gap)}
+.st-method > div{display:grid;gap:var(--s-4);align-content:start;min-width:0}
+.st-method h3{font-family:var(--t-subtitle-ff);font-size:var(--t-subtitle-fs);line-height:var(--t-subtitle-lh);letter-spacing:var(--t-subtitle-ls);font-weight:600}
+.st-method p{font-size:var(--t-body-fs);line-height:var(--t-body-lh);letter-spacing:var(--t-body-ls);color:var(--label-2)}
+.st-method p strong{color:var(--label);font-weight:600}
+.st-method .doc-code{white-space:pre-wrap;overflow-wrap:anywhere}
+
+@media (max-width:1068px){
+  .st-rig{grid-template-columns:minmax(0,1fr);padding:var(--s-10);justify-items:center}
+  .st-rig-glass{justify-items:center}
+  .st-legend{grid-template-columns:minmax(0,1fr)}
+  /* stacked: the glass is on top, the phone below */
+  .st-rig-scrim{background:linear-gradient(180deg,var(--scrim) 0%,var(--scrim) 48%,transparent 82%)}
+}
+@media (max-width:734px){
+  .st-rig{padding:var(--s-8) var(--s-5);min-height:0;gap:var(--s-8)}
+  .st-bar{padding:0 var(--s-5)}
+  .st-bar span:last-child{display:none}
+  .st-rig-phone{width:210px}
+  .st-row{grid-template-columns:24px minmax(0,1fr)}
+  .st-row .st-note{grid-column:2}
+  .st-method{grid-template-columns:minmax(0,1fr)}
+}
+
+/* ── frame mode: this page, loaded as a rig inside itself ──────────────── */
+html[data-st-frame] :is(.globalnav,.localnav,body > footer){display:none}
+html[data-st-frame] body{background:var(--bg-1)}
+.st-f-phone{position:relative;min-height:100vh;overflow:clip;display:grid;align-content:center;justify-items:center;gap:28px;padding:48px 24px;isolation:isolate}
+.st-f-phone canvas{position:absolute;inset:0;width:100%;height:100%;z-index:-1}
+.st-f-scrim{background:var(--scrim)}
+.st-f-phone .st-bar{width:100%}
+.st-f-cap{font-size:var(--t-ui-footnote-fs);line-height:var(--t-ui-footnote-lh);color:var(--on-art-1);text-align:center;max-width:30ch;
+  padding:var(--s-2) var(--s-4);border-radius:var(--r-sm);background:var(--scrim)}
+.st-f-rm{display:grid;gap:20px;padding:28px 32px}
+.st-f-kicker{font-family:var(--font-mono);font-size:var(--t-12);line-height:1.5;letter-spacing:0;color:var(--label-2)}
+.st-f-pad{padding:28px 32px 0}
+.st-f-states{display:flex;flex-wrap:wrap;gap:20px 28px;align-items:end;padding-bottom:8px;border-bottom:1px solid var(--separator)}
+.st-f-states figure{margin:0;display:grid;justify-items:center;gap:10px;min-width:56px}
+.st-f-states figcaption{font-size:var(--t-ui-caption1-fs);line-height:var(--t-ui-caption1-lh);color:var(--label-2)}
+.st-f-dot{display:block;width:12px;height:12px;border-radius:50%;background:var(--ok)}
+.st-f-arc{display:block;width:18px;height:18px;border-radius:50%;border:2px solid var(--fill-1);border-top-color:var(--label)}
+.st-f-bar{display:block;width:120px}
+.st-f-muted{color:var(--label-2);max-width:52ch}
+.st-f-list{margin:0;padding:0;list-style:none;display:flex;gap:10px;flex-wrap:wrap}
+.st-f-list li{padding:6px 14px;border-radius:var(--r-pill);background:var(--fill-1);font-size:var(--t-ui-subhead-fs)}
+.st-f-prog{height:0}
+.st-f-spacer{height:1400px}
+.st-f-corners{display:flex;flex-wrap:wrap;gap:24px;padding:20px 32px}
+.st-f-corners figure{margin:0;display:grid;gap:10px}
+.st-f-corners figcaption{font-size:var(--t-ui-footnote-fs);line-height:var(--t-ui-footnote-lh);color:var(--label-2)}
+.st-cf-box{width:220px;height:140px;background:var(--fill-2)}
+.st-cf-edge{box-shadow:0 0 0 1px var(--separator)}
+#st-cf-lab{display:flex;flex-wrap:wrap;gap:12px;padding:24px;transform:translateZ(0);overflow:clip}
+</style>
+</head>
+<body>
+
+<!-- ═══ SITE NAV (shared — copy verbatim; set aria-current on this page's link) ═══ -->
+<nav class="globalnav" aria-label="Fluid Design">
+  <div class="globalnav__bar">
+    <a class="globalnav__brand" href="index.html" aria-label="Fluid Design Open home"><i data-sym="sparkles"></i></a>
+    <ul class="globalnav__list">
+      <li class="globalnav__item"><a class="globalnav__link" href="index.html">Overview</a></li>
+      <li class="globalnav__item"><a class="globalnav__link" href="start.html">Start</a></li>
+      <li class="globalnav__item"><a class="globalnav__link" href="docs.html">Docs</a></li>
+      <li class="globalnav__item" data-flyout="gn-foundations"><a class="globalnav__link" href="color.html">Foundations</a><button class="globalnav__trigger" type="button"><span class="sr-only">Foundations menu</span></button></li>
+      <li class="globalnav__item" data-flyout="gn-components"><a class="globalnav__link" href="components.html">Components</a><button class="globalnav__trigger" type="button"><span class="sr-only">Components menu</span></button></li>
+      <li class="globalnav__item" data-flyout="gn-instruments"><a class="globalnav__link" href="selftest.html" aria-current="page">Instruments</a><button class="globalnav__trigger" type="button"><span class="sr-only">Instruments menu</span></button></li>
+    </ul>
+    <div class="globalnav__tools">
+      <button class="globalnav__icon" type="button" data-tone-toggle aria-label="Switch appearance"><i data-sym="circle-half"></i></button>
+      <button class="globalnav__menu" type="button" aria-label="Menu" aria-expanded="false"><i data-sym="lines"></i></button>
+    </div>
+  </div>
+  <div class="globalnav__flyout" id="gn-foundations" hidden>
+    <div class="globalnav__flyout-content">
+      <div class="globalnav__group" data-elevated>
+        <h2 class="globalnav__group-title">Foundations</h2>
+        <ul><li><a class="globalnav__flyout-link" href="color.html">Colour</a></li><li><a class="globalnav__flyout-link" href="type.html">Type</a></li><li><a class="globalnav__flyout-link" href="layout.html">Layout</a></li><li><a class="globalnav__flyout-link" href="materials.html">Materials</a></li><li><a class="globalnav__flyout-link" href="motion.html">Motion</a></li></ul>
+      </div>
+      <div class="globalnav__group">
+        <h2 class="globalnav__group-title">Content</h2>
+        <ul><li><a class="globalnav__flyout-link" href="symbols.html">Symbols</a></li><li><a class="globalnav__flyout-link" href="data.html">Data</a></li></ul>
+      </div>
+    </div>
+  </div>
+  <div class="globalnav__flyout" id="gn-components" hidden>
+    <div class="globalnav__flyout-content">
+      <div class="globalnav__group" data-elevated>
+        <h2 class="globalnav__group-title">Components</h2>
+        <ul><li><a class="globalnav__flyout-link" href="components.html">Controls</a></li><li><a class="globalnav__flyout-link" href="chrome.html">Chrome</a></li><li><a class="globalnav__flyout-link" href="showcase.html">Product pages</a></li><li><a class="globalnav__flyout-link" href="patterns.html">Patterns</a></li></ul>
+      </div>
+    </div>
+  </div>
+  <div class="globalnav__flyout" id="gn-instruments" hidden>
+    <div class="globalnav__flyout-content">
+      <div class="globalnav__group" data-elevated>
+        <h2 class="globalnav__group-title">Instruments</h2>
+        <ul><li><a class="globalnav__flyout-link" href="selftest.html" aria-current="page">Self-test</a></li><li><a class="globalnav__flyout-link" href="audit.html">Audit</a></li></ul>
+      </div>
+    </div>
+  </div>
+</nav>
+
+<!-- ═══ LOCAL NAV (per page: title, one CTA, jump links to this page's sections) ═══ -->
+<div class="localnav" data-localnav-reveal="#hero">
+  <div class="localnav__capsule" data-lg3 data-lg3-priority="3">
+    <a class="localnav__title" href="#top">Self-test</a>
+    <button class="localnav__explore" type="button"><span class="localnav__explore-label">Explore</span></button>
+    <a class="localnav__cta" href="start.html">Adopt</a>
+    <div class="localnav__panel" aria-label="Explore Fluid Design">
+      <ul class="localnav__tiles">
+        <li><a class="localnav__tile" href="materials.html" style="--tile-hue: var(--series-1)"><span class="localnav__thumb"><i data-sym="sparkles"></i></span>Materials</a></li>
+        <li><a class="localnav__tile" href="motion.html" style="--tile-hue: var(--series-2)"><span class="localnav__thumb"><i data-sym="waveform"></i></span>Motion</a></li>
+        <li><a class="localnav__tile" href="chrome.html" style="--tile-hue: var(--series-3)"><span class="localnav__thumb"><i data-sym="sidebar"></i></span>Chrome</a></li>
+        <li><a class="localnav__tile" href="components.html" style="--tile-hue: var(--series-4)"><span class="localnav__thumb"><i data-sym="sliders"></i></span>Controls</a></li>
+        <li><a class="localnav__tile" href="showcase.html" style="--tile-hue: var(--series-5)"><span class="localnav__thumb"><i data-sym="grid"></i></span>Product pages</a></li>
+      </ul>
+      <hr class="localnav__rule">
+      <nav class="localnav__jump" aria-label="On this page">
+        <p class="localnav__jump-label">On this page <i data-sym="chevron-down"></i></p>
+        <ul class="localnav__jump-grid">
+          <li class="localnav__jump-item"><a href="#summary">Summary</a></li>
+          <li class="localnav__jump-item"><a href="#results">Every assertion</a></li>
+          <li class="localnav__jump-item"><a href="#bench">The bench</a></li>
+          <li class="localnav__jump-item"><a href="#method">How it is proven</a></li>
+        </ul>
+      </nav>
+    </div>
+  </div>
+</div>
+
+<main id="top">
+  <script>
+  /* FIRST, before anything it watches: an error trap installed after the
+     scripts it monitors catches nothing that happened while they ran. */
+  (function () {
+    var errs = window.__stErrors = [];
+    addEventListener('error', function (e) {
+      var t = e.target;
+      if (t && t !== window && t.tagName) errs.push('failed to load ' + (t.src || t.href || t.tagName));
+      else errs.push((e.message || 'error') + ' @ ' + String(e.filename || '').replace(/^.*\//, '') + ':' + (e.lineno || 0));
+    }, true);
+    addEventListener('unhandledrejection', function (e) { errs.push('unhandled rejection: ' + (e.reason && e.reason.message || e.reason)); });
+    /* FRAME MODE — this page loaded inside itself as a rig:
+         ?frame=phone     the glass rig at 402 px (the phone budget)
+         ?frame=rm        reduced motion, emulated for real: matchMedia answers
+                          reduce for every module, and every @media rule on
+                          prefers-reduced-motion is rewritten in the CSSOM
+         ?frame=corners   the Safari corner path (?no-fd-corner-shape)        */
+    var q = new URLSearchParams(location.search), f = q.get('frame');
+    if (!f) return;
+    document.documentElement.setAttribute('data-st-frame', f);
+    if (f !== 'rm') return;
+    var ON = '(min-width: 0px)', OFF = '(min-width: 99999px)';
+    var rewrite = function (m) {
+      return String(m).replace(/\(\s*prefers-reduced-motion\s*:\s*no-preference\s*\)/g, OFF)
+                      .replace(/\(\s*prefers-reduced-motion\s*(:\s*reduce\s*)?\)/g, ON);
+    };
+    var mm = window.matchMedia.bind(window);
+    window.matchMedia = function (qs) { return mm(rewrite(qs)); };
+    var n = 0;
+    (function walk(list) {
+      for (var i = 0; i < list.length; i++) {
+        var r = list[i];
+        if (r.media && r.media.mediaText && /prefers-reduced-motion/.test(r.media.mediaText)) { r.media.mediaText = rewrite(r.media.mediaText); n++; }
+        if (r.cssRules && r.cssRules.length) walk(r.cssRules);
+      }
+    })([].map.call(document.styleSheets, function (s) { try { return { cssRules: s.cssRules }; } catch (e) { return {}; } }));
+    window.__stRmRules = n;
+  })();
+  </script>
+
+  <!-- ═══ HERO: the claim, and the rig the material assertions read ═══ -->
+  <section class="band" data-band="stage" id="hero">
+    <div class="viewport-content">
+      <div class="st-hero-copy">
+        <p class="t-eyebrow">Self-test</p>
+        <h1 class="t-hero">Every claim, measured.</h1>
+        <p class="t-lede">The assertions below run against the real assets, in this browser, every time the page opens. Each reads back what the engine <strong>produced</strong> &mdash; a computed style, a pixel, a path length &mdash; not what it says it did. Each one has been seen failing on purpose.</p>
+      </div>
+      <div class="st-rig corner-continuous r-lg" id="st-rig">
+        <canvas class="st-rig-art" data-art="deep" data-art-seed="11" aria-hidden="true"></canvas>
+        <div class="st-rig-scrim" aria-hidden="true"></div>
+        <div class="st-rig-glass">
+          <div class="st-bar capsule" id="st-bar" data-lg3 data-lg3-priority="9"><span>50&nbsp;px bar</span><span>refraction under test</span></div>
+          <div class="st-pills" id="st-pills">
+            <span class="st-pill capsule" data-lg3 data-lg3-priority="5" id="st-p5">5</span>
+            <span class="st-pill capsule" data-lg3 data-lg3-priority="4" id="st-p4">4</span>
+            <span class="st-pill capsule" data-lg3 data-lg3-priority="3" id="st-p3">3</span>
+            <span class="st-pill capsule" data-lg3 data-lg3-priority="2" id="st-p2">2</span>
+            <span class="st-pill capsule" data-lg3 data-lg3-priority="1" id="st-p1">1</span>
+          </div>
+        </div>
+        <div class="st-rig-phone">
+          <div class="device" data-device="phone">
+            <div class="device__screen" data-screen-width="402">
+              <iframe id="st-frame-phone" src="selftest.html?frame=phone" title="The same rig at 402 pixels" tabindex="-1"></iframe>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="st-legend">
+        <p><b>The 50&nbsp;px bar.</b> Its refraction map is where the displacement numbers come from: at least 8&nbsp;px at the rim, 2&nbsp;px on average.</p>
+        <p><b>Five pills, priority 5 to 1.</b> Only three hosts may bend light on a desktop; the budget gives them to the highest priority. <span id="st-refracting"></span></p>
+        <p><b>The same rig at 402&nbsp;px.</b> This page again, inside a phone frame, where the budget is one.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══ SUMMARY ═══ -->
+  <section class="band st-sum" data-band="story" id="summary">
+    <div class="viewport-content">
+      <div class="st-sum-head">
+        <h2 class="t-section" id="st-headline" aria-live="polite">Running the suite&hellip;</h2>
+        <span class="pill-status" data-state="live" id="st-state">Running</span>
+      </div>
+      <div class="stat-grid" data-cols="4">
+        <div class="stat-cell"><p class="stat-value" id="st-n-total">0</p><p class="stat-caption">assertions</p></div>
+        <div class="stat-cell"><p class="stat-value" id="st-n-pass">0</p><p class="stat-caption">passed</p></div>
+        <div class="stat-cell"><p class="stat-value" id="st-n-fail">0</p><p class="stat-caption">failed</p></div>
+        <div class="stat-cell"><p class="stat-value" id="st-n-time">0</p><p class="stat-caption">seconds to run</p></div>
+      </div>
+      <progress class="progress" id="st-progress" max="1" value="0" aria-label="Suite progress"></progress>
+      <div class="st-tools">
+        <div class="segmented" role="radiogroup" aria-label="Show" id="st-filter">
+          <button type="button" role="radio" aria-checked="true" data-value="all">Every assertion</button>
+          <button type="button" role="radio" data-value="fail">Failures only</button>
+        </div>
+        <a class="btn btn-secondary" href="selftest.html" id="st-rerun">Run again</a>
+      </div>
+      <dl class="doc-kv st-env" id="st-env"></dl>
+    </div>
+  </section>
+
+  <!-- ═══ RESULTS ═══ -->
+  <section class="band" data-band="utility" id="results">
+    <div class="viewport-content">
+      <h2 class="t-section">Every assertion.</h2>
+      <p class="t-lede" style="margin-top:var(--s-5)">Grouped by the module they hold to account. A red row names what it measured, so a failure can be fixed from the note alone.</p>
+      <div class="st-groups" id="st-groups"></div>
+      <div class="empty-state" id="st-empty" hidden>
+        <span class="empty-state-glyph"><i data-sym="checkmark-circle"></i></span>
+        <h3 class="empty-state-title">No failures.</h3>
+        <p class="empty-state-body" id="st-empty-body"></p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══ THE BENCH: the fixtures the assertions drive ═══ -->
+  <section class="band" data-band="story" id="bench">
+    <div class="viewport-content">
+      <h2 class="t-section">The bench.</h2>
+      <p class="t-lede" style="margin-top:var(--s-5)">Every fixture the suite drives, live. The menu opens, the sheet rises and the tab bar minimises while the page runs; <strong>two more copies of this page</strong> run below, one with reduced motion and one on Safari&rsquo;s corner path.</p>
+      <div class="doc-grid st-bench">
+        <figure style="margin:0">
+          <div class="doc-specimen"><div class="st-seg-wrap">
+            <div class="segmented" role="radiogroup" aria-label="Range" id="st-seg">
+              <button type="button" role="radio" aria-checked="true">Day</button>
+              <button type="button" role="radio">Week</button>
+              <button type="button" role="radio">Month</button>
+            </div>
+          </div></div>
+          <figcaption class="doc-specimen__label"><b>Segmented.</b> The indicator must sit under the selected item.</figcaption>
+        </figure>
+        <figure style="margin:0">
+          <div class="doc-specimen">
+            <button class="btn btn-secondary" type="button" id="st-menu-btn" data-menu="st-menu">Actions <i data-sym="chevron-down"></i></button>
+            <div class="menu" id="st-menu" popover="manual" aria-label="Actions">
+              <button class="menu-item" type="button">Duplicate</button>
+              <button class="menu-item" type="button">Rename</button>
+              <div class="menu-separator"></div>
+              <button class="menu-item menu-item-destructive" type="button">Delete</button>
+            </div>
+          </div>
+          <figcaption class="doc-specimen__label"><b>Menu.</b> Opens on its trigger, focuses the first item, gives focus back.</figcaption>
+        </figure>
+        <figure style="margin:0">
+          <div class="doc-specimen">
+            <button class="btn btn-secondary" type="button" data-sheet-open="st-sheet" id="st-sheet-btn">Open the sheet</button>
+          </div>
+          <figcaption class="doc-specimen__label"><b>Sheet.</b> Medium, then large, then closed.</figcaption>
+        </figure>
+        <figure style="margin:0">
+          <div class="doc-specimen" data-pad="none">
+            <div class="st-tabpane" data-tone="dark">
+              <div class="st-tabscroll" id="st-tabscroll">
+                <div class="st-tabart" data-tone="dark"><canvas data-art="aurora" data-art-seed="3" aria-hidden="true"></canvas></div>
+                <p>aurora.demo &middot; 440 landed today</p><p>basil.demo &middot; 299 landed today</p><p>cobalt.demo &middot; 335 landed today</p>
+                <p>dune.demo &middot; 148 landed today</p><p>@sample.trailrunners</p><p>@sample.cyclecafe</p>
+                <p>@sample.surfschool</p><p>@sample.coffeeroasters</p><p>@sample.vintagecars</p>
+                <p>@sample.bbqclub</p><p>@sample.bookclub</p><p>@sample.photowalk</p>
+              </div>
+              <nav class="tabbar" data-tabbar-position="absolute" data-tabbar-scroll="#st-tabscroll" aria-label="Bench tabs" id="st-tabbar">
+                <div class="tabbar__row">
+                  <div class="tabbar__bar" data-lg3 data-lg3-recipe="pill" data-lg3-interactive>
+                    <div class="tabbar__tabs">
+                      <button class="tab" type="button" aria-selected="true"><i data-sym="target"></i><span class="tab__label">Today</span></button>
+                      <button class="tab" type="button"><i data-sym="person"></i><span class="tab__label">Accounts</span></button>
+                      <button class="tab" type="button"><i data-sym="bubble"></i><span class="tab__label">Inbox</span></button>
+                    </div>
+                  </div>
+                </div>
+              </nav>
+            </div>
+          </div>
+          <figcaption class="doc-specimen__label"><b>Tab bar.</b> Minimises after 32&nbsp;px down, comes back after 16&nbsp;px up.</figcaption>
+        </figure>
+        <figure style="margin:0">
+          <div class="doc-specimen"><div data-chart="bars" class="st-chart-bars" id="st-bars" data-values="331,9,120,60,210,26"></div></div>
+          <figcaption class="doc-specimen__label"><b>Bars.</b> Read from zero: the 9 beside the 331 is drawn to scale.</figcaption>
+        </figure>
+        <figure style="margin:0">
+          <div class="doc-specimen"><div class="st-chart-row">
+            <div data-chart="rings" class="st-chart-rings" id="st-rings" data-center="78%" data-values='[{"label":"Like","value":312,"max":400,"color":"series-1"},{"label":"Follow","value":70,"max":70,"color":"series-2"},{"label":"Unfollow","value":null,"max":70,"color":"series-3"}]'></div>
+            <ul data-chart-legend></ul>
+          </div></div>
+          <figcaption class="doc-specimen__label"><b>Rings.</b> Each arc ends at value over max; a missing value draws none.</figcaption>
+        </figure>
+        <figure style="margin:0">
+          <div class="doc-specimen"><div data-chart="dial" class="st-chart-dial" id="st-dial" data-now="14:30" aria-label="A day on the dial"
+            data-values='[{"from":0,"to":6,"kind":"idle","label":"asleep"},{"from":6.05,"to":6.4,"kind":"done","label":"06:03 batch"},{"from":7.2,"to":7.5,"kind":"empty","label":"07:12 came back empty"},{"from":9,"to":9.6,"kind":"done","label":"09:00 burst"},{"from":11.1,"to":11.3,"kind":"lost","label":"11:06 timed out"},{"from":13,"to":13.7,"kind":"done","label":"13:00 burst"},{"from":15,"to":15.2,"kind":"planned","label":"planned"}]'></div></div>
+          <figcaption class="doc-specimen__label"><b>Dial.</b> One segment per span, the hand at 14:30.</figcaption>
+        </figure>
+        <figure style="margin:0">
+          <div class="doc-specimen"><div style="width:100%"><div data-chart="strip" class="st-chart-strip" id="st-strip" aria-label="Batch strip"
+            data-values='[{"at":"09:00","asked":8,"landed":6,"people":6,"label":"aurora.demo Follow"},{"at":"09:20","asked":6,"landed":0,"people":0,"empty":true,"label":"basil.demo Like"},{"at":"09:40","asked":10,"landed":12,"people":9,"label":"cobalt.demo Like"},{"at":"10:00","asked":7,"landed":0,"people":0,"empty":true,"arrived":false,"label":"dune.demo Follow"},{"at":"10:20","asked":9,"landed":5,"people":5,"label":"aurora.demo Unfollow"}]'></div><p class="au-note" data-chart-out></p></div></div>
+          <figcaption class="doc-specimen__label"><b>Strip.</b> Height is asked, fill is landed; an empty batch is an outline.</figcaption>
+        </figure>
+        <figure style="margin:0">
+          <div class="doc-specimen" style="gap:var(--s-5)">
+            <div data-chart="sparkline" class="st-chart-spark" id="st-spark" data-values="3,5,4,8,6,9,7,11"></div>
+            <div data-chart="series" class="st-chart-spark" id="st-series" data-values="140,96,74,63,58,52,49"></div>
+            <div data-chart="ring" id="st-ring" data-value="1222" data-max="2160" data-label="1,222 landed of a 2,160 cap, 57 per cent"></div>
+          </div>
+          <figcaption class="doc-specimen__label"><b>Sparkline, series, ring.</b> Every chart is an image with a title.</figcaption>
+        </figure>
+        <figure style="margin:0">
+          <div class="doc-specimen" data-ground="art">
+            <canvas class="doc-specimen__art" data-art="twilight" data-art-seed="2" aria-hidden="true"></canvas>
+            <div class="st-refuse" data-lg3 data-lg3-mode="frost" id="st-refuse-host"><div data-chart="sparkline" class="st-chart-spark" id="st-refused" data-values="3,5,4,8,6,9"></div></div>
+          </div>
+          <figcaption class="doc-specimen__label"><b>A chart on glass</b> is refused in place: charts are content.</figcaption>
+        </figure>
+        <figure style="margin:0" class="st-wide">
+          <div class="doc-specimen"><div class="st-syms" id="st-syms"></div></div>
+          <figcaption class="doc-specimen__label"><b>Every symbol</b>, built from the sprite; each path must have length.</figcaption>
+        </figure>
+        <figure style="margin:0">
+          <div class="doc-specimen" style="gap:var(--s-4)">
+            <div class="st-rtl" dir="ltr" id="st-ltr"><i data-sym="chevron-right"></i><i data-sym="arrow-right"></i><i data-sym="plus"></i></div>
+            <div class="st-rtl" dir="rtl" id="st-rtl"><i data-sym="chevron-right"></i><i data-sym="arrow-right"></i><i data-sym="plus"></i><i data-sym="chevron-right" data-sym-class="sym-noflip"></i></div>
+          </div>
+          <figcaption class="doc-specimen__label"><b>Right to left.</b> Arrows mirror, a plus does not, <code>.sym-noflip</code> opts out.</figcaption>
+        </figure>
+        <figure style="margin:0">
+          <div class="doc-specimen"><div class="st-corners">
+            <div class="st-snap corner-continuous r-lg" id="st-snap"></div>
+            <div class="st-conc" data-concentric-box id="st-conc"><div data-concentric id="st-conc-in"></div></div>
+            <div class="st-conc-cap" data-concentric-box id="st-conc-cap"><div data-concentric id="st-conc-cap-in"></div></div>
+          </div></div>
+          <figcaption class="doc-specimen__label"><b>Corners.</b> A short box snaps to a capsule; a child is concentric with its parent.</figcaption>
+        </figure>
+        <figure style="margin:0">
+          <div class="doc-specimen" style="gap:var(--s-4)">
+            <div class="st-motion-probe" id="st-motion-probe"></div>
+          </div>
+          <figcaption class="doc-specimen__label"><b>The morph primitive.</b> One <code>--progress</code> on a spring; a change of spring keeps its speed.</figcaption>
+        </figure>
+        <figure style="margin:0" class="st-wide">
+          <div class="doc-specimen" data-pad="none"><iframe class="st-frame st-frame-tall" id="st-frame-rm" src="selftest.html?frame=rm" title="This page with reduced motion emulated" tabindex="-1"></iframe></div>
+          <figcaption class="doc-specimen__label"><b>Reduced motion, emulated.</b> Every module asked the question gets <i>reduce</i>; every <code>@media</code> rule on it is rewritten in place.</figcaption>
+        </figure>
+        <figure style="margin:0" class="st-wide">
+          <div class="doc-specimen" data-pad="none"><iframe class="st-frame" id="st-frame-corners" src="selftest.html?frame=corners&amp;no-fd-corner-shape" title="This page on the corner fallback" tabindex="-1"></iframe></div>
+          <figcaption class="doc-specimen__label"><b>Safari&rsquo;s corner path.</b> The fallback runs with <code>corner-shape</code> switched off; one element is built for every rule that declares it.</figcaption>
+        </figure>
+      </div>
+    </div>
+  </section>
+
+  <!-- the sheet the bench opens -->
+  <div class="sheet" id="st-sheet" data-lg3 data-detents="medium large" aria-labelledby="st-sheet-title" hidden>
+    <button class="sheet__grabber" type="button" aria-label="Sheet size"></button>
+    <div class="sheet__header">
+      <button class="sheet__close" type="button" aria-label="Close" data-sheet-close><i data-sym="xmark"></i></button>
+      <h2 class="sheet__title" id="st-sheet-title">Filters</h2>
+      <button class="sheet__done" type="button" aria-label="Done" data-sheet-close><i data-sym="checkmark"></i></button>
+    </div>
+    <div class="sheet__body"><p class="ui-body">Opened by the self-test to measure its detents.</p></div>
+  </div>
+
+  <!-- ═══ HOW IT IS PROVEN ═══ -->
+  <section class="band" data-band="utility" id="method">
+    <div class="viewport-content">
+      <h2 class="t-section">How it is proven.</h2>
+      <div class="st-method">
+        <div>
+          <h3>Every row has been red.</h3>
+          <p>An assertion you have never seen fail passes exactly the same when the product is broken. The headless runner serves a <strong>deliberately broken copy</strong> of one asset at a time &mdash; the file on disk is never touched &mdash; and refuses to pass unless the rows that cover it turn red.</p>
+<pre class="doc-code" data-lang="shell"><code>node tools/run-selftest.mjs
+node tools/run-selftest.mjs --width 402 --dark
+node tools/run-selftest.mjs --mutants</code></pre>
+        </div>
+        <div>
+          <h3>Lists come from the source.</h3>
+          <p>The palette roles come from <code>PALETTE.ROLES</code>, the brand files from its presets, the corner rules from the stylesheets themselves, the springs from <code>SPRING.NAMED</code>. A hand-typed list drifts; a derived one cannot miss the thing that was added yesterday.</p>
+        </div>
+        <div>
+          <h3>What this page cannot see.</h3>
+          <p>Safari itself, Firefox, a real phone&rsquo;s GPU and forced colours are not in this browser. The corner and reduced-motion paths are emulated faithfully, and the audit measures contrast on the rendered pages; where a check cannot run here it says <strong>skipped</strong> and why.</p>
+        </div>
+        <div>
+          <h3>Type is held to measured values.</h3>
+          <p>Sizes, line heights and tracking are compared with reference values measured at the same width, not with our own tokens &mdash; a token that drifts from the reference fails here even if every page still agrees with it.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- frame fixtures: cloned into place only in frame mode -->
+  <template id="st-tpl-phone">
+    <section class="st-f-phone" data-tone="dark">
+      <canvas data-art="deep" data-art-seed="11" aria-hidden="true"></canvas>
+      <div class="st-rig-scrim st-f-scrim" aria-hidden="true"></div>
+      <div class="st-bar capsule" id="f-bar" data-lg3 data-lg3-priority="2"><span>402&nbsp;px</span><span>budget 1</span></div>
+      <div class="st-pills"><span class="st-pill capsule" data-lg3 data-lg3-priority="1" id="f-p1">1</span><span class="st-pill capsule" data-lg3 data-lg3-priority="1" id="f-p2">1</span></div>
+      <p class="st-f-cap">At phone width only the highest priority host bends light.</p>
+    </section>
+  </template>
+  <template id="st-tpl-rm">
+    <section class="st-f-rm">
+      <p class="st-f-kicker">prefers-reduced-motion: reduce &middot; emulated in this copy</p>
+      <div class="st-f-states">
+        <figure><span class="spinner" role="status" aria-label="Loading" id="rm-spinner"></span><figcaption>Spinner</figcaption></figure>
+        <figure><span class="pill-status" data-state="live" id="rm-live">Live</span><figcaption>Live dot</figcaption></figure>
+        <figure><span class="m-pulse st-f-dot" id="rm-pulse"></span><figcaption>Pulse</figcaption></figure>
+        <figure><span class="m-spin st-f-arc" id="rm-spin"></span><figcaption>Spin</figcaption></figure>
+        <figure><span class="progress-ring" data-indeterminate aria-label="Working" id="rm-ring"></span><figcaption>Ring</figcaption></figure>
+        <figure><progress class="progress st-f-bar" aria-label="Working" id="rm-indet"></progress><figcaption>Progress</figcaption></figure>
+        <figure><span class="skeleton skeleton-text st-f-bar" id="rm-skel"></span><figcaption>Skeleton</figcaption></figure>
+      </div>
+      <h2 class="t-subtitle" data-reveal="up" id="rm-up">Reveals rest in place.</h2>
+      <p class="t-body st-f-muted" data-reveal="scale" id="rm-scale">No rise, no scale: the content is authored in its final state and stays there.</p>
+      <ul class="st-f-list" data-reveal="stagger" id="rm-stagger"><li data-staggered-item>Staggered one</li><li data-staggered-item>Staggered two</li><li data-staggered-item>Staggered three</li></ul>
+      <p class="t-body st-f-muted" data-m-enter="up" id="rm-enter">An entrance that would slide up fades instead.</p>
+      <div id="rm-prog" class="st-f-prog"></div>
+      <div data-scene id="rm-scene"><div data-scene-sticky><p class="t-body st-f-muted">A pinned scene sits at its end.</p></div></div>
+      <div class="st-f-spacer"></div>
+      <h2 class="t-subtitle" data-reveal="up" id="rm-far">A reveal far below the fold.</h2>
+    </section>
+  </template>
+  <template id="st-tpl-corners">
+    <p class="st-f-kicker st-f-pad">corner-shape switched off &middot; the fallback draws every corner</p>
+    <section class="st-f-corners">
+      <figure><div class="corner-continuous r-lg st-cf-box" id="st-cf-square"></div><figcaption>Plain box: clipped to the superellipse</figcaption></figure>
+      <figure><div class="corner-continuous r-lg st-cf-box st-cf-edge" id="st-cf-circle"></div><figcaption>Edged box: the circle of equal mass</figcaption></figure>
+    </section>
+    <div class="st-f-spacer" style="height:900px"></div>
+    <div class="st-anim-probe" id="f-anim" data-anim-keyframe='{"start":"t - 100vh","end":"t - 50vh","opacity":[0.2,1],"easeFunction":"linear","disabledWhen":[]}'>A compiled scroll keyframe</div>
+    <div class="st-f-spacer" style="height:900px"></div>
+    <div id="st-cf-lab"></div>
+  </template>
+
+  <script>
+  /* In frame mode the page becomes its own fixture, before any module runs. */
+  (function () {
+    var f = document.documentElement.getAttribute('data-st-frame');
+    if (!f) return;
+    var tpl = document.getElementById('st-tpl-' + f), main = document.getElementById('top');
+    if (!tpl) return;
+    [].slice.call(main.children).forEach(function (c) { if (c.tagName !== 'SCRIPT') c.remove(); });
+    main.appendChild(tpl.content.cloneNode(true));
+    ['.globalnav', '.localnav'].forEach(function (s) { var n = document.querySelector(s); if (n) n.remove(); });
+    window.__stFrame = new Promise(function (resolve) {
+      document.addEventListener('DOMContentLoaded', function () {
+        var fr = window.FG3 && FG3.cornersReady ? FG3.cornersReady : Promise.resolve();
+        var fonts = document.fonts && document.fonts.ready ? document.fonts.ready : Promise.resolve();
+        Promise.all([fr, fonts]).then(function () { setTimeout(function () { resolve(f); }, 350); });
+      });
+    });
+  })();
+  </script>
+
+  <script>
+  /* ═══════════════════════════════════════════════════════════════════════
+     THE SUITE. One assertion per line that starts with T( — tools/pages.json
+     counts /^\s*T\(/ and the build refuses when a page quotes another number.
+     An assertion returns true | {pass, note} | {skip: why}, sync or async.
+     ═══════════════════════════════════════════════════════════════════════ */
+  (function () {
+    'use strict';
+    if (document.documentElement.hasAttribute('data-st-frame')) return;
+    var groups = [], cur = null;
+    function G(id, title, blurb) { cur = { id: id, title: title, blurb: blurb, rows: [] }; groups.push(cur); }
+    function T(label, fn) { cur.rows.push({ label: label, fn: fn, group: cur }); }
+    var $ = function (id) { return document.getElementById(id); };
+    function wait(ms) { return new Promise(function (r) { setTimeout(r, ms); }); }
+    function frames(n, win) {
+      win = win || window;
+      return new Promise(function (res) {
+        var k = 0, done = false;
+        function tick() { if (done) return; if (++k >= (n || 2)) { done = true; res(); } else win.requestAnimationFrame(tick); }
+        win.requestAnimationFrame(tick);
+        setTimeout(function () { if (!done) { done = true; res(); } }, 80 + (n || 2) * 40);
+      });
+    }
+    function near(a, b, tol) { return Math.abs(a - b) <= tol; }
+    function px(v) { return parseFloat(v); }
+    function f2(x) { return (Math.round(x * 100) / 100).toString(); }
+    var RM = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    /* ── shared readers ───────────────────────────────────────────────── */
+    var textCache = {};
+    function fetchText(url) {
+      if (!textCache[url]) textCache[url] = fetch(url, { cache: 'no-store' }).then(function (r) { if (!r.ok) throw new Error(url + ' ' + r.status); return r.text(); });
+      return textCache[url];
+    }
+    function strip(css) { return css.replace(/\/\*[\s\S]*?\*\//g, ''); }
+    /* the page's own stylesheets, as TEXT (what an engine without a property still has) */
+    function sheetTexts(doc) {
+      doc = doc || document;
+      return Promise.all([].filter.call(doc.styleSheets, function (s) {
+        var n = s.ownerNode; return !(n && n.hasAttribute && n.hasAttribute('data-fg3-ignore'));
+      }).map(function (s) {
+        var n = s.ownerNode;
+        if (n && n.tagName === 'STYLE') return Promise.resolve({ href: 'inline <style>', text: n.textContent });
+        return fetchText(s.href).then(function (t) { return { href: s.href.replace(/^.*\/assets\//, 'assets/'), text: t }; });
+      }));
+    }
+    function matchBrace(s, i) {
+      for (var d = 0, q = ''; i < s.length; i++) {
+        var c = s[i];
+        if (q) { if (c === '\\') i++; else if (c === q) q = ''; continue; }
+        if (c === '"' || c === "'") q = c;
+        else if (c === '{') d++;
+        else if (c === '}' && --d === 0) return i;
+      }
+      return s.length;
+    }
+    /* CSS text → [{sel, media:[…], decls:{name: value}, keyframes}] */
+    function blocks(text) {
+      var out = [];
+      (function scan(s, media, inKf) {
+        var i = 0;
+        while (i < s.length) {
+          var open = s.indexOf('{', i); if (open < 0) break;
+          var sel = s.slice(i, open).replace(/^[\s;]+/, '').trim(), close = matchBrace(s, open), body = s.slice(open + 1, close);
+          if (sel.charAt(0) === '@') scan(body, media.concat(sel), inKf || /^@(-webkit-)?keyframes/i.test(sel));
+          else {
+            var decls = {};
+            body.split(';').forEach(function (d) { var k = d.indexOf(':'); if (k > 0) decls[d.slice(0, k).trim()] = d.slice(k + 1).trim(); });
+            out.push({ sel: sel.replace(/\s+/g, ' '), media: media, decls: decls, keyframes: !!inKf });
+          }
+          i = close + 1;
+        }
+      })(strip(text), [], false);
+      return out;
+    }
+    /* independent WCAG maths (not palette.js's) */
+    function rgbOf(c) {
+      c = String(c).trim();
+      if (c[0] === '#') { var h = c.slice(1); if (h.length === 3) h = h.replace(/./g, '$&$&'); return [parseInt(h.slice(0, 2), 16), parseInt(h.slice(2, 4), 16), parseInt(h.slice(4, 6), 16), 1]; }
+      var m = /rgba?\(([^)]+)\)/.exec(c); if (!m) return null;
+      var p = m[1].split(/[\s,\/]+/).filter(Boolean).map(parseFloat);
+      return [p[0], p[1], p[2], p.length > 3 ? p[3] : 1];
+    }
+    function over8(fg, bg) { var a = fg[3]; return [0, 1, 2].map(function (k) { return Math.round(fg[k] * a + bg[k] * (1 - a)); }).concat(1); }
+    function lumOf(rgb) { return rgb.slice(0, 3).map(function (v) { v /= 255; return v <= 0.04045 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4); }).reduce(function (s, v, i) { return s + v * [0.2126, 0.7152, 0.0722][i]; }, 0); }
+    function wcag(a, b) { var x = lumOf(a), y = lumOf(b); return (Math.max(x, y) + 0.05) / (Math.min(x, y) + 0.05); }
+    function linearAt(str, q) {
+      var pts = str.trim().slice(7, -1).split(',').map(function (s) { var p = s.trim().split(/\s+/); return [parseFloat(p[1]) / 100, +p[0]]; });
+      for (var i = 1; i < pts.length; i++) if (q <= pts[i][0]) {
+        var a = pts[i - 1], b = pts[i];
+        return b[0] === a[0] ? b[1] : a[1] + (b[1] - a[1]) * (q - a[0]) / (b[0] - a[0]);
+      }
+      return pts[pts.length - 1][1];
+    }
+    function frameReady(id) {
+      var f = $(id);
+      return new Promise(function (res, rej) {
+        var t0 = performance.now();
+        (function poll() {
+          var w = null; try { w = f.contentWindow; } catch (e) {}
+          if (w && w.__stFrame) return w.__stFrame.then(function () { res(w); });
+          if (performance.now() - t0 > 20000) return rej(new Error(id + ' never became ready'));
+          setTimeout(poll, 60);
+        })();
+      });
+    }
+    function paletteFile(preset) { return 'assets/fg3-color.css'; }
+    function toneBlocks(text) {
+      var b = blocks(text), pick = function (fn) { return b.filter(fn)[0] || { decls: {} }; };
+      return {
+        light: pick(function (x) { return !x.media.length && x.sel === ':root, [data-tone="light"]'; }).decls,
+        dark: pick(function (x) { return !x.media.length && x.sel === '[data-tone="dark"]'; }).decls,
+        stage: pick(function (x) { return !x.media.length && x.sel === '.band[data-band="stage"]:not([data-tone])'; }).decls,
+        moreLight: pick(function (x) { return x.media.length && /prefers-contrast/.test(x.media[0]) && x.sel === '[data-tone="light"]'; }).decls,
+        moreDark: pick(function (x) { return x.media.length && /prefers-contrast/.test(x.media[0]) && x.sel === '[data-tone="dark"]'; }).decls
+      };
+    }
+    function endFrac(path) {
+      var d = path && path.getAttribute('d'); if (!d) return 0;
+      var m = d.match(/A[^A]*$/)[0].trim().split(/[\sA]+/).filter(Boolean).map(Number);
+      var f = ((Math.atan2(m[6] - 50, m[5] - 50) + Math.PI / 2) / (2 * Math.PI) + 1) % 1;
+      return d.split('A').length > 2 && f < 0.001 ? 1 : f;
+    }
+
+    /* ════════════════ GEOMETRY ════════════════ */
+    G('geometry', 'Geometry', 'The corner is the same number everywhere: the outline, the field the glass bends with, and the CSS token.');
+
+    T('n = 2^k: bevel (k 0) is n 1, round (k 1) is n 2, squircle (k 2) is n 4', function () {
+      var e = [0, 1, 2].map(GEOM.expFromK);
+      return { pass: e[0] === 1 && e[1] === 2 && e[2] === 4, note: 'k 0,1,2 → n ' + e.join(', ') };
+    });
+    T('a k = 0 corner is a straight chord, not a curve', function () {
+      var d = GEOM.outline(200, 200, 40, 0, 16);
+      var pts = d.slice(1).split('Z')[0].split('L').slice(0, 17).map(function (s) { return s.split(',').map(Number); });
+      var A = pts[0], B = pts[16], dev = 0;
+      pts.forEach(function (P) {
+        dev = Math.max(dev, Math.abs((B[1] - A[1]) * P[0] - (B[0] - A[0]) * P[1] + B[0] * A[1] - B[1] * A[0]) / Math.hypot(B[1] - A[1], B[0] - A[0]));
+      });
+      return { pass: dev < 1e-6, note: 'largest distance from the chord ' + dev.toExponential(1) + ' px' };
+    });
+    T('continuous corner: superellipse(k) at r × --r-scale cuts the reference diagonal inset within 0.5 px (r 12, 18, 28, 44)', function () {
+      var worst = 0, notes = [];
+      [12, 18, 28, 44].forEach(function (r) {
+        var ref = GEOM.contCorner(r, 400), inset = NaN;
+        for (var i = 1; i < ref.length; i++) {
+          var a = ref[i - 1], b = ref[i], da = a.x - a.y, db = b.x - b.y;
+          if (da === 0) { inset = a.x; break; }
+          if (da * db < 0) { inset = a.x + (b.x - a.x) * da / (da - db); break; }
+        }
+        var c = GEOM.continuous(r), css = GEOM.superellipseInset(c.radius, c.k);
+        worst = Math.max(worst, Math.abs(css - inset));
+        notes.push('r' + r + ' ' + css.toFixed(2) + ' vs ' + inset.toFixed(2));
+      });
+      return { pass: worst <= 0.5, note: notes.join(' · ') + ' px (worst Δ ' + worst.toFixed(3) + ')' };
+    });
+    T('continuous corner: the whole curve stays within 2% of r of the reference (Hausdorff)', function () {
+      var worst = 0, notes = [];
+      [18, 44].forEach(function (r) {
+        var ref = GEOM.contCorner(r, 160), c = GEOM.continuous(r), n = GEOM.expFromK(c.k), se = [];
+        for (var i = 0; i <= 1600; i++) {
+          var th = i / 1600 * Math.PI / 2;
+          se.push({ x: c.radius * (1 - Math.pow(Math.cos(th), 2 / n)), y: c.radius * (1 - Math.pow(Math.sin(th), 2 / n)) });
+        }
+        var one = function (P, Q) { var mx = 0; P.forEach(function (p) { var m = Infinity; Q.forEach(function (q) { var d = Math.hypot(p.x - q.x, p.y - q.y); if (d < m) m = d; }); if (m > mx) mx = m; }); return mx; };
+        var h = Math.max(one(ref, se), one(se, ref));
+        worst = Math.max(worst, (h - 0.1) / r);
+        notes.push('r' + r + ' ' + h.toFixed(3) + ' px');
+      });
+      return { pass: worst <= 0.02, note: notes.join(' · ') + ' (within 2% of r + 0.1 px: ' + (worst * 100).toFixed(2) + '%)' };
+    });
+    T('the page carries the calibration: --k-continuous and --r-scale equal GEOM.CONTINUOUS', function () {
+      var cs = getComputedStyle(document.documentElement);
+      var k = px(cs.getPropertyValue('--k-continuous')), s = px(cs.getPropertyValue('--r-scale'));
+      return { pass: k === GEOM.CONTINUOUS.k && s === GEOM.CONTINUOUS.rScale,
+        note: 'tokens k ' + k + ', r-scale ' + s + ' · GEOM ' + GEOM.CONTINUOUS.k + ' / ' + GEOM.CONTINUOUS.rScale };
+    });
+    T('capsule rule: a radius that reaches the ends is a true semicircle (k 1), a card keeps its k', function () {
+      var cap = GEOM.continuous(18, 200, 36), card = GEOM.continuous(12, 300, 200);
+      return { pass: cap.capsule && cap.k === 1 && cap.radius === 18 && !card.capsule && card.k === GEOM.CONTINUOUS.k,
+        note: '18 on 200×36 → radius ' + cap.radius + ', k ' + cap.k + ' · 12 on 300×200 → k ' + card.k };
+    });
+    T('capsule snap in the page: a 40 px box with a continuous radius draws round, not a lozenge', function () {
+      var el = $('st-snap'), cs = getComputedStyle(el), mode = FG3.cornerState().mode;
+      var shape = cs.getPropertyValue('corner-top-left-shape') || cs.getPropertyValue('corner-shape');
+      if (mode === 'native') return { pass: el.hasAttribute('data-fg3-capsule') && /round|superellipse\(1\)/.test(shape),
+        note: 'native: data-fg3-capsule ' + el.hasAttribute('data-fg3-capsule') + ', corner shape "' + shape + '"' };
+      return { pass: !el.hasAttribute('data-fg3-corner') && (cs.clipPath === 'none' || !cs.clipPath),
+        note: 'fallback: left to border-radius (no clip), radius ' + cs.borderTopLeftRadius };
+    });
+    T('the field at k = 1 is the circular signed distance, exactly', function () {
+      var worst = 0;
+      for (var x = -140; x <= 140; x += 5) for (var y = -140; y <= 140; y += 5) {
+        var qx = Math.abs(x) - 80, qy = Math.abs(y) - 80;
+        var ref = Math.hypot(Math.max(qx, 0), Math.max(qy, 0)) + Math.min(Math.max(qx, qy), 0) - 20;
+        worst = Math.max(worst, Math.abs(GEOM.sdBox(x, y, 100, 100, 20, 2) - ref));
+      }
+      return { pass: worst < 1e-9, note: 'largest |field − circle| ' + worst.toExponential(1) };
+    });
+    T('the squircle field is accurate inside the bevel band (< 0.2 px at n 4)', function () {
+      var r = 34, worst = 0;
+      function ref(u, v, n) {
+        var best = Infinity;
+        for (var i = 0; i <= 2000; i++) {
+          var s = i / 2000, x = s, y = Math.pow(Math.max(0, 1 - Math.pow(x, n)), 1 / n);
+          best = Math.min(best, (u - x) * (u - x) + (v - y) * (v - y));
+          y = s; x = Math.pow(Math.max(0, 1 - Math.pow(y, n)), 1 / n);
+          best = Math.min(best, (u - x) * (u - x) + (v - y) * (v - y));
+        }
+        return Math.sqrt(best);
+      }
+      for (var ax = 1; ax <= r; ax += 3) for (var ay = 1; ay <= r; ay += 3) {
+        var inside = Math.pow(ax / r, 4) + Math.pow(ay / r, 4) <= 1;
+        var t = (inside ? -1 : 1) * ref(ax / r, ay / r, 4) * r;
+        if (t > 0.5 || t < -18) continue;
+        worst = Math.max(worst, Math.abs(GEOM.sdBox(110 - r + ax, 40 - r + ay, 110, 40, r, 4) - t));
+      }
+      return { pass: worst < 0.2, note: 'largest error ' + worst.toFixed(4) + ' px' };
+    });
+    T('concentric: inner radius = outer − measured gap; a capsule’s child is a capsule', function () {
+      var a = $('st-conc-in').getAttribute('data-concentric-r'), b = $('st-conc-cap-in').getAttribute('data-concentric-r') || '';
+      var g = GEOM.concentric(30, 8, {}), c = GEOM.concentric(30, 40, { minimum: 6 });
+      return { pass: a === '22' && /capsule/.test(b) && g.r === 22 && c.r === 6,
+        note: 'page: 30 − 8 → ' + a + ' · capsule parent → "' + b + '" · GEOM floor ' + c.r };
+    });
+
+    /* ════════════════ SPRINGS ════════════════ */
+    G('springs', 'Springs', 'The spring constants, written down rather than tuned, and the CSS the page actually plays.');
+
+    T('Spring(duration 0.5, bounce 0.3) is (mass 1, stiffness 157.9, damping 17.6), as documented', function () {
+      var s = SPRING.Spring({ duration: 0.5, bounce: 0.3 });
+      return { pass: near(s.mass, 1, 1e-9) && near(s.stiffness, 157.9, 0.06) && near(s.damping, 17.6, 0.02),
+        note: 'got (' + s.mass + ', ' + s.stiffness.toFixed(2) + ', ' + s.damping.toFixed(2) + ')' };
+    });
+    T('Spring(mass 1, stiffness 100, damping 10) is (duration 0.63, bounce 0.5), as documented', function () {
+      var s = SPRING.Spring({ mass: 1, stiffness: 100, damping: 10 });
+      return { pass: near(s.duration, 0.628, 0.005) && near(s.bounce, 0.5, 1e-9), note: 'got (' + s.duration.toFixed(3) + ', ' + s.bounce.toFixed(3) + ')' };
+    });
+    T('every --sp-* linear() the page loaded plays within .003 of the solver', function () {
+      var cs = getComputedStyle(document.documentElement), worst = 0, at = '', missing = [];
+      Object.keys(SPRING.NAMED).forEach(function (n) {
+        var str = cs.getPropertyValue('--sp-' + n).trim();
+        if (str.indexOf('linear(') !== 0) { missing.push(n); return; }
+        var s = SPRING.Spring(n);
+        for (var i = 0; i <= 200; i++) {
+          var p = i / 200, e = Math.abs(linearAt(str, p) - s.at(p * s.settlingDuration));
+          if (e > worst) { worst = e; at = n + ' at ' + (p * 100).toFixed(1) + '%'; }
+        }
+      });
+      return { pass: worst <= 0.003 && !missing.length, note: Object.keys(SPRING.NAMED).length + ' springs, worst ' + worst.toFixed(4) + ' (' + at + ')' + (missing.length ? ' · missing ' + missing.join(' ') : '') };
+    });
+    T('every --sp-*-ms is the solver’s settling time', function () {
+      var cs = getComputedStyle(document.documentElement), bad = [];
+      Object.keys(SPRING.NAMED).forEach(function (n) {
+        var ms = px(cs.getPropertyValue('--sp-' + n + '-ms')), want = SPRING.Spring(n).ms();
+        if (!(Math.abs(ms - want) <= 1)) bad.push(n + ' ' + ms + ' vs ' + want);
+      });
+      return { pass: !bad.length, note: bad.length ? bad.join(' · ') : 'all ' + Object.keys(SPRING.NAMED).length + ' within 1 ms' };
+    });
+    T('a retarget keeps velocity (spring layer)', function () {
+      var raf = window.requestAnimationFrame;
+      try {
+        window.requestAnimationFrame = undefined;                 /* a manual clock */
+        var L = SPRING.Layer('snappy', 0, null);
+        L.setTarget(1);
+        for (var i = 0; i < 6; i++) L.step(1 / 60);
+        var v0 = L.velocity, x0 = L.value;
+        L.setTarget(2);
+        var vAfter = L.velocity;
+        L.step(1 / 60);
+        return { pass: v0 > 0.5 && vAfter === v0 && L.value > x0, note: 'velocity before ' + v0.toFixed(3) + ' /s, after the retarget ' + vAfter.toFixed(3) + ' /s' };
+      } finally { window.requestAnimationFrame = raf; }
+    });
+    T('the fixed 60 Hz integrator lands on one trajectory at 30, 60 and 120 Hz', function () {
+      var raf = window.requestAnimationFrame;
+      try {
+        window.requestAnimationFrame = undefined;
+        var got = [30, 60, 120].map(function (hz) {
+          var L = SPRING.Layer('bouncy', 0, null); L.setTarget(1);
+          for (var i = 0; i < 0.4 * hz; i++) L.step(1 / hz);
+          return L.value;
+        });
+        var spread = Math.max.apply(null, got) - Math.min.apply(null, got);
+        return { pass: spread < 2e-3, note: 'x(0.4 s) = ' + got.map(function (v) { return v.toFixed(4); }).join(' / ') };
+      } finally { window.requestAnimationFrame = raf; }
+    });
+    T('linearFrom seeds the current velocity into the first segment of linear()', function () {
+      var s = SPRING.Spring('smooth'), a = s.linearFrom(0, 4, 1), b = s.linearFrom(0, 0, 1);
+      function slope(r) {
+        var p = r.easing.slice(7, -1).split(',').slice(0, 2).map(function (x) { var q = x.trim().split(/\s+/); return [+q[0], parseFloat(q[1]) / 100]; });
+        return (p[1][0] - p[0][0]) / (p[1][1] - p[0][1]) / (r.ms / 1000);
+      }
+      var sa = slope(a), sb = slope(b);
+      return { pass: Math.abs(sa - 4) < 0.6 && Math.abs(sb) < 0.6, note: 'first slope ' + sa.toFixed(2) + ' /s with v0 4 · ' + sb.toFixed(2) + ' /s from rest' };
+    });
+    T('MOTION.progress hands its velocity on when the spring changes (nav-in → nav-out)', function () {
+      if (RM) return { skip: 'reduced motion: progress jumps by design' };
+      var el = $('st-motion-probe');
+      var h1 = MOTION.progress(el, 1, { spring: 'nav-in', from: 0 });
+      return wait(90).then(function () {
+        var v = h1.velocity, h2 = MOTION.progress(el, 0, { spring: 'nav-out' });
+        var carried = h2.velocity;
+        return wait(700).then(function () {
+          return { pass: v > 0.2 && near(carried, v, Math.max(0.05, Math.abs(v) * 0.25)), note: 'nav-in at 90 ms ' + v.toFixed(2) + ' /s → nav-out starts at ' + carried.toFixed(2) + ' /s' };
+        });
+      });
+    });
+
+    /* ════════════════ PALETTE ════════════════ */
+    G('palette', 'Palette', 'The generated stylesheets, read as shipped. Roles come from PALETTE.ROLES, files from its presets, contrast from our own arithmetic.');
+
+    function palettes() {
+      return Promise.all(Object.keys(PALETTE.PRESETS).map(function (p) {
+        return fetchText(paletteFile(p)).then(function (t) { return { preset: p, file: paletteFile(p), text: t, tones: toneBlocks(t) }; });
+      }));
+    }
+    T('every role in PALETTE.ROLES is declared in every generated palette: light, dark and stage blocks', function () {
+      return palettes().then(function (list) {
+        var miss = [];
+        list.forEach(function (f) {
+          ['light', 'dark', 'stage'].forEach(function (b) {
+            PALETTE.ROLES.forEach(function (r) { if (!(('--' + r) in f.tones[b])) miss.push(f.file.replace('assets/', '') + ' ' + b + ' --' + r); });
+          });
+        });
+        return { pass: !miss.length, note: list.length + ' files × 3 blocks × ' + PALETTE.ROLES.length + ' roles' + (miss.length ? ' · missing: ' + miss.slice(0, 6).join(', ') : '') };
+      });
+    });
+    T('each shipped palette is exactly what palette.js generates today', function () {
+      return palettes().then(function (list) {
+        var stale = list.filter(function (f) {
+          var body = f.text.slice(f.text.indexOf('*/') + 2).trim();
+          return body !== PALETTE.toCSS(PALETTE.build({ preset: f.preset })).trim();
+        }).map(function (f) { return f.file; });
+        return { pass: !stale.length, note: stale.length ? 'stale or hand-edited: ' + stale.join(', ') : list.length + ' files regenerate byte for byte' };
+      });
+    });
+    T('contrast holds in the shipped files, recomputed here: label 7:1, secondary inks 4.5:1, tertiary and series 3:1', function () {
+      var RULES = [['label', 7], ['label-2', 4.5], ['link', 4.5], ['accent', 4.5], ['ok', 4.5], ['warn', 4.5], ['bad', 4.5],
+        ['sweep-1', 4.5], ['label-3', 3], ['label-4', 3], ['series-1', 3], ['series-2', 3], ['series-3', 3], ['series-4', 3], ['series-5', 3], ['series-6', 3]];
+      return palettes().then(function (list) {
+        var fails = [], worst = { m: Infinity };
+        list.forEach(function (f) {
+          ['light', 'dark'].forEach(function (tone) {
+            var t = f.tones[tone], grounds = ['--bg-1', '--bg-2', '--bg-3', '--bg-elevated'].map(function (g) { return rgbOf(t[g]); });
+            function hold(role, need, gs, ground) {
+              var ink = rgbOf(t['--' + role]); if (!ink) { fails.push(f.preset + ' ' + tone + ' ' + role + ' unparsed'); return; }
+              gs.forEach(function (g) {
+                var r = wcag(over8(ink, g), g);
+                if (r / need < worst.m) worst = { m: r / need, s: f.preset + ' ' + tone + ' --' + role + ' ' + r.toFixed(2) + ':1' };
+                if (r + 0.005 < need) fails.push(f.preset + ' ' + tone + ' --' + role + ' ' + r.toFixed(2) + ' on ' + (ground || 'bg'));
+              });
+            }
+            RULES.forEach(function (x) { hold(x[0], x[1], grounds); });
+            ['ok', 'warn', 'bad'].forEach(function (k) {
+              var wash = rgbOf(t['--' + k + '-fill']);
+              hold(k + '-strong', 4.5, grounds.map(function (g) { return over8(wash, g); }), k + '-fill');
+              hold(k + '-ink', 4.5, [rgbOf(t['--' + k])], '--' + k);
+            });
+            hold('accent-ink', 4.5, [rgbOf(t['--accent-solid']), rgbOf(t['--accent-hover']), rgbOf(t['--accent-active'])], 'accent fills');
+            var fill = rgbOf(t['--fill-1']);
+            hold('label-2-on-fill', 4.5, grounds.map(function (g) { return over8(fill, g); }), 'fill-1');
+          });
+        });
+        return { pass: !fails.length, note: (fails.length ? fails.slice(0, 5).join(' · ') + ' · ' : '') + 'tightest: ' + worst.s };
+      });
+    });
+    T('increased contrast is never worse than the base, role by role, both tones, every brand', function () {
+      return palettes().then(function (list) {
+        var worse = [], n = 0;
+        list.forEach(function (f) {
+          [['light', 'moreLight'], ['dark', 'moreDark']].forEach(function (pair) {
+            var base = f.tones[pair[0]], more = f.tones[pair[1]];
+            var grounds = ['--bg-1', '--bg-2', '--bg-3', '--bg-elevated'].map(function (g) { return rgbOf(base[g]); });
+            Object.keys(more).forEach(function (k) {
+              if (/^--(fill|separator|sys|bg)/.test(k) || /on-fill$|-strong$/.test(k)) return;
+              var a = rgbOf(base[k]), b = rgbOf(more[k]); if (!a || !b) return;
+              n++;
+              grounds.forEach(function (g) {
+                var ra = wcag(over8(a, g), g), rb = wcag(over8(b, g), g);
+                if (rb + 0.005 < ra) worse.push(f.preset + ' ' + pair[0] + ' ' + k + ' ' + ra.toFixed(2) + '→' + rb.toFixed(2));
+              });
+            });
+          });
+        });
+        return { pass: n > 20 && !worse.length, note: n + ' stepped roles checked' + (worse.length ? ' · worse: ' + worse.slice(0, 4).join(', ') : ', none got worse') };
+      });
+    });
+    T('the page resolved the palette: --label and --bg-1 read the linked file in both tones', function () {
+      return fetchText('assets/fg3-color.css').then(function (t) {
+        var tb = toneBlocks(t), out = [], ok = true;
+        ['light', 'dark'].forEach(function (tone) {
+          var p = document.createElement('div'); p.setAttribute('data-tone', tone); document.body.appendChild(p);
+          var cs = getComputedStyle(p);
+          ['--label', '--bg-1', '--accent'].forEach(function (r) {
+            var got = cs.getPropertyValue(r).trim(), want = tb[tone][r];
+            if (got !== want) ok = false;
+            out.push(tone + ' ' + r + ' ' + got);
+          });
+          p.remove();
+        });
+        return { pass: ok, note: out.join(' · ') };
+      });
+    });
+
+    /* ════════════════ TOKENS ════════════════ */
+    G('tokens', 'Type and tokens', 'Held to measured values at this width, not to our own tokens.');
+
+    /* reference values, the classes each role copies: [size, line px, tracking em, weight] by width */
+    var REFTYPE = {
+      't-hero':     { lg: [80, 84, -0.015, 600], md: [64, 68, -0.009, 600], sm: [48, 52.0077, -0.003, 600], xs: [40, 44, 0, 600], xsNote: 'SPEC §3 sets 40 at ≤480 (the marquee keeps 48)' },
+      't-headline': { lg: [56, 60, -0.005, 600], md: [48, 52.0077, -0.003, 600], sm: [40, 44, 0, 600], xs: [32, 36, 0.004, 600] },
+      't-section':  { lg: [48, 52.0077, -0.003, 600], md: [40, 44, 0, 600], sm: [32, 36, 0.004, 600] },
+      't-subtitle': { lg: [28, 32, 0.007, 600], md: [24, 28, 0.009, 600], sm: [21, 25, 0.011, 600] },
+      't-lede':     { lg: [21, 29.0010, 0.011, 400], md: [21, 29.0010, 0.011, 400], sm: [19, 27.0010, 0.012, 400] },
+      't-body':     { lg: [17, 25, -0.022, 400] },
+      't-callout':  { lg: [19, 23, 0.012, 400], md: [17, 21.0012, -0.022, 400], sm: [14, 18.0008, -0.016, 400] },
+      't-micro':    { lg: [12, 16.0005, -0.01, 400] }
+    };
+    function bandOf(w) { return w <= 480 ? 'xs' : w <= 734 ? 'sm' : w <= 1068 ? 'md' : 'lg'; }
+    function refFor(role) {
+      var t = REFTYPE[role], b = bandOf(innerWidth), order = ['xs', 'sm', 'md', 'lg'], i = order.indexOf(b);
+      while (!t[order[i]]) i++;
+      return { v: t[order[i]], note: order[i] === 'xs' ? t.xsNote : null };
+    }
+    function probe(cls) { var p = document.createElement('p'); p.className = cls; p.textContent = 'Probe'; p.style.cssText = 'position:absolute;left:-9999px;top:0'; document.body.appendChild(p); return p; }
+    T('type roles at this width equal the measured size, line height, tracking and weight', function () {
+      var bad = [], notes = [];
+      Object.keys(REFTYPE).forEach(function (role) {
+        var p = probe(role), cs = getComputedStyle(p), a = refFor(role), v = a.v;
+        var fs = px(cs.fontSize), lh = px(cs.lineHeight), ls = cs.letterSpacing === 'normal' ? 0 : px(cs.letterSpacing), fw = +cs.fontWeight;
+        if (!near(fs, v[0], 0.01) || !near(lh, v[1], 0.06) || !near(ls, v[2] * v[0], 0.02) || fw !== v[3])
+          bad.push('.' + role + ' ' + f2(fs) + '/' + f2(lh) + ' ' + f2(ls) + 'px ' + fw + ' ≠ ' + v[0] + '/' + v[1] + ' ' + f2(v[2] * v[0]) + 'px ' + v[3]);
+        if (a.note) notes.push(a.note);
+        p.remove();
+      });
+      return { pass: !bad.length, note: (bad.length ? bad.join(' · ') : Object.keys(REFTYPE).length + ' roles match at ' + innerWidth + ' px') + (notes.length ? ' · ' + notes.join('; ') : '') };
+    });
+    T('the face switch: every type role keeps optical sizing on, so the text or display cut follows the size', function () {
+      var root = getComputedStyle(document.documentElement), bad = [], n = 0;
+      var norm = function (f) { return f.replace(/["']/g, '').replace(/\s*,\s*/g, ',').trim(); };
+      var disp = norm(root.getPropertyValue('--font-display')), text = norm(root.getPropertyValue('--font-text'));
+      Object.keys(REFTYPE).forEach(function (role) {
+        var p = probe(role), cs = getComputedStyle(p), fs = px(cs.fontSize), fam = norm(cs.fontFamily);
+        var want = fs >= 19 ? disp : text; n++;
+        if (fam !== want) bad.push('.' + role + ' ' + fs + 'px reads the ' + (fs >= 19 ? 'text' : 'display') + ' stack');
+        // The stacks name no per-cut family: the system face and Inter's opsz axis
+        // switch text/display cuts by size, which font-optical-sizing:none would defeat.
+        if (cs.fontOpticalSizing !== 'auto') bad.push('.' + role + ' has font-optical-sizing:' + cs.fontOpticalSizing);
+        p.remove();
+      });
+      return { pass: !bad.length && disp !== '' && text !== '', note: bad.length ? bad.join(' · ') : n + ' roles at this width read the right stack, optical sizing auto' };
+    });
+    T('no bare var() reads a custom property that nothing declares (check-vars, in the page)', function () {
+      var scripts = [].filter.call(document.scripts, function (s) { return s.src; }).map(function (s) { return fetchText(s.src); });
+      return Promise.all([sheetTexts(), Promise.all(scripts)]).then(function (r) {
+        var declared = {}, misses = [], reads = 0;
+        var INTENTIONAL = { 'm-name': 1, 'fg3-r': 1 };
+        r[0].forEach(function (s) {
+          var t = strip(s.text), m, re = /(?:^|[;{\s])--([\w-]+)\s*:/g;
+          while ((m = re.exec(t))) declared[m[1]] = 1;
+          re = /@property\s+--([\w-]+)/g; while ((m = re.exec(t))) declared[m[1]] = 1;
+        });
+        r[1].concat([].filter.call(document.scripts, function (s) { return !s.src; }).map(function (s) { return s.textContent; })).forEach(function (t) {
+          var m, re = /(var\(\s*)?--([a-zA-Z][\w-]*)/g;
+          t = t.replace(/\/\*[\s\S]*?\*\//g, '');
+          while ((m = re.exec(t))) if (!m[1]) declared[m[2]] = 1;
+        });
+        r[0].forEach(function (s) {
+          var t = strip(s.text), i = 0;
+          while ((i = t.indexOf('var(', i)) >= 0) {
+            var d = 0, j = i + 3;
+            for (; j < t.length; j++) { if (t[j] === '(') d++; else if (t[j] === ')' && --d === 0) break; }
+            var inner = t.slice(i + 4, j), comma = inner.indexOf(','), name = (comma < 0 ? inner : inner.slice(0, comma)).trim();
+            i += 4;
+            if (name.indexOf('--') !== 0) continue;
+            reads++;
+            name = name.slice(2);
+            if (declared[name] || INTENTIONAL[name]) continue;
+            if (comma >= 0) { var only = /^var\(\s*--([\w-]+)\s*\)$/.exec(inner.slice(comma + 1).trim()); if (!only || declared[only[1]]) continue; }
+            misses.push(s.href + ' --' + name);
+          }
+        });
+        var uniq = misses.filter(function (x, k) { return misses.indexOf(x) === k; });
+        return { pass: !uniq.length && reads > 500, note: reads + ' var() reads in ' + r[0].length + ' sheets, ' + Object.keys(declared).length + ' names declared' + (uniq.length ? ' · UNDECLARED: ' + uniq.slice(0, 6).join(', ') : '') };
+      });
+    });
+    T('content width and band padding match the reference at this width', function () {
+      var vc = document.querySelector('#summary .viewport-content'), W = document.documentElement.clientWidth;
+      var want = Math.min(W * 0.875, W <= 734 ? 420 : 1260), got = vc.getBoundingClientRect().width;
+      var pad = px(getComputedStyle($('summary')).paddingBottom), wantPad = W <= 734 ? 80 : W <= 1068 ? 96 : 128;
+      return { pass: near(got, want, 0.6) && pad === wantPad, note: 'content ' + got.toFixed(1) + ' px (want ' + want.toFixed(1) + ') · story band ' + pad + ' px (want ' + wantPad + ')' };
+    });
+
+    /* ════════════════ MATERIAL ════════════════ */
+    G('material', 'Material', 'What the glass engine produced on the rig at the top of this page.');
+
+    T('engine gate: refraction exactly when the browser is Chromium on a hardware GPU', function () {
+      var uad = navigator.userAgentData, chromium = uad && uad.brands ? uad.brands.some(function (b) { return /Chromium/.test(b.brand); }) : /(Chrome|Chromium)\/\d/.test(navigator.userAgent);
+      var backdrop = CSS.supports('backdrop-filter', 'blur(1px)') || CSS.supports('-webkit-backdrop-filter', 'blur(1px)');
+      var renderer = '', software = true;
+      try {
+        var gl = document.createElement('canvas').getContext('webgl');
+        if (gl) { var ext = gl.getExtension('WEBGL_debug_renderer_info'); renderer = String(gl.getParameter(ext ? ext.UNMASKED_RENDERER_WEBGL : gl.RENDERER)); software = /SwiftShader|llvmpipe|softpipe|Basic Render Driver|Software Adapter|Microsoft Basic/i.test(renderer); var lose = gl.getExtension('WEBGL_lose_context'); if (lose) lose.loseContext(); }
+      } catch (e) {}
+      var want = !backdrop ? 'flat' : chromium && !software ? 'refraction' : 'frost';
+      return { pass: LG3.engine === want, note: 'LG3 ' + LG3.engine + ', expected ' + want + ' (chromium ' + chromium + ', renderer ' + (renderer || 'none') + ')' };
+    });
+    T('refraction on a 50 px bar: at least 8 px at the rim and 2 px on average', function () {
+      var bar = $('st-bar'), s = LG3.stats(bar);
+      if (!s) return { pass: false, note: 'LG3.stats returned nothing: the bar never became glass' };
+      return { pass: bar.offsetHeight === 50 && s.max >= 8 && s.mean >= 2,
+        note: bar.offsetWidth + '×' + bar.offsetHeight + ' px: max ' + s.max + ' px, mean ' + s.mean + ' px over ' + s.displaced + ' px · path ' + s.path };
+    });
+    T('budget: at most 3 hosts refract on a desktop, highest priority first', function () {
+      var n = LG3.refracting, b = LG3.budget, eng = LG3.engine;
+      var path = function (id) { var h = $(id); return h.getAttribute('data-lg3-engine') || (h.__lg3 && h.__lg3.path); };
+      if (eng !== 'refraction') { $('st-refracting').textContent = 'This browser draws frost, not refraction (' + eng + ').'; return { pass: n === 0, note: 'engine ' + eng + ': nothing may refract, ' + n + ' do' }; }
+      var top = path('st-bar'), low = path('st-p1');
+      var bending = ['st-bar', 'st-p5', 'st-p4', 'st-p3', 'st-p2', 'st-p1'].filter(function (id) { return path(id) === 'refraction'; })
+        .map(function (id) { return id === 'st-bar' ? 'the bar' : 'pill ' + id.slice(4); });
+      $('st-refracting').textContent = 'Measured here: ' + (bending.length ? bending.join(', ') + (bending.length === 1 ? ' refracts.' : ' refract.') : 'none refract.');
+      return { pass: n <= b && b === (innerWidth < 735 ? 1 : 3) && top === 'refraction' && low !== 'refraction',
+        note: n + ' refracting of a budget of ' + b + ' · priority 9 bar: ' + top + ' · priority 1 pill: ' + low };
+    });
+    T('at 402 px the budget is one host, and it is the highest priority', function () {
+      return frameReady('st-frame-phone').then(function (w) {
+        /* the budget only spends on glass that is on screen: on a narrow page
+           the phone sits below the fold, so bring it into view for the read */
+        var f = $('st-frame-phone'), r = f.getBoundingClientRect(), y0 = scrollY, moved = false;
+        if (r.top < 0 || r.bottom > innerHeight) { f.scrollIntoView({ block: 'center', behavior: 'instant' }); moved = true; }
+        return wait(moved ? 500 : 300).then(function () {
+          var L = w.LG3, bar = w.document.getElementById('f-bar'), p = bar.getAttribute('data-lg3-engine');
+          var one = L.engine !== 'refraction' ? L.refracting === 0 : L.refracting === 1 && p === 'refraction';
+          if (moved) scrollTo(0, y0);
+          return { pass: w.innerWidth === 402 && L.budget === 1 && one, note: 'frame ' + w.innerWidth + ' px: budget ' + L.budget + ', refracting ' + L.refracting + ', bar ' + p };
+        });
+      });
+    });
+    T('no glass host sits inside an ancestor with opacity below 1', function () {
+      function check(doc, where) {
+        var bad = [];
+        doc.querySelectorAll('.lg3,[data-lg3]').forEach(function (h) {
+          if (h.hasAttribute('data-lg3-away') || !h.getClientRects().length) return;
+          for (var a = h.parentElement; a && a !== doc.documentElement; a = a.parentElement) {
+            var o = parseFloat(doc.defaultView.getComputedStyle(a).opacity);
+            if (o < 1) { bad.push(where + ': ' + (h.id || h.className.split(' ')[0]) + ' under ' + (a.id || a.tagName.toLowerCase() + '.' + String(a.className).split(' ')[0]) + ' at ' + o); break; }
+          }
+        });
+        return bad;
+      }
+      return frameReady('st-frame-phone').then(function (w) {
+        var n = document.querySelectorAll('.lg3').length + w.document.querySelectorAll('.lg3').length;
+        var bad = check(document, 'page').concat(check(w.document, 'phone'));
+        return { pass: n > 8 && !bad.length, note: n + ' glass hosts' + (bad.length ? ' · ' + bad.slice(0, 4).join(' · ') : ', none faded') };
+      });
+    });
+    T('reduce transparency: glass goes solid and stops refracting, and returns when released', function () {
+      var bar = $('st-bar'), before = LG3.refracting, tint = bar.querySelector('.lg3__tint');
+      LG3.setReduceTransparency(true);
+      return wait(200).then(function () {
+        var m = LG3.material(bar), n = LG3.refracting, attr = document.documentElement.hasAttribute('data-reduce-transparency');
+        var bg = tint ? getComputedStyle(tint).backgroundColor : '', a = (/rgba?\([^)]*,\s*([\d.]+)\)/.exec(bg) || [0, 1])[1];
+        LG3.setReduceTransparency(null);
+        return wait(250).then(function () {
+          var after = LG3.refracting;
+          return { pass: attr && n === 0 && m.scale <= 0.14 && m.blur >= 24 && +a >= 0.9 && !document.documentElement.hasAttribute('data-reduce-transparency') && after === before,
+            note: 'on: wash ' + (1 - m.scale).toFixed(2) + ', blur ' + m.blur.toFixed(1) + ' px, tint alpha ' + a + ', refracting ' + n + ' · released: refracting ' + after + ' (was ' + before + ')' };
+        });
+      });
+    });
+    T('dematerialize ramps the lens and the scale, never the host’s opacity', function () {
+      if (RM) return { skip: 'reduced motion: materialize switches without a ramp' };
+      var h = $('st-p3'), seen = [], ops = [];
+      var p = LG3.dematerialize(h, { duration: 0.5, bounce: 0 });
+      var t0 = performance.now();
+      return new Promise(function (res) {
+        (function sample() {
+          var cs = getComputedStyle(h);
+          seen.push(px(cs.getPropertyValue('--lg3-mat')));
+          for (var a = h; a && a.nodeType === 1; a = a.parentElement) ops.push(parseFloat(getComputedStyle(a).opacity));
+          if (performance.now() - t0 < 260) setTimeout(sample, 30); else res();
+        })();
+      }).then(function () { return p; }).then(function () { return LG3.materialize(h, { duration: 0.3, bounce: 0 }); }).then(function () {
+        var mid = seen.filter(function (v) { return v > 0.02 && v < 0.98; }).length;
+        return { pass: mid >= 2 && Math.min.apply(null, ops) === 1, note: seen.length + ' samples, ' + mid + ' mid-ramp (--lg3-mat ' + seen.map(function (v) { return v.toFixed(2); }).join(' ') + ') · lowest opacity on the host or above: ' + Math.min.apply(null, ops) };
+      });
+    });
+
+    /* ════════════════ CORNERS ════════════════ */
+    G('corners', 'Corners, everywhere', 'Derived from the stylesheets: every rule that declares corner-shape, in both the native and the Safari path.');
+
+    function countDecls(texts) {
+      var n = 0, per = {};
+      texts.forEach(function (s) {
+        var t = strip(s.text), k;
+        while ((k = t.search(/@(-webkit-)?keyframes/)) >= 0) { var o = t.indexOf('{', k); t = t.slice(0, k) + t.slice(matchBrace(t, o) + 1); }
+        var c = (t.match(/(^|[;{\s])corner-shape\s*:/g) || []).length;
+        if (c) per[s.href] = c;
+        n += c;
+      });
+      return { n: n, per: per };
+    }
+    T('the corner pass knows every corner-shape declaration in the loaded stylesheets', function () {
+      return sheetTexts().then(function (texts) {
+        var c = countDecls(texts), st = FG3.cornerState();
+        return { pass: st.rules === c.n && c.n > 20, note: 'stylesheets declare ' + c.n + ', the pass holds ' + st.rules + ' (' + st.mode + ') · ' +
+          Object.keys(c.per).map(function (k) { return k.replace('assets/', '') + ' ' + c.per[k]; }).join(', ') };
+      });
+    });
+    /* Build one element that matches a selector: compounds of tag, classes,
+       ids and attributes joined by descendant or child combinators. Anything
+       richer (pseudo-classes, siblings) is reported as not buildable. */
+    function build(sel, doc) {
+      var s = sel.replace(/:where\(([^(),]*)\)/g, '$1').replace(/:is\(([^(),]*)\)/g, '$1').replace(/:not\([^()]*\)/g, '');
+      if (/[+~]|::?[a-z-]+/i.test(s.replace(/\[[^\]]*\]/g, ''))) return null;
+      var parts = s.trim().split(/\s*>\s*|\s+/).filter(Boolean), root = null, cur = null;
+      for (var i = 0; i < parts.length; i++) {
+        var p = parts[i], tag = (/^[a-z][\w-]*/i.exec(p) || ['div'])[0];
+        if (/^(html|body|:root)$/i.test(tag)) continue;
+        var el = doc.createElement(tag), m, re = /\.([\w-]+)|#([\w-]+)|\[([\w-]+)(?:([~|^$*]?=)"?([^"\]]*)"?)?\]/g;
+        while ((m = re.exec(p))) {
+          if (m[1]) el.classList.add(m[1]);
+          else if (m[2]) el.id = m[2];
+          else if (m[3]) el.setAttribute(m[3], m[5] != null ? m[5] : '');
+        }
+        if (!root) root = el; else cur.appendChild(el);
+        cur = el;
+      }
+      if (!cur) return null;
+      return { root: root, target: cur };
+    }
+    T('Safari path: every element a corner-shape rule reaches is considered, and shaped unless it is a capsule, glass or k 1', function () {
+      return frameReady('st-frame-corners').then(function (w) {
+        var d = w.document, lab = d.getElementById('st-cf-lab'), made = [], unbuildable = 0;
+        return sheetTexts(d).then(function (texts) {
+          texts.forEach(function (s) {
+            blocks(s.text).forEach(function (b) {
+              if (b.keyframes || !('corner-shape' in b.decls)) return;
+              b.sel.split(',').forEach(function (one) {
+                one = one.trim();
+                if (/:(hover|active|focus|focus-visible|focus-within|checked|disabled|popover-open|open)\b|::/.test(one)) { unbuildable++; return; }
+                var x = build(one, d);
+                if (!x) { unbuildable++; return; }
+                x.target.style.cssText += ';display:block;width:180px;height:120px;position:relative';
+                lab.appendChild(x.root);
+                var ok = false; try { ok = x.target.matches(one); } catch (e) {}
+                if (!ok) { x.root.remove(); unbuildable++; return; }
+                made.push({ sel: one, el: x.target, file: s.href });
+              });
+            });
+          });
+          return w.FG3.corners({ reload: true });
+        }).then(function () { return wait(250); }).then(function () {
+          var missed = [], shaped = 0, skipped = 0, foreign = w.FG3.cornerState().foreign, off = w.FG3.cornerState().off || [];
+          made.forEach(function (m) {
+            var el = m.el, k = el.__fg3K;
+            if (off.indexOf(el) >= 0) { skipped++; return; }                /* hands off: data-fg3-corner=off, or a corner driven by calc() (a morph) */
+            if (k == null) { missed.push(m.sel + ' (' + m.file.replace('assets/', '') + ')'); return; }
+            if (el.hasAttribute('data-fg3-corner')) { shaped++; return; }
+            if (foreign.indexOf(el) >= 0) { skipped++; return; }          /* its own clip-path owns the silhouette */
+            var cs = w.getComputedStyle(el), r = px(cs.borderTopLeftRadius), h = Math.min(el.offsetWidth, el.offsetHeight) / 2 - 0.5;
+            if (k === 1 || el.matches('[data-lg3],.lg3') || r < 0.5 || r >= h || el.hasAttribute('data-fg3-capsule')) skipped++;
+            else missed.push(m.sel + ' (k ' + k + ', r ' + r + ', not shaped)');
+          });
+          return { pass: made.length > 20 && !missed.length,
+            note: made.length + ' built from the rules: ' + shaped + ' shaped, ' + skipped + ' rightly left alone (capsule, glass, k 1, no radius, a clip-path of their own, or hands off), ' + unbuildable + ' need a state or context no element can be built for' + (missed.length ? ' · MISSED: ' + missed.slice(0, 5).join(', ') : '') };
+        });
+      });
+    });
+    T('Safari path: a plain box is clipped to the reference diagonal; an edged box gets the circle of equal mass', function () {
+      return frameReady('st-frame-corners').then(function (w) {
+        var d = w.document, sq = d.getElementById('st-cf-square'), ci = d.getElementById('st-cf-circle');
+        var cs = w.getComputedStyle(sq), cc = w.getComputedStyle(ci), R = 28 * GEOM.CONTINUOUS.rScale;
+        var clip = cs.clipPath || '', nums = (clip.match(/-?\d*\.?\d+(e-?\d+)?/g) || []).map(Number), pts = [];
+        for (var k = 0; k + 1 < nums.length; k += 2) pts.push([nums[k], nums[k + 1]]);
+        var diag = null;
+        for (var i = 1; i < pts.length && pts[i][0] < 60; i++) {            /* top-left corner: where x == y */
+          var a = pts[i - 1], b = pts[i], da = a[0] - a[1], db = b[0] - b[1];
+          if (da * db <= 0 && a[0] < 60) { var t = da === db ? 0 : da / (da - db); diag = a[0] + (b[0] - a[0]) * t; break; }
+        }
+        var contInset = GEOM.contInset(28), circle = px(cc.borderTopLeftRadius);
+        return { pass: sq.getAttribute('data-fg3-corner') === 'square' && px(cs.borderTopLeftRadius) === 0 && diag != null && near(diag, contInset, 0.5) &&
+            ci.getAttribute('data-fg3-corner') === 'circle' && near(circle, 28, 0.6) && (!cc.clipPath || cc.clipPath === 'none'),
+          note: 'square: clip diagonal ' + (diag == null ? 'none' : diag.toFixed(2)) + ' px vs reference ' + contInset.toFixed(2) + ' · edged: radius ' + circle.toFixed(2) + ' px (the reference 28, from ' + R.toFixed(2) + ' continuous)' };
+      });
+    });
+
+    /* ════════════════ MOTION ════════════════ */
+    G('motion', 'Reduced motion', 'Computed styles in a copy of this page with reduced motion emulated: displacement goes, information stays.');
+
+    T('no blanket rule: nothing sets animation or transition durations with !important on *', function () {
+      var bad = [];
+      (function walk(list, where) {
+        for (var i = 0; i < list.length; i++) {
+          var r = list[i];
+          if (r.selectorText && /(^|,)\s*\*/.test(r.selectorText)) {
+            ['animation-duration', 'transition-duration', 'animation', 'transition'].forEach(function (p) {
+              if (r.style.getPropertyValue(p) && r.style.getPropertyPriority(p) === 'important') bad.push(where + ' ' + r.selectorText + ' {' + p + ' !important}');
+            });
+          }
+          if (r.cssRules && r.cssRules.length) walk(r.cssRules, where);
+        }
+      })([].concat.apply([], [].map.call(document.styleSheets, function (s) { try { return [].slice.call(s.cssRules); } catch (e) { return []; } })), 'page');
+      return { pass: !bad.length, note: bad.length ? bad.join(' · ') : document.styleSheets.length + ' sheets walked, including every @media block' };
+    });
+    T('reduced motion: state indicators keep moving (spinner, live dot, pulse, spin, ring, progress, skeleton)', function () {
+      return frameReady('st-frame-rm').then(function (w) {
+        var d = w.document, list = [['rm-spinner'], ['rm-live', '::before'], ['rm-pulse'], ['rm-spin'], ['rm-ring'], ['rm-indet', '::after'], ['rm-skel']];
+        var bad = [], seen = [];
+        list.forEach(function (x) {
+          var el = d.getElementById(x[0]), cs = w.getComputedStyle(el, x[1] || null);
+          var name = cs.animationName, it = cs.animationIterationCount, dur = parseFloat(cs.animationDuration);
+          seen.push(x[0].slice(3) + (x[1] || '') + ' ' + name + ' ' + dur + 's');
+          if (!name || name === 'none' || it !== 'infinite' || !(dur >= 0.3)) bad.push(x[0] + (x[1] || '') + ' ' + name + '/' + it + '/' + cs.animationDuration);
+        });
+        return { pass: w.matchMedia('(prefers-reduced-motion: reduce)').matches && w.__stRmRules > 5 && !bad.length,
+          note: (bad.length ? 'STOPPED: ' + bad.join(', ') + ' · ' : '') + seen.join(' · ') + ' · ' + w.__stRmRules + ' @media rules rewritten' };
+      });
+    });
+    T('reduced motion: no displacement — entrances and scenes sit in their final state', function () {
+      return frameReady('st-frame-rm').then(function (w) {
+        var d = w.document, bad = [];
+        ['rm-enter', 'rm-scale'].forEach(function (id) {
+          var cs = w.getComputedStyle(d.getElementById(id));
+          if (cs.transform !== 'none' || (cs.translate !== 'none' && cs.translate !== '0px') || (cs.scale !== 'none' && cs.scale !== '1')) bad.push(id + ' ' + cs.transform + '/' + cs.translate + '/' + cs.scale);
+        });
+        var prog = w.getComputedStyle(d.getElementById('rm-scene')).getPropertyValue('--progress').trim();
+        if (prog !== '1') bad.push('scene --progress ' + prog);
+        var sheet = [].some.call(d.querySelectorAll('.segmented-indicator'), function () { return false; });
+        return { pass: !bad.length && !sheet, note: bad.length ? bad.join(' · ') : 'entrance and scale reveal untransformed, scene --progress 1' };
+      });
+    });
+    T('reduced motion: the gate reads it, ANIM stands down, and MOTION.progress lands at once', function () {
+      return frameReady('st-frame-rm').then(function (w) {
+        var html = w.document.documentElement, el = w.document.getElementById('rm-prog');
+        w.MOTION.progress(el, 1, { from: 0 });
+        var v = el.style.getPropertyValue('--progress'), moving = el.hasAttribute('data-m-moving');
+        return { pass: html.classList.contains('no-fd-enhanced') && html.getAttribute('data-fd-cause') === 'reduced-motion' && w.ANIM.enhanced === false && v === '1' && !moving,
+          note: 'gate ' + (html.classList.contains('no-fd-enhanced') ? 'no-fd-enhanced' : 'fd-enhanced') + ' (' + html.getAttribute('data-fd-cause') + '), ANIM enhanced ' + w.ANIM.enhanced + ', --progress ' + v + ' at once' };
+      });
+    });
+
+    /* ════════════════ ANIM ════════════════ */
+    G('anim', 'Scroll choreography', 'A keyframe language, compiled onto the browser’s own scroll timeline.');
+
+    var BOX = { null: { t: 3000, h: 800, b: 3800, w: 1200, l: 120, r: 1320 }, 0: { t: 5000, h: 2000, b: 7000, w: 1440, l: 0, r: 1440 }, 1: { t: 8000, h: 500, b: 8500, w: 1440, l: 0, r: 1440 } };
+    var CTX = { vh: 1000, vw: 1440, box: function (r) { return BOX[r]; },
+      css: function (n) { return { '--r-localnav-height': '52', '--tom-scrim-fade-in-kf-start': 'a0t - 110vh', '--product-viewer-entice-trigger-position': '50vh' }[n] || '0'; },
+      prop: function (n) { return { offsetWidth: 1200 }[n]; } };
+    T('The expression language evaluates: anchors, vh, h, css(), min/max, ternaries', function () {
+      var cases = [['a0t - 100vh', 4000], ['t - 50vh + 50h', 2900], ['max(a0t - (50vh - 50a0h), a0b - 100vh + h)', 6800], ['b + 100%', 4600],
+        ['t - css(--product-viewer-entice-trigger-position)', 2500], ['t + 100a0h - css(--r-localnav-height)', 4948], ['css(--tom-scrim-fade-in-kf-start, a1)', 3900],
+        ['a1b + 50vh', 9000], ['(b - 100vh) + 20px', 2820], ['t < 5000 ? 1 : 2', 1], ['prop(offsetWidth) / 2', 600], ['-500px', -500]];
+      var bad = cases.filter(function (c) { var v; try { v = ANIM.expr(c[0], CTX); } catch (e) { v = e.message; } return !(Math.abs(v - c[1]) < 1e-6); })
+        .map(function (c) { var v; try { v = ANIM.expr(c[0], CTX); } catch (e) { v = e.message; } return c[0] + ' = ' + v + ' (want ' + c[1] + ')'; });
+      return { pass: !bad.length, note: bad.length ? bad.join(' · ') : cases.length + ' expressions from reference pages evaluate as the interpreter does' };
+    });
+    T('rangeOf maps t + c·h + K onto view() exit-crossing calc(c·100% + K)', function () {
+      var cases = [['t - 85vh', 'exit-crossing -85vh', null], ['b', 'exit-crossing 100%', null], ['t + 60h - 100vh', 'exit-crossing calc(60% - 100vh)', null],
+        ['a0t - 100vh', 'exit-crossing -100vh', 0], ['t', 'exit-crossing 0%', null]];
+      var bad = [];
+      cases.forEach(function (c) { var r = ANIM.rangeOf(c[0]); if (!r || r.css !== c[1] || (r.ref === undefined ? null : r.ref) !== c[2]) bad.push(c[0] + ' → ' + JSON.stringify(r)); });
+      var none = ANIM.rangeOf('max(t, b - 50vh)');
+      return { pass: !bad.length && none === null, note: bad.length ? bad.join(' · ') : cases.length + ' ranges map; a non-linear max() is left to the JS path' };
+    });
+    T('a compiled keyframe tracks the scroll position the way the reference formula says', function () {
+      return frameReady('st-frame-corners').then(function (w) {
+      var el = w.document.getElementById('f-anim'), info = (w.ANIM.inspect(el) || [])[0];
+      if (!info) return { pass: false, note: 'ANIM never compiled the probe' };
+      var top = el.getBoundingClientRect().top + w.scrollY, vh = w.innerHeight, y0 = w.scrollY, got = [];
+      var at = function (y) { w.scrollTo(0, y); return frames(3, w).then(function () { return wait(60); }).then(function () { got.push(+w.getComputedStyle(el).opacity); }); };
+      /* start t - 100vh, end t - 50vh, opacity .2 → 1: progress (y - start) / (end - start) */
+      return at(top - 0.75 * vh).then(function () { return at(top - 0.55 * vh); }).then(function () { return at(top - 1.2 * vh); }).then(function () {
+        w.scrollTo(0, y0);
+        var want = [0.2 + 0.8 * 0.5, 0.2 + 0.8 * 0.9, 0.2];
+        var ok = got.every(function (v, i) { return near(v, want[i], 0.04); });
+        return { pass: ok, note: 'in a frame ' + vh + ' px tall · path ' + info.path + ' ' + (info.range ? info.range.join(' → ') : '') + ' · opacity ' + got.map(function (v) { return v.toFixed(3); }).join(', ') + ' (want ' + want.map(function (v) { return v.toFixed(2); }).join(', ') + ')' };
+      });
+      });
+    });
+    T('data-reveal content is fully visible under reduced motion (opacity 1, no rise)', function () {
+      return frameReady('st-frame-rm').then(function (w) {
+        var d = w.document, bad = [], n = 0;
+        d.querySelectorAll('[data-reveal],[data-reveal] > [data-staggered-item]').forEach(function (el) {
+          var cs = w.getComputedStyle(el); n++;
+          if (+cs.opacity !== 1 || (cs.translate !== 'none' && cs.translate !== '0px') || el.classList.contains('anim-armed')) bad.push((el.id || el.textContent.trim()) + ' opacity ' + cs.opacity + ' translate ' + cs.translate);
+        });
+        return { pass: n >= 6 && !bad.length, note: n + ' reveal elements, including one 1,400 px below the fold' + (bad.length ? ' · HIDDEN: ' + bad.join(', ') : ', all at rest and visible') };
+      });
+    });
+
+    /* ════════════════ SYMBOLS ════════════════ */
+    G('symbols', 'Symbols', 'One sprite, one grid, one stroke language, and a mirror for the directions that have one.');
+
+    var SPEC_GLYPHS = ['phone', 'phone-fold', 'bolt', 'flame', 'heart', 'person-add', 'person-remove', 'bubble', 'paperplane', 'target', 'map', 'shape', 'shield', 'waveform', 'record', 'camera', 'list-bullet', 'calendar', 'chart-bar', 'sparkles', 'play-pause', 'lock'];
+    T('the set: SYM.count() equals the sprite, and every SPEC §6 glyph is in it', function () {
+      var sprite = document.getElementById('fg3-symbol-sprite'), inSprite = sprite ? sprite.querySelectorAll('symbol').length : 0;
+      var missing = SPEC_GLYPHS.filter(function (n) { return !SYM.has(n); });
+      return { pass: SYM.count() === SYM.names().length && inSprite === SYM.count() && !missing.length,
+        note: SYM.count() + ' glyphs, ' + inSprite + ' in the sprite' + (missing.length ? ' · MISSING: ' + missing.join(', ') : ' · all ' + SPEC_GLYPHS.length + ' SPEC glyphs present') };
+    });
+    T('every glyph renders: each path has length and sits inside the 24 grid', function () {
+      var host = $('st-syms'), bad = [];
+      if (!host.children.length) SYM.names().forEach(function (n) { host.appendChild(SYM.build(n, null, n)); });
+      SYM.names().forEach(function (n) {
+        var s = document.getElementById('sym-' + n);
+        if (!s) { bad.push(n + ' (no symbol)'); return; }
+        var paths = s.querySelectorAll('path,circle,rect,line,polyline,polygon,ellipse');
+        if (!paths.length) { bad.push(n + ' (empty)'); return; }
+        [].forEach.call(paths, function (p) { var L = 0; try { L = p.getTotalLength(); } catch (e) {} if (!(L > 0.5)) bad.push(n + ' (a path of length ' + L.toFixed(2) + ')'); });
+        var use = host.querySelector('svg[data-sym-name="' + n + '"] use'), bb = null;
+        try { bb = use && use.getBBox(); } catch (e) {}
+        if (!bb || bb.width < 2 && bb.height < 2 || bb.x < -1 || bb.y < -1 || bb.x + bb.width > 25 || bb.y + bb.height > 25) bad.push(n + ' (box ' + (bb ? [bb.x, bb.y, bb.width, bb.height].map(function (v) { return v.toFixed(1); }).join(' ') : 'none') + ')');
+      });
+      return { pass: !bad.length, note: bad.length ? bad.slice(0, 8).join(' · ') : SYM.count() + ' glyphs drawn; every path has length; every box inside 24 × 24' };
+    });
+    T('right to left: directional glyphs mirror, a plus does not, .sym-noflip opts out', function () {
+      function tf(host, i) { var u = host.querySelectorAll('svg.sym')[i].querySelector('use'); return getComputedStyle(u).transform; }
+      var rtl = $('st-rtl'), ltr = $('st-ltr');
+      var chev = tf(rtl, 0), arrow = tf(rtl, 1), plus = tf(rtl, 2), keep = tf(rtl, 3), l = tf(ltr, 0);
+      var flipped = function (m) { return /^matrix\(-1,/.test(m.replace(/\s/g, '')); };
+      return { pass: flipped(chev) && flipped(arrow) && !flipped(plus) && !flipped(keep) && !flipped(l),
+        note: 'rtl chevron ' + chev + ' · arrow ' + arrow + ' · plus ' + plus + ' · noflip ' + keep + ' · ltr ' + l };
+    });
+
+    /* ════════════════ CHARTS ════════════════ */
+    G('charts', 'Charts', 'Content, drawn in SVG, read back from the SVG.');
+
+    T('bars are read from zero: 9 beside 331 is drawn 9/331 as tall', function () {
+      var h = [].map.call(document.querySelectorAll('#st-bars .ch-bar'), function (b) { return +b.getAttribute('height'); });
+      return { pass: h.length === 6 && near(h[1] / h[0], 9 / 331, 0.004), note: 'drawn ratio ' + (h[1] / h[0]).toFixed(4) + ', true ' + (9 / 331).toFixed(4) };
+    });
+    T('every chart is an image with a title: sparkline, series, bars, ring, rings, dial, strip', function () {
+      var bad = [], kinds = {};
+      document.querySelectorAll('#bench [data-chart]').forEach(function (h) {
+        var s = h.querySelector('svg'), t = s && s.querySelector('title');
+        kinds[h.getAttribute('data-chart')] = 1;
+        if (!h.hasAttribute('data-chart-drawn') || !s || s.getAttribute('role') !== 'img' || !t || t.textContent.length < 8) bad.push(h.id || h.getAttribute('data-chart'));
+      });
+      return { pass: !bad.length && Object.keys(kinds).length === 7, note: Object.keys(kinds).join(', ') + (bad.length ? ' · NO TITLE: ' + bad.join(', ') : ' — each role=img with a title') };
+    });
+    T('rings land on value/max, and a missing value draws no arc', function () {
+      var h = $('st-rings');
+      var settle = function (n) { return h.hasAttribute('data-chart-settled') || n > 40 ? Promise.resolve() : wait(60).then(function () { return settle(n + 1); }); };
+      return settle(0).then(function () {
+        var arcs = h.querySelectorAll('.ch-rings-arc'), a = endFrac(arcs[0]), b = endFrac(arcs[1]);
+        var miss = h.querySelectorAll('.ch-rings-ring')[2];
+        return { pass: near(a, 312 / 400, 0.004) && b > 0.999 && miss && miss.classList.contains('is-missing') && !arcs[2].getAttribute('d'),
+          note: 'Like ' + a.toFixed(3) + ' (want .780) · Follow ' + b.toFixed(3) + ' (full) · Unfollow ' + (miss && miss.classList.contains('is-missing') ? 'missing, no arc' : 'drawn') };
+      });
+    });
+    T('dial: one segment per span, and the now-hand points at 14:30', function () {
+      var d = $('st-dial'), segs = d.querySelectorAll('.ch-dial-seg'), hl = d.querySelector('.ch-dial-hand line');
+      var ang = hl ? Math.atan2(hl.getAttribute('y2') - 50, hl.getAttribute('x2') - 50) : NaN, at = (((ang + Math.PI / 2) / (2 * Math.PI) + 1) % 1) * 24;
+      return { pass: segs.length === 7 && d.querySelectorAll('.k-empty').length === 1 && d.querySelectorAll('.k-lost').length === 1 && near(at, 14.5, 0.05),
+        note: segs.length + ' segments (1 empty, 1 lost) · hand at ' + at.toFixed(3) + ' h' };
+    });
+    T('strip: height is asked, fill is landed people, an empty batch is an outline', function () {
+      var marks = document.querySelectorAll('#st-strip .ch-strip-mark'), data = JSON.parse($('st-strip').getAttribute('data-values')), bad = [];
+      var H = null, maxA = Math.max.apply(null, data.map(function (b) { return b.asked; }));
+      [].forEach.call(marks, function (m, i) {
+        var r = m.querySelector('.ch-strip-asked, .ch-strip-outline'), hh = +r.getAttribute('height') + (r.classList.contains('ch-strip-outline') ? 1.2 : 0);
+        if (data[i].asked === maxA) H = hh;
+      });
+      [].forEach.call(marks, function (m, i) {
+        var b = data[i], outline = m.querySelector('.ch-strip-outline'), fill = m.querySelector('.ch-strip-landed');
+        if (b.empty ? (!outline || fill) : (!fill || outline)) bad.push(i + (b.empty ? ' should be an outline' : ' should be filled'));
+        if (fill && Math.abs(+fill.getAttribute('height') - H * b.people / maxA) > 0.6) bad.push(i + ' fill ' + fill.getAttribute('height'));
+      });
+      return { pass: marks.length === 5 && !bad.length && document.querySelectorAll('#st-strip .is-lost').length === 1, note: marks.length + ' marks' + (bad.length ? ' · ' + bad.join(', ') : ': 2 outlines, 1 dashed (timed out), fills to scale') };
+    });
+    T('a chart inside glass is refused in place', function () {
+      var h = $('st-refused');
+      return { pass: h.hasAttribute('data-chart-refused'), note: 'data-chart-refused ' + h.hasAttribute('data-chart-refused') };
+    });
+
+    /* ════════════════ COMPONENTS ════════════════ */
+    G('components', 'Components', 'The cheap, deterministic behaviours: where an indicator sits, where focus goes, which detent a sheet is at.');
+
+    function segCheck(host) {
+      var ind = host.querySelector('.segmented-indicator'), sel = host.querySelector('[aria-checked="true"]');
+      var a = ind.getBoundingClientRect(), b = sel.getBoundingClientRect();
+      return { dx: Math.abs(a.left - b.left), dw: Math.abs(a.width - b.width), label: sel.textContent.trim() };
+    }
+    T('segmented: the indicator sits under the selected item, before and after a change', function () {
+      var host = $('st-seg'), api = UI.segmented(host), c0 = segCheck(host);
+      api.select(2, { silent: true });
+      return wait(RM ? 120 : 560).then(function () {
+        var c1 = segCheck(host);
+        api.select(0, { silent: true });
+        return { pass: c0.dx < 1 && c0.dw < 1 && c1.dx < 1 && c1.dw < 1 && c1.label === 'Month',
+          note: c0.label + ': off by ' + f2(c0.dx) + ' px / ' + f2(c0.dw) + ' px · ' + c1.label + ': off by ' + f2(c1.dx) + ' px / ' + f2(c1.dw) + ' px' };
+      });
+    });
+    T('segmented: arrow keys move the selection and the single tab stop', function () {
+      var host = $('st-seg'), items = host.querySelectorAll('button');
+      items[0].focus();
+      items[0].dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowRight', bubbles: true }));
+      var sel = host.querySelector('[aria-checked="true"]'), stops = [].filter.call(items, function (b) { return b.tabIndex === 0; });
+      var ok = sel === items[1] && stops.length === 1 && stops[0] === items[1] && document.activeElement === items[1];
+      UI.segmented(host).select(0, { silent: true });
+      items[0].blur();
+      return { pass: ok, note: 'after ArrowRight: selected "' + sel.textContent + '", ' + stops.length + ' tab stop(s), focus on "' + (document.activeElement.textContent || '').trim() + '"' };
+    });
+    T('menu: opens on its trigger, focuses the first item, closes and gives focus back', function () {
+      var btn = $('st-menu-btn'), panel = $('st-menu'), api = UI.menu(btn, panel);
+      return Promise.resolve(api.open()).then(function () { return wait(80); }).then(function () {
+        var open = panel.matches(':popover-open'), exp = btn.getAttribute('aria-expanded'), first = document.activeElement === panel.querySelector('.menu-item');
+        return Promise.resolve(api.close()).then(function () { return wait(RM ? 60 : 420); }).then(function () {
+          var closed = !panel.matches(':popover-open'), back = document.activeElement === btn;
+          btn.blur();
+          return { pass: open && exp === 'true' && first && closed && back && btn.getAttribute('aria-expanded') === 'false',
+            note: 'open ' + open + ', aria-expanded ' + exp + ', first item focused ' + first + ' · closed ' + closed + ', focus back on the trigger ' + back };
+        });
+      });
+    });
+    T('sheet: medium detent, then large, then closed', function () {
+      var sh = $('st-sheet'), H = innerHeight;
+      CHROME.sheet.open(sh, { from: $('st-sheet-btn'), detent: 'medium' });
+      return wait(RM ? 200 : 1000).then(function () {
+        var m = sh.getBoundingClientRect(), dm = sh.getAttribute('data-detent');
+        CHROME.sheet.detent(sh, 'large');
+        return wait(RM ? 200 : 1000).then(function () {
+          var l = sh.getBoundingClientRect(), dl = sh.getAttribute('data-detent');
+          CHROME.sheet.close(sh);
+          return wait(RM ? 200 : 1100).then(function () {
+            $('st-sheet-btn').blur();
+            /* medium = half the window, less the floating inset (16 px on a desktop, less on a phone) */
+            return { pass: dm === 'medium' && near(m.height, H * 0.5 - 8, 12) && dl === 'large' && l.height > m.height + 100 && near(l.bottom, H, 1) && sh.hidden,
+              note: 'medium ' + Math.round(m.height) + ' px of a ' + H + ' px window (want half, less its inset) · large ' + Math.round(l.height) + ' px to the bottom edge · closed ' + sh.hidden };
+          });
+        });
+      });
+    });
+    T('tab bar: minimises after 32 px down, restores after 16 px up (hysteresis)', function () {
+      var sc = $('st-tabscroll'), tb = $('st-tabbar'), log = [];
+      var go = function (y) { sc.scrollTop = y; sc.dispatchEvent(new Event('scroll')); log.push(y + (tb.hasAttribute('data-minimized') ? ' min' : ' full')); return tb.hasAttribute('data-minimized'); };
+      var a = [go(0), go(20), go(40), go(30), go(25), go(18)];
+      go(0);
+      var want = [false, false, true, true, true, false];
+      return { pass: a.every(function (v, i) { return v === want[i]; }), note: log.slice(0, 6).join(' → ') };
+    });
+
+    /* ════════════════ BOOT ════════════════ */
+    G('boot', 'Boot', 'One FG3.boot() mounts everything, throws nothing, and does nothing the second time.');
+
+    var MODS = ['ART3', 'LG3', 'SYM', 'CHART', 'MOTION', 'ANIM', 'DEVICE', 'UI', 'CHROME', 'SHOW'];
+    T('every module is present and mounted by one FG3.boot()', function () {
+      var st = FG3.state, absent = MODS.filter(function (m) { return !window[m]; }), unmounted = MODS.filter(function (m) { return st.mounted.indexOf(m) < 0; });
+      return { pass: st.ready && !absent.length && !unmounted.length && document.documentElement.getAttribute('data-fg3') === 'ready',
+        note: 'mounted ' + st.mounted.join(' ') + (absent.length ? ' · ABSENT ' + absent.join(' ') : '') + (unmounted.length ? ' · NOT MOUNTED ' + unmounted.join(' ') : '') };
+    });
+    T('nothing threw and no asset failed to load', function () {
+      var errs = (window.__stErrors || []).concat((FG3.state.errors || []).map(function (e) { return 'FG3 ' + e.step + ': ' + e.error; }));
+      /* the browser's own /favicon.ico probe is not a page asset (no page links one) */
+      var failed = performance.getEntriesByType('resource').filter(function (e) { return e.responseStatus >= 400 && !/\/favicon\.ico$/.test(e.name); }).map(function (e) { return e.responseStatus + ' ' + e.name.replace(location.origin + '/', ''); });
+      var empty = [].filter.call(document.styleSheets, function (s) { try { return !s.cssRules.length; } catch (e) { return false; } }).map(function (s) { return s.href || 'inline'; });
+      var all = errs.concat(failed, empty.map(function (h) { return 'empty stylesheet ' + h; }));
+      return { pass: !all.length, note: all.length ? all.slice(0, 6).join(' · ') : performance.getEntriesByType('resource').length + ' resources, no errors, no failed loads' };
+    });
+    T('boot is idempotent: a second FG3.boot() and second mounts add nothing', function () {
+      var s1 = FG3.state, count = function () {
+        return [document.querySelectorAll('#fg3-symbol-sprite').length, $('st-seg').querySelectorAll('.segmented-indicator').length,
+          document.querySelectorAll('#hero .device__frame').length, $('st-tabbar').querySelectorAll('.tabbar__lens').length, LG3.hosts.size,
+          document.querySelectorAll('#st-bars svg').length].join(',');
+      };
+      var before = count(), s2 = FG3.boot();
+      ['SYM', 'UI', 'DEVICE', 'CHROME', 'LG3'].forEach(function (m) { try { window[m].mount(document); } catch (e) {} });
+      var after = count();
+      return { pass: s1 === s2 && before === after, note: 'same state object ' + (s1 === s2) + ' · parts ' + before + ' → ' + after };
+    });
+    T('the appearance toggle flips the tone and every role follows', function () {
+      /* in a copy of the page, so the reader's page does not flash */
+      return frameReady('st-frame-corners').then(function (w) {
+        var d = w.document, html = d.documentElement, btn = d.createElement('button');
+        btn.type = 'button'; btn.setAttribute('data-tone-toggle', ''); btn.textContent = 'Appearance';
+        d.body.appendChild(btn); w.FG3.refresh(d.body);
+        var stored = null; try { stored = localStorage.getItem('fg3-tone'); } catch (e) {}
+        var t0 = html.getAttribute('data-tone'), bg0 = w.getComputedStyle(html).getPropertyValue('--bg-1').trim(), label0 = btn.getAttribute('aria-label');
+        btn.click();
+        var t1 = html.getAttribute('data-tone'), bg1 = w.getComputedStyle(html).getPropertyValue('--bg-1').trim(), label1 = btn.getAttribute('aria-label');
+        btn.click();
+        var t2 = html.getAttribute('data-tone');
+        try { if (stored == null) localStorage.removeItem('fg3-tone'); else localStorage.setItem('fg3-tone', stored); } catch (e) {}
+        btn.remove();
+        return { pass: t1 !== t0 && bg1 !== bg0 && t2 === t0 && label0 !== label1,
+          note: t0 + ' (' + bg0 + ') → ' + t1 + ' (' + bg1 + ') → ' + t2 + ' · its label went from "' + label0 + '" to "' + label1 + '"' };
+      });
+    });
+    T('the capability gate agrees with itself: one class, a known cause, ANIM follows', function () {
+      var cl = document.documentElement.classList, cause = document.documentElement.getAttribute('data-fd-cause');
+      var one = cl.contains('fd-enhanced') !== cl.contains('no-fd-enhanced');
+      var causeOK = cl.contains('fd-enhanced') ? !cause : /^(reduced-motion|viewport|small-desktop|text-zoom|override)$/.test(cause);
+      var rmOK = !RM || cause === 'reduced-motion';
+      return { pass: one && causeOK && rmOK && ANIM.enhanced === cl.contains('fd-enhanced'),
+        note: (cl.contains('fd-enhanced') ? 'fd-enhanced' : 'no-fd-enhanced (' + cause + ')') + ' · ANIM enhanced ' + ANIM.enhanced + ' · reduced motion ' + RM };
+    });
+
+    /* ════════════════ RUN + RENDER ════════════════ */
+    var ICON = { pass: 'checkmark-circle', fail: 'xmark-circle', skip: 'minus', wait: 'clock' };
+    var total = groups.reduce(function (n, g) { return n + g.rows.length; }, 0), done = 0, passed = 0, failed = 0, skipped = 0, filter = 'all';
+    function esc(s) { return String(s == null ? '' : s).replace(/[&<>]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;' }[c]; }); }
+    function roll(id, v, fmt) { if (FG3.rollNumber) FG3.rollNumber($(id), v, fmt ? { format: fmt } : undefined); else $(id).textContent = fmt ? fmt(v) : v; }
+    function renderShell() {
+      var host = $('st-groups');
+      groups.forEach(function (g) {
+        var card = document.createElement('article');
+        card.className = 'card st-group'; card.id = 'g-' + g.id;
+        card.innerHTML = '<header class="st-group-head"><h3>' + esc(g.title) + '</h3><span class="badge" data-count>' + g.rows.length + ' to run</span></header>' +
+          '<p class="st-group-blurb">' + esc(g.blurb) + '</p><ol class="st-rows"></ol>';
+        var ol = card.querySelector('ol');
+        g.rows.forEach(function (r) {
+          var li = document.createElement('li');
+          li.className = 'st-row'; li.setAttribute('data-state', 'wait');
+          li.innerHTML = '<span class="st-glyph"></span><span class="st-label">' + esc(r.label) + '</span><span class="st-note">waiting</span>';
+          li.querySelector('.st-glyph').appendChild(SYM.build(ICON.wait, null, 'Waiting'));
+          ol.appendChild(li); r.li = li;
+        });
+        host.appendChild(card); g.card = card;
+      });
+      roll('st-n-total', total);
+    }
+    function paint(r) {
+      var li = r.li, state = r.skip ? 'skip' : r.pass ? 'pass' : 'fail';
+      li.setAttribute('data-state', state);
+      var g = li.querySelector('.st-glyph'); g.textContent = '';
+      g.appendChild(SYM.build(ICON[state], null, state === 'pass' ? 'Passed' : state === 'fail' ? 'Failed' : 'Skipped'));
+      li.querySelector('.st-note').textContent = r.note || '';
+      applyFilter();
+    }
+    function groupBadge(g) {
+      var p = g.rows.filter(function (r) { return r.pass && !r.skip; }).length, f = g.rows.filter(function (r) { return r.done && !r.pass && !r.skip; }).length;
+      var s = g.rows.filter(function (r) { return r.skip; }).length, b = g.card.querySelector('[data-count]');
+      b.className = 'badge ' + (f ? 'badge-bad' : 'badge-ok');
+      b.textContent = f ? f + ' failed' : p + ' of ' + (g.rows.length - s) + ' passed' + (s ? ', ' + s + ' skipped' : '');
+    }
+    function applyFilter() {
+      var shown = 0;
+      groups.forEach(function (g) {
+        var any = false;
+        g.rows.forEach(function (r) { var hide = filter === 'fail' && !(r.done && !r.pass && !r.skip); r.li.hidden = hide; if (!hide) any = true; });
+        g.card.hidden = !any;
+        if (any) shown++;
+      });
+      /* the filter emptied the list: say so, not an empty band */
+      $('st-empty').hidden = shown > 0;
+      if (!shown) $('st-empty-body').textContent = done < total ? 'None so far: ' + done + ' of ' + total + ' run.' : passed + ' of ' + (total - skipped) + ' passed' + (skipped ? ', ' + skipped + ' skipped.' : '.');
+    }
+    function withTimeout(p, ms) { return Promise.race([p, wait(ms).then(function () { return { pass: false, note: 'timed out after ' + ms / 1000 + ' s' }; })]); }
+    function env() {
+      var st = FG3.cornerState(), cl = document.documentElement.classList;
+      var rows = [['Engine', LG3.engine + (LG3.caps && LG3.caps.renderer ? ' · ' + LG3.caps.renderer : '')], ['Refracting', LG3.refracting + ' of ' + LG3.budget],
+        ['Corners', st.mode + ' corner-shape, ' + st.rules + ' rules'], ['Gate', cl.contains('fd-enhanced') ? 'enhanced' : 'base (' + document.documentElement.getAttribute('data-fd-cause') + ')'],
+        ['Width', innerWidth + ' px · ' + FG3.getTone().tone + ' · reduced motion ' + (RM ? 'on' : 'off')], ['Browser', navigator.userAgent.replace(/^.*?\) /, '')]];
+      $('st-env').innerHTML = rows.map(function (r) { return '<dt>' + esc(r[0]) + '</dt><dd>' + esc(r[1]) + '</dd>'; }).join('');
+
+    }
+    /* A run of synchronous assertions is one long task: scrolling the page
+       stalled for most of the run. Give the page a turn (input, a frame)
+       every two frames or so, with a posted task rather than a timer, which
+       a background tab throttles to one a second. */
+    var lastTurn = 0;
+    function breathe() {
+      if (performance.now() - lastTurn < 32) return null;
+      return new Promise(function (res) {
+        if (window.scheduler && typeof scheduler.yield === 'function') { scheduler.yield().then(res); return; }
+        var ch = new MessageChannel(); ch.port1.onmessage = function () { res(); }; ch.port2.postMessage(0);
+      }).then(function () { lastTurn = performance.now(); });
+    }
+    async function run() {
+      var t0 = performance.now();
+      renderShell();
+      lastTurn = performance.now();
+      for (var gi = 0; gi < groups.length; gi++) {
+        var g = groups[gi];
+        $('st-headline').textContent = done + ' of ' + total + ' run, now ' + g.title.toLowerCase() + '…';
+        for (var ri = 0; ri < g.rows.length; ri++) {
+          var r = g.rows[ri], out;
+          await breathe();
+          try { out = await withTimeout(Promise.resolve().then(r.fn), 12000); } catch (e) { out = { pass: false, note: 'threw: ' + (e && e.message || e) }; }
+          r.done = true;
+          if (out && out.skip) { r.skip = true; r.pass = true; r.note = 'skipped: ' + out.skip; skipped++; }
+          else { r.pass = out === true || !!(out && out.pass === true); r.note = out && out.note || ''; if (r.pass) passed++; else failed++; }
+          done++;
+          paint(r);
+          roll('st-n-pass', passed); roll('st-n-fail', failed);
+          $('st-progress').value = done / total;
+          $('st-progress').setAttribute('aria-valuetext', done + ' of ' + total);
+        }
+        groupBadge(g);
+      }
+      var secs = (performance.now() - t0) / 1000;
+      roll('st-n-time', Math.round(secs * 10) / 10, function (v) { return v.toFixed(1); });
+      $('st-headline').textContent = total + ' assertions, ' + passed + ' passed.';
+      var st = $('st-state'); st.setAttribute('data-state', failed ? 'bad' : 'ok'); st.textContent = failed ? failed + ' failed' : 'All pass';
+      env();
+      document.title = (failed ? failed + ' failed' : 'All ' + passed + ' pass') + ' ' + String.fromCharCode(183) + ' Self-test ' + String.fromCharCode(183) + ' Fluid Design Open';
+      window.__selftest = { done: true, total: total, passed: passed, failed: failed, skipped: skipped, ms: Math.round(secs * 1000),
+        env: $('st-env').innerText, groups: groups.map(function (g) { return { id: g.id, title: g.title, rows: g.rows.map(function (r) { return { label: r.label, pass: r.pass, skip: !!r.skip, note: r.note }; }) }; }) };
+    }
+    var resolveReady;
+    window.fg3AuditReady = new Promise(function (r) { resolveReady = r; });
+    document.addEventListener('DOMContentLoaded', function () {
+      $('st-filter').addEventListener('change', function (e) { filter = e.detail && e.detail.value || 'all'; applyFilter(); });
+      /* settle: the art painted, fonts loaded, the corner pass done */
+      var art = document.querySelector('.st-rig-art');
+      var ready = [FG3.cornersReady, document.fonts ? document.fonts.ready : null].filter(Boolean);
+      Promise.all(ready).then(function () {
+        var t0 = performance.now();
+        (function wait4() {
+          if (art.hasAttribute('data-lg3-source') || performance.now() - t0 > 3000) setTimeout(function () { run().then(function () { resolveReady(window.__selftest); }); }, 250);
+          else setTimeout(wait4, 30);
+        })();
+      });
+    });
+  })();
+  </script>
+</main>
+
+<!-- ═══ FOOTER (shared — copy verbatim) ═══ -->
+<footer class="band" data-band="utility" data-band-seam="keep">
+  <div class="viewport-content stack-4">
+    <p class="t-caption" style="color: var(--label-2)">Fluid Design Open 1.0 &middot; An original design language with Fluid&rsquo;s colour. Type follows the system font, with Inter as the fallback. Device art is original.</p>
+    <p class="t-caption"><a href="index.html">Overview</a> &middot; <a href="start.html">Start</a> &middot; <a href="docs.html">Docs</a> &middot; <a href="components.html">Components</a> &middot; <a href="selftest.html">Self-test</a> &middot; <a href="audit.html">Audit</a></p>
+  </div>
+</footer>
+
+<script src="assets/geom.js"></script>
+<script src="assets/spring.js"></script>
+<script src="assets/palette.js"></script>
+<script src="assets/art3.js"></script>
+<script src="assets/lg3-core.js"></script>
+<script src="assets/fg3.js"></script>
+<script src="assets/symbols.js"></script>
+<script src="assets/chart.js"></script>
+<script src="assets/motion.js"></script>
+<script src="assets/anim.js"></script>
+<script src="assets/device.js"></script>
+<script src="assets/ui.js"></script>
+<script src="assets/chrome.js"></script>
+<script src="assets/showcase.js"></script>
+<script src="assets/docs.js"></script>   <!-- documentation pages only -->
+<script>FG3.boot(); if (window.DOCS) DOCS.mount();</script>
+</body>
+</html>

@@ -1,0 +1,264 @@
+/* ═══════════════════════════════════════════════════════════════════════════
+   fg3-docs.css — the furniture of the documentation SITE, and only that.
+
+   Every page of this site links it (the page template does,
+   including the pages that use it for their "built from the system" bands). A
+   product app built outside this site does not need it. It exists so that
+   nineteen pages written in parallel show code, specimens, token tables and
+   rules in ONE way instead of nineteen. Everything here is content (opaque):
+   a specimen frame may HOST glass, but is never glass itself.
+
+     .doc-code            <pre class="doc-code"><code>…</code></pre>
+                          [data-lang="html|css|js"] labels it; docs.js adds a
+                          Copy button (.doc-code__copy) and keeps the label.
+                          A height-capped pre (max-height + overflow:auto)
+                          scrolls; DOCS keeps the button in its corner.
+     .doc-specimen        a live example in a frame; children render as they
+                          would on a page. Modifiers: [data-ground="art"]
+                          (a stage ground so glass has something to bend —
+                          put an ART3 canvas.doc-specimen__art inside),
+                          [data-ground="alt"] (--bg-2), [data-pad="none"],
+                          [data-align="stretch"] (children take the full width).
+                          Children are CENTRED both ways, and a grid centres
+                          block children too: a div, grid or stage shrinks to
+                          its content. Give it the width with
+                          data-align="stretch" on the frame, or
+                          justify-self:stretch on the one child.
+       .doc-specimen__label   caption under the frame (what it is, in one line)
+     .doc-grid            responsive grid of specimens (auto-fill, min 280px)
+     .doc-table           token / API tables (wraps .table); code cells mono
+       .doc-swatch        a colour chip inside a table cell, background set
+                          by the page from a ROLE: style="--c:var(--accent)"
+     .doc-dodont          a pair: .doc-do and .doc-dont, each with a
+                          specimen and a one-line reason (.doc-verdict: one
+                          paragraph; the Do / Don't label runs in with it)
+     .doc-note            a callout; [data-kind="trap"|"measured"|"rule"|"chosen"]
+     .doc-toc             an in-page contents list (sticky on wide screens)
+     .doc-layout          two-column page body: .doc-toc + .doc-body
+     .doc-anatomy         numbered callouts over a specimen: .doc-pin[data-n]
+     .doc-kv              a two-column definition list (term / value)
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* ─── Code ──────────────────────────────────────────────────────────────── */
+.doc-code {
+  position: relative;
+  margin: 0;
+  padding: 20px 24px;
+  background: var(--bg-2);
+  color: var(--label);
+  border-radius: var(--r-md);
+  corner-shape: superellipse(var(--k-continuous));
+  font: 400 var(--t-14)/1.6 var(--font-mono);
+  letter-spacing: 0;
+  overflow-x: auto;
+  tab-size: 2;
+  white-space: pre;
+  -webkit-overflow-scrolling: touch;
+}
+.doc-code code { font: inherit; }
+.doc-code[data-lang]::before {
+  content: attr(data-lang);
+  display: block;
+  margin: -4px 0 10px;
+  font: 600 var(--t-12)/1 var(--font-text);
+  letter-spacing: .02em;
+  color: var(--label-2);
+}
+[data-band="utility"] .doc-code,
+[data-ground="alt"] .doc-code { background: var(--bg-1); }
+.doc-code__copy {
+  position: absolute;
+  inset-block-start: 12px;
+  inset-inline-end: 12px;
+}
+/* Tokens inside prose: `code` gets a quiet fill, never a HUE of its own. Its
+   ink is the label: grey prose (--label-2) on that fill measured 4.11:1 light
+   and 3.13:1 dark; --label holds ≥ 10:1 on either band ground, and in label
+   prose nothing changes. A note is a fill itself: its code keeps the label. */
+:where(p, li, td, dd) > code {
+  padding: .08em .36em;
+  border-radius: 6px;
+  background: var(--fill-2);
+  color: var(--label);
+  font-size: .9em;
+}
+
+/* ─── Specimens ─────────────────────────────────────────────────────────── */
+.doc-specimen {
+  position: relative;
+  display: grid;
+  place-items: center;
+  gap: 16px;
+  min-height: 160px;
+  padding: 40px 32px;
+  background: var(--bg-1);
+  border-radius: var(--r-lg);
+  corner-shape: superellipse(var(--k-continuous));
+  box-shadow: var(--shadow-hairline);
+  overflow: clip;
+  isolation: isolate;
+}
+[data-band="utility"] .doc-specimen { background: var(--bg-1); }
+[data-band="story"] .doc-specimen,
+.doc-specimen[data-ground="alt"] { background: var(--bg-2); box-shadow: none; }
+.doc-specimen[data-ground="art"] { background: var(--band-stage-bg, #000); color: var(--label); }
+.doc-specimen[data-pad="none"] { padding: 0; }
+.doc-specimen[data-align="stretch"] { justify-items: stretch; }
+.doc-specimen__art {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  z-index: -1;
+}
+.doc-specimen__label {
+  margin: 12px 4px 0;
+  font-size: var(--t-14);
+  line-height: var(--t-14-lh);
+  letter-spacing: var(--t-14-ls);
+  color: var(--label-2);
+}
+.doc-specimen__label b { color: var(--label); font-weight: 600; }
+
+.doc-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(280px, 100%), 1fr));
+  gap: var(--grid-gap, 20px);
+}
+
+/* ─── Tables ────────────────────────────────────────────────────────────── */
+.doc-table { width: 100%; overflow-x: auto; }
+.doc-table .table td:first-child code,
+.doc-table .table td code { white-space: nowrap; }
+.doc-table .table td { font-variant-numeric: tabular-nums; }
+.doc-swatch {
+  display: inline-block;
+  inline-size: 28px;
+  block-size: 28px;
+  vertical-align: middle;
+  border-radius: 8px;
+  corner-shape: superellipse(var(--k-continuous));
+  background: var(--c, transparent);
+  box-shadow: inset 0 0 0 1px var(--separator);
+}
+
+/* ─── Do / don't ────────────────────────────────────────────────────────── */
+.doc-dodont {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--grid-gap, 20px);
+}
+@media (max-width: 734px) { .doc-dodont { grid-template-columns: 1fr; } }
+.doc-do, .doc-dont { display: grid; gap: 12px; align-content: start; }
+/* One paragraph, not a flex row: every inline child of a flex box (code,
+   strong, a link) became its own item and the sentence split into columns.
+   The label runs in, as a lead-in. */
+.doc-verdict {
+  display: block;
+  margin: 0;
+  font-size: var(--t-14);
+  line-height: var(--t-14-lh);
+  color: var(--label-2);
+}
+.doc-verdict::before {
+  margin-inline-end: 8px;
+  font-weight: 600;
+  color: var(--ok-strong, var(--ok));
+  content: "Do";
+}
+.doc-dont .doc-verdict::before { color: var(--bad-strong, var(--bad)); content: "Don\2019t"; }
+
+/* ─── Notes ─────────────────────────────────────────────────────────────── */
+.doc-note {
+  margin: 0;
+  padding: 16px 20px;
+  border-radius: var(--r-sm);
+  corner-shape: superellipse(var(--k-continuous));
+  background: var(--fill-1);
+  font-size: var(--t-17);
+  line-height: var(--t-17-lh);
+  letter-spacing: var(--t-17-ls);
+  color: var(--label);
+}
+.doc-note::before {
+  display: block;
+  margin-bottom: 4px;
+  font-size: var(--t-12);
+  line-height: var(--t-12-lh);
+  font-weight: 600;
+  letter-spacing: .02em;
+  color: var(--label-2-on-fill);
+  content: "Note";
+}
+/* The kind labels are 12px/600 on the note's fill, so they need 4.5:1 on it
+   over BOTH band grounds, in both tones. A bare role measured 3.66 (rule,
+   light, utility) and 2.83 (trap, dark, utility); mixed 56% into the label
+   it keeps its hue and holds >= 4.6:1 everywhere (72% leaves trap at 3.87 on
+   a dark utility band). The plain "Note" takes the on-fill grey. */
+.doc-note[data-kind="trap"]::before { content: "Trap \2014  fails without throwing"; color: color-mix(in oklab, var(--bad-strong, var(--bad)) 56%, var(--label)); }
+.doc-note[data-kind="measured"]::before { content: "Measured"; color: color-mix(in oklab, var(--ok-strong, var(--ok)) 56%, var(--label)); }
+.doc-note[data-kind="rule"]::before { content: "Rule"; color: color-mix(in oklab, var(--accent) 56%, var(--label)); }
+.doc-note[data-kind="chosen"]::before { content: "Chosen, not measured"; color: color-mix(in oklab, var(--warn-strong, var(--warn)) 56%, var(--label)); }
+.doc-note code { color: var(--label); }
+
+/* ─── Contents + two-column body ────────────────────────────────────────── */
+.doc-layout {
+  display: grid;
+  grid-template-columns: 220px minmax(0, 1fr);
+  gap: 64px;
+  align-items: start;
+}
+@media (max-width: 1068px) { .doc-layout { grid-template-columns: 1fr; gap: 32px; } }
+.doc-toc {
+  position: sticky;
+  inset-block-start: 88px;
+  display: grid;
+  gap: 2px;
+  font-size: var(--t-14);
+  line-height: var(--t-14-lh);
+}
+@media (max-width: 1068px) { .doc-toc { position: static; } }
+.doc-toc a {
+  display: block;
+  padding: 6px 12px;
+  border-radius: 8px;
+  color: var(--label-2);
+  text-decoration: none;
+}
+.doc-toc a:hover { color: var(--label); background: var(--fill-2); }
+.doc-toc a[aria-current="true"] { color: var(--label); background: var(--fill-1); font-weight: 600; }
+.doc-body { min-width: 0; display: grid; gap: 48px; }
+.doc-body > section { display: grid; gap: 20px; }
+
+/* ─── Anatomy pins ──────────────────────────────────────────────────────── */
+.doc-anatomy { position: relative; }
+.doc-pin {
+  position: absolute;
+  display: grid;
+  place-items: center;
+  inline-size: 22px;
+  block-size: 22px;
+  border-radius: 50%;
+  background: var(--label);
+  color: var(--label-inv);
+  font: 600 12px/1 var(--font-text);
+  translate: -50% -50%;
+}
+.doc-pin::after { content: attr(data-n); }
+
+/* ─── Definition list ───────────────────────────────────────────────────── */
+.doc-kv {
+  display: grid;
+  grid-template-columns: max-content minmax(0, 1fr);
+  gap: 8px 24px;
+  margin: 0;
+  font-size: var(--t-14);
+  line-height: var(--t-14-lh-loose, 1.43);
+}
+.doc-kv dt { color: var(--label-2); }
+.doc-kv dd { margin: 0; color: var(--label); }
+
+@media (forced-colors: active) {
+  .doc-code, .doc-specimen, .doc-note { border: 1px solid CanvasText; }
+  .doc-pin { forced-color-adjust: none; background: CanvasText; color: Canvas; }
+}

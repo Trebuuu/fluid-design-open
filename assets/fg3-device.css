@@ -1,0 +1,498 @@
+/* ═══════════════════════════════════════════════════════════════════════════
+   fg3-device.css — our own device art: phone, duo (book foldable), laptop,
+   browser window. Paired with device.js (DEVICE), which builds the parts.
+   ───────────────────────────────────────────────────────────────────────────
+   MARKUP (author writes only this; DEVICE.mount adds the rest)
+     <div class="device" data-device="phone|duo|laptop|browser"
+          [data-finish="light|dark|accent"] [data-fold="0..1"]
+          [data-device-state="closed|tent|laptop|open"] [data-url="…"]
+          [data-island="none"] style="--device-width: 320px">
+       <div class="device__screen" [data-screen="inner|outer"]
+            [data-screen-width="402"]> …live DOM… </div>
+     </div>
+     <div class="device-fold-slider" data-for="<duo id>"></div>
+
+   ONE UNIT. `.device` is an inline-size container and every part is sized in
+   `--u` = 1/<logical width> of the device (426 phone, 788 duo, 1440 laptop,
+   1280 browser). Parts are therefore drawn in the device's own logical units
+   and the whole frame scales with one `width`, with no JS on first paint. The
+   screen CONTENT is a separate matter: `data-screen-width` lays it out at that
+   logical width and DEVICE scales it to fit (transform, ResizeObserver).
+   SIZE. The frame is min(100%, --device-width) wide, and --device-width is
+   also its intrinsic width, so it holds in shrink-to-fit places (an auto grid
+   track, a centred figure, inline-block) and still shrinks in a 1fr track or
+   a flex row. A percentage --device-width has no intrinsic size: there, size
+   the parent.
+
+   CAMERA PILL. .device__island stacks above every app layer inside the screen
+   (calc(--z-tooltip + 20)); the screen is a stacking context of its own.
+
+   CORNERS. Every hardware corner is continuous: `corner-shape:
+   superellipse(var(--k-continuous))` with the radius × `--r-scale` — the core's
+   tokens for the geometry module's calibration (GEOM.CONTINUOUS: k 1.71, r-scale 1.53, fitted
+   to the onset and 45° inset of the continuous corner). The fallbacks
+   here are the same numbers. Where corner-shape is unsupported the plain
+   circular radius IS the fallback (a circle of the nominal radius carries the
+   same 45° mass); screens also get GEOM's clip-path from device.js. Every
+   corner-shape declaration sits inside @supports, so FG3's stylesheet-walking
+   fallback never clips a frame (which would cut its keys and shadow).
+
+   COLOUR. Hardware is material, not UI, so the finish is a small token block
+   of its own (below), switched by tone the same way the palette is. Every UI
+   colour on the slider and the browser chrome is a palette role. PUBLIC on
+   :root and every [data-tone]: --finish-light, --finish-dark, --finish-accent
+   (each finish's mid-tone, for a swatch that shows a finish off the device).
+
+   PERFORMANCE. The fold writes transform / translate / opacity only. Nothing
+   here transitions a layout property. `will-change` is set by device.js while
+   a fold is moving and removed at rest.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* ── Finish tokens ─────────────────────────────────────────────────────────
+   Light = a pale natural metal; dark = graphite. A band's `data-tone` picks
+   the set by inheritance, so the NEAREST band wins (a light band inside a dark
+   page gets the light finish). `data-finish` on one device overrides. */
+:root, [data-tone="light"] { --device-dark: 0; }
+[data-tone="dark"] { --device-dark: 1; }
+@media (prefers-color-scheme: dark) { :root:not([data-tone]) { --device-dark: 1; } }
+
+/* The three finishes' mid-tones, public, for anything that SHOWS a finish
+   outside a device (the showcase module's .swatch[data-finish]): one home per value. Declared
+   on every tone root, so the accent finish follows the band's own accent. */
+:root, [data-tone] {
+  --finish-light:  oklch(89% .004 250);
+  --finish-dark:   oklch(40% .006 262);
+  --finish-accent: color-mix(in oklch, var(--accent) 45%, oklch(78% .01 280));
+}
+
+.device {
+  --_d: calc(var(--device-dark, 0) * 100%);
+  --device-metal-hi:  color-mix(in oklch, oklch(98.5% .002 250) calc(100% - var(--_d)), oklch(66% .006 262));
+  --device-metal:     color-mix(in oklch, var(--finish-light)   calc(100% - var(--_d)), var(--finish-dark));
+  --device-metal-mid: color-mix(in oklch, oklch(80% .006 250)   calc(100% - var(--_d)), oklch(31% .005 262));
+  --device-metal-lo:  color-mix(in oklch, oklch(64% .008 250)   calc(100% - var(--_d)), oklch(21% .004 262));
+  --device-seam:      color-mix(in oklch, oklch(50% .010 250)   calc(100% - var(--_d)), oklch(12% .003 262));
+  --device-glass:     oklch(13% .004 265);          /* the black cover glass round a display */
+  --device-display:   oklch(6% .002 265);           /* a display that is switched off */
+  --device-island:    oklch(0% 0 0);                /* camera cut-out: true black, so a capsule can live in it */
+  --device-shade:     oklch(0% 0 0);                /* fold shading (opacity is the variable) */
+  --device-sheen:     oklch(100% 0 0);              /* specular light */
+  --device-shadow:    color-mix(in oklch, oklch(22% .02 265 / .30) calc(100% - var(--_d)), oklch(0% 0 0 / .75));
+  --device-rim:       color-mix(in oklch, oklch(100% 0 0 / 0) calc(100% - var(--_d)), oklch(100% 0 0 / .16));
+  --device-thumb-ink: oklch(100% 0 0);              /* fallback only: pages with the palette use --accent-ink */
+  --device-thumb-shadow: oklch(0% 0 0 / .35);       /* 0 2px 7px rgba(0,0,0,.35) */
+}
+.device[data-finish="light"] { --device-dark: 0; }
+.device[data-finish="dark"]  { --device-dark: 1; }
+.device[data-finish="accent"] {
+  --device-metal-hi:  color-mix(in oklch, var(--accent) 22%, oklch(96% .01 280));
+  --device-metal:     var(--finish-accent);
+  --device-metal-mid: color-mix(in oklch, var(--accent) 55%, oklch(60% .01 280));
+  --device-metal-lo:  color-mix(in oklch, var(--accent) 50%, oklch(38% .01 280));
+  --device-seam:      color-mix(in oklch, var(--accent) 40%, oklch(25% .01 280));
+}
+
+/* ── The container ─────────────────────────────────────────────────────── */
+.device {
+  --dk: var(--k-continuous, var(--k, 1.71));   /* superellipse k (the core's token of the geometry module's fit) */
+  --drs: var(--r-scale, 1.53);                  /* radius multiplier: the same 45° mass */
+  --u: calc(100cqw / var(--device-lw)); /* one logical unit (resolved by each part) */
+  position: relative;
+  display: block;
+  container-type: inline-size;
+  inline-size: min(100%, var(--device-width, var(--device-width-default)));
+  /* An inline-size container has no content width of its own, so in a
+     shrink-to-fit place (an auto grid track, a centred figure, inline-block,
+     absolute position) the frame collapsed to its caption's width or to 0.
+     --device-width is its intrinsic width instead; min-inline-size 0 keeps a
+     1fr track or a flex row free to shrink it (a percentage --device-width has
+     no intrinsic size: there the parent needs a width). */
+  contain-intrinsic-inline-size: var(--device-width, var(--device-width-default));
+  min-inline-size: 0;
+  aspect-ratio: var(--device-aspect);
+  isolation: isolate;
+  -webkit-tap-highlight-color: transparent;
+}
+.device[data-device="phone"]   { --device-lw: 426;  --device-aspect: 426 / 898;  --device-width-default: 320px; }
+.device[data-device="duo"]     { --device-lw: 788;  --device-aspect: 788 / 636;  --device-width-default: 640px; }
+.device[data-device="laptop"]  { --device-lw: 1440; --device-aspect: 1440 / 880; --device-width-default: 880px; }
+.device[data-device="browser"] { --device-lw: 1280; --device-aspect: 1280 / 820; --device-width-default: 960px; }
+
+/* Before DEVICE.mount (no JS yet): a plain slab so nothing is ever unframed. */
+.device:not([data-device-ready])::before {
+  content: ""; position: absolute; inset: 0; z-index: -1;
+  border-radius: calc(40 * var(--u));
+  background: linear-gradient(135deg, var(--device-metal-hi), var(--device-metal-lo));
+}
+.device:not([data-device-ready]) > .device__screen {
+  position: absolute; inset: calc(14 * var(--u)); border-radius: calc(28 * var(--u));
+  overflow: hidden; background: var(--device-display);
+}
+.device[data-device="duo"]:not([data-device-ready]) > .device__screen[data-screen="outer"] { display: none; }
+
+/* Shared part rules. */
+.device__frame, .device__glare, .device__key, .device__lid, .device__base,
+.device__window, .device__toolbar, .device__ground, .device__camera, .device__rig,
+.device__panel, .device__face, .device__mirror, .device__sheen, .device__shade,
+.device__crease, .device__edge, .device__shadow { position: absolute; display: block; box-sizing: border-box; }
+.device__glare, .device__sheen, .device__shade, .device__crease, .device__shadow,
+.device__ground, .device__mirror { pointer-events: none; }
+
+.device__screen {
+  position: absolute;
+  overflow: hidden;
+  background: var(--device-display);
+  --lu: var(--u);                       /* a logical px for things in the screen … */
+  contain: layout paint;
+}
+.device__viewport {
+  position: absolute; left: 0; top: 0;
+  transform-origin: 0 0;
+  overflow: hidden;
+  --lu: 1px;                            /* … which inside a scaled viewport IS 1px */
+}
+
+/* The camera cut-out. It sizes to its content, so a live capsule placed in it
+   (chrome .live-capsule) grows it — the island is the capsule's frame. It is
+   hardware, so it sits above EVERY app layer in the screen: app chrome at
+   --z-chrome, sheets, toasts and tooltips (the screen is its own stacking
+   context, so nothing outside the device is affected). An app root that
+   makes its own stacking context above it still wins; don't. */
+.device__island {
+  position: absolute; z-index: calc(var(--z-tooltip, 800) + 20);
+  top: calc(11 * var(--lu)); left: 50%; translate: -50% 0;
+  display: flex; align-items: center; justify-content: center;
+  min-inline-size: calc(122 * var(--lu)); min-block-size: calc(36 * var(--lu));
+  box-sizing: border-box;
+  border-radius: 999px;
+  background: var(--device-island);
+  color: oklch(100% 0 0);
+}
+
+/* ── Metal: one recipe for every frame edge ────────────────────────────────
+   Light from the upper left (the same convention as the swatch specular
+   ring): bright at top-left, a secondary glint bottom-right. */
+.device__frame, .device__face, .device__lid, .device__key, .device__edge {
+  background:
+    linear-gradient(135deg,
+      var(--device-metal-hi) 0%, var(--device-metal) 16%, var(--device-metal-mid) 38%,
+      var(--device-metal) 58%, var(--device-metal-lo) 80%, var(--device-metal-mid) 92%, var(--device-metal-hi) 100%);
+}
+
+/* ═══ PHONE — 402 × 874 display, 4u metal + 8u glass, 55u display corners ═══ */
+.device[data-device="phone"] .device__frame {
+  inset: 0; z-index: 1;
+  border-radius: calc(67 * var(--u));
+  box-shadow:
+    inset 0 0 0 calc(.7 * var(--u)) color-mix(in oklch, var(--device-metal-hi) 80%, transparent),
+    0 0 0 .5px var(--device-seam),
+    0 0 0 1px var(--device-rim),
+    0 calc(4 * var(--u)) calc(10 * var(--u)) var(--device-shadow),
+    0 calc(34 * var(--u)) calc(70 * var(--u)) calc(-12 * var(--u)) var(--device-shadow);
+}
+.device[data-device="phone"] .device__frame::before {       /* cover glass / bezel */
+  content: ""; position: absolute; inset: calc(4 * var(--u));
+  border-radius: calc(63 * var(--u));
+  background: var(--device-glass);
+  box-shadow: inset 0 0 0 calc(.6 * var(--u)) oklch(100% 0 0 / .07);
+}
+.device[data-device="phone"] > .device__screen {
+  inset: calc(12 * var(--u)); z-index: 2;
+  border-radius: calc(55 * var(--u));
+}
+.device[data-device="phone"] .device__glare {
+  inset: calc(4 * var(--u)); z-index: 3;
+  border-radius: calc(63 * var(--u));
+  background: linear-gradient(122deg,
+    color-mix(in oklch, var(--device-sheen) 11%, transparent) 0%,
+    color-mix(in oklch, var(--device-sheen) 3%, transparent) 26%,
+    transparent 40%);
+}
+@supports (corner-shape: superellipse(2)) {
+  .device[data-device="phone"] .device__frame { border-radius: calc(67 * var(--u) * var(--drs)); corner-shape: superellipse(var(--dk)); }
+  .device[data-device="phone"] .device__frame::before,
+  .device[data-device="phone"] .device__glare { border-radius: calc(63 * var(--u) * var(--drs)); corner-shape: superellipse(var(--dk)); }
+  .device[data-device="phone"] > .device__screen { border-radius: calc(55 * var(--u) * var(--drs)); corner-shape: superellipse(var(--dk)); }
+}
+
+/* Side keys: generated from GEO.keys in device.js (--key-y / --key-h in u).
+   A key nobody positioned collapses to nothing rather than reading an unset var. */
+.device__key {
+  z-index: 0;
+  inline-size: calc(4 * var(--u));
+  inset-block-start: calc(var(--key-y, 0) * var(--u));
+  block-size: calc(var(--key-h, 0) * var(--u));
+  border-radius: calc(2 * var(--u));
+  box-shadow: 0 0 0 .5px var(--device-seam);
+}
+.device__key[data-side="start"] {
+  left: calc(-2.4 * var(--u));
+  background: linear-gradient(90deg, var(--device-metal-lo), var(--device-metal-hi) 45%, var(--device-metal) 80%);
+}
+.device__key[data-side="end"] {
+  right: calc(-2.4 * var(--u));
+  background: linear-gradient(90deg, var(--device-metal), var(--device-metal-hi) 55%, var(--device-metal-lo));
+}
+
+/* ═══ DUO — book foldable. Open: 788 × 636; each panel 394 × 636.
+   Inner display 760 × 608 spanning the hinge (32u corners); outer display on
+   the back of the leaf, 362 × 608. Free-edge corners 46u, hinge-side 10u
+   (the hinge side of a closed book fold is near-square). ═══ */
+.device[data-device="duo"] .device__ground,
+.device[data-device="duo"] .device__camera,
+.device[data-device="duo"] .device__rig { inset: 0; }
+.device[data-device="duo"] .device__camera { perspective: calc(3000 * var(--u)); z-index: 1; }
+.device[data-device="duo"] .device__rig {
+  transform-style: preserve-3d;
+  transform: rotateX(var(--device-tilt-x, 0deg)) rotateY(var(--device-tilt-y, 0deg));
+}
+.device__panel {
+  inset-block: 0; inline-size: 50%;
+  transform-style: preserve-3d;
+}
+.device__panel--start { left: 0; transform-origin: 100% 50% 0; }   /* the leaf: turns about the hinge */
+.device__panel--end   { left: 50%; }
+.device__face {
+  inset: 0;
+  overflow: hidden;
+  backface-visibility: hidden; -webkit-backface-visibility: hidden;
+  box-shadow: inset 0 0 0 calc(.6 * var(--u)) color-mix(in oklch, var(--device-metal-hi) 70%, transparent),
+              0 0 0 .5px var(--device-seam), 0 0 0 1px var(--device-rim);
+}
+.device__face::before {                                       /* the black glass round the display */
+  content: ""; position: absolute; background: var(--device-glass);
+}
+/* Radii: TL TR BR BL. Leaf inner face: free edge left. End face: free edge right.
+   Outer face is the leaf turned over, so ITS left is the hinge. */
+.device__panel--start > .device__face--inner { border-radius: calc(46 * var(--u)) calc(10 * var(--u)) calc(10 * var(--u)) calc(46 * var(--u)); }
+.device__panel--end   > .device__face--inner,
+.device__face--outer  { border-radius: calc(10 * var(--u)) calc(46 * var(--u)) calc(46 * var(--u)) calc(10 * var(--u)); }
+.device__panel--start > .device__face--inner::before { inset: calc(5 * var(--u)) 0 calc(5 * var(--u)) calc(5 * var(--u)); border-radius: calc(41 * var(--u)) 0 0 calc(41 * var(--u)); }
+.device__panel--end   > .device__face--inner::before { inset: calc(5 * var(--u)) calc(5 * var(--u)) calc(5 * var(--u)) 0; border-radius: 0 calc(41 * var(--u)) calc(41 * var(--u)) 0; }
+.device__face--outer::before { inset: calc(5 * var(--u)); border-radius: calc(5 * var(--u)) calc(41 * var(--u)) calc(41 * var(--u)) calc(5 * var(--u)); }
+.device__face--outer { transform: translateZ(calc(-7 * var(--u))) rotateY(180deg); }  /* back of a 7u-thick leaf */
+
+/* The inner display: ONE live screen across both halves, a hair in front of
+   the faces. While the leaf is off the flat, device.js splits it: the live
+   screen is clipped to the fixed half and the leaf shows a snapshot (mirror). */
+.device[data-device="duo"] .device__screen[data-screen="inner"] {
+  left: calc(14 * var(--u)); top: calc(14 * var(--u));
+  inline-size: calc(760 * var(--u)); block-size: calc(608 * var(--u));
+  border-radius: calc(32 * var(--u));
+  transform: translateZ(calc(.5 * var(--u)));
+}
+.device[data-device="duo"] .device__screen[data-screen="inner"].is-split { clip-path: inset(0 0 0 50%); }
+.device__mirror {
+  left: calc(14 * var(--u)); top: calc(14 * var(--u));
+  inline-size: calc(380 * var(--u)); block-size: calc(608 * var(--u));
+  overflow: hidden;
+  border-radius: calc(32 * var(--u)) 0 0 calc(32 * var(--u));
+  background: var(--device-display);
+}
+.device__mirror[hidden] { display: none; }
+.device__mirror > .device__mirror-content {
+  position: absolute; left: 0; top: 0;
+  inline-size: calc(760 * var(--u)); block-size: calc(608 * var(--u));
+}
+.device__face--outer > .device__screen {
+  left: calc(18 * var(--u)); top: calc(14 * var(--u)); right: calc(14 * var(--u)); bottom: calc(14 * var(--u));
+  border-radius: calc(6 * var(--u)) calc(32 * var(--u)) calc(32 * var(--u)) calc(6 * var(--u));
+}
+/* The outer display's camera sits in its right-hand control strip (on the
+   outer display the bars move to a vertical strip on the side). */
+.device__face--outer > .device__screen > .device__island,
+.device__face--outer .device__viewport > .device__island {
+  top: calc(16 * var(--lu)); left: auto; right: calc(16 * var(--lu)); translate: none;
+  min-inline-size: calc(26 * var(--lu)); min-block-size: calc(26 * var(--lu));
+}
+/* Free-edge thickness of the leaf: seen as a metal band when the leaf stands edge-on. */
+.device__edge {
+  inset-block: calc(14 * var(--u)); left: calc(-7 * var(--u)); inline-size: calc(7 * var(--u));
+  transform-origin: 100% 50%; transform: rotateY(-90deg);
+  backface-visibility: hidden; -webkit-backface-visibility: hidden;
+  border-radius: calc(3 * var(--u));
+  background: linear-gradient(90deg, var(--device-metal-lo), var(--device-metal-hi) 50%, var(--device-metal-mid));
+}
+.device__panel--end > .device__key { right: calc(-2.4 * var(--u)); transform: translateZ(calc(-3.5 * var(--u))); }
+
+/* Light and shade: opacity / transform only, written per frame by device.js. */
+.device__sheen {
+  inset: 0; z-index: 30; opacity: 0;
+  background: linear-gradient(100deg, transparent 36%,
+    color-mix(in oklch, var(--device-sheen) 10%, transparent) 45%,
+    color-mix(in oklch, var(--device-sheen) 30%, transparent) 50%,
+    color-mix(in oklch, var(--device-sheen) 10%, transparent) 55%, transparent 64%);
+}
+.device__shade { inset: 0; z-index: 31; opacity: 0; background: var(--device-shade); }
+.device__crease {                                   /* hinge shading on the fixed half */
+  z-index: 29; inset-block: 0; left: 50%; inline-size: 26%; opacity: 0;
+  background: linear-gradient(90deg,
+    color-mix(in oklch, var(--device-sheen) 22%, transparent) 0,
+    color-mix(in oklch, var(--device-shade) 55%, transparent) 1.2%,
+    color-mix(in oklch, var(--device-shade) 18%, transparent) 30%, transparent);
+}
+.device__shadow {
+  inset-block: 0; inline-size: 50%;
+  border-radius: calc(46 * var(--u));
+  background: var(--device-shadow);
+  filter: blur(calc(22 * var(--u)));
+}
+.device__shadow--base { left: 50%; translate: 0 3.5%; }
+.device__shadow--leaf { left: 0;   transform-origin: 100% 50%; translate: 0 3.5%; }
+
+@supports (corner-shape: superellipse(2)) {
+  .device[data-device="duo"] .device__face,
+  .device[data-device="duo"] .device__face::before,
+  .device[data-device="duo"] .device__screen,
+  .device__mirror { corner-shape: superellipse(var(--dk)); }
+  .device__panel--start > .device__face--inner { border-radius: calc(46 * var(--u) * var(--drs)) calc(10 * var(--u) * var(--drs)) calc(10 * var(--u) * var(--drs)) calc(46 * var(--u) * var(--drs)); }
+  .device__panel--end > .device__face--inner,
+  .device__face--outer { border-radius: calc(10 * var(--u) * var(--drs)) calc(46 * var(--u) * var(--drs)) calc(46 * var(--u) * var(--drs)) calc(10 * var(--u) * var(--drs)); }
+  .device__panel--start > .device__face--inner::before { border-radius: calc(41 * var(--u) * var(--drs)) 0 0 calc(41 * var(--u) * var(--drs)); }
+  .device__panel--end > .device__face--inner::before { border-radius: 0 calc(41 * var(--u) * var(--drs)) calc(41 * var(--u) * var(--drs)) 0; }
+  .device__face--outer::before { border-radius: calc(5 * var(--u) * var(--drs)) calc(41 * var(--u) * var(--drs)) calc(41 * var(--u) * var(--drs)) calc(5 * var(--u) * var(--drs)); }
+  .device[data-device="duo"] .device__screen[data-screen="inner"] { border-radius: calc(32 * var(--u) * var(--drs)); }
+  .device__mirror { border-radius: calc(32 * var(--u) * var(--drs)) 0 0 calc(32 * var(--u) * var(--drs)); }
+  .device__face--outer > .device__screen { border-radius: calc(6 * var(--u) * var(--drs)) calc(32 * var(--u) * var(--drs)) calc(32 * var(--u) * var(--drs)) calc(6 * var(--u) * var(--drs)); }
+}
+
+/* ═══ LAPTOP — 1280 × 800 display in a 1320 × 850 lid on a 1440-wide base ═══ */
+.device__lid {
+  left: calc(60 * var(--u)); top: 0; inline-size: calc(1320 * var(--u)); block-size: calc(850 * var(--u));
+  border-radius: calc(30 * var(--u)) calc(30 * var(--u)) calc(6 * var(--u)) calc(6 * var(--u));
+  box-shadow: inset 0 0 0 calc(.8 * var(--u)) color-mix(in oklch, var(--device-metal-hi) 80%, transparent),
+              0 0 0 .5px var(--device-seam), 0 0 0 1px var(--device-rim);
+}
+.device__lid::before {
+  content: ""; position: absolute; inset: calc(4 * var(--u));
+  border-radius: calc(26 * var(--u)) calc(26 * var(--u)) calc(3 * var(--u)) calc(3 * var(--u));
+  background: var(--device-glass);
+}
+.device__lid::after {                                  /* camera */
+  content: ""; position: absolute; top: calc(10 * var(--u)); left: 50%;
+  inline-size: calc(6 * var(--u)); block-size: calc(6 * var(--u)); translate: -50% 0; border-radius: 50%;
+  background: radial-gradient(circle at 35% 35%, oklch(45% .03 250), oklch(12% .01 250) 60%);
+}
+.device[data-device="laptop"] > .device__screen {
+  left: calc(80 * var(--u)); top: calc(24 * var(--u));
+  inline-size: calc(1280 * var(--u)); block-size: calc(800 * var(--u));
+  border-radius: calc(10 * var(--u)) calc(10 * var(--u)) calc(2 * var(--u)) calc(2 * var(--u));
+}
+.device__base {
+  left: 0; top: calc(850 * var(--u)); inline-size: 100%; block-size: calc(30 * var(--u));
+  border-radius: 0 0 calc(44 * var(--u)) calc(44 * var(--u)) / 0 0 calc(24 * var(--u)) calc(24 * var(--u));
+  background: linear-gradient(180deg, var(--device-metal-hi) 0, var(--device-metal) 22%, var(--device-metal-mid) 60%, var(--device-metal-lo) 100%);
+  box-shadow: 0 0 0 .5px var(--device-seam), 0 0 0 1px var(--device-rim),
+              0 calc(18 * var(--u)) calc(36 * var(--u)) calc(-8 * var(--u)) var(--device-shadow);
+}
+.device__base::before {                                /* the thumb scoop */
+  content: ""; position: absolute; top: 0; left: 50%; translate: -50% 0;
+  inline-size: calc(210 * var(--u)); block-size: calc(9 * var(--u));
+  border-radius: 0 0 calc(12 * var(--u)) calc(12 * var(--u));
+  background: linear-gradient(180deg, var(--device-metal-lo), var(--device-metal-mid));
+}
+.device__base::after {                                 /* hinge shadow line */
+  content: ""; position: absolute; top: 0; left: calc(60 * var(--u)); right: calc(60 * var(--u));
+  block-size: calc(3 * var(--u));
+  background: linear-gradient(180deg, var(--device-seam), transparent);
+}
+@supports (corner-shape: superellipse(2)) {
+  .device__lid { border-radius: calc(30 * var(--u) * var(--drs)) calc(30 * var(--u) * var(--drs)) calc(6 * var(--u)) calc(6 * var(--u)); corner-shape: superellipse(var(--dk)); }
+  .device__lid::before { border-radius: calc(26 * var(--u) * var(--drs)) calc(26 * var(--u) * var(--drs)) calc(3 * var(--u)) calc(3 * var(--u)); corner-shape: superellipse(var(--dk)); }
+  .device[data-device="laptop"] > .device__screen { border-radius: calc(10 * var(--u) * var(--drs)) calc(10 * var(--u) * var(--drs)) calc(2 * var(--u)) calc(2 * var(--u)); corner-shape: superellipse(var(--dk)); }
+}
+
+/* ═══ BROWSER — a generic window: neutral dots, address pill, content ═══
+   UI chrome, so palette roles throughout (it follows the tone like any app). */
+.device__window {
+  inset: 0;
+  border-radius: calc(18 * var(--u));
+  background: var(--bg-1);
+  box-shadow:
+    0 0 0 .5px var(--separator), 0 0 0 1px var(--device-rim),
+    0 calc(6 * var(--u)) calc(16 * var(--u)) var(--device-shadow),
+    0 calc(40 * var(--u)) calc(90 * var(--u)) calc(-20 * var(--u)) var(--device-shadow);
+}
+.device__toolbar {
+  left: 0; right: 0; top: 0; block-size: calc(52 * var(--u)); z-index: 2;
+  display: flex; align-items: center; gap: calc(10 * var(--u));
+  padding-inline: calc(20 * var(--u));
+  border-radius: calc(18 * var(--u)) calc(18 * var(--u)) 0 0;
+  background: var(--bg-2);
+  box-shadow: inset 0 -.5px 0 var(--separator);
+  font: 400 calc(14 * var(--u)) / 1 var(--font-text, -apple-system, BlinkMacSystemFont, "Inter", "Helvetica Neue", Arial, sans-serif);
+  color: var(--label-2);
+}
+.device__dots { display: flex; gap: calc(8 * var(--u)); flex: 0 0 auto; }
+.device__dots i { display: block; inline-size: calc(12 * var(--u)); block-size: calc(12 * var(--u)); border-radius: 50%; background: var(--fill-2, var(--separator)); box-shadow: inset 0 0 0 .5px var(--separator); }
+.device__nav { display: flex; gap: calc(14 * var(--u)); margin-inline-start: calc(16 * var(--u)); color: var(--label-3); }
+.device__nav svg, .device__url svg { inline-size: calc(14 * var(--u)); block-size: calc(14 * var(--u)); display: block; }
+.device__url {
+  position: absolute; left: 50%; translate: -50% 0;
+  display: flex; align-items: center; justify-content: center; gap: calc(6 * var(--u));
+  inline-size: 44%; block-size: calc(32 * var(--u));
+  border-radius: 999px; background: var(--fill-3, var(--bg-1));
+  box-shadow: inset 0 0 0 .5px var(--separator);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  color: var(--label-2-on-fill, var(--label));   /* text on a fill: --label-2 measured 4.32:1 light / 3.67:1 dark here */
+}
+.device[data-device="browser"] > .device__screen {
+  left: 0; right: 0; top: calc(52 * var(--u)); bottom: 0; z-index: 1;
+  background: var(--bg-1);
+  border-radius: 0 0 calc(18 * var(--u)) calc(18 * var(--u));
+}
+@supports (corner-shape: superellipse(2)) {
+  .device__window { border-radius: calc(18 * var(--u) * var(--drs)); corner-shape: superellipse(var(--dk)); }
+  .device__toolbar { border-radius: calc(18 * var(--u) * var(--drs)) calc(18 * var(--u) * var(--drs)) 0 0; corner-shape: superellipse(var(--dk)); }
+  .device[data-device="browser"] > .device__screen { border-radius: 0 0 calc(18 * var(--u) * var(--drs)) calc(18 * var(--u) * var(--drs)); corner-shape: superellipse(var(--dk)); }
+}
+
+/* ═══ FOLD SLIDER — 17px track, 60×40 thumb, 2px ring,
+   0 2px 7px shadow, 17px ‹› glyph; magnetic detents 0 / ⅓ / 1; the thumb
+   stretches (≤ 28px) and squashes (scaleY 1 − .0025t) when a magnet holds it. ═══ */
+.device-fold-slider {
+  position: relative; display: block;
+  inline-size: min(100%, var(--fold-slider-width, 367px)); block-size: 44px;
+  touch-action: none; user-select: none; -webkit-user-select: none;
+  cursor: grab;
+}
+.device-fold-slider[data-dragging] { cursor: grabbing; }
+.device-fold-slider__track {
+  position: absolute; left: 0; right: 0; top: 50%; block-size: 17px; margin-block-start: -8.5px;
+  border-radius: 999px;
+  background: var(--separator-opaque, var(--fill-3));
+  box-shadow: inset 0 0 0 .5px var(--separator);
+}
+.device-fold-slider__rail {                   /* the thumb's travel; MOTION.detent measures this */
+  position: absolute; inset-block: 0; inset-inline: 30px;
+}
+.device-fold-slider__rail::before { content: ""; position: absolute; inset: 0 -30px; }  /* the whole track is the hit area */
+.device-fold-slider__thumb {
+  position: absolute; left: -30px; top: 50%; inline-size: 60px; block-size: 40px; margin-block-start: -20px;
+  border-radius: 999px; outline: none;
+}
+.device-fold-slider__thumb:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+.device-fold-slider__skin {
+  position: absolute; inset: 0; border-radius: 999px;
+  background: var(--accent-solid, var(--accent));
+  box-shadow: 0 0 0 2px var(--bg-2), 0 2px 7px var(--device-thumb-shadow);
+}
+.device-fold-slider__glyph {
+  position: absolute; left: 50%; top: 50%; inline-size: 17px; block-size: 17px; margin: -8.5px 0 0 -8.5px;
+  color: var(--accent-ink, var(--device-thumb-ink)); pointer-events: none;   /* the ink ON an accent fill (colour role) */
+}
+.device-fold-slider { --device-thumb-ink: oklch(100% 0 0); --device-thumb-shadow: oklch(0% 0 0 / .35); }
+
+/* Forced colours: the art is decoration; keep the frame legible as a box. */
+@media (forced-colors: active) {
+  .device__frame, .device__face, .device__lid, .device__window { forced-color-adjust: none; border: 1px solid CanvasText; }
+  .device-fold-slider__skin { forced-color-adjust: none; background: Highlight; }
+}
+
+/* Focus inside a scaled screen: DEVICE lays mockup DOM out at a logical width
+   and scales it (--screen-scale ≈ .5–.8), so a 2 px ring rendered at ~1.2 px,
+   anti-aliased into its ground and measured 2.3–2.9:1. Divide it back out: the
+   ring lands at the system's 2 px on the glass, whatever the scale. */
+/* Rounded UP to a whole px: Chromium floors outline widths to device pixels,
+   so 2.5 px computed as 2 px and the compensation did nothing. */
+.device__screen :focus-visible{outline-width:round(up, calc(var(--focus-w) / var(--screen-scale, 1)), 1px)}

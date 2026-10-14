@@ -1,0 +1,1684 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Chrome &middot; Fluid Design Open</title>
+<!--
+  The Fluid Design Open page template. Every page of the site copies this skeleton VERBATIM
+  (head, site nav, footer, scripts) and replaces only: the <title>, the
+  aria-current link in the nav, the local-nav capsule's title/jump links, and
+  <main>.
+
+  Do NOT put data-tone on <html> unless the page must be pinned: an author
+  tone beats the reader's appearance toggle (FG3 precedence).
+-->
+<script>
+/* Tone without a flash (fg3.js header): reader's choice › author › host › system. */
+try{var d=document.documentElement,t=localStorage.getItem('fg3-tone');
+if(!d.hasAttribute('data-tone')){d.setAttribute('data-tone',t||d.getAttribute(
+'data-theme')||(matchMedia('(prefers-color-scheme: dark)').matches?'dark':
+'light'));d.setAttribute('data-tone-auto','')}}catch(e){}
+</script>
+<link rel="stylesheet" href="assets/fg3-tokens.css">
+<link rel="stylesheet" href="assets/fg3-color.css">
+<link rel="stylesheet" href="assets/fg3-springs.css">
+<link rel="stylesheet" href="assets/fg3.css">
+<link rel="stylesheet" href="assets/lg3.css">
+<link rel="stylesheet" href="assets/fg3-motion.css">
+<link rel="stylesheet" href="assets/fg3-components.css">
+<link rel="stylesheet" href="assets/fg3-chrome.css">
+<link rel="stylesheet" href="assets/fg3-showcase.css">
+<link rel="stylesheet" href="assets/fg3-symbols.css">
+<link rel="stylesheet" href="assets/fg3-chart.css">
+<link rel="stylesheet" href="assets/fg3-device.css">
+<link rel="stylesheet" href="assets/fg3-docs.css">    <!-- documentation pages only -->
+<style>
+/* Page layout only: roles and tokens, never a colour value (SPEC §2).
+   Page-local classes are prefixed with the page's own short name (e.g. mo- on
+   motion.html) so they can never collide with a system class. */
+
+/* ── Section furniture: a headline, one lede, a row of things to try ─────── */
+.ch-intro{display:grid;gap:16px;margin-bottom:var(--band-header-gap)}
+.ch-intro .t-lede{margin-top:4px}
+.ch-try{display:flex;flex-wrap:wrap;gap:12px;margin-top:12px}
+.ch-center{text-align:center;justify-items:center}
+.ch-center .t-lede{margin-inline:auto}
+
+/* ── A stage: the art (or the content) chrome floats over. Opaque content,
+   never glass itself; clipped to THE radius. No isolation, so a fixed panel
+   opened from inside it (palette, sheet) is never trapped under the next band. */
+.ch-stage{position:relative;overflow:clip;border-radius:var(--r-lg);corner-shape:superellipse(var(--k-continuous));
+  background:var(--band-stage-bg);min-height:320px}
+.ch-stage > canvas{position:absolute;inset:0;width:100%;height:100%}
+.ch-stage__body{position:relative;height:100%}
+.ch-label{margin:12px 4px 0;color:var(--label-2);font-size:var(--t-14);line-height:var(--t-14-lh);letter-spacing:var(--t-14-ls)}
+.ch-label b{color:var(--label);font-weight:600}
+:is(.device,.ch-win,.ch-stage) + .ch-label{margin-top:20px}
+.ch-note-center.ch-above{margin:0 auto 72px}
+.ch-mockfig{display:grid;gap:14px;justify-items:center}
+.ch-mockfig figcaption{margin:0}
+/* a quiet dim over bright art, so the glass above it settles dark and its words read */
+.ch-dim--deep{--dim:60%}
+.ch-dim{position:absolute;inset:0;pointer-events:none;background:color-mix(in srgb,var(--band-stage-bg) var(--dim,38%),transparent)}
+/* WORKAROUNDS (reported to chrome): lg3.css gives a light-appearance glass host the
+   monochrome ink at (0,2,0), which beats .toolbar__primary's accent ink, so the
+   tinted primary's label went dark on violet (2.8:1). And the selected tab's
+   accent label measured 1.8-3.4:1 on the lens over art: the lens already shows
+   the selection, so the label keeps the glass ink. */
+.toolbar__primary.lg3{color:var(--accent-ink)}
+.toolbar__primary::before{opacity:1;background:var(--accent-fill-active)}
+.toolbar__primary:hover::before{background:var(--accent-fill)}
+.ch-cmd .command__pill-label,.ch-cmd .command__pill kbd{color:inherit}
+.tabbar .tab[aria-selected="true"]{color:inherit}
+/* and the count on a selected sidebar row keeps the row's ink (label-2 measured 3.9:1 there on dark glass) */
+.sidebar__item[aria-current="page"] .sidebar__count{color:inherit}
+
+/* ── The spec row: what it is and its rules left, the measured numbers
+   right, then one code card across (HTML | JavaScript tabs) ───────────── */
+.ch-spec{display:grid;grid-template-columns:minmax(0,5fr) minmax(0,7fr);gap:40px 64px;margin-top:72px;align-items:start}
+.ch-spec + .ch-spec{margin-top:96px}
+.ch-spec__facts{display:grid;gap:24px;min-width:0;align-content:start}
+.ch-spec:not(:has(> .ch-spec__stats)) > .ch-spec__facts{grid-column:1 / -1;max-width:var(--w-prose)}
+.ch-spec__name{font-family:var(--t-subtitle-ff);font-size:var(--t-subtitle-fs);line-height:var(--t-subtitle-lh);letter-spacing:var(--t-subtitle-ls);font-weight:600}
+.ch-spec__stats{gap:32px 40px;padding-top:6px}
+.ch-spec__stats .stat-value{white-space:nowrap}
+.ch-spec .doc-note{font-size:var(--t-14);line-height:var(--t-14-lh-loose,1.43)}
+.ch-code{grid-column:1 / -1;position:relative;display:grid;gap:14px;min-width:0}
+.ch-code__tabs{--seg-h:var(--h-m);justify-self:start}
+.ch-code__label{display:flex;align-items:center;height:var(--h-m);margin:0;padding-inline:4px;color:var(--label-2);font:600 var(--t-14)/1 var(--font-text)}
+.ch-code > .doc-code{position:static;max-height:420px;overflow:auto;scrollbar-width:thin}
+@media (max-width:1068px){ .ch-spec{grid-template-columns:minmax(0,1fr);gap:32px;margin-top:56px} .ch-spec + .ch-spec{margin-top:72px} }
+@media (max-width:734px){ .ch-code > .doc-code{max-height:360px;padding:18px 18px} }
+.ch-note-center{max-width:760px;margin:28px auto 0;text-align:center}
+
+/* ═══ HERO — the chrome itself, floating over the art ═══════════════════ */
+.band.hero.ch-hero{--hero-overlap:0px}
+.ch-hero .hero-media{place-items:center;padding-block:24px clamp(32px,6vh,72px);min-height:430px}
+.ch-float{display:grid;justify-items:center;gap:30px;width:min(600px,calc(100% - 40px))}
+.ch-float__cap{height:44px;display:flex;justify-content:center;width:100%}
+.ch-float .toolbar{width:100%}
+.ch-dock{position:relative;width:min(470px,100%);height:112px}
+.ch-dock .tabbar{left:0;right:0;bottom:0}
+
+/* ═══ RULES — three tiles ═══════════════════════════════════════════════ */
+.ch-rules{margin-top:80px}
+.ch-rules .bento-tile{--bento-fade:190px}
+.ch-rules .bento-copy > p + p{color:var(--label-2)}
+.ch-duo{display:flex;align-items:center;gap:18px;flex-wrap:wrap;justify-content:center}
+.ch-chip-content{padding:14px 18px;border-radius:var(--r-md);corner-shape:superellipse(var(--k-continuous));background:var(--bg-1);color:var(--label);
+  font:600 var(--t-28)/1 var(--font-display);letter-spacing:var(--t-28-ls);font-variant-numeric:tabular-nums}
+.ch-chip-content small{display:block;margin-top:6px;color:var(--label-2);font:400 var(--t-12)/1.3 var(--font-text);letter-spacing:0}
+.ch-density{display:grid;gap:10px;justify-items:center}
+.ch-den{display:grid;place-items:center;width:132px;height:56px;border-radius:999px;color:var(--label);
+  font:600 var(--t-14)/1.2 var(--font-text);text-align:center}
+.ch-den--rest{background:color-mix(in srgb,var(--mat-platter-fill-solid) 72%,transparent);-webkit-backdrop-filter:blur(7px);backdrop-filter:blur(7px)}
+.ch-den--move{background:var(--mat-platter-fill-solid);-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px)}
+.ch-den small{display:block;font-weight:400;font-size:var(--t-12);color:var(--label-2-on-fill)}
+.ch-readout{font-variant-numeric:tabular-nums}
+
+/* ═══ NAVIGATION — a browser window with its own global nav ═════════════ */
+.ch-browser{--device-width:1060px;margin-inline:auto}
+.ch-mini{position:absolute;inset:0;background:var(--bg-1);color:var(--label);overflow:hidden}
+.ch-mini__hero{position:absolute;inset:44px 0 0;display:grid;justify-items:center;align-content:start;padding-top:80px;text-align:center;overflow:hidden}
+.ch-mini__hero canvas{position:absolute;inset:0;width:100%;height:100%;
+  -webkit-mask-image:linear-gradient(180deg,transparent 30%,#000 75%);mask-image:linear-gradient(180deg,transparent 30%,#000 75%)}
+.ch-mini__hero p,.ch-mini__hero h3{position:relative}
+.ch-mini__eyebrow{font:600 var(--t-21)/1 var(--font-display)}
+.ch-mini__title{margin-top:10px;font:600 var(--t-80)/1.05 var(--font-display);letter-spacing:var(--t-80-ls)}
+.ch-mini__sub{margin-top:24px;font:400 var(--t-14)/1.3 var(--font-text);color:var(--label-2)}
+.ch-narrow{display:none}
+/* ≤833 the global nav is the phone nav (the menu opens a full-height
+   sheet): the window shows it at phone width, 402 logical px (≈ 1:1), not a
+   1280 desktop window shrunk to a quarter where no link can be read */
+@media (max-width:833px){
+  .device.ch-browser[data-device]{--device-width:402px;--device-lw:402;--device-aspect:402 / 640}
+  .ch-browser .device__nav{display:none}   /* a phone browser has no back/forward beside the address */
+  .ch-mini__hero{padding-top:56px}
+  .ch-mini__hero canvas{-webkit-mask-image:linear-gradient(180deg,transparent 45%,#000 85%);mask-image:linear-gradient(180deg,transparent 45%,#000 85%)}
+  .ch-mini__title{font-size:var(--t-40)}
+  .ch-wide{display:none} .ch-narrow{display:inline}
+}
+
+/* ═══ APP BARS — the phone ══════════════════════════════════════════════ */
+.ch-phone-row{display:grid;grid-template-columns:minmax(0,1fr) 340px;gap:64px;align-items:center}
+.ch-phone{--device-width:340px}
+.ch-app{position:absolute;inset:0;z-index:0;background:var(--bg-1);color:var(--label)}   /* own context: the island stays above the app's chrome */
+.ch-app__scroll{position:absolute;inset:0;overflow:auto;scrollbar-width:none;overscroll-behavior:contain}
+.ch-app__scroll::-webkit-scrollbar{display:none}
+.ch-app__scroll .navbar{padding-top:54px}
+.ch-app__feed{display:grid;gap:12px;padding:4px 16px 160px}
+.ch-app__card{position:relative;height:176px;overflow:hidden;border-radius:var(--r-md);corner-shape:superellipse(var(--k-continuous));background:var(--bg-2)}
+.ch-app__card canvas{position:absolute;inset:0;width:100%;height:100%}
+.ch-app__card::after,.ch-win__hero::after,.ch-lock__app::after{content:"";position:absolute;inset:0;pointer-events:none;
+  background:linear-gradient(180deg,color-mix(in srgb,var(--band-stage-bg) 80%,transparent),transparent 80%)}
+.ch-win__hero::after{background:linear-gradient(0deg,color-mix(in srgb,var(--band-stage-bg) 62%,transparent),transparent 70%)}
+.ch-lock__app::after{background:linear-gradient(180deg,color-mix(in srgb,var(--band-stage-bg) 50%,transparent),transparent 55%)}
+.ch-app__card p{position:relative;z-index:1;margin:0;padding:16px;color:var(--on-art-1);font:600 var(--t-ui-headline-fs)/1.3 var(--font-text)}
+.ch-app__card b{display:block;font:600 var(--t-40)/1 var(--font-display);letter-spacing:var(--t-40-ls)}
+.ch-row{display:flex;justify-content:space-between;align-items:center;min-height:50px;padding:0 16px;background:var(--bg-2);
+  border-radius:var(--r-sm);corner-shape:superellipse(var(--k-continuous));font:400 var(--t-ui-body-fs)/1.3 var(--font-text);letter-spacing:var(--t-ui-body-ls)}
+.ch-row span:last-child{color:var(--label-2);font-variant-numeric:tabular-nums}
+.ch-now-text{flex:1;min-width:0;font:600 var(--t-ui-footnote-fs)/1.2 var(--font-text)}
+.ch-now-text [data-accessory-extra]{color:var(--label-2);font-weight:400}
+.ch-now-trail{font:600 var(--t-ui-footnote-fs)/1 var(--font-text);padding-right:8px;font-variant-numeric:tabular-nums}
+@media (max-width:1068px){ .ch-phone-row{grid-template-columns:minmax(0,1fr);justify-items:center;gap:48px} .ch-phone-row > :first-child{justify-self:stretch} }
+
+/* ═══ TOOLBARS ══════════════════════════════════════════════════════════ */
+.ch-tools{display:grid;grid-template-columns:minmax(0,8fr) minmax(0,4fr);gap:20px}
+.ch-tools .ch-stage{height:300px}
+.ch-tb{position:absolute;inset:14px 14px auto}
+.ch-vtb{position:absolute;right:12px;top:14px;bottom:14px}
+.ch-dodont{margin-top:20px}
+.ch-dodont .ch-stage{height:128px;min-height:0}
+.ch-dodont .toolbar{position:absolute;inset:auto 14px 42px;flex-wrap:nowrap}
+@media (max-width:1068px){ .ch-tools{grid-template-columns:minmax(0,1fr)} }
+@media (max-width:734px){
+  .ch-tb .toolbar__title{display:none}
+  .ch-tb{gap:8px}
+  .ch-dodont .toolbar{inset:auto 10px 42px;gap:6px}
+  .ch-dodont .toolbar__item{min-width:38px;padding:0 6px}
+}
+@media (max-width:480px){
+  .ch-tb .toolbar__primary{width:44px;padding:0}
+  .ch-tb .toolbar__primary > span:not([class^="lg3"]){position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%)}
+}
+
+/* ═══ SIDEBARS + INSPECTOR — two windows ════════════════════════════════ */
+.ch-win{position:relative;display:grid;grid-template-columns:auto minmax(0,1fr) auto;height:600px;overflow:hidden;
+  border-radius:var(--r-lg);corner-shape:superellipse(var(--k-continuous));background:var(--bg-2);box-shadow:var(--shadow-tile)}
+.ch-win + .ch-label + .ch-win{margin-top:40px}
+.ch-win > .sidebar{margin:8px;z-index:2}
+.ch-win > .sidebar[data-sidebar="edge"]{margin:0}
+.ch-win > .inspector{margin:8px;z-index:2}
+.ch-win__main{position:relative;overflow:auto;scrollbar-width:thin;min-width:0}
+.ch-win--float .ch-win__main{position:absolute;inset:0;z-index:0}
+.ch-win--float{grid-template-columns:auto 1fr}
+.ch-win__hero{position:relative;height:300px;display:flex;align-items:flex-end;padding:0 32px 28px;overflow:hidden}
+.ch-win--float .ch-win__hero{padding-left:calc(248px + 48px)}
+.ch-win__hero canvas{position:absolute;inset:0;width:100%;height:100%}
+.ch-win__stat{position:relative;z-index:1;color:var(--on-art-1)}
+.ch-win__stat b{display:block;font:600 var(--t-56)/1 var(--font-display);letter-spacing:var(--t-56-ls);font-variant-numeric:tabular-nums}
+.ch-win__stat span{color:var(--on-art-2);font:400 var(--t-17)/1.3 var(--font-text)}
+.ch-win__cards{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;padding:16px}
+.ch-win--float .ch-win__cards{padding-left:calc(248px + 24px)}
+.ch-card{background:var(--bg-1);border-radius:var(--r-md);corner-shape:superellipse(var(--k-continuous));padding:18px 20px;min-height:120px}
+.ch-card h4{margin:0 0 4px;font:600 var(--t-ui-headline-fs)/1.3 var(--font-text)}
+.ch-card p{margin:0;color:var(--label-2);font:400 var(--t-ui-subhead-fs)/1.35 var(--font-text)}
+.ch-card b{display:block;margin-top:8px;font:600 var(--t-32)/1 var(--font-display);font-variant-numeric:tabular-nums}
+.ch-card b small{margin-left:6px;color:var(--label-2);font:400 var(--t-ui-subhead-fs)/1 var(--font-text)}
+.ch-win > .bg-extension{left:0;top:0;width:248px;height:300px;z-index:1;
+  -webkit-mask-image:linear-gradient(180deg,#000 70%,transparent);mask-image:linear-gradient(180deg,#000 70%,transparent)}
+@media (max-width:734px){
+  .ch-win{height:520px}
+  .ch-win--float .ch-win__hero{padding-left:calc(72px + 32px)}
+  .ch-win--float .ch-win__cards{padding-left:calc(72px + 20px)}
+  .ch-win__cards{grid-template-columns:minmax(0,1fr)}
+  .ch-win__hero{padding:0 20px 20px;height:260px}
+  .ch-win__stat b{font-size:var(--t-40)}
+  .ch-win > .bg-extension{width:72px;height:260px}
+}
+
+/* ═══ SHEETS ════════════════════════════════════════════════════════════ */
+.ch-sheets{display:grid;grid-template-columns:minmax(0,1fr) 200px 200px;gap:32px;align-items:center}
+.ch-sheets .ch-stage{height:100%;min-height:420px;display:grid;place-items:center}
+.ch-sheets .ch-stage .btn{position:relative}
+.ch-mock{--device-width:200px}
+.ch-mock__app{position:absolute;inset:0;background:var(--bg-2)}
+.ch-mock__app canvas{position:absolute;inset:0 0 auto;height:55%;width:100%}
+.ch-mock__rows{position:absolute;inset:56% 16px 0;display:grid;align-content:start;gap:10px}
+.ch-mock__rows i{display:block;height:46px;border-radius:14px;background:var(--bg-1)}
+.ch-mock__scrim{position:absolute;inset:0;background:var(--scrim)}
+.ch-mock__sheet{position:absolute;left:8px;right:8px;bottom:8px;height:calc(50% - 8px);display:grid;align-content:start;gap:10px;padding:10px 18px;
+  border-radius:44px;background:color-mix(in srgb,var(--bg-elevated) 45%,transparent);-webkit-backdrop-filter:blur(18px) saturate(1.6);backdrop-filter:blur(18px) saturate(1.6);
+  box-shadow:inset 0 0 0 1px var(--separator)}
+.ch-mock__sheet--large{left:0;right:0;bottom:0;top:54px;height:auto;border-radius:44px 44px 0 0;background:var(--bg-elevated);box-shadow:none}
+.ch-mock__grab{justify-self:center;width:36px;height:5px;border-radius:9px;background:var(--label-3)}
+.ch-mock__line{height:40px;border-radius:12px;background:var(--fill-1)}
+.ch-mock__head{display:flex;justify-content:space-between;align-items:center;font:600 17px/1 var(--font-text);color:var(--label)}
+.ch-mock__head i{display:block;width:36px;height:36px;border-radius:50%;background:var(--fill-1)}
+.ch-mock__head i:last-child{background:var(--accent-fill)}
+.ch-mockcap{text-align:center}
+@media (max-width:1068px){ .ch-sheets{grid-template-columns:repeat(2,200px);justify-content:center} .ch-sheets > .ch-sheet-live{grid-column:1 / -1;justify-self:stretch} }
+@media (max-width:480px){ .ch-mock{--device-width:150px} .ch-sheets{grid-template-columns:repeat(2,150px);gap:20px} }
+
+/* ═══ SCROLL EDGES ══════════════════════════════════════════════════════ */
+.ch-edges{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:20px}
+.ch-pane{position:relative;height:440px;overflow:hidden;border-radius:var(--r-lg);corner-shape:superellipse(var(--k-continuous));background:var(--bg-1);box-shadow:var(--shadow-hairline)}
+.ch-pane__bar{position:absolute;z-index:var(--z-chrome);inset:0 0 auto;padding:10px 12px}
+.ch-pane__scroll{position:absolute;inset:0;overflow:auto;scrollbar-width:thin}
+.ch-pane__txt{padding:74px 24px 40px;font:400 var(--t-17)/1.47 var(--font-text);letter-spacing:var(--t-17-ls)}
+.ch-pane__txt p{margin:0 0 14px}
+.ch-pane__txt h4{margin:22px 0 8px;font:600 var(--t-21)/1.2 var(--font-display)}
+.ch-pane__ph{position:relative;height:130px;margin:12px 0 18px;overflow:hidden;border-radius:var(--r-sm);corner-shape:superellipse(var(--k-continuous))}
+.ch-pane__ph canvas{position:absolute;inset:0;width:100%;height:100%}
+@media (max-width:734px){ .ch-edges{grid-template-columns:minmax(0,1fr)} .ch-pane{height:400px} }
+
+/* ═══ CONTROL BAR — gallery card content ════════════════════════════════ */
+.ch-gcard{position:relative;display:grid;justify-items:center;align-content:start;width:100%;height:100%;padding-top:176px}
+.ch-gnum{position:relative;margin:0;color:var(--on-art-1);font:600 var(--t-96)/1 var(--font-display);letter-spacing:var(--t-96-ls);font-variant-numeric:tabular-nums}
+.ch-gnum small{display:block;margin-bottom:10px;text-align:center;color:var(--on-art-2);font:400 var(--t-17)/1.3 var(--font-text);letter-spacing:var(--t-17-ls)}
+@media (max-width:734px){ .ch-gcard{padding-top:132px} .ch-gnum{font-size:var(--t-64)} }
+/* the bar floats only once the cards' words are above it: its sticky box
+   begins 45% of a card above where it parks, so the drop arrives over the
+   cards' lower half (the words sit in the upper), never over a caption */
+.ch-cb-hold{display:flow-root;margin-top:calc(var(--gallery-h) * -.45);pointer-events:none}
+.ch-cb-hold::before{content:"";display:block;height:calc(var(--gallery-h) * .45)}
+.ch-cb-hold > .control-bar{pointer-events:auto}
+
+/* ═══ LIVE CAPSULE ══════════════════════════════════════════════════════ */
+.ch-live{display:grid;grid-template-columns:minmax(0,1fr) 300px;gap:40px;align-items:start}
+.ch-live .ch-stage{min-height:440px}
+.ch-live__slot{position:absolute;left:0;right:0;top:40px;display:flex;justify-content:center}
+.ch-lock{--device-width:300px;align-self:center}
+.ch-lock__app{position:absolute;inset:0;z-index:0;overflow:hidden}
+.ch-lock__app canvas{position:absolute;inset:0;width:100%;height:100%}
+.ch-lock__time{position:absolute;z-index:1;left:0;right:0;top:150px;text-align:center;color:var(--on-art-1);font:600 96px/1 var(--font-display);letter-spacing:-.02em;font-variant-numeric:tabular-nums}
+.ch-lock__date{position:absolute;z-index:1;left:0;right:0;top:124px;text-align:center;color:var(--on-art-1);font:600 20px/1 var(--font-text)}
+.ch-states{margin:0 auto 32px;max-width:100%}
+@media (max-width:1068px){ .ch-live{grid-template-columns:minmax(0,1fr)} .ch-lock{justify-self:center} }
+@media (max-width:734px){ .ch-live .ch-stage{min-height:440px} .ch-states{margin-bottom:24px} }
+
+/* ═══ COMMAND ═══════════════════════════════════════════════════════════ */
+.ch-cmd .ch-stage{height:300px;min-height:0;display:grid;place-items:center}
+.ch-cmd .toolbar{position:relative;width:min(560px,calc(100% - 28px))}
+@media (min-width:735px){ .ch-cmd .command{flex:1} .ch-cmd .command__pill{width:100%} }
+
+
+/* ═══ API ═══════════════════════════════════════════════════════════════ */
+.ch-api .table td:first-child{white-space:nowrap}
+.ch-api td code{white-space:normal}
+.ch-behave{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:20px;margin-top:48px}
+@media (max-width:1068px){ .ch-behave{grid-template-columns:minmax(0,1fr)} }
+.ch-pane__scroll:focus-visible{outline-offset:-3px}   /* inside: the pane clips anything drawn outside it */
+</style>
+</head>
+<body>
+
+<!-- ═══ SITE NAV (shared — copy verbatim; set aria-current on this page's link) ═══ -->
+<nav class="globalnav" aria-label="Fluid Design">
+  <div class="globalnav__bar">
+    <a class="globalnav__brand" href="index.html" aria-label="Fluid Design Open home"><i data-sym="sparkles"></i></a>
+    <ul class="globalnav__list">
+      <li class="globalnav__item"><a class="globalnav__link" href="index.html">Overview</a></li>
+      <li class="globalnav__item"><a class="globalnav__link" href="start.html">Start</a></li>
+      <li class="globalnav__item"><a class="globalnav__link" href="docs.html">Docs</a></li>
+      <li class="globalnav__item" data-flyout="gn-foundations"><a class="globalnav__link" href="color.html">Foundations</a><button class="globalnav__trigger" type="button"><span class="sr-only">Foundations menu</span></button></li>
+      <li class="globalnav__item" data-flyout="gn-components"><a class="globalnav__link" href="components.html">Components</a><button class="globalnav__trigger" type="button"><span class="sr-only">Components menu</span></button></li>
+      <li class="globalnav__item" data-flyout="gn-instruments"><a class="globalnav__link" href="selftest.html">Instruments</a><button class="globalnav__trigger" type="button"><span class="sr-only">Instruments menu</span></button></li>
+    </ul>
+    <div class="globalnav__tools">
+      <button class="globalnav__icon" type="button" data-tone-toggle aria-label="Switch appearance"><i data-sym="circle-half"></i></button>
+      <button class="globalnav__menu" type="button" aria-label="Menu" aria-expanded="false"><i data-sym="lines"></i></button>
+    </div>
+  </div>
+  <div class="globalnav__flyout" id="gn-foundations" hidden>
+    <div class="globalnav__flyout-content">
+      <div class="globalnav__group" data-elevated>
+        <h2 class="globalnav__group-title">Foundations</h2>
+        <ul><li><a class="globalnav__flyout-link" href="color.html">Colour</a></li><li><a class="globalnav__flyout-link" href="type.html">Type</a></li><li><a class="globalnav__flyout-link" href="layout.html">Layout</a></li><li><a class="globalnav__flyout-link" href="materials.html">Materials</a></li><li><a class="globalnav__flyout-link" href="motion.html">Motion</a></li></ul>
+      </div>
+      <div class="globalnav__group">
+        <h2 class="globalnav__group-title">Content</h2>
+        <ul><li><a class="globalnav__flyout-link" href="symbols.html">Symbols</a></li><li><a class="globalnav__flyout-link" href="data.html">Data</a></li></ul>
+      </div>
+    </div>
+  </div>
+  <div class="globalnav__flyout" id="gn-components" hidden>
+    <div class="globalnav__flyout-content">
+      <div class="globalnav__group" data-elevated>
+        <h2 class="globalnav__group-title">Components</h2>
+        <ul><li><a class="globalnav__flyout-link" href="components.html">Controls</a></li><li><a class="globalnav__flyout-link" href="chrome.html" aria-current="page">Chrome</a></li><li><a class="globalnav__flyout-link" href="showcase.html">Product pages</a></li><li><a class="globalnav__flyout-link" href="patterns.html">Patterns</a></li></ul>
+      </div>
+    </div>
+  </div>
+  <div class="globalnav__flyout" id="gn-instruments" hidden>
+    <div class="globalnav__flyout-content">
+      <div class="globalnav__group" data-elevated>
+        <h2 class="globalnav__group-title">Instruments</h2>
+        <ul><li><a class="globalnav__flyout-link" href="selftest.html">Self-test</a></li><li><a class="globalnav__flyout-link" href="audit.html">Audit</a></li></ul>
+      </div>
+    </div>
+  </div>
+</nav>
+
+<!-- ═══ LOCAL NAV (per page: title, one CTA, jump links to this page's sections) ═══ -->
+<div class="localnav" data-localnav-reveal="#hero">
+  <div class="localnav__capsule" data-lg3 data-lg3-priority="3">
+    <a class="localnav__title" href="#top">Chrome</a>
+    <button class="localnav__explore" type="button"><span class="localnav__explore-label">Explore</span></button>
+    <a class="localnav__cta" href="start.html">Adopt</a>
+    <div class="localnav__panel" aria-label="Explore Fluid Design">
+      <ul class="localnav__tiles">
+        <li><a class="localnav__tile" href="materials.html" style="--tile-hue: var(--series-1)"><span class="localnav__thumb"><i data-sym="sparkles"></i></span>Materials</a></li>
+        <li><a class="localnav__tile" href="motion.html" style="--tile-hue: var(--series-2)"><span class="localnav__thumb"><i data-sym="waveform"></i></span>Motion</a></li>
+        <li><a class="localnav__tile" href="chrome.html" style="--tile-hue: var(--series-3)"><span class="localnav__thumb"><i data-sym="sidebar"></i></span>Chrome</a></li>
+        <li><a class="localnav__tile" href="components.html" style="--tile-hue: var(--series-4)"><span class="localnav__thumb"><i data-sym="sliders"></i></span>Controls</a></li>
+        <li><a class="localnav__tile" href="showcase.html" style="--tile-hue: var(--series-5)"><span class="localnav__thumb"><i data-sym="grid"></i></span>Product pages</a></li>
+      </ul>
+      <hr class="localnav__rule">
+      <nav class="localnav__jump" aria-label="On this page">
+        <p class="localnav__jump-label">On this page <i data-sym="chevron-down"></i></p>
+        <ul class="localnav__jump-grid">
+          <li class="localnav__jump-item"><a href="#rules">Rules</a></li>
+          <li class="localnav__jump-item"><a href="#navigation">Site navigation</a></li>
+          <li class="localnav__jump-item"><a href="#app-bars">App bars</a></li>
+          <li class="localnav__jump-item"><a href="#toolbars">Toolbars</a></li>
+          <li class="localnav__jump-item"><a href="#sidebars">Sidebars</a></li>
+          <li class="localnav__jump-item"><a href="#sheets">Sheets</a></li>
+          <li class="localnav__jump-item"><a href="#scroll-edges">Scroll edges</a></li>
+          <li class="localnav__jump-item"><a href="#control-bar">Control bar</a></li>
+          <li class="localnav__jump-item"><a href="#live-capsule">Live capsule</a></li>
+          <li class="localnav__jump-item"><a href="#command">Command palette</a></li>
+          <li class="localnav__jump-item"><a href="#api">API</a></li>
+        </ul>
+      </nav>
+    </div>
+  </div>
+</div>
+
+<main id="top">
+
+<!-- ═══ HERO · stage band; the chrome floats over art ═══════════════════════ -->
+<section class="band hero ch-hero" data-band="stage" id="hero" aria-labelledby="ch-hero-h">
+  <canvas class="hero-art" data-art="twilight" data-art-seed="11" data-art-contrast="1.2" data-art-vignette=".3" aria-hidden="true"></canvas>
+  <div class="hero-marquee viewport-content">
+    <p class="hero-eyebrow">Chrome</p>
+    <h1 class="hero-headline" id="ch-hero-h">Floats above. Steps aside.</h1>
+    <p class="hero-sub">Every bar, capsule, sheet and panel in Fluid Design Open<br>Glass for the chrome, opaque for the content</p>
+    <div class="hero-media">
+      <div class="ch-float">
+        <div class="ch-float__cap">
+          <div class="live-capsule" data-anchor="center" data-kind="burst" data-elapsed="42" style="--lc-hue: var(--series-1)" id="ch-hero-cap">
+            <div class="live-capsule__glass" data-lg3 data-lg3-interactive>
+              <button class="live-capsule__face" type="button" aria-label="Now: Review, 4 of 10 tasks. Show details">
+                <span class="live-capsule__lead"><i data-sym="heart"></i></span>
+                <span class="live-capsule__trail">4/10</span>
+              </button>
+              <div class="live-capsule__detail">
+                <div class="live-capsule__row">
+                  <span class="live-capsule__glyph"><i data-sym="heart"></i></span>
+                  <span><b class="live-capsule__account">aurora.demo</b><span class="live-capsule__line">Review &larr; @sample.trailrunners</span></span>
+                  <span class="live-capsule__elapsed">0:42</span>
+                </div>
+                <div class="live-capsule__meter" role="progressbar" aria-label="Tasks" aria-valuemin="0" aria-valuemax="10" aria-valuenow="4" style="--lc-meter: .4"><span></span></div>
+                <div class="live-capsule__foot"><span class="live-capsule__count">4 of 10</span><button class="live-capsule__stop" type="button">Stop</button></div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="toolbar" aria-label="Specimen toolbar">
+          <div class="toolbar__group" data-lg3 data-lg3-interactive><button class="toolbar__item" type="button" aria-label="Back"><i data-sym="chevron-left"></i></button></div>
+          <div class="toolbar__spacer"></div>
+          <div class="toolbar__group" data-lg3 data-lg3-interactive>
+            <button class="toolbar__item" type="button" aria-label="Filters"><i data-sym="sliders"></i></button>
+            <button class="toolbar__item" type="button" aria-label="Share"><i data-sym="arrow-up-right"></i></button>
+            <button class="toolbar__item" type="button" aria-label="More"><i data-sym="ellipsis"></i></button>
+          </div>
+          <button class="toolbar__primary" type="button" data-lg3 data-lg3-interactive><i data-sym="play"></i><span>Start</span></button>
+        </div>
+        <div class="ch-dock">
+          <nav class="tabbar" data-tabbar-position="absolute" data-tabbar-static aria-label="Specimen tab bar">
+            <div class="tabbar__row">
+              <div class="tabbar__bar" data-lg3 data-lg3-recipe="pill" data-lg3-priority="1" data-lg3-interactive>
+                <div class="tabbar__tabs">
+                  <button class="tab" type="button" aria-selected="true"><i data-sym="target"></i><span class="tab__label">Today</span></button>
+                  <button class="tab" type="button"><i data-sym="person"></i><span class="tab__label">Projects</span></button>
+                  <button class="tab" type="button"><i data-sym="bubble"></i><span class="tab__label">Inbox</span></button>
+                  <button class="tab" type="button"><i data-sym="bell"></i><span class="tab__label">Alerts</span></button>
+                </div>
+              </div>
+              <button class="tab-prominent" type="button" data-lg3 data-lg3-interactive aria-label="Search"><i data-sym="magnifier"></i></button>
+            </div>
+          </nav>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ RULES · story band, lockup + three tiles ════════════════════════════ -->
+<section class="band" data-band="story" id="rules" aria-labelledby="ch-rules-h">
+  <div class="viewport-content">
+    <div class="lockup">
+      <p class="lockup-eyebrow">Three rules</p>
+      <h2 class="lockup-headline" id="ch-rules-h">Glass is for the layer that floats.</h2>
+      <p class="lockup-copy">Bars, capsules, controls over media and sheets at partial height are chrome, and <strong>only chrome is glass</strong>. Cards, tables, charts and numbers stay opaque, and glass never sits on glass &mdash; it cannot sample what another lens has already bent.</p>
+    </div>
+    <div class="bento ch-rules" data-reveal="stagger">
+      <div class="bento-tile span-4" data-tone="dark" data-staggered-item>
+        <div class="bento-copy"><p>Glass is chrome</p><h3>The bar is glass. The number is not.</h3></div>
+        <canvas data-art="aurora" data-art-seed="7" aria-hidden="true"></canvas>
+        <div class="bento-media">
+          <div class="ch-duo">
+            <div class="toolbar__group" data-lg3 data-lg3-interactive role="group" aria-label="Specimen controls"><button class="toolbar__item" type="button" aria-label="Filters"><i data-sym="sliders"></i></button><button class="toolbar__item" type="button" aria-label="More"><i data-sym="ellipsis"></i></button></div>
+            <div class="ch-chip-content">12.6 s<small>per finished task, inside runs</small></div>
+          </div>
+        </div>
+      </div>
+      <div class="bento-tile span-4" data-tone="dark" data-staggered-item>
+        <div class="bento-copy"><p>A lens needs something to bend</p><h3>Three refracting hosts, then frost.</h3><p>Left, refraction. Right, the frost it falls back to.</p></div>
+        <canvas data-art="ember" data-art-seed="12" aria-hidden="true"></canvas>
+        <div class="bento-media">
+          <div class="ch-duo">
+            <button class="btn btn-glass btn-icon btn-xl" type="button" data-lg3 data-lg3-interactive data-lg3-priority="2" aria-label="Refracting glass"><i data-sym="sparkles"></i></button>
+            <button class="btn btn-glass btn-icon btn-xl" type="button" data-lg3 data-lg3-interactive data-lg3-mode="frost" aria-label="Frosted glass"><i data-sym="sparkles"></i></button>
+          </div>
+        </div>
+      </div>
+      <div class="bento-tile span-4" data-tone="dark" data-staggered-item>
+        <div class="bento-copy"><p>Density follows motion</p><h3>Denser while it moves. Clearer at rest.</h3></div>
+        <canvas data-art="deep" data-art-seed="5" aria-hidden="true"></canvas>
+        <div class="bento-media">
+          <div class="ch-duo">
+            <div class="ch-den ch-den--rest"><span>At rest<small>blur 7 &middot; fill 72%</small></span></div>
+            <div class="ch-den ch-den--move"><span>Moving<small>blur 14 &middot; fill 100%</small></span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <p class="ch-label ch-note-center">The budget is live: this page is refracting <b class="ch-readout" data-ch-refracting>&hellip;</b> glass hosts right now. On a desktop the engine allows 3, on a phone 1; the rest fall back to frost automatically, highest <code>data-lg3-priority</code> first.</p>
+  </div>
+</section>
+
+<!-- ═══ SITE NAVIGATION · global nav in a window, and this page's local nav ═ -->
+<section class="band" data-band="utility" id="navigation" aria-labelledby="ch-nav-h">
+  <div class="viewport-content">
+    <div class="ch-intro">
+      <h2 class="t-section" id="ch-nav-h">The global nav and the local nav.</h2>
+      <p class="t-lede">The global nav is a quiet bar, exact to the pixel: it rests transparent, and a flyout grows out of it at a rate set by its own height. The local nav is the <strong>floating glass capsule at the top of this page</strong> &mdash; it arrived as the hero left, and Explore morphs it into a panel.</p>
+    </div>
+    <p class="ch-label ch-note-center ch-above"><span class="ch-wide">A live global nav inside a browser window. <b>Hover Orbit or Studio</b>, or tab to the small chevron after each name and press Return.</span><span class="ch-narrow">The same global nav at phone width. <b>Tap the menu</b>, then the chevron after Orbit or Studio.</span></p>
+    <div class="device ch-browser" data-device="browser" data-url="orbit.example/overview">
+      <div class="device__screen" data-screen-width="1280">
+        <div class="ch-mini">
+          <nav class="globalnav" aria-label="Specimen global nav">
+            <div class="globalnav__bar">
+              <a class="globalnav__brand" href="#navigation" aria-label="Specimen home"><i data-sym="sparkles"></i></a>
+              <ul class="globalnav__list">
+                <li class="globalnav__item" data-flyout="ch-gn-flow"><a class="globalnav__link" href="#navigation">Orbit</a><button class="globalnav__trigger" type="button"><span class="sr-only">Orbit menu</span></button></li>
+                <li class="globalnav__item" data-flyout="ch-gn-talk"><a class="globalnav__link" href="#navigation">Studio</a><button class="globalnav__trigger" type="button"><span class="sr-only">Studio menu</span></button></li>
+                <li class="globalnav__item"><a class="globalnav__link" href="#navigation">Reports</a></li>
+                <li class="globalnav__item"><a class="globalnav__link" href="#navigation">Integrations</a></li>
+                <li class="globalnav__item"><a class="globalnav__link" href="#navigation">Templates</a></li>
+                <li class="globalnav__item"><a class="globalnav__link" href="#navigation">Support</a></li>
+              </ul>
+              <div class="globalnav__tools">
+                <a class="globalnav__icon" href="#navigation" aria-label="Specimen search"><i data-sym="magnifier"></i></a>
+                <button class="globalnav__menu" type="button" aria-label="Menu" aria-expanded="false"><i data-sym="lines"></i></button>
+              </div>
+            </div>
+            <div class="globalnav__flyout" id="ch-gn-flow" hidden>
+              <div class="globalnav__flyout-content">
+                <div class="globalnav__group" data-elevated>
+                  <h2 class="globalnav__group-title">Explore Orbit</h2>
+                  <ul><li><a class="globalnav__flyout-link" href="#navigation">Overview</a></li><li><a class="globalnav__flyout-link" href="#navigation">Runs</a></li><li><a class="globalnav__flyout-link" href="#navigation">Quotas</a></li><li><a class="globalnav__flyout-link" href="#navigation">Mobile app</a></li></ul>
+                </div>
+                <div class="globalnav__group">
+                  <h2 class="globalnav__group-title">Get started</h2>
+                  <ul><li><a class="globalnav__flyout-link" href="#navigation">Connect a runner</a></li><li><a class="globalnav__flyout-link" href="#navigation">Setup checklist</a></li><li><a class="globalnav__flyout-link" href="#navigation">Templates</a></li></ul>
+                </div>
+                <div class="globalnav__group">
+                  <h2 class="globalnav__group-title">More from Orbit</h2>
+                  <ul><li><a class="globalnav__flyout-link" href="#navigation">Recordings</a></li><li><a class="globalnav__flyout-link" href="#navigation">Security</a></li><li><a class="globalnav__flyout-link" href="#navigation">Release notes</a></li></ul>
+                </div>
+              </div>
+            </div>
+            <div class="globalnav__flyout" id="ch-gn-talk" hidden>
+              <div class="globalnav__flyout-content">
+                <div class="globalnav__group" data-elevated>
+                  <h2 class="globalnav__group-title">Explore Studio</h2>
+                  <ul><li><a class="globalnav__flyout-link" href="#navigation">Boards</a></li><li><a class="globalnav__flyout-link" href="#navigation">Threads</a></li><li><a class="globalnav__flyout-link" href="#navigation">Docs</a></li></ul>
+                </div>
+                <div class="globalnav__group">
+                  <h2 class="globalnav__group-title">Build</h2>
+                  <ul><li><a class="globalnav__flyout-link" href="#navigation">API</a></li><li><a class="globalnav__flyout-link" href="#navigation">Webhooks</a></li></ul>
+                </div>
+              </div>
+            </div>
+          </nav>
+          <div class="ch-mini__hero">
+            <canvas data-art="steel" data-art-seed="23" data-art-contrast="1.2" aria-hidden="true"></canvas>
+            <p class="ch-mini__eyebrow">Orbit</p>
+            <h3 class="ch-mini__title">One workspace. Every project.</h3>
+            <p class="ch-mini__sub"><span class="ch-wide">Hover a product name to open its flyout</span><span class="ch-narrow">Tap the menu to open it</span></p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="ch-navpair">
+      <div class="ch-spec">
+        <div class="ch-spec__facts">
+          <p class="ch-spec__name">Global nav</p>
+          <div class="ch-try"><button class="btn btn-tinted btn-m" type="button" data-ch-do="gn-open">Open the Orbit flyout</button></div>
+        </div>
+<div class="stat-grid ch-spec__stats" data-cols="2">
+            <div class="stat-cell"><p class="stat-value">44 px</p><p class="stat-caption">bar height, 48 below 834</p></div>
+            <div class="stat-cell"><p class="stat-value">120 ms</p><p class="stat-caption">hover intent before it opens</p></div>
+            <div class="stat-cell"><p class="stat-value">480 ms</p><p class="stat-caption">at most to grow: half its height, from 240</p></div>
+            <div class="stat-cell"><p class="stat-value">20 ms</p><p class="stat-caption">between links as they cascade in</p></div>
+          </div>
+        <div class="ch-code">
+<div class="segmented ch-code__tabs" role="tablist" aria-label="Code"><button type="button" role="tab" id="ch-code-1-t0" aria-controls="ch-code-1-p0" aria-selected="true">HTML</button><button type="button" role="tab" id="ch-code-1-t1" aria-controls="ch-code-1-p1">JavaScript</button></div>
+<pre class="doc-code" role="tabpanel" id="ch-code-1-p0" aria-labelledby="ch-code-1-t0" tabindex="0"><code>&lt;nav class="globalnav" aria-label="Fluid"&gt;
+  &lt;div class="globalnav__bar"&gt;
+    &lt;a class="globalnav__brand" href="index.html" aria-label="Home"&gt;&lt;i data-sym="sparkles"&gt;&lt;/i&gt;&lt;/a&gt;
+    &lt;ul class="globalnav__list"&gt;
+      &lt;li class="globalnav__item" data-flyout="gn-flow"&gt;
+        &lt;a class="globalnav__link" href="#"&gt;Orbit&lt;/a&gt;
+        &lt;button class="globalnav__trigger" type="button"&gt;&lt;span class="sr-only"&gt;Orbit menu&lt;/span&gt;&lt;/button&gt;
+      &lt;/li&gt;
+    &lt;/ul&gt;
+    &lt;div class="globalnav__tools"&gt;
+      &lt;button class="globalnav__menu" type="button" aria-label="Menu" aria-expanded="false"&gt;&lt;i data-sym="lines"&gt;&lt;/i&gt;&lt;/button&gt;
+    &lt;/div&gt;
+  &lt;/div&gt;
+  &lt;div class="globalnav__flyout" id="gn-flow" hidden&gt;
+    &lt;div class="globalnav__flyout-content"&gt;
+      &lt;div class="globalnav__group" data-elevated&gt;
+        &lt;h2 class="globalnav__group-title"&gt;Explore Orbit&lt;/h2&gt;
+        &lt;ul&gt;&lt;li&gt;&lt;a class="globalnav__flyout-link" href="#"&gt;Overview&lt;/a&gt;&lt;/li&gt;&lt;/ul&gt;
+      &lt;/div&gt;
+    &lt;/div&gt;
+  &lt;/div&gt;
+&lt;/nav&gt;</code></pre>
+<pre class="doc-code" role="tabpanel" id="ch-code-1-p1" aria-labelledby="ch-code-1-t1" tabindex="0" hidden><code>const nav = document.querySelector('.globalnav');
+CHROME.globalnav.open(nav, nav.querySelector('[data-flyout="gn-flow"]'));
+CHROME.globalnav.close(nav);
+CHROME.globalnav.menu(nav, true);   // the full-height menu below 834 px</code></pre>
+</div>
+      </div>
+
+      <div class="ch-spec">
+        <div class="ch-spec__facts">
+          <p class="ch-spec__name">Local nav</p>
+          <div class="ch-try"><button class="btn btn-tinted btn-m" type="button" data-ch-do="ln-open">Open this page&rsquo;s Explore panel</button></div>
+          <p class="doc-note" data-kind="measured">One number, <code>--progress</code>, drives the whole morph: height, the radius <code>calc(32px &minus; 14px &times; (1 &minus; p))</code>, the title from 19 to 40 px and Explore turning into the close disc. The radius is a circular one &mdash; a continuous 18 on a 52 px bar would clamp to a capsule.</p>
+        </div>
+<div class="stat-grid ch-spec__stats" data-cols="2">
+            <div class="stat-cell"><p class="stat-value">1024</p><p class="stat-caption">px wide, 52 tall, 10 from the top</p></div>
+            <div class="stat-cell"><p class="stat-value">18 &rarr; 32</p><p class="stat-caption">px radius, pill to panel</p></div>
+            <div class="stat-cell"><p class="stat-value">600 ms</p><p class="stat-caption">to open on spring(1.5, 28, 28, 1)</p></div>
+            <div class="stat-cell"><p class="stat-value">230 ms</p><p class="stat-caption">to slide in once the hero has passed</p></div>
+          </div>
+        <div class="ch-code">
+<div class="segmented ch-code__tabs" role="tablist" aria-label="Code"><button type="button" role="tab" id="ch-code-2-t0" aria-controls="ch-code-2-p0" aria-selected="true">HTML</button><button type="button" role="tab" id="ch-code-2-t1" aria-controls="ch-code-2-p1">JavaScript</button></div>
+<pre class="doc-code" role="tabpanel" id="ch-code-2-p0" aria-labelledby="ch-code-2-t0" tabindex="0"><code>&lt;div class="localnav" data-localnav-reveal="#hero"&gt;
+  &lt;div class="localnav__capsule" data-lg3 data-lg3-priority="3"&gt;
+    &lt;a class="localnav__title" href="#top"&gt;Chrome&lt;/a&gt;
+    &lt;button class="localnav__explore" type="button"&gt;
+      &lt;span class="localnav__explore-label"&gt;Explore&lt;/span&gt;
+    &lt;/button&gt;
+    &lt;a class="localnav__cta" href="start.html"&gt;Adopt&lt;/a&gt;
+    &lt;div class="localnav__panel" aria-label="Explore"&gt;
+      &lt;ul class="localnav__tiles"&gt;&hellip;&lt;/ul&gt;
+      &lt;hr class="localnav__rule"&gt;
+      &lt;nav class="localnav__jump" aria-label="On this page"&gt;
+        &lt;p class="localnav__jump-label"&gt;On this page&lt;/p&gt;
+        &lt;ul class="localnav__jump-grid"&gt;
+          &lt;li class="localnav__jump-item"&gt;&lt;a href="#toolbars"&gt;Toolbars&lt;/a&gt;&lt;/li&gt;
+        &lt;/ul&gt;
+      &lt;/nav&gt;
+    &lt;/div&gt;
+  &lt;/div&gt;
+&lt;/div&gt;</code></pre>
+<pre class="doc-code" role="tabpanel" id="ch-code-2-p1" aria-labelledby="ch-code-2-t1" tabindex="0" hidden><code>const ln = document.querySelector('.localnav');
+CHROME.localnav.open(ln);            // pill &rarr; panel on the nav-in spring
+CHROME.localnav.close(ln);           // back on nav-out; Escape does the same
+ln.addEventListener('chrome:localnav', (e) =&gt; console.log(e.detail.open));</code></pre>
+</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ APP BARS · the phone: large title, tab bar, accessory, island ═══════ -->
+<section class="band" data-band="story" id="app-bars" aria-labelledby="ch-app-h">
+  <div class="viewport-content">
+    <div class="ch-phone-row">
+      <div>
+        <div class="ch-intro" style="margin-bottom:0">
+          <h2 class="t-section" id="ch-app-h">Bars that make room.</h2>
+          <p class="t-lede">The large title scrolls <strong>under</strong> a transparent bar and the inline title fades in. Scroll down and the tab bar <strong>minimises to its selected tab</strong>, its accessory moving inline beside it; scroll up and both come back. The island carries the same &ldquo;now&rdquo;.</p>
+        </div>
+        <div class="ch-try">
+          <button class="btn btn-tinted btn-m" type="button" data-ch-do="ph-scroll">Scroll the phone</button>
+          <button class="btn btn-text btn-m" type="button" data-ch-do="ph-top">Back to the top</button>
+          <button class="btn btn-text btn-m" type="button" data-ch-do="ph-island">Expand the island</button>
+        </div>
+        <div class="stat-grid ch-app-stats" data-cols="3" style="margin-top:56px">
+          <div class="stat-cell"><p class="stat-value">62</p><p class="stat-caption">pt tab bar, 21 from the edges</p></div>
+          <div class="stat-cell"><p class="stat-value">50</p><p class="stat-caption">pt circle when minimised</p></div>
+          <div class="stat-cell"><p class="stat-value">34/41</p><p class="stat-caption">large title, bold, then 17 inline</p></div>
+        </div>
+      </div>
+      <div class="device ch-phone" data-device="phone">
+        <div class="device__screen" data-screen-width="402">
+          <div class="ch-app">
+            <div class="device__island">
+              <div class="live-capsule" data-anchor="center" data-kind="burst" data-elapsed="42" style="--lc-hue: var(--series-1)" id="ch-island-cap">
+                <div class="live-capsule__glass">
+                  <button class="live-capsule__face" type="button" aria-label="Now: Like, 4 of 10. Show details">
+                    <span class="live-capsule__lead"><i data-sym="heart"></i></span>
+                    <span class="live-capsule__summary">Review</span>
+                    <span class="live-capsule__trail">4/10</span>
+                  </button>
+                  <div class="live-capsule__detail">
+                    <div class="live-capsule__row">
+                      <span class="live-capsule__glyph"><i data-sym="heart"></i></span>
+                      <span><b class="live-capsule__account">aurora.demo</b><span class="live-capsule__line">Review &larr; @sample.trailrunners</span></span>
+                      <span class="live-capsule__elapsed">0:42</span>
+                    </div>
+                    <div class="live-capsule__meter" role="progressbar" aria-label="Tasks" aria-valuemin="0" aria-valuemax="10" aria-valuenow="4" style="--lc-meter: .4"><span></span></div>
+                    <div class="live-capsule__foot"><span class="live-capsule__count">4 of 10</span><button class="live-capsule__stop" type="button">Stop</button></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="ch-app__scroll" id="ch-feed">
+              <header class="navbar" data-navbar-scroll="#ch-feed" data-navbar-minimize data-scroll-edge="soft">
+                <div class="navbar__bar">
+                  <div class="navbar__leading"><button class="navbar__btn" type="button" data-lg3 data-lg3-interactive aria-label="Projects"><i data-sym="person"></i></button></div>
+                  <h3 class="navbar__title">Today</h3>
+                  <div class="navbar__trailing"><div class="navbar__group" data-lg3 data-lg3-interactive><button class="navbar__btn" type="button" aria-label="Filter"><i data-sym="sliders"></i></button><button class="navbar__btn" type="button" aria-label="More"><i data-sym="ellipsis"></i></button></div></div>
+                </div>
+              </header>
+              <div class="navbar-large"><h3 class="navbar-large__title">Today</h3><p class="navbar-large__subtitle">Saturday 26 September &middot; 1,222 done</p></div>
+              <div class="ch-app__feed">
+                <div class="ch-app__card" data-tone="dark"><canvas data-art="steel" data-art-seed="3" aria-hidden="true"></canvas><p><b>12.6 s</b>per finished task inside runs &middot; 42.7 s on the whole-run clock</p></div>
+                <div class="ch-row"><span>aurora.demo</span><span>avg 82%</span></div>
+                <div class="ch-row"><span>basil.demo</span><span>avg 56%</span></div>
+                <div class="ch-app__card" data-tone="dark"><canvas data-art="twilight" data-art-seed="8" aria-hidden="true"></canvas><p><b>224 of 348</b>tasks reviewed in the last 38 runs &middot; 14 were empty, 1 never started</p></div>
+                <div class="ch-row"><span>cobalt.demo</span><span>avg 61%</span></div>
+                <div class="ch-row"><span>dune.demo</span><span>avg 30%</span></div>
+                <div class="ch-app__card" data-tone="dark"><canvas data-art="deep" data-art-seed="4" aria-hidden="true"></canvas><p><b>2,160</b>daily limit &middot; 4 projects &times; 540</p></div>
+                <div class="ch-row"><span>Triage closed</span><span>aurora.demo &middot; 14:15</span></div>
+                <div class="ch-app__card" data-tone="dark"><canvas data-art="ember" data-art-seed="2" aria-hidden="true"></canvas><p><b>1,904</b>tasks queued today &middot; 1,222 done</p></div>
+              </div>
+            </div>
+            <nav class="tabbar" data-tabbar-position="absolute" data-tabbar-scroll="#ch-feed" aria-label="Phone tabs">
+              <div class="tabbar__accessory" data-lg3>
+                <div class="tabbar__now" style="--lc-hue: var(--series-1)">
+                  <span class="live-capsule__lead"><i data-sym="heart"></i></span>
+                  <span class="ch-now-text">aurora.demo <span data-accessory-extra>&middot; Review &larr; @sample.trailrunners</span></span>
+                  <span class="ch-now-trail">4/10</span>
+                </div>
+              </div>
+              <div class="tabbar__row">
+                <div class="tabbar__bar" data-lg3 data-lg3-recipe="pill" data-lg3-interactive>
+                  <div class="tabbar__tabs">
+                    <button class="tab" type="button" aria-selected="true"><i data-sym="target"></i><span class="tab__label">Today</span></button>
+                    <button class="tab" type="button"><i data-sym="person"></i><span class="tab__label">Projects</span></button>
+                    <button class="tab" type="button"><i data-sym="bubble"></i><span class="tab__label">Inbox</span></button>
+                    <button class="tab" type="button"><i data-sym="bell"></i><span class="tab__label">Alerts</span></button>
+                  </div>
+                </div>
+                <button class="tab-prominent" type="button" data-lg3 data-lg3-interactive aria-label="Search"><i data-sym="magnifier"></i></button>
+              </div>
+            </nav>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="ch-spec">
+      <div class="ch-spec__facts">
+        <p class="ch-spec__name">Navigation bar</p>
+        <p class="t-body" style="color:var(--label-2)">Transparent; only its controls are glass. <code>data-navbar-minimize</code> shrinks the controls on the way down, and its own <a href="#scroll-edges">scroll edge</a> appears once content is underneath.</p>
+        <p class="doc-note" data-kind="rule">Titles under 15 characters, never the app&rsquo;s name. Symbols without enclosures &mdash; the glass group is the container.</p>
+      </div>
+      <div class="ch-code">
+<p class="ch-code__label">HTML</p>
+<pre class="doc-code" id="ch-code-3-p0" tabindex="0" aria-label="HTML example"><code>&lt;div class="feed" id="feed"&gt;              &lt;!-- the scroll container --&gt;
+  &lt;header class="navbar" data-navbar-scroll="#feed" data-navbar-minimize data-scroll-edge="soft"&gt;
+    &lt;div class="navbar__bar"&gt;
+      &lt;div class="navbar__leading"&gt;
+        &lt;button class="navbar__btn" type="button" data-lg3 data-lg3-interactive aria-label="Projects"&gt;&lt;i data-sym="person"&gt;&lt;/i&gt;&lt;/button&gt;
+      &lt;/div&gt;
+      &lt;h1 class="navbar__title"&gt;Today&lt;/h1&gt;
+      &lt;div class="navbar__trailing"&gt;
+        &lt;div class="navbar__group" data-lg3 data-lg3-interactive&gt;
+          &lt;button class="navbar__btn" type="button" aria-label="Filter"&gt;&lt;i data-sym="sliders"&gt;&lt;/i&gt;&lt;/button&gt;
+          &lt;button class="navbar__btn" type="button" aria-label="More"&gt;&lt;i data-sym="ellipsis"&gt;&lt;/i&gt;&lt;/button&gt;
+        &lt;/div&gt;
+      &lt;/div&gt;
+    &lt;/div&gt;
+  &lt;/header&gt;
+  &lt;div class="navbar-large"&gt;
+    &lt;h2 class="navbar-large__title"&gt;Today&lt;/h2&gt;
+    &lt;p class="navbar-large__subtitle"&gt;Saturday 26 September&lt;/p&gt;
+  &lt;/div&gt;
+  &hellip;
+&lt;/div&gt;</code></pre>
+</div>
+    </div>
+
+    <div class="ch-spec">
+      <div class="ch-spec__facts">
+        <p class="ch-spec__name">Tab bar</p>
+        <p class="doc-note" data-kind="chosen">Minimise waits for 32 px of travel down and restores after 16 px up.</p>
+        <p class="doc-note" data-kind="rule">Navigation only, never actions. Five tabs or fewer, one-word labels. The accessory is for something app-wide &mdash; here, the run that is in progress.</p>
+      </div>
+<div class="stat-grid ch-spec__stats" data-cols="2">
+          <div class="stat-cell"><p class="stat-value">400 ms</p><p class="stat-caption">lens travel, bounce .15 &mdash; the select spring</p></div>
+          <div class="stat-cell"><p class="stat-value">+16 pt</p><p class="stat-caption">the lens lifts every way on press</p></div>
+        </div>
+      <div class="ch-code">
+<div class="segmented ch-code__tabs" role="tablist" aria-label="Code"><button type="button" role="tab" id="ch-code-4-t0" aria-controls="ch-code-4-p0" aria-selected="true">HTML</button><button type="button" role="tab" id="ch-code-4-t1" aria-controls="ch-code-4-p1">JavaScript</button></div>
+<pre class="doc-code" role="tabpanel" id="ch-code-4-p0" aria-labelledby="ch-code-4-t0" tabindex="0"><code>&lt;nav class="tabbar" data-tabbar-scroll="#feed" aria-label="Tabs"&gt;
+  &lt;div class="tabbar__accessory" data-lg3&gt;
+    &lt;div class="tabbar__now"&gt;&hellip;&lt;span data-accessory-extra&gt;hidden while minimised&lt;/span&gt;&lt;/div&gt;
+  &lt;/div&gt;
+  &lt;div class="tabbar__row"&gt;
+    &lt;div class="tabbar__bar" data-lg3 data-lg3-recipe="pill" data-lg3-priority="2" data-lg3-interactive&gt;
+      &lt;div class="tabbar__tabs"&gt;
+        &lt;button class="tab" type="button" aria-selected="true"&gt;&lt;i data-sym="target"&gt;&lt;/i&gt;&lt;span class="tab__label"&gt;Today&lt;/span&gt;&lt;/button&gt;
+        &lt;button class="tab" type="button"&gt;&lt;i data-sym="bubble"&gt;&lt;/i&gt;&lt;span class="tab__label"&gt;Inbox&lt;/span&gt;&lt;/button&gt;
+      &lt;/div&gt;
+    &lt;/div&gt;
+    &lt;button class="tab-prominent" type="button" data-lg3 data-lg3-interactive aria-label="Search"&gt;&lt;i data-sym="magnifier"&gt;&lt;/i&gt;&lt;/button&gt;
+  &lt;/div&gt;
+&lt;/nav&gt;</code></pre>
+<pre class="doc-code" role="tabpanel" id="ch-code-4-p1" aria-labelledby="ch-code-4-t1" tabindex="0" hidden><code>const tb = document.querySelector('.tabbar');
+CHROME.tabbar.select(tb, 1);
+CHROME.tabbar.minimize(tb, true);
+tb.addEventListener('chrome:minimize', (e) =&gt; console.log(e.detail.minimized));</code></pre>
+</div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ TOOLBARS ══════════════════════════════════════════════════════════ -->
+<section class="band" data-band="utility" id="toolbars" aria-labelledby="ch-tb-h">
+  <div class="viewport-content">
+    <div class="ch-intro">
+      <h2 class="t-section" id="ch-tb-h">Toolbars.</h2>
+      <p class="t-lede">At most <strong>three glass groups</strong> and one tinted primary, trailing. Symbols never share a group with words. On a large canvas the same groups move to a <strong>vertical strip</strong>: back at the top, the prominent action next, the rest below.</p>
+    </div>
+    <div class="ch-tools">
+      <div>
+        <div class="ch-stage">
+          <canvas data-art="dawn" data-art-seed="14" aria-hidden="true"></canvas>
+          <div class="toolbar ch-tb" aria-label="Shapes">
+            <div class="toolbar__group" data-lg3 data-lg3-interactive><button class="toolbar__item" type="button" aria-label="Back"><i data-sym="chevron-left"></i></button></div>
+            <div class="toolbar__spacer"></div>
+            <div class="toolbar__group" data-lg3 data-lg3-interactive>
+              <button class="toolbar__item" type="button" aria-label="Filters"><i data-sym="sliders"></i></button>
+              <button class="toolbar__item" type="button" aria-label="Share"><i data-sym="arrow-up-right"></i></button>
+              <button class="toolbar__item" type="button" aria-label="More"><i data-sym="ellipsis"></i></button>
+            </div>
+            <button class="toolbar__primary" type="button" data-lg3 data-lg3-interactive><i data-sym="play"></i><span>Start</span></button>
+          </div>
+        </div>
+        <p class="ch-label"><b>Horizontal.</b> Leading: back, then a title if the bar has a hard edge under it. Trailing: the common tools, then the one primary. Arrow keys move between items; the toolbar is a single tab stop.</p>
+      </div>
+      <div>
+        <div class="ch-stage">
+          <canvas data-art="aurora" data-art-seed="21" aria-hidden="true"></canvas>
+          <div class="toolbar ch-vtb" data-axis="vertical" aria-label="Canvas">
+            <div class="toolbar__group" data-lg3 data-lg3-interactive><button class="toolbar__item" type="button" aria-label="Back"><i data-sym="chevron-left"></i></button></div>
+            <button class="toolbar__primary" type="button" data-lg3 data-lg3-interactive aria-label="Done"><i data-sym="checkmark"></i></button>
+            <div class="toolbar__spacer"></div>
+            <div class="toolbar__group" data-lg3 data-lg3-interactive><button class="toolbar__item" type="button" aria-label="Pencil"><i data-sym="pencil"></i></button><button class="toolbar__item" type="button" aria-label="Layers"><i data-sym="grid"></i></button><button class="toolbar__item" type="button" aria-label="Map"><i data-sym="map"></i></button></div>
+          </div>
+        </div>
+        <p class="ch-label"><b>Vertical</b>, <code>data-axis="vertical"</code>. Fixed 60 px width, symbols only.</p>
+      </div>
+    </div>
+
+    <div class="doc-dodont ch-dodont">
+      <div class="doc-do">
+        <div class="ch-stage">
+          <canvas data-art="steel" data-art-seed="6" aria-hidden="true"></canvas>
+          <div class="toolbar" aria-label="Three groups">
+            <div class="toolbar__group" data-lg3 data-lg3-mode="frost"><button class="toolbar__item" type="button" aria-label="Back"><i data-sym="chevron-left"></i></button></div>
+            <div class="toolbar__spacer"></div>
+            <div class="toolbar__group" data-lg3 data-lg3-mode="frost"><button class="toolbar__item" type="button" aria-label="Filters"><i data-sym="sliders"></i></button><button class="toolbar__item" type="button" aria-label="More"><i data-sym="ellipsis"></i></button></div>
+            <button class="toolbar__primary" type="button" data-lg3 data-lg3-mode="frost" aria-label="Done"><i data-sym="checkmark"></i></button>
+          </div>
+        </div>
+        <p class="doc-verdict">Group by meaning; one tinted primary at the trailing end.</p>
+      </div>
+      <div class="doc-dont">
+        <div class="ch-stage">
+          <canvas data-art="steel" data-art-seed="6" aria-hidden="true"></canvas>
+          <div class="toolbar" aria-label="Too many groups">
+            <div class="toolbar__group" data-lg3 data-lg3-mode="frost"><button class="toolbar__item" type="button" aria-label="Back"><i data-sym="chevron-left"></i></button></div>
+            <div class="toolbar__group" data-lg3 data-lg3-mode="frost"><button class="toolbar__item" type="button" aria-label="Filters"><i data-sym="sliders"></i></button></div>
+            <div class="toolbar__group" data-lg3 data-lg3-mode="frost"><button class="toolbar__item" type="button" aria-label="Share"><i data-sym="arrow-up-right"></i></button></div>
+            <div class="toolbar__group" data-lg3 data-lg3-mode="frost"><button class="toolbar__item" type="button" aria-label="More"><i data-sym="ellipsis"></i></button></div>
+            <button class="toolbar__primary" type="button" data-lg3 data-lg3-mode="frost" aria-label="Save"><i data-sym="checkmark"></i></button>
+            <button class="toolbar__primary" type="button" data-lg3 data-lg3-mode="frost" aria-label="Start"><i data-sym="play"></i></button>
+          </div>
+        </div>
+        <p class="doc-verdict">A lens per button and two tinted actions: nothing reads as primary.</p>
+      </div>
+    </div>
+
+    <div class="ch-spec">
+      <div class="ch-spec__facts">
+      </div>
+<div class="stat-grid ch-spec__stats" data-cols="2">
+          <div class="stat-cell"><p class="stat-value">&le; 3</p><p class="stat-caption">glass groups per bar</p></div>
+          <div class="stat-cell"><p class="stat-value">1</p><p class="stat-caption">tinted primary, colour on the glass, not the label</p></div>
+          <div class="stat-cell"><p class="stat-value">44 px</p><p class="stat-caption">every item, the touch target</p></div>
+          <div class="stat-cell"><p class="stat-value">60 px</p><p class="stat-caption">the vertical strip&rsquo;s fixed width</p></div>
+        </div>
+      <div class="ch-code">
+<p class="ch-code__label">HTML</p>
+<pre class="doc-code" id="ch-code-5-p0" tabindex="0" aria-label="HTML example"><code>&lt;div class="toolbar" aria-label="Shapes"&gt;
+  &lt;div class="toolbar__group" data-lg3 data-lg3-interactive&gt;
+    &lt;button class="toolbar__item" type="button" aria-label="Back"&gt;&lt;i data-sym="chevron-left"&gt;&lt;/i&gt;&lt;/button&gt;
+  &lt;/div&gt;
+  &lt;span class="toolbar__title"&gt;Shapes&lt;/span&gt;
+  &lt;div class="toolbar__spacer"&gt;&lt;/div&gt;
+  &lt;div class="toolbar__group" data-lg3 data-lg3-interactive&gt;
+    &lt;button class="toolbar__item" type="button" aria-label="Filters"&gt;&lt;i data-sym="sliders"&gt;&lt;/i&gt;&lt;/button&gt;
+    &lt;button class="toolbar__item" type="button" aria-label="More"&gt;&lt;i data-sym="ellipsis"&gt;&lt;/i&gt;&lt;/button&gt;
+  &lt;/div&gt;
+  &lt;button class="toolbar__primary" type="button" data-lg3 data-lg3-interactive&gt;
+    &lt;i data-sym="play"&gt;&lt;/i&gt;&lt;span&gt;Start&lt;/span&gt;
+  &lt;/button&gt;
+&lt;/div&gt;
+
+&lt;!-- Foldable: the same groups on the side --&gt;
+&lt;div class="toolbar" data-axis="vertical" aria-label="Canvas"&gt;&hellip;&lt;/div&gt;</code></pre>
+</div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ SIDEBARS + INSPECTOR ══════════════════════════════════════════════ -->
+<section class="band" data-band="story" id="sidebars" aria-labelledby="ch-sb-h">
+  <div class="viewport-content">
+    <div class="ch-intro">
+      <h2 class="t-section" id="ch-sb-h">Sidebars and inspectors.</h2>
+      <p class="t-lede">Two generations of the same panel. The first sidebar <strong>floats inset</strong>, with the content flowing behind it. The second runs <strong>edge to edge</strong>, its icons in the accent again, and a background extension mirrors the hero beneath it so the art seems to continue under the glass.</p>
+    </div>
+
+    <div class="ch-win ch-win--float" id="ch-win-a">
+      <aside class="sidebar" data-lg3 data-sidebar="floating" data-concentric aria-label="Specimen sections, floating">
+        <div class="sidebar__head">
+          <span class="sidebar__brand"><i data-sym="phone"></i>Orbit</span>
+          <button class="sidebar__fold" type="button" aria-label="Fold sidebar"><i data-sym="sidebar"></i></button>
+        </div>
+        <div class="sidebar__section">
+          <p class="sidebar__heading">Today</p>
+          <a class="sidebar__item" href="#sidebars" aria-current="page"><i data-sym="target"></i><span class="sidebar__label">Today</span></a>
+        </div>
+        <div class="sidebar__section">
+          <p class="sidebar__heading">Fleet</p>
+          <a class="sidebar__item" href="#sidebars"><i data-sym="phone"></i><span class="sidebar__label">Runners</span><span class="sidebar__count">2</span></a>
+          <a class="sidebar__item" href="#sidebars"><i data-sym="person"></i><span class="sidebar__label">Projects</span><span class="sidebar__count">4</span></a>
+        </div>
+        <div class="sidebar__section">
+          <p class="sidebar__heading">Reviewers</p>
+          <a class="sidebar__item" href="#sidebars"><i data-sym="map"></i><span class="sidebar__label">Targets</span></a>
+          <a class="sidebar__item" href="#sidebars"><i data-sym="sliders"></i><span class="sidebar__label">Templates</span></a>
+        </div>
+      </aside>
+      <div class="ch-win__main">
+        <div class="ch-win__hero" data-tone="dark">
+          <canvas data-art="deep" data-art-seed="4" aria-hidden="true"></canvas>
+          <div class="ch-win__stat"><b>1,222</b><span>done of 1,904 queued &middot; daily limit 2,160</span></div>
+        </div>
+        <div class="ch-win__cards">
+          <div class="ch-card"><h4>aurora.demo</h4><p>Review 312 of 400 &middot; Triage closed 14:15</p><b>82%<small>avg</small></b></div>
+          <div class="ch-card"><h4>basil.demo</h4><p>Triage 41 of 70</p><b>56%<small>avg</small></b></div>
+          <div class="ch-card"><h4>cobalt.demo</h4><p>Archive 39 of 70 &middot; Triage blocked &middot; 17h 12m</p><b>61%<small>avg</small></b></div>
+          <div class="ch-card"><h4>dune.demo</h4><p>Review 96 of 400 &middot; Comments paused</p><b>30%<small>avg</small></b></div>
+        </div>
+      </div>
+    </div>
+    <p class="ch-label"><b>Floating</b>, <code>data-sidebar="floating"</code>: inset 8 px, concentric with its window. The fold button (top right of the sidebar) folds it to a 72 px rail.</p>
+
+    <div class="ch-win" id="ch-win-b">
+      <div class="bg-extension" data-extend-from="#ch-ext-art" data-extend="start" aria-hidden="true"></div>
+      <aside class="sidebar" data-lg3 data-sidebar="edge" aria-label="Specimen sections, edge to edge">
+        <div class="sidebar__head">
+          <span class="sidebar__brand"><i data-sym="phone"></i>Orbit</span>
+          <button class="sidebar__fold" type="button" aria-label="Fold sidebar"><i data-sym="sidebar"></i></button>
+        </div>
+        <div class="sidebar__section">
+          <p class="sidebar__heading">Fleet</p>
+          <a class="sidebar__item" href="#sidebars" aria-current="page"><i data-sym="phone"></i><span class="sidebar__label">Runners</span><span class="sidebar__count">2</span></a>
+          <a class="sidebar__item" href="#sidebars"><i data-sym="person"></i><span class="sidebar__label">Projects</span><span class="sidebar__count">4</span></a>
+        </div>
+        <div class="sidebar__section">
+          <p class="sidebar__heading">Threads</p>
+          <a class="sidebar__item" href="#sidebars"><i data-sym="bubble"></i><span class="sidebar__label">Inbox</span><span class="sidebar__count">3</span></a>
+          <a class="sidebar__item" href="#sidebars"><i data-sym="exclamation-triangle"></i><span class="sidebar__label">Incidents</span><span class="sidebar__count">2</span></a>
+        </div>
+      </aside>
+      <div class="ch-win__main">
+        <div class="ch-win__hero" data-tone="dark">
+          <canvas id="ch-ext-art" data-art="twilight" data-art-seed="9" aria-hidden="true"></canvas>
+          <div class="ch-win__stat"><b>2 runners</b><span>runner-01 online &middot; runner-02 offline 18 min</span></div>
+        </div>
+        <div class="ch-win__cards">
+          <div class="ch-card"><h4>runner-01</h4><p>aurora.demo &middot; basil.demo &middot; cobalt.demo &middot; dune.demo</p><b>Online</b></div>
+          <div class="ch-card"><h4>runner-02</h4><p>Nothing placed on it &middot; last seen 14:12</p><b>Offline</b></div>
+        </div>
+      </div>
+      <aside class="inspector" data-lg3 data-concentric aria-label="Specimen activity" id="ch-insp">
+        <div class="inspector__head"><h3 class="inspector__title">Activity</h3><button class="inspector__fold" type="button" aria-label="Fold inspector"><i data-sym="chevron-right"></i></button></div>
+        <span class="inspector__vlabel" aria-hidden="true">Activity</span>
+        <div class="inspector__filters"><button class="inspector__filter" type="button" data-filter="all" aria-checked="true">All</button><button class="inspector__filter" type="button" data-filter="act">Acts</button><button class="inspector__filter" type="button" data-filter="reply">Replies</button><button class="inspector__filter" type="button" data-filter="error">Errors</button></div>
+        <div class="inspector__body">
+          <div class="inspector__row" data-kind="act"><time>14:29:51</time><span>approved @lead_30912</span></div>
+          <div class="inspector__row" data-kind="act"><time>14:29:44</time><span>approved @person.m7710 &middot; 3 tasks</span></div>
+          <div class="inspector__row" data-kind="act"><time>14:29:30</time><span>opened the queue of @sample.trailrunners</span></div>
+          <div class="inspector__row" data-kind="reply"><time>14:20:51</time><span>replied for aurora.demo, confirmed on screen</span></div>
+          <div class="inspector__row" data-kind="error"><time>14:17:15</time><span>dune.demo timed out &middot; not written off</span></div>
+          <div class="inspector__row" data-kind="act"><time>14:15:02</time><span>aurora.demo Triage closed &middot; 70 of 70</span></div>
+          <div class="inspector__row" data-kind="error"><time>14:12:03</time><span>runner-02 went offline</span></div>
+        </div>
+      </aside>
+    </div>
+    <p class="ch-label"><b>Edge to edge</b>, <code>data-sidebar="edge"</code>, over a <code>.bg-extension</code> mirrored from the hero, with the inspector trailing. The inspector folds to a 52 px strip with a vertical label.</p>
+
+    <div class="ch-spec">
+      <div class="ch-spec__facts">
+        <p class="doc-note" data-kind="rule">Large glass adapts but does not flip, and is more opaque: sidebars, inspectors and the palette carry a wash of the raised ground under their content. Text and controls stay above the extension; it only ever carries media.</p>
+      </div>
+<div class="stat-grid ch-spec__stats" data-cols="2">
+          <div class="stat-cell"><p class="stat-value">248</p><p class="stat-caption">px sidebar, folding to a 72 px rail</p></div>
+          <div class="stat-cell"><p class="stat-value">320</p><p class="stat-caption">px inspector, folding to 52</p></div>
+          <div class="stat-cell"><p class="stat-value">2</p><p class="stat-caption">levels of hierarchy, at most</p></div>
+          <div class="stat-cell"><p class="stat-value">1</p><p class="stat-caption">background extension per region</p></div>
+        </div>
+      <div class="ch-code">
+<div class="segmented ch-code__tabs" role="tablist" aria-label="Code"><button type="button" role="tab" id="ch-code-6-t0" aria-controls="ch-code-6-p0" aria-selected="true">HTML</button><button type="button" role="tab" id="ch-code-6-t1" aria-controls="ch-code-6-p1">JavaScript</button></div>
+<pre class="doc-code" role="tabpanel" id="ch-code-6-p0" aria-labelledby="ch-code-6-t0" tabindex="0"><code>&lt;div class="bg-extension" data-extend-from="#hero-art" data-extend="start" aria-hidden="true"&gt;&lt;/div&gt;
+&lt;aside class="sidebar" data-lg3 data-sidebar="edge" aria-label="Sections"&gt;
+  &lt;div class="sidebar__head"&gt;
+    &lt;span class="sidebar__brand"&gt;&lt;i data-sym="phone"&gt;&lt;/i&gt;Orbit&lt;/span&gt;
+    &lt;button class="sidebar__fold" type="button" aria-label="Fold sidebar"&gt;&lt;i data-sym="sidebar"&gt;&lt;/i&gt;&lt;/button&gt;
+  &lt;/div&gt;
+  &lt;div class="sidebar__section"&gt;
+    &lt;p class="sidebar__heading"&gt;Fleet&lt;/p&gt;
+    &lt;a class="sidebar__item" href="#" aria-current="page"&gt;
+      &lt;i data-sym="phone"&gt;&lt;/i&gt;&lt;span class="sidebar__label"&gt;Phones&lt;/span&gt;&lt;span class="sidebar__count"&gt;2&lt;/span&gt;
+    &lt;/a&gt;
+  &lt;/div&gt;
+&lt;/aside&gt;
+
+&lt;aside class="inspector" data-lg3 aria-label="Activity"&gt;
+  &lt;div class="inspector__head"&gt;
+    &lt;h3 class="inspector__title"&gt;Activity&lt;/h3&gt;
+    &lt;button class="inspector__fold" type="button" aria-label="Fold inspector"&gt;&lt;i data-sym="chevron-right"&gt;&lt;/i&gt;&lt;/button&gt;
+  &lt;/div&gt;
+  &lt;span class="inspector__vlabel" aria-hidden="true"&gt;Activity&lt;/span&gt;
+  &lt;div class="inspector__filters"&gt;
+    &lt;button class="inspector__filter" type="button" data-filter="all" aria-checked="true"&gt;All&lt;/button&gt;
+    &lt;button class="inspector__filter" type="button" data-filter="error"&gt;Errors&lt;/button&gt;
+  &lt;/div&gt;
+  &lt;div class="inspector__body"&gt;
+    &lt;div class="inspector__row" data-kind="error"&gt;&lt;time&gt;14:12:03&lt;/time&gt;&lt;span&gt;runner-02 went offline&lt;/span&gt;&lt;/div&gt;
+  &lt;/div&gt;
+&lt;/aside&gt;</code></pre>
+<pre class="doc-code" role="tabpanel" id="ch-code-6-p1" aria-labelledby="ch-code-6-t1" tabindex="0" hidden><code>CHROME.sidebar.fold(document.querySelector('.sidebar'), true);
+CHROME.inspector.fold(document.querySelector('.inspector'), true);</code></pre>
+</div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ SHEETS ════════════════════════════════════════════════════════════ -->
+<section class="band" data-band="utility" id="sheets" aria-labelledby="ch-sh-h">
+  <div class="viewport-content">
+    <div class="ch-intro">
+      <h2 class="t-section" id="ch-sh-h">Sheets grow out of their button.</h2>
+      <p class="t-lede">At partial height a sheet is <strong>inset glass</strong>, its bottom corners following the display. Drag it to full height and the glass <strong>becomes opaque</strong> and anchors to the edges. A sheet that interrupts dims what is behind it; one that runs alongside does not.</p>
+    </div>
+    <div class="ch-sheets">
+      <div class="ch-sheet-live">
+        <div class="ch-stage">
+          <canvas data-art="ember" data-art-seed="17" aria-hidden="true"></canvas>
+          <button class="btn btn-glass btn-l" type="button" data-lg3 data-lg3-interactive data-sheet-open="ch-filters"><i data-sym="sliders"></i> Filters</button>
+        </div>
+        <p class="ch-label"><b>Live.</b> Press Filters: the sheet morphs out of the button at its medium detent. Drag the top edge or press the grabber for full height; flick down or press Escape to dismiss.</p>
+      </div>
+      <figure class="ch-mockfig" style="margin:0">
+        <figcaption class="ch-label ch-mockcap"><b>Medium.</b> Inset, glass.</figcaption>
+        <div class="device ch-mock" data-device="phone" aria-hidden="true">
+          <div class="device__screen" data-screen-width="402">
+            <div class="ch-mock__app">
+              <canvas data-art="twilight" data-art-seed="31" aria-hidden="true"></canvas>
+              <div class="ch-mock__rows"><i></i><i></i><i></i><i></i></div>
+              <div class="ch-mock__scrim"></div>
+              <div class="ch-mock__sheet"><span class="ch-mock__grab"></span><div class="ch-mock__head"><i></i>Filters<i></i></div><div class="ch-mock__line"></div><div class="ch-mock__line"></div><div class="ch-mock__line"></div></div>
+            </div>
+          </div>
+        </div>
+      </figure>
+      <figure class="ch-mockfig" style="margin:0">
+        <figcaption class="ch-label ch-mockcap"><b>Large.</b> Anchored, opaque.</figcaption>
+        <div class="device ch-mock" data-device="phone" aria-hidden="true">
+          <div class="device__screen" data-screen-width="402">
+            <div class="ch-mock__app">
+              <canvas data-art="twilight" data-art-seed="31" aria-hidden="true"></canvas>
+              <div class="ch-mock__rows"><i></i><i></i><i></i><i></i></div>
+              <div class="ch-mock__scrim"></div>
+              <div class="ch-mock__sheet ch-mock__sheet--large"><span class="ch-mock__grab"></span><div class="ch-mock__head"><i></i>Filters<i></i></div><div class="ch-mock__line"></div><div class="ch-mock__line"></div><div class="ch-mock__line"></div><div class="ch-mock__line"></div><div class="ch-mock__line"></div></div>
+            </div>
+          </div>
+        </div>
+      </figure>
+    </div>
+
+    <div class="ch-spec">
+      <div class="ch-spec__facts">
+        <p class="doc-note" data-kind="rule">One sheet at a time. Close leading, Done trailing, never Cancel as well. The detents change the sheet&rsquo;s height, not its position, so a partial sheet keeps its rounded, inset bottom edge.</p>
+      </div>
+<div class="stat-grid ch-spec__stats" data-cols="2">
+          <div class="stat-cell"><p class="stat-value">&frac12;</p><p class="stat-caption">of the screen at the medium detent</p></div>
+          <div class="stat-cell"><p class="stat-value">44</p><p class="stat-caption">px top radius; the bottom goes to 0 at large</p></div>
+          <div class="stat-cell"><p class="stat-value">16 px</p><p class="stat-caption">inset at medium, 8 on a phone</p></div>
+          <div class="stat-cell"><p class="stat-value">.48</p><p class="stat-caption">black scrim with a 20 px blur, when it dims</p></div>
+        </div>
+      <div class="ch-code">
+<div class="segmented ch-code__tabs" role="tablist" aria-label="Code"><button type="button" role="tab" id="ch-code-7-t0" aria-controls="ch-code-7-p0" aria-selected="true">HTML</button><button type="button" role="tab" id="ch-code-7-t1" aria-controls="ch-code-7-p1">JavaScript</button></div>
+<pre class="doc-code" role="tabpanel" id="ch-code-7-p0" aria-labelledby="ch-code-7-t0" tabindex="0"><code>&lt;button class="btn btn-glass" type="button" data-lg3 data-lg3-interactive
+        data-sheet-open="filters"&gt;Filters&lt;/button&gt;
+
+&lt;div class="sheet" id="filters" data-lg3 data-detents="medium large" data-sheet-dim
+     aria-labelledby="filters-title" hidden&gt;
+  &lt;button class="sheet__grabber" type="button" aria-label="Sheet size"&gt;&lt;/button&gt;
+  &lt;div class="sheet__header"&gt;
+    &lt;button class="sheet__close" type="button" aria-label="Close" data-sheet-close&gt;&lt;i data-sym="xmark"&gt;&lt;/i&gt;&lt;/button&gt;
+    &lt;h2 class="sheet__title" id="filters-title"&gt;Filters&lt;/h2&gt;
+    &lt;button class="sheet__done" type="button" aria-label="Done" data-sheet-close&gt;&lt;i data-sym="checkmark"&gt;&lt;/i&gt;&lt;/button&gt;
+  &lt;/div&gt;
+  &lt;div class="sheet__body"&gt;&hellip;&lt;/div&gt;
+&lt;/div&gt;</code></pre>
+<pre class="doc-code" role="tabpanel" id="ch-code-7-p1" aria-labelledby="ch-code-7-t1" tabindex="0" hidden><code>const sheet = document.getElementById('filters');
+CHROME.sheet.open(sheet, { from: button, detent: 'medium' });
+CHROME.sheet.detent(sheet, 'large');
+CHROME.sheet.close(sheet);
+sheet.addEventListener('chrome:sheet', (e) =&gt; console.log(e.detail.open, e.detail.detent));</code></pre>
+</div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ SCROLL EDGES ══════════════════════════════════════════════════════ -->
+<section class="band" data-band="story" id="scroll-edges" aria-labelledby="ch-se-h">
+  <div class="viewport-content">
+    <div class="ch-intro">
+      <h2 class="t-section" id="ch-se-h">One edge per scroll view.</h2>
+      <p class="t-lede">The edge effect separates floating controls from the content moving under them. It is not decoration: it appears only once something is actually underneath. <strong>Soft</strong> dissolves the content; <strong>hard</strong> is a near-opaque band for dense bars and text outside glass. Scroll either pane.</p>
+    </div>
+    <div class="ch-edges">
+      <div>
+        <div class="ch-pane">
+          <div class="ch-pane__scroll" tabindex="0" aria-label="Soft edge demo, scrollable">
+            <div class="scroll-edge" data-edge-style="soft" aria-hidden="true"></div>
+            <div class="ch-pane__txt">
+              <p>A run starts once on a project and works the tasks it finds there, one row at a time. The bar above stays out of the way until the words reach it.</p>
+              <div class="ch-pane__ph"><canvas data-art="twilight" data-art-seed="5" aria-hidden="true"></canvas></div>
+              <h4>Soft, for glass controls</h4>
+              <p>The glass groups in this bar hold every label they need, so the edge only has to soften what passes beneath. Watch the paragraph blur and fade as it slides under the back button.</p>
+              <p>Over dark content the same edge becomes a subtle dimming instead of a white fade, because the glass above it has gone dark too.</p>
+              <div class="ch-pane__ph"><canvas data-art="aurora" data-art-seed="7" aria-hidden="true"></canvas></div>
+              <p>There is one edge per scroll view and per side. A second one in the same container is refused, with a warning in the console.</p>
+              <p>Scroll back to the top and the edge goes: with nothing underneath, there is nothing to separate.</p>
+              <div class="ch-pane__ph"><canvas data-art="ember" data-art-seed="9" aria-hidden="true"></canvas></div>
+              <p>That is the whole component: a zero-height anchor at the top of the scroller, two layers hanging from it, and one attribute that says which style it is.</p>
+            </div>
+          </div>
+          <div class="ch-pane__bar"><div class="toolbar"><div class="toolbar__group" data-lg3 data-lg3-mode="frost"><button class="toolbar__item" type="button" aria-label="Back"><i data-sym="chevron-left"></i></button></div><div class="toolbar__spacer"></div><div class="toolbar__group" data-lg3 data-lg3-mode="frost"><button class="toolbar__item" type="button" aria-label="Share"><i data-sym="arrow-up-right"></i></button><button class="toolbar__item" type="button" aria-label="More"><i data-sym="ellipsis"></i></button></div></div></div>
+        </div>
+        <p class="ch-label"><code>data-edge-style="soft"</code> &mdash; glass controls, no text outside them.</p>
+      </div>
+      <div>
+        <div class="ch-pane">
+          <div class="ch-pane__scroll" tabindex="0" aria-label="Hard edge demo, scrollable">
+            <div class="scroll-edge" data-edge-style="hard" aria-hidden="true"></div>
+            <div class="ch-pane__txt">
+              <p>Recordings keep a short flight record of every run: the screens it saw, the steps it took and the rows it wrote.</p>
+              <div class="ch-pane__ph"><canvas data-art="steel" data-art-seed="4" aria-hidden="true"></canvas></div>
+              <h4>Hard, for dense bars</h4>
+              <p>This bar has a title that sits outside any glass. Soft would let the paragraphs read through the title; the hard edge is a linear, nearly opaque band with a hairline, like a hard-edged native bar.</p>
+              <p>Automatic picks hard for you when the region holds a pinned header or a dense toolbar, and soft everywhere else.</p>
+              <div class="ch-pane__ph"><canvas data-art="deep" data-art-seed="3" aria-hidden="true"></canvas></div>
+              <p>In a split view each pane may have its own edge. Keep their heights equal so the two bars line up.</p>
+              <p>Vertical bars, like the side strip on a large canvas, get no edge at all by default.</p>
+              <div class="ch-pane__ph"><canvas data-art="dawn" data-art-seed="8" aria-hidden="true"></canvas></div>
+              <p>Under increased contrast the soft edge turns solid, and in forced colours it becomes a plain band of the canvas colour.</p>
+            </div>
+          </div>
+          <div class="ch-pane__bar"><div class="toolbar" data-dense><span class="toolbar__title">Recordings &middot; 14 runs</span><div class="toolbar__spacer"></div><div class="toolbar__group" data-lg3 data-lg3-mode="frost" data-text><button class="toolbar__item" type="button">Export</button></div></div></div>
+        </div>
+        <p class="ch-label"><code>data-edge-style="hard"</code> &mdash; a title outside glass needs the near-opaque band.</p>
+      </div>
+    </div>
+
+    <div class="ch-spec">
+      <div class="ch-spec__facts">
+        <p class="doc-note" data-kind="rule">Prefer <code>auto</code>. It resolves to hard when the region holds <code>[data-pinned-header]</code>, <code>.toolbar[data-dense]</code> or <code>.navbar[data-dense]</code>. Bars sit at <code>--z-chrome</code>, edges one level below at <code>--z-edge</code>.</p>
+      </div>
+<div class="stat-grid ch-spec__stats" data-cols="2">
+          <div class="stat-cell"><p class="stat-value">72 px</p><p class="stat-caption">soft edge: a 12 px blur over a fade to the ground</p></div>
+          <div class="stat-cell"><p class="stat-value">1</p><p class="stat-caption">edge per scroll view and side</p></div>
+        </div>
+      <div class="ch-code">
+<p class="ch-code__label">HTML</p>
+<pre class="doc-code" id="ch-code-8-p0" tabindex="0" aria-label="HTML example"><code>&lt;div class="pane" style="overflow: auto"&gt;      &lt;!-- the scroll container --&gt;
+  &lt;div class="scroll-edge" data-edge-style="auto" aria-hidden="true"&gt;&lt;/div&gt;
+  &hellip;content&hellip;
+&lt;/div&gt;
+
+&lt;!-- a page-level bottom edge under a fixed tab bar --&gt;
+&lt;div class="scroll-edge" data-edge="bottom" data-edge-fixed data-edge-style="soft"
+     style="--edge-h: 150px" aria-hidden="true"&gt;&lt;/div&gt;</code></pre>
+</div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ CONTROL BAR · over a gallery ══════════════════════════════════════ -->
+<section class="band" data-band="utility" data-band-bar id="control-bar" aria-labelledby="ch-cb-h">
+  <div class="viewport-content">
+    <header class="section-header">
+      <h2 class="section-header-headline" id="ch-cb-h">A drop that becomes a control bar.</h2>
+      <button class="section-header-link" type="button" data-ch-do="cb-intro">Play the intro again <i data-sym="arrow-clockwise"></i></button>
+    </header>
+  </div>
+  <div class="gallery" aria-label="Control bar specimen">
+    <div class="gallery-rail" tabindex="-1">
+      <ul class="gallery-list">
+        <li class="gallery-item" data-label="Drop">
+          <div class="gallery-card" data-tone="dark">
+            <p class="gallery-caption">It arrives as a liquid drop,<br>then splits into two bubbles.</p>
+            <div class="gallery-media"><canvas data-art="twilight" data-art-seed="3" aria-hidden="true"></canvas><div class="ch-gcard"><p class="ch-gnum"><small>from drop to the play icon</small>940 ms</p></div></div>
+          </div>
+        </li>
+        <li class="gallery-item" data-label="Dots">
+          <div class="gallery-card" data-tone="dark">
+            <p class="gallery-caption">The current dot is a pill<br>that fills while you watch.</p>
+            <div class="gallery-media"><canvas data-art="aurora" data-art-seed="5" aria-hidden="true"></canvas><div class="ch-gcard"><p class="ch-gnum"><small>a card, then the next one</small>6.15 s</p></div></div>
+          </div>
+        </li>
+        <li class="gallery-item" data-label="Density">
+          <div class="gallery-card" data-tone="dark">
+            <p class="gallery-caption">Denser while it moves.<br>Clearer at rest.</p>
+            <div class="gallery-media"><canvas data-art="ember" data-art-seed="8" aria-hidden="true"></canvas><div class="ch-gcard"><p class="ch-gnum"><small>px of blur while a bubble moves</small>7 &rarr; 14</p></div></div>
+          </div>
+        </li>
+        <li class="gallery-item" data-label="Parking">
+          <div class="gallery-card" data-tone="dark">
+            <p class="gallery-caption">It floats over the cards,<br>then parks below them.</p>
+            <div class="gallery-media"><canvas data-art="deep" data-art-seed="2" aria-hidden="true"></canvas><div class="ch-gcard"><p class="ch-gnum"><small>from the bottom of the window</small>32 px</p></div></div>
+          </div>
+        </li>
+        <li class="gallery-item" data-label="Pause">
+          <div class="gallery-card" data-tone="dark">
+            <p class="gallery-caption">Reduced motion starts it paused.<br>The progress still reports time.</p>
+            <div class="gallery-media"><canvas data-art="steel" data-art-seed="9" aria-hidden="true"></canvas><div class="ch-gcard"><p class="ch-gnum"><small>240 + 16 + 56</small>312 &times; 56</p></div></div>
+          </div>
+        </li>
+        <li class="gallery-item" data-label="Labels">
+          <div class="gallery-card" data-tone="dark">
+            <p class="gallery-caption">Every dot is a button<br>that names its card.</p>
+            <div class="gallery-media"><canvas data-art="dawn" data-art-seed="6" aria-hidden="true"></canvas><div class="ch-gcard"><p class="ch-gnum"><small>one tab stop each, labelled</small>7 dots</p></div></div>
+          </div>
+        </li>
+        <li class="gallery-item" data-label="Page move">
+          <div class="gallery-card" data-tone="dark">
+            <p class="gallery-caption">A card moves in one second,<br>then the pill starts to fill.</p>
+            <div class="gallery-media"><canvas data-art="twilight" data-art-seed="12" aria-hidden="true"></canvas><div class="ch-gcard"><p class="ch-gnum"><small>easeInOutQuad, snap off while it moves</small>1 s</p></div></div>
+          </div>
+        </li>
+      </ul>
+    </div>
+    <div class="ch-cb-hold">
+    <div class="control-bar" data-autoplay data-duration="6.15" aria-label="Specimen highlights">
+      <div class="control-bar__dots">
+        <button class="control-bar__dot" type="button" aria-label="Drop" aria-current="true"></button>
+        <button class="control-bar__dot" type="button" aria-label="Dots"></button>
+        <button class="control-bar__dot" type="button" aria-label="Density"></button>
+        <button class="control-bar__dot" type="button" aria-label="Parking"></button>
+        <button class="control-bar__dot" type="button" aria-label="Pause"></button>
+        <button class="control-bar__dot" type="button" aria-label="Labels"></button>
+        <button class="control-bar__dot" type="button" aria-label="Page move"></button>
+      </div>
+      <button class="control-bar__play" type="button" aria-label="Pause"></button>
+    </div>
+    </div>
+  </div>
+</section>
+<section class="band" data-band="utility" aria-label="Control bar specification">
+  <div class="viewport-content">
+    <div class="ch-spec" style="margin-top:0">
+      <div class="ch-spec__facts">
+        <p class="ch-spec__name">Control bar</p>
+        <p class="doc-note" data-kind="measured">The intro is timed to the millisecond: the drop at 0, the bar rising at 30, the dot bubble springing to 240 px at 500, the play bubble at 540, each dot 20 ms apart from 740, the icon at 940.</p>
+      </div>
+<div class="stat-grid ch-spec__stats" data-cols="2">
+          <div class="stat-cell"><p class="stat-value">312</p><p class="stat-caption">px with seven dots: a 240 bubble, 16, a 56 play bubble</p></div>
+          <div class="stat-cell"><p class="stat-value">8 &rarr; 48</p><p class="stat-caption">px, a dot to the current pill (32 on phones)</p></div>
+          <div class="stat-cell"><p class="stat-value">.72</p><p class="stat-caption">fill at rest, 1 while it moves</p></div>
+          <div class="stat-cell"><p class="stat-value">224</p><p class="stat-caption">px band bottom, where it parks</p></div>
+        </div>
+      <div class="ch-code">
+<div class="segmented ch-code__tabs" role="tablist" aria-label="Code"><button type="button" role="tab" id="ch-code-9-t0" aria-controls="ch-code-9-p0" aria-selected="true">HTML</button><button type="button" role="tab" id="ch-code-9-t1" aria-controls="ch-code-9-p1">JavaScript</button></div>
+<pre class="doc-code" role="tabpanel" id="ch-code-9-p0" aria-labelledby="ch-code-9-t0" tabindex="0"><code>&lt;section class="band" data-band="utility" data-band-bar&gt;
+  &lt;div class="gallery"&gt;
+    &lt;div class="gallery-rail"&gt;&hellip;&lt;/div&gt;
+    &lt;div class="control-bar" data-autoplay data-duration="6.15" aria-label="Highlights"&gt;
+      &lt;div class="control-bar__dots"&gt;
+        &lt;button class="control-bar__dot" type="button" aria-label="Arrive once" aria-current="true"&gt;&lt;/button&gt;
+        &lt;button class="control-bar__dot" type="button" aria-label="Limits"&gt;&lt;/button&gt;
+      &lt;/div&gt;
+      &lt;button class="control-bar__play" type="button" aria-label="Pause"&gt;&lt;/button&gt;
+    &lt;/div&gt;
+  &lt;/div&gt;
+&lt;/section&gt;</code></pre>
+<pre class="doc-code" role="tabpanel" id="ch-code-9-p1" aria-labelledby="ch-code-9-t1" tabindex="0" hidden><code>const cb = document.querySelector('.control-bar');
+CHROME.controlBar.intro(cb);        // replay the drop &rarr; bubbles intro
+CHROME.controlBar.select(cb, 2);
+CHROME.controlBar.play(cb, false);
+cb.addEventListener('chrome:controlbar', (e) =&gt; console.log(e.detail.index, e.detail.playing));</code></pre>
+</div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ LIVE CAPSULE ══════════════════════════════════════════════════════ -->
+<section class="band" data-band="story" id="live-capsule" aria-labelledby="ch-lc-h">
+  <div class="viewport-content">
+    <div class="ch-intro ch-center">
+      <h2 class="t-section" id="ch-lc-h">What&rsquo;s happening now, in one capsule.</h2>
+      <p class="t-lede">The live capsule is Orbit&rsquo;s camera pill: compact, it says the action and the count; pressed, it <strong>morphs open</strong> to the project, the reviewer, a meter and Stop. In a phone it lives in the camera pill, which grows around it.</p>
+    </div>
+    <div class="segmented ch-states" role="radiogroup" aria-label="Capsule state" id="ch-states">
+      <button type="button" role="radio" aria-checked="true">Run</button>
+      <button type="button" role="radio">Warm-up</button>
+      <button type="button" role="radio">Reply</button>
+      <button type="button" role="radio">Napping</button>
+      <button type="button" role="radio">Needs you</button>
+    </div>
+    <div class="ch-live">
+      <div>
+        <div class="ch-stage" data-tone="dark">
+          <canvas data-art="aurora" data-art-seed="12" aria-hidden="true"></canvas>
+          <div class="ch-dim" aria-hidden="true"></div>
+          <div class="ch-live__slot">
+            <div class="live-capsule" data-anchor="center" data-kind="burst" data-elapsed="42" style="--lc-hue: var(--series-1)" id="ch-cap">
+              <div class="live-capsule__glass" data-lg3 data-lg3-tone="light" data-lg3-interactive>
+                <button class="live-capsule__face" type="button" aria-label="Now: Review, 4 of 10 tasks. Show details">
+                  <span class="live-capsule__lead"><i data-sym="heart"></i></span>
+                  <span class="live-capsule__summary">Review</span>
+                  <span class="live-capsule__trail">4/10</span>
+                </button>
+                <div class="live-capsule__detail">
+                  <div class="live-capsule__row">
+                    <span class="live-capsule__glyph"><i data-sym="heart"></i></span>
+                    <span><b class="live-capsule__account">aurora.demo</b><span class="live-capsule__line">Review &larr; @sample.trailrunners</span></span>
+                    <span class="live-capsule__elapsed">0:42</span>
+                  </div>
+                  <div class="live-capsule__meter" role="progressbar" aria-label="Tasks" aria-valuemin="0" aria-valuemax="10" aria-valuenow="4" style="--lc-meter: .4"><span></span></div>
+                  <div class="live-capsule__foot"><span class="live-capsule__count">4 of 10</span><button class="live-capsule__stop" type="button"><i data-sym="xmark"></i>Stop</button></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <p class="ch-label"><b>On glass</b>, over art. Press the capsule; press outside it or Escape to close. Its slot keeps the compact size in the layout while the glass grows over whatever is below.</p>
+      </div>
+      <div class="device ch-lock" data-device="phone">
+        <div class="device__screen" data-screen-width="402">
+          <div class="ch-lock__app" data-tone="dark">
+            <canvas data-art="twilight" data-art-seed="27" data-art-contrast="1.15" aria-hidden="true"></canvas>
+            <p class="ch-lock__date">Saturday 26 September</p>
+            <p class="ch-lock__time">14:30</p>
+          </div>
+          <div class="device__island">
+            <div class="live-capsule" data-anchor="center" data-kind="burst" data-elapsed="42" style="--lc-hue: var(--series-1)" id="ch-cap-island">
+              <div class="live-capsule__glass">
+                <button class="live-capsule__face" type="button" aria-label="Now: Like, 4 of 10. Show details">
+                  <span class="live-capsule__lead"><i data-sym="heart"></i></span>
+                  <span class="live-capsule__summary">Review</span>
+                  <span class="live-capsule__trail">4/10</span>
+                </button>
+                <div class="live-capsule__detail">
+                  <div class="live-capsule__row">
+                    <span class="live-capsule__glyph"><i data-sym="heart"></i></span>
+                    <span><b class="live-capsule__account">aurora.demo</b><span class="live-capsule__line">Review &larr; @sample.trailrunners</span></span>
+                    <span class="live-capsule__elapsed">0:42</span>
+                  </div>
+                  <div class="live-capsule__meter" role="progressbar" aria-label="Tasks" aria-valuemin="0" aria-valuemax="10" aria-valuenow="4" style="--lc-meter: .4"><span></span></div>
+                  <div class="live-capsule__foot"><span class="live-capsule__count">4 of 10</span><button class="live-capsule__stop" type="button">Stop</button></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="ch-spec">
+      <div class="ch-spec__facts">
+        <p class="doc-note" data-kind="rule">Red only for Stop and for a halted run. The project&rsquo;s own hue marks everything else. Inside a DEVICE island, leave <code>data-lg3</code> off: the island is the capsule&rsquo;s frame.</p>
+      </div>
+<div class="stat-grid ch-spec__stats" data-cols="2">
+          <div class="stat-cell"><p class="stat-value">44</p><p class="stat-caption">px compact height, a true capsule</p></div>
+          <div class="stat-cell"><p class="stat-value">30</p><p class="stat-caption">px radius once open, 360 wide</p></div>
+          <div class="stat-cell"><p class="stat-value">122</p><p class="stat-caption">&times; 36 minimum island, growing to fit</p></div>
+          <div class="stat-cell"><p class="stat-value">1 s</p><p class="stat-caption">elapsed tick, kept under reduced motion</p></div>
+        </div>
+      <div class="ch-code">
+<div class="segmented ch-code__tabs" role="tablist" aria-label="Code"><button type="button" role="tab" id="ch-code-10-t0" aria-controls="ch-code-10-p0" aria-selected="true">HTML</button><button type="button" role="tab" id="ch-code-10-t1" aria-controls="ch-code-10-p1">JavaScript</button></div>
+<pre class="doc-code" role="tabpanel" id="ch-code-10-p0" aria-labelledby="ch-code-10-t0" tabindex="0"><code>&lt;div class="live-capsule" data-anchor="center" data-kind="burst" data-elapsed="42"
+     style="--lc-hue: var(--series-1)"&gt;
+  &lt;div class="live-capsule__glass" data-lg3 data-lg3-interactive&gt;
+    &lt;button class="live-capsule__face" type="button" aria-label="Now: Review, 4 of 10 tasks. Show details"&gt;
+      &lt;span class="live-capsule__lead"&gt;&lt;i data-sym="heart"&gt;&lt;/i&gt;&lt;/span&gt;
+      &lt;span class="live-capsule__summary"&gt;Like&lt;/span&gt;
+      &lt;span class="live-capsule__trail"&gt;4/10&lt;/span&gt;
+    &lt;/button&gt;
+    &lt;div class="live-capsule__detail"&gt;
+      &lt;div class="live-capsule__row"&gt;
+        &lt;span class="live-capsule__glyph"&gt;&lt;i data-sym="heart"&gt;&lt;/i&gt;&lt;/span&gt;
+        &lt;span&gt;&lt;b class="live-capsule__account"&gt;aurora.demo&lt;/b&gt;
+          &lt;span class="live-capsule__line"&gt;Like from @sample.trailrunners&lt;/span&gt;&lt;/span&gt;
+        &lt;span class="live-capsule__elapsed"&gt;0:42&lt;/span&gt;
+      &lt;/div&gt;
+      &lt;div class="live-capsule__meter" role="progressbar" aria-label="Tasks"
+           aria-valuemin="0" aria-valuemax="10" aria-valuenow="4" style="--lc-meter: .4"&gt;&lt;span&gt;&lt;/span&gt;&lt;/div&gt;
+      &lt;div class="live-capsule__foot"&gt;
+        &lt;span class="live-capsule__count"&gt;4 of 10&lt;/span&gt;
+        &lt;button class="live-capsule__stop" type="button"&gt;Stop&lt;/button&gt;
+      &lt;/div&gt;
+    &lt;/div&gt;
+  &lt;/div&gt;
+&lt;/div&gt;</code></pre>
+<pre class="doc-code" role="tabpanel" id="ch-code-10-p1" aria-labelledby="ch-code-10-t1" tabindex="0" hidden><code>const cap = document.querySelector('.live-capsule');
+CHROME.live.expand(cap, true);
+CHROME.live.update(cap, {
+  kind: 'reply', glyph: 'bubble', hue: 'var(--series-2)', summary: 'Reply', trail: '1',
+  account: 'basil.demo', line: 'Replying to @lead_40213', done: 5, asked: 10, count: 'run paused', elapsed: 0
+});
+cap.addEventListener('chrome:live-stop', () =&gt; stopTheRun());</code></pre>
+</div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ COMMAND PALETTE ═══════════════════════════════════════════════════ -->
+<section class="band" data-band="utility" id="command" aria-labelledby="ch-cmd-h">
+  <div class="viewport-content ch-cmd">
+    <div class="ch-intro">
+      <h2 class="t-section" id="ch-cmd-h">A pill that becomes the palette.</h2>
+      <p class="t-lede">The command pill sits in a toolbar like any other glass. Press it, or <strong>&#8984;K / Ctrl+K</strong> anywhere on this page, and the same glass morphs into a palette: a field, grouped results, arrow keys and Return. Escape morphs it back into the pill.</p>
+    </div>
+    <div class="ch-stage" data-tone="dark">
+      <canvas data-art="deep" data-art-seed="18" aria-hidden="true"></canvas>
+      <div class="ch-dim ch-dim--deep" aria-hidden="true"></div>
+      <div class="toolbar" aria-label="Console">
+        <div class="toolbar__group" data-lg3 data-lg3-tone="light" data-lg3-interactive><button class="toolbar__item" type="button" aria-label="Sidebar"><i data-sym="sidebar"></i></button></div>
+        <div class="command">
+          <button class="command__pill" type="button" data-lg3 data-lg3-tone="light" data-lg3-interactive><i data-sym="magnifier"></i><span class="command__pill-label">Jump to&hellip;</span><kbd>&#8984;K</kbd></button>
+          <div class="command__panel" data-lg3 hidden>
+            <div class="command__field"><i data-sym="magnifier"></i><input class="command__input" type="text" placeholder="Search Orbit" aria-label="Search Orbit"></div>
+            <ul class="command__list">
+              <li class="command__group" role="presentation"><div class="command__group-title" id="ch-cg1">Go to</div>
+                <ul role="group" aria-labelledby="ch-cg1">
+                  <li class="command__item" data-value="today"><i data-sym="target"></i><span class="command__label">Today</span><kbd>G T</kbd></li>
+                  <li class="command__item" data-value="runners"><i data-sym="phone"></i><span class="command__label">Runners</span><kbd>G R</kbd></li>
+                  <li class="command__item" data-value="projects"><i data-sym="person"></i><span class="command__label">Projects</span></li>
+                  <li class="command__item" data-value="inbox" data-keywords="messages replies"><i data-sym="bubble"></i><span class="command__label">Inbox</span></li>
+                </ul>
+              </li>
+              <li class="command__group" role="presentation"><div class="command__group-title" id="ch-cg2">Actions</div>
+                <ul role="group" aria-labelledby="ch-cg2">
+                  <li class="command__item" data-value="start" data-keywords="run begin"><i data-sym="play"></i><span class="command__label">Start the queue</span></li>
+                  <li class="command__item" data-value="record"><i data-sym="record"></i><span class="command__label">Export a recording</span></li>
+                  <li class="command__item" data-value="shape"><i data-sym="sliders"></i><span class="command__label">Edit the run shape</span></li>
+                </ul>
+              </li>
+            </ul>
+            <p class="command__empty" hidden>No matches</p>
+          </div>
+        </div>
+        <div class="toolbar__group" data-lg3 data-lg3-tone="light" data-lg3-interactive><button class="toolbar__item" type="button" aria-label="Notifications"><i data-sym="bell"></i></button></div>
+      </div>
+    </div>
+    <p class="ch-label"><b>Live.</b> Press the pill or &#8984;K. <span data-ch-chosen aria-live="polite">Your choice will show here.</span></p>
+
+    <div class="ch-spec">
+      <div class="ch-spec__facts">
+        <p class="doc-note" data-kind="rule">The pill and the panel are two glass elements that trade places with <code>LG3.morph</code>, so the palette never fades in: it grows out of the thing you pressed and shrinks back into it.</p>
+      </div>
+<div class="stat-grid ch-spec__stats" data-cols="2">
+          <div class="stat-cell"><p class="stat-value">36 px</p><p class="stat-caption">pill in a toolbar; a 44 px circle on phones</p></div>
+          <div class="stat-cell"><p class="stat-value">640</p><p class="stat-caption">px palette, 14% from the top</p></div>
+          <div class="stat-cell"><p class="stat-value">32</p><p class="stat-caption">px continuous radius, the expanded chrome size</p></div>
+          <div class="stat-cell"><p class="stat-value">44 px</p><p class="stat-caption">rows; the selected one takes the accent fill</p></div>
+        </div>
+      <div class="ch-code">
+<div class="segmented ch-code__tabs" role="tablist" aria-label="Code"><button type="button" role="tab" id="ch-code-11-t0" aria-controls="ch-code-11-p0" aria-selected="true">HTML</button><button type="button" role="tab" id="ch-code-11-t1" aria-controls="ch-code-11-p1">JavaScript</button></div>
+<pre class="doc-code" role="tabpanel" id="ch-code-11-p0" aria-labelledby="ch-code-11-t0" tabindex="0"><code>&lt;div class="command"&gt;
+  &lt;button class="command__pill" type="button" data-lg3 data-lg3-interactive&gt;
+    &lt;i data-sym="magnifier"&gt;&lt;/i&gt;&lt;span class="command__pill-label"&gt;Jump to&amp;hellip;&lt;/span&gt;&lt;kbd&gt;&amp;#8984;K&lt;/kbd&gt;
+  &lt;/button&gt;
+  &lt;div class="command__panel" data-lg3 hidden&gt;
+    &lt;div class="command__field"&gt;
+      &lt;i data-sym="magnifier"&gt;&lt;/i&gt;
+      &lt;input class="command__input" type="text" placeholder="Search Orbit" aria-label="Search Orbit"&gt;
+    &lt;/div&gt;
+    &lt;ul class="command__list"&gt;
+      &lt;li class="command__group" role="presentation"&gt;
+        &lt;div class="command__group-title" id="cg-go"&gt;Go to&lt;/div&gt;
+        &lt;ul role="group" aria-labelledby="cg-go"&gt;
+          &lt;li class="command__item" data-value="inbox" data-keywords="messages replies"&gt;
+            &lt;i data-sym="bubble"&gt;&lt;/i&gt;&lt;span class="command__label"&gt;Inbox&lt;/span&gt;
+          &lt;/li&gt;
+        &lt;/ul&gt;
+      &lt;/li&gt;
+    &lt;/ul&gt;
+    &lt;p class="command__empty" hidden&gt;No matches&lt;/p&gt;
+  &lt;/div&gt;
+&lt;/div&gt;</code></pre>
+<pre class="doc-code" role="tabpanel" id="ch-code-11-p1" aria-labelledby="ch-code-11-t1" tabindex="0" hidden><code>CHROME.command.open(document.querySelector('.command'));
+document.addEventListener('chrome:command', (e) =&gt; go(e.detail.value));</code></pre>
+</div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ API ═══════════════════════════════════════════════════════════════ -->
+<section class="band" data-band="story" id="api" aria-labelledby="ch-api-h">
+  <div class="viewport-content">
+    <div class="ch-intro">
+      <h2 class="t-section" id="ch-api-h">The chrome API at a glance.</h2>
+      <p class="t-lede"><code>chrome.js</code> never mounts itself: <code>FG3.boot()</code> wires every component under the document. Each one owns <strong>one spring-driven number</strong> that CSS turns into shape, so every morph can be interrupted mid-flight.</p>
+    </div>
+    <div class="doc-table ch-api">
+      <table class="table">
+        <thead><tr><th scope="col">Component</th><th scope="col">Methods</th><th scope="col">Event</th><th scope="col">The number it springs</th></tr></thead>
+        <tbody>
+          <tr><td>Global nav</td><td><code>globalnav.open(nav, item)</code> <code>close(nav)</code> <code>menu(nav, on)</code></td><td>&mdash;</td><td><code>--gn-fh</code> (height, CSS transition)</td></tr>
+          <tr><td>Local nav</td><td><code>localnav.open(el)</code> <code>close(el)</code> <code>toggle(el)</code> <code>reveal(el, on)</code></td><td><code>chrome:localnav</code></td><td><code>--progress</code></td></tr>
+          <tr><td>Navigation bar</td><td><code>navbar.sync(el)</code></td><td>&mdash;</td><td><code>--nb-collapse</code> <code>--nb-min</code></td></tr>
+          <tr><td>Tab bar</td><td><code>tabbar.select(el, i)</code> <code>minimize(el, on)</code> <code>sync(el)</code></td><td><code>chrome:tab</code> <code>chrome:minimize</code></td><td><code>--tb-min</code></td></tr>
+          <tr><td>Sidebar, inspector</td><td><code>sidebar.fold(el, on)</code> <code>inspector.fold(el, on)</code></td><td>&mdash;</td><td><code>--sb-fold</code> <code>--insp-fold</code></td></tr>
+          <tr><td>Sheet</td><td><code>sheet.open(el, {from, detent})</code> <code>close(el)</code> <code>detent(el, 'medium'|'large')</code></td><td><code>chrome:sheet</code></td><td><code>--m-y</code> <code>--sheet-full</code></td></tr>
+          <tr><td>Scroll edge</td><td><code>scrollEdge.sync(edge)</code></td><td>&mdash;</td><td><code>[data-active]</code></td></tr>
+          <tr><td>Control bar</td><td><code>controlBar.intro(el)</code> <code>select(el, i)</code> <code>play(el, on)</code></td><td><code>chrome:controlbar</code></td><td><code>--cb-p</code> and the intro&rsquo;s <code>--cb-*</code></td></tr>
+          <tr><td>Live capsule</td><td><code>live.expand(el, on)</code> <code>toggle(el)</code> <code>update(el, state)</code></td><td><code>chrome:live</code> <code>chrome:live-stop</code></td><td><code>--lc-p</code></td></tr>
+          <tr><td>Command palette</td><td><code>command.open(el)</code> <code>close(el)</code></td><td><code>chrome:command</code></td><td><code>LG3.morph</code> pill &harr; panel</td></tr>
+          <tr><td>All of them</td><td><code>mount(root)</code> <code>refresh(root)</code></td><td></td><td></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="ch-behave">
+      <p class="doc-note" data-kind="rule">Escape closes the topmost open surface, wherever focus is: palette, then sheet, then local nav, then capsule, then flyout. One level per press.</p>
+      <p class="doc-note" data-kind="rule">Every glass host gets <code>data-tone</code> from its measured appearance, so the colour roles inside it resolve for the glass, not for the band behind it.</p>
+      <p class="doc-note" data-kind="trap">Never fade a glass ancestor: opacity below 1 kills the backdrop pass. Glass arrives with <code>LG3.materialize</code> and leaves with <code>LG3.dematerialize</code>.</p>
+    </div>
+  </div>
+</section>
+
+<!-- the live sheet (glass at medium, opaque at large), opened by Filters -->
+<div class="sheet" id="ch-filters" data-lg3 data-detents="medium large" data-sheet-dim aria-labelledby="ch-filters-title" hidden>
+  <button class="sheet__grabber" type="button" aria-label="Sheet size"></button>
+  <div class="sheet__header">
+    <button class="sheet__close" type="button" aria-label="Close" data-sheet-close><i data-sym="xmark"></i></button>
+    <h2 class="sheet__title" id="ch-filters-title">Filters</h2>
+    <button class="sheet__done" type="button" aria-label="Done" data-sheet-close><i data-sym="checkmark"></i></button>
+  </div>
+  <div class="sheet__body">
+    <ul class="list list-inset">
+      <li><div class="row"><div class="row-body"><span class="row-title">Projects</span></div><span class="row-detail">All four</span></div></li>
+      <li><div class="row"><div class="row-body"><span class="row-title">Actions</span></div><span class="row-detail">Review, Triage</span></div></li>
+      <li><div class="row"><div class="row-body"><span class="row-title">Source</span></div><span class="row-detail">Queue of</span></div></li>
+      <li><div class="row"><div class="row-body"><span class="row-title">Window</span></div><span class="row-detail">Today</span></div></li>
+      <li><label class="row"><div class="row-body"><span class="row-title">Only what finished</span></div><input class="switch" type="checkbox" role="switch" checked></label></li>
+      <li><label class="row"><div class="row-body"><span class="row-title">Include runs that came back empty</span></div><input class="switch" type="checkbox" role="switch"></label></li>
+      <li><div class="row"><div class="row-body"><span class="row-title">Group by</span></div><span class="row-detail">Project</span></div></li>
+      <li><div class="row"><div class="row-body"><span class="row-title">Sort</span></div><span class="row-detail">Newest first</span></div></li>
+    </ul>
+  </div>
+</div>
+
+<script>
+/* Page wiring only: the demo buttons call the public CHROME API, and a
+   readout reports LG3's live refraction budget. Runs once FG3 has booted. */
+document.addEventListener('fg3:ready', function () {
+  var $ = function (s) { return document.querySelector(s); };
+  var RM = matchMedia('(prefers-reduced-motion: reduce)');
+  var mini = $('.ch-mini .globalnav'), ln = $('.localnav'), feed = $('#ch-feed');
+  var gnNarrow = matchMedia('(max-width: 833px)');
+  var act = {
+    /* ≤833 there is no hover flyout: open the menu, then Orbit's sub-menu */
+    'gn-open': function () {
+      if (!window.CHROME || !mini) return;
+      var flow = mini.querySelector('[data-flyout="ch-gn-flow"]');
+      if (!gnNarrow.matches) { CHROME.globalnav.open(mini, flow); return; }
+      CHROME.globalnav.menu(mini, true);
+      var t = flow && flow.querySelector('.globalnav__trigger');
+      if (t) setTimeout(function () { t.click(); }, RM.matches ? 0 : 320);
+    },
+    'ln-open': function () { if (window.CHROME && ln) CHROME.localnav.open(ln); },
+    'ph-scroll': function () { feed.scrollTo({ top: feed.scrollTop + 420, behavior: RM.matches ? 'auto' : 'smooth' }); },
+    'ph-top': function () { feed.scrollTo({ top: 0, behavior: RM.matches ? 'auto' : 'smooth' }); },
+    'ph-island': function () { if (window.CHROME) CHROME.live.toggle($('#ch-island-cap')); },
+    'cb-intro': function () { if (window.CHROME) CHROME.controlBar.intro($('#control-bar .control-bar')); }
+  };
+  document.querySelectorAll('[data-ch-do]').forEach(function (b) {
+    b.addEventListener('click', function (e) { e.stopPropagation(); var f = act[b.getAttribute('data-ch-do')]; if (f) f(); });
+  });
+
+  /* capsule states: one segmented control drives the glass and the island.
+     asked: null = not a progress state (no meter, no "0 of 1"); stop: false =
+     nothing is running, so there is nothing to Stop */
+  var states = [
+    { kind: 'burst', glyph: 'heart', trail: '4/10', summary: 'Review', account: 'aurora.demo', line: 'Review \u2190 @sample.trailrunners', done: 4, asked: 10, count: '4 of 10', hue: 'var(--series-1)', elapsed: 42, stop: true },
+    { kind: 'warm', glyph: 'flame', trail: '1:12', summary: 'Warm-up', account: 'basil.demo', line: 'Resting after 8 tasks \u00b7 next run in 1:12', asked: null, count: '1:12 left of the warm-up', hue: 'var(--series-2)', elapsed: 0, stop: true },
+    { kind: 'reply', glyph: 'bubble', trail: '1', summary: 'Reply', account: 'basil.demo', line: 'Replying to @lead_40213 \u00b7 Review paused, 5 left', done: 5, asked: 10, count: 'run paused', hue: 'var(--series-2)', elapsed: 8, stop: true },
+    { kind: 'nap', glyph: 'clock', trail: '15:40', summary: 'Next', account: 'Nothing queued', line: 'Review reopens for aurora.demo at 15:40', asked: null, count: 'Replies still arrive', hue: 'var(--label-2)', elapsed: null, stop: false },
+    { kind: 'halted', glyph: 'exclamation-triangle', trail: '18 min', summary: 'Needs you', account: 'runner-02', line: 'Runner offline for 18 minutes', asked: null, count: 'Reconnect the runner', hue: 'var(--bad-ink)', elapsed: null, stop: false }
+  ];
+  var seg = $('#ch-states');
+  if (seg) seg.addEventListener('change', function (e) {
+    var s = states[e.detail && e.detail.index] || states[0];
+    ['#ch-cap', '#ch-cap-island'].forEach(function (id) {
+      var c = $(id); if (!c || !window.CHROME) return;
+      CHROME.live.update(c, s);
+      var stop = c.querySelector('.live-capsule__stop'); if (stop) stop.hidden = !s.stop;
+    });
+  });
+
+  /* code cards: the segmented tab list shows one panel at a time */
+  document.querySelectorAll('.ch-code').forEach(function (card) {
+    var tabs = card.querySelector('[role="tablist"]'), panels = card.querySelectorAll('[role="tabpanel"]');
+    if (tabs) tabs.addEventListener('change', function (e) {
+      var i = e.detail ? e.detail.index : 0;
+      panels.forEach(function (p, k) { p.hidden = k !== i; });
+    });
+  });
+
+  /* ≤833 the browser window is 402 logical px wide: the phone nav near 1:1 */
+  var gnScreen = mini && mini.closest('.device__screen');
+  function gnFit() {
+    if (!gnScreen) return;
+    gnScreen.setAttribute('data-screen-width', gnNarrow.matches ? '402' : '1280');
+    if (window.DEVICE) DEVICE.fit(gnScreen.closest('.device'));
+  }
+  gnFit();
+  if (gnNarrow.addEventListener) gnNarrow.addEventListener('change', gnFit);
+  /* the specimen's menu must not lock the page's scroll the way the page's
+     own menu does (chrome.js marks <html> for either) */
+  if (mini) new MutationObserver(function () {
+    var root = document.documentElement;
+    if (mini.hasAttribute('data-gn-menu') && !document.querySelector('.globalnav[data-gn-menu]:not(.ch-mini .globalnav)')) root.removeAttribute('data-gn-menu');
+  }).observe(mini, { attributes: true, attributeFilter: ['data-gn-menu'] });
+
+  /* the specimen window shows its flyout open until the reader moves on */
+  if (mini && window.CHROME && !matchMedia('(max-width: 833px)').matches) CHROME.globalnav.open(mini, mini.querySelector('[data-flyout="ch-gn-flow"]'));
+
+  /* arriving at the live capsule, both capsules open once to show the morph */
+  var lcStage = $('#live-capsule .ch-live');
+  if (lcStage && window.FG3 && FG3.whenSeen) FG3.whenSeen(lcStage, function () {
+    setTimeout(function () {
+      if (!window.CHROME) return;
+      ['#ch-cap', '#ch-cap-island'].forEach(function (id) { var c = $(id); if (c) CHROME.live.expand(c, true); });
+    }, 700);
+  });
+
+  /* the palette reports its choice */
+  document.addEventListener('chrome:command', function (e) {
+    var out = $('[data-ch-chosen]'); if (out && e.detail) out.textContent = 'Chose \u201c' + e.detail.label + '\u201d';
+  });
+
+  /* phones: the specimen windows fold their panels to the rails */
+  var narrow = matchMedia('(max-width: 734px)');
+  function fit() {
+    if (!window.CHROME) return;
+    document.querySelectorAll('.ch-win .sidebar').forEach(function (sb) { CHROME.sidebar.fold(sb, narrow.matches); });
+    var insp = $('#ch-insp'); if (insp) CHROME.inspector.fold(insp, narrow.matches);
+  }
+  fit();
+  if (narrow.addEventListener) narrow.addEventListener('change', fit);
+
+  /* LG3's live refraction budget, as html[data-lg3-refracting] = "n/budget" */
+  var out = $('[data-ch-refracting]');
+  function budget() {
+    var v = document.documentElement.getAttribute('data-lg3-refracting');
+    if (out) out.textContent = v ? v.replace('/', ' of ') : 'none (frost engine)';
+  }
+  budget();
+  new MutationObserver(budget).observe(document.documentElement, { attributes: true, attributeFilter: ['data-lg3-refracting'] });
+});
+</script>
+</main>
+
+<!-- ═══ FOOTER (shared — copy verbatim) ═══ -->
+<footer class="band" data-band="utility" data-band-seam="keep">
+  <div class="viewport-content stack-4">
+    <p class="t-caption" style="color: var(--label-2)">Fluid Design Open 1.0 &middot; A glass-and-spring design language with Fluid&rsquo;s colour. Type uses the system UI font where available and Inter elsewhere. Device art is original.</p>
+    <p class="t-caption"><a href="index.html">Overview</a> &middot; <a href="start.html">Start</a> &middot; <a href="docs.html">Docs</a> &middot; <a href="components.html">Components</a> &middot; <a href="selftest.html">Self-test</a> &middot; <a href="audit.html">Audit</a></p>
+  </div>
+</footer>
+
+<script src="assets/geom.js"></script>
+<script src="assets/spring.js"></script>
+<script src="assets/palette.js"></script>
+<script src="assets/art3.js"></script>
+<script src="assets/lg3-core.js"></script>
+<script src="assets/fg3.js"></script>
+<script src="assets/symbols.js"></script>
+<script src="assets/chart.js"></script>
+<script src="assets/motion.js"></script>
+<script src="assets/anim.js"></script>
+<script src="assets/device.js"></script>
+<script src="assets/ui.js"></script>
+<script src="assets/chrome.js"></script>
+<script src="assets/showcase.js"></script>
+<script src="assets/docs.js"></script>   <!-- documentation pages only -->
+<script>FG3.boot(); if (window.DOCS) DOCS.mount();</script>
+</body>
+</html>

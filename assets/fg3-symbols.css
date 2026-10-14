@@ -1,0 +1,118 @@
+/* ═══════════════════════════════════════════════════════════════════════════
+   fg3-symbols.css — SYMBOLS AS PART OF THE TYPE SYSTEM (Fluid Design Open)
+   ───────────────────────────────────────────────────────────────────────────
+   A symbol is type: sized in em, centred on the cap height
+   (measured), stroke set optically by the TYPE ROLE.
+
+   PUBLIC CLASSES  .sym · .sym-xs/sm/md/lg/xl (optical) · .sym-light/regular/medium/
+   semibold/bold (weight) · .sym-scale-sm/lg · .sym-hier · .sym-palette (+ --sym-layer-2/3)
+   · .sym-variable (+ --sym-value 0..1, default 1, inherits: set it on the glyph or on
+   any container) · .sym-ok/.sym-warn/.sym-bad · .sym-replace-out/in
+   · .sym-bounce · .sym-noflip · .sym-row · [data-sym-missing]
+   Custom properties: --sym-optical, --sym-weight, --sym-1..4, --sym-value.
+   The round icon button is the .btn-icon.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.sym{
+  /* inline: a reset's svg{display:block} drops the glyph under its word */
+  display:inline-block;
+  width:1em;height:1em;
+  /* Cap height is .727em in Inter and ~.705em in the system font; the em box centres at
+     .5em. -0.145em (Geist) left the glyphs a mean .013em low across all
+     19 roles in Inter; -0.13em splits the
+     difference between Inter and the system font. */
+  vertical-align:-0.13em;
+  flex:0 0 auto;align-self:center;
+  fill:none;stroke:currentColor;
+  stroke-width:calc(var(--sym-optical,1.65) * var(--sym-weight,1));
+  stroke-linecap:round;stroke-linejoin:round;
+  transform-origin:50% 50%;
+  /* Monochrome is the default: every layer is the ink. */
+  --sym-2:currentColor;--sym-3:currentColor;
+}
+
+/* ── optical ramp on the type roles: 2.15 units at 11px is a .98px line,
+   1.38 at 34px is 1.95px — the stroke grows with the type, only slower. */
+.ui-caption2,.ui-caption1,.t-micro                      { --sym-optical:2.15 }
+.ui-footnote,.ui-subhead,.t-caption                     { --sym-optical:1.9 }
+.ui-callout,.ui-body,.ui-headline,.t-body,.t-callout,.t-eyebrow { --sym-optical:1.65 }
+.ui-title3,.ui-title2,.t-lede,.t-subtitle               { --sym-optical:1.5 }
+.ui-title1,.ui-large-title                              { --sym-optical:1.38 }
+.t-title,.t-section,.t-headline,.t-hero,.t-stat         { --sym-optical:1.24 }
+
+/* Opt-in, for a container that sets a font-size without a type role. */
+.sym-xs{ --sym-optical:2.15 } .sym-sm{ --sym-optical:1.9 } .sym-md{ --sym-optical:1.65 }
+.sym-lg{ --sym-optical:1.5 }  .sym-xl{ --sym-optical:1.3 }
+
+/* Weight follows the text's; multiplicative, so it composes with the ramp. */
+.sym-light{ --sym-weight:.78 } .sym-regular{ --sym-weight:1 } .sym-medium{ --sym-weight:1.12 }
+.sym-semibold{ --sym-weight:1.28 } .sym-bold{ --sym-weight:1.45 }
+
+.sym-scale-sm{ width:.86em;height:.86em;vertical-align:-0.1em }
+.sym-scale-lg{ width:1.18em;height:1.18em;vertical-align:-0.22em }
+
+/* ── rendering modes: one markup, four looks (layers read --sym-N through
+   the <use> shadow boundary, because custom properties inherit across it). */
+.sym-hier{
+  --sym-2:color-mix(in srgb,currentColor 58%,transparent);
+  --sym-3:color-mix(in srgb,currentColor 30%,transparent);
+}
+.sym-palette{
+  --sym-2:var(--sym-layer-2,var(--accent));
+  --sym-3:var(--sym-layer-3,var(--label-3));
+}
+.sym-ok{ color:var(--ok) } .sym-warn{ color:var(--warn) } .sym-bad{ color:var(--bad) }
+
+/* Variable value: a layer lights when --sym-value passes its threshold (×1000
+   and clamp = a step 0.001 wide); plain paths are never driven, so the glyph
+   still reads at zero. --sym-value is READ with a default of 1, never declared
+   here, so a value set on a container (a slider's row, a status bar) reaches
+   every glyph inside it; one set on the glyph itself still wins. */
+.sym-variable{
+  --sym-off:color-mix(in srgb,currentColor 22%,transparent);
+  --sym-1:color-mix(in srgb,currentColor calc(clamp(0,(var(--sym-value,1) - .74) * 1000,1) * 100%),var(--sym-off));
+  --sym-2:color-mix(in srgb,currentColor calc(clamp(0,(var(--sym-value,1) - .49) * 1000,1) * 100%),var(--sym-off));
+  --sym-3:color-mix(in srgb,currentColor calc(clamp(0,(var(--sym-value,1) - .24) * 1000,1) * 100%),var(--sym-off));
+  --sym-4:color-mix(in srgb,currentColor calc(clamp(0,var(--sym-value,1) * 1000,1) * 100%),var(--sym-off));
+}
+
+/* ── The .replace: two classes, because the href swap happens between
+   them in JS. The entry rides the toggle spring (fg3-springs.css). */
+@keyframes sym-out{ to{ opacity:0;transform:scale(.72) } }
+@keyframes sym-in { from{ opacity:0;transform:scale(1.28) } }
+.sym-replace-out{ animation:sym-out 110ms var(--ease-exit,cubic-bezier(.11,0,.5,0)) both }
+.sym-replace-in { animation:sym-in var(--sp-toggle-ms,412ms) var(--sp-toggle,cubic-bezier(.32,.72,0,1)) both }
+
+/* Bounce with a small rotation: a pure scale mostly changes stroke weight. */
+@keyframes sym-bounce{
+  0%{ transform:scale(1) rotate(0) } 32%{ transform:scale(1.16) rotate(-5deg) }
+  62%{ transform:scale(.97) rotate(2.5deg) } 100%{ transform:scale(1) rotate(0) }
+}
+.sym-bounce{ animation:sym-bounce 480ms var(--ease-out-cubic,cubic-bezier(.33,1,.68,1)) }
+
+/* ── direction: flip the <use>, never the <svg> — motion classes write the
+   host's transform, and a flip there would silently un-flip mid-animation. */
+[dir="rtl"] .sym[data-sym-dir]:not(.sym-noflip) use{
+  transform:scaleX(-1);transform-origin:50% 50%;transform-box:view-box;
+}
+
+/* ── in context ──────────────────────────────────────────────────────────── */
+.sym-row{ display:inline-flex;align-items:center;gap:.5em }
+[data-sym-missing]{
+  display:inline-block;width:1em;height:1em;vertical-align:-0.13em;border-radius:3px;
+  box-shadow:inset 0 0 0 1.5px var(--bad);
+  background:color-mix(in srgb,var(--bad) 18%,transparent);
+}
+
+/* ── accessibility: a glyph is non-text (3:1), so --label-3/-4 suit it. */
+@media (prefers-contrast: more){ .sym{ --sym-weight:1.24 } }
+[data-contrast="more"] .sym{ --sym-weight:1.24 }
+@media (prefers-reduced-motion: reduce){
+  /* Displacement goes; the information (which glyph) arrives as a short fade. */
+  .sym-replace-out{ animation:none }
+  .sym-replace-in{ animation:sym-fade 120ms linear both }
+  .sym-bounce{ animation:none }
+}
+@keyframes sym-fade{ from{ opacity:0 } }
+/* Forced colours: every layer takes the forced ink (variable keeps thresholds). */
+@media (forced-colors: active){ .sym:not(.sym-variable){ --sym-2:currentColor;--sym-3:currentColor } }

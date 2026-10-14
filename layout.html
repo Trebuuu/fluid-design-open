@@ -1,0 +1,972 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Layout &middot; Fluid Design Open</title>
+<!--
+  The page template. Every page of the site copies this skeleton VERBATIM
+  (head, site nav, footer, scripts) and replaces only: the <title>, the
+  aria-current link in the nav, the local-nav capsule's title/jump links, and
+  <main>. Pages load assets/fg3-color.css.
+
+  Do NOT put data-tone on <html> unless the page must be pinned: an author
+  tone beats the reader's appearance toggle (FG3 precedence).
+-->
+<script>
+/* Tone without a flash (fg3.js header): reader's choice \u203a author \u203a host \u203a system. */
+try{var d=document.documentElement,t=localStorage.getItem('fg3-tone');
+if(!d.hasAttribute('data-tone')){d.setAttribute('data-tone',t||d.getAttribute(
+'data-theme')||(matchMedia('(prefers-color-scheme: dark)').matches?'dark':
+'light'));d.setAttribute('data-tone-auto','')}}catch(e){}
+</script>
+<link rel="stylesheet" href="assets/fg3-tokens.css">
+<link rel="stylesheet" href="assets/fg3-color.css">
+<link rel="stylesheet" href="assets/fg3-springs.css">
+<link rel="stylesheet" href="assets/fg3.css">
+<link rel="stylesheet" href="assets/lg3.css">
+<link rel="stylesheet" href="assets/fg3-motion.css">
+<link rel="stylesheet" href="assets/fg3-components.css">
+<link rel="stylesheet" href="assets/fg3-chrome.css">
+<link rel="stylesheet" href="assets/fg3-showcase.css">
+<link rel="stylesheet" href="assets/fg3-symbols.css">
+<link rel="stylesheet" href="assets/fg3-chart.css">
+<link rel="stylesheet" href="assets/fg3-device.css">
+<link rel="stylesheet" href="assets/fg3-docs.css">    <!-- documentation pages only -->
+<style>
+/* Page layout only: roles and tokens, never a colour value (SPEC §2).
+   Page-local classes are prefixed la- (layout.html). */
+
+/* ── shared ─────────────────────────────────────────────────────────────── */
+/* inline code sits on --fill-2 (fg3-docs.css), so it takes the on-fill ink:
+   inherited grey prose ink measured 4.15:1 light / 3.08:1 dark on that fill */
+main :not(pre) > code{color:var(--label-2-on-fill)}
+/* a note is itself a fill, so code inside it sits on two: take the full ink */
+main .doc-note code{color:var(--label)}
+.la-gap-top{margin-top:var(--band-header-gap)}
+.la-num{font-variant-numeric:tabular-nums}
+.la-note{margin-top:var(--s-9)}
+.la-code-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:var(--grid-gap);margin-top:var(--s-10)}
+@media (max-width:1068px){.la-code-grid{grid-template-columns:minmax(0,1fr)}}
+.la-code-grid h3{font-size:var(--t-17);line-height:var(--t-17-lh);margin-bottom:var(--s-3)}
+.la-tint{--la-tint:color-mix(in srgb,var(--accent) 14%,transparent);--la-edge:color-mix(in srgb,var(--accent) 55%,transparent)}
+
+/* ── the page-wide 12-column overlay (toggled from the hero's glass) ───── */
+.la-overlay{position:fixed;inset:0;z-index:var(--z-sticky);pointer-events:none;display:none}
+html[data-la-grid] .la-overlay{display:block}
+.la-overlay .viewport-content{height:100%;display:grid;grid-template-columns:repeat(var(--grid-cols),minmax(0,1fr));gap:var(--grid-gap)}
+.la-overlay i{display:block;background:color-mix(in srgb,var(--accent) 11%,transparent);box-shadow:inset 1px 0 color-mix(in srgb,var(--accent) 45%,transparent),inset -1px 0 color-mix(in srgb,var(--accent) 45%,transparent)}
+@media (max-width:734px){.la-overlay .viewport-content{grid-template-columns:minmax(0,1fr)}.la-overlay i:not(:first-child){display:none}}
+
+/* ── 0 · hero: dark tiles on the art; the art glows through the gutters ─ */
+.la-hero{--hero-art-from:22%;--hero-art-to:40%}
+/* display:block is not enough: .hero-media's place-items:end center still
+   applies justify-items to block children in Chromium 150+ (block-layout
+   alignment) and shrink-wraps the grid to fit-content. Reset it. */
+.la-hero .hero-media{container-type:normal;display:block;place-items:normal;min-height:0;margin-bottom:0;margin-inline:0}
+.la-bento{display:grid;grid-template-columns:repeat(12,minmax(0,1fr));grid-auto-rows:minmax(0,1fr);gap:var(--grid-gap);height:100%;min-height:360px}
+.la-bento > div{position:relative;display:flex;flex-direction:column;justify-content:flex-end;gap:2px;padding:var(--s-6);text-align:start;
+  background:var(--bg-2);color:var(--label);border-radius:var(--r-lg);corner-shape:superellipse(var(--k-continuous))}
+/* each tile shows the tracks it spans: n columns, the real 20px gutter, so
+   the stripes inside a tile line up with the page's own columns */
+.la-bento > div{overflow:hidden;isolation:isolate}
+.la-tracks{position:absolute;inset:0 0 auto;height:58%;z-index:-1;display:grid;grid-auto-flow:column;grid-auto-columns:minmax(0,1fr);gap:var(--grid-gap);
+  -webkit-mask-image:linear-gradient(#000 40%,transparent);mask-image:linear-gradient(#000 40%,transparent)}
+.la-tracks i{background:var(--fill-2)}
+.la-bento b{font-family:var(--font-display);font-size:var(--t-56);line-height:1;font-weight:600;letter-spacing:var(--t-56-ls);font-variant-numeric:tabular-nums}
+.la-bento span{font-size:var(--t-14);line-height:var(--t-14-lh);color:var(--label-2)}
+.la-bento em,.la-grid-demo em{font-style:normal}
+.la-bento .la-s8{grid-column:span 8} .la-bento .la-s4{grid-column:span 4}
+@media (max-width:734px){
+  .la-bento{grid-template-columns:repeat(6,minmax(0,1fr));gap:12px;min-height:300px}
+  .la-bento .la-s8{grid-column:span 6} .la-bento .la-s4{grid-column:span 3}
+  .la-bento > div:nth-child(n+4){display:none}
+  .la-bento > div{padding:var(--s-4)}
+  .la-bento b{font-size:var(--t-40)}
+}
+.la-platter .hero-price > span:last-child{font-weight:400}
+.la-platter .switch{margin-inline-end:6px}
+
+/* ── 1 · intro stats ────────────────────────────────────────────────────── */
+.la-stats{margin-top:var(--s-12)}
+.la-stats .stat-caption{color:var(--label-2)}
+
+/* ── 2 · content width: the window, drawn to scale ──────────────────────── */
+.la-window{position:relative;margin-top:var(--band-header-gap);padding:var(--s-8) 0 var(--s-6);border-radius:var(--r-lg);corner-shape:superellipse(var(--k-continuous));
+  background:var(--bg-1);box-shadow:inset 0 0 0 1px var(--separator);overflow:hidden}
+.la-window-col{position:relative;height:180px;margin-inline:auto;width:87.5%;max-width:var(--w-content);border-radius:var(--r-md);corner-shape:superellipse(var(--k-continuous))}
+.la-window-col::before{content:"";position:absolute;inset:0;border-radius:inherit;corner-shape:inherit;background:var(--la-tint);box-shadow:inset 0 0 0 1px var(--la-edge)}
+.la-window-cols{position:absolute;inset:0;display:grid;grid-template-columns:repeat(var(--grid-cols),minmax(0,1fr));gap:var(--grid-gap);padding:0}
+.la-window-cols i{background:var(--la-tint)}
+@media (max-width:734px){.la-window-cols{display:none}}
+.la-dims{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:var(--s-3);margin-top:var(--s-5);padding-inline:var(--s-5);font-size:var(--t-14);color:var(--label-2)}
+.la-dims b{color:var(--label);font-weight:600;font-variant-numeric:tabular-nums}
+.la-dims span:nth-child(1){text-align:start} .la-dims span:nth-child(3){text-align:end}
+.la-dims span:nth-child(2){text-align:center;font-size:var(--t-17)}
+.la-window-cap{position:absolute;top:var(--s-3);left:0;right:0;text-align:center;font-size:var(--t-12);color:var(--label-2)}
+
+/* ── 3 · 12-column grid ─────────────────────────────────────────────────── */
+.la-grid-demo{position:relative;display:grid;gap:var(--grid-gap);margin-top:var(--band-header-gap)}
+.la-grid-demo .la-cell{display:flex;align-items:flex-end;justify-content:space-between;gap:var(--s-2);min-height:88px;padding:var(--s-4) var(--s-5);
+  border-radius:var(--r-md);corner-shape:superellipse(var(--k-continuous));background:var(--c-surface);font-size:var(--t-14);color:var(--label-2)}
+.la-grid-demo .la-cell b{font-family:var(--font-display);font-size:var(--t-28);line-height:1;font-weight:600;color:var(--label)}
+.la-grid-demo .la-cell em{font-style:normal;font-variant-numeric:tabular-nums}
+.la-grid-demo[data-cols-on]::after{content:"";position:absolute;inset:-12px 0;pointer-events:none;
+  --c:var(--la-colw,80px);--e:color-mix(in srgb,var(--accent) 60%,transparent);--f:color-mix(in srgb,var(--accent) 6%,transparent);
+  background:repeating-linear-gradient(90deg,var(--e) 0 1px,var(--f) 1px calc(var(--c) - 1px),var(--e) calc(var(--c) - 1px) var(--c),transparent var(--c) calc(var(--c) + var(--grid-gap)))}
+/* phones: every row but the span-sm-6 pair collapses to the same full-width
+   bar, so the demo keeps one full row and the pair instead of six */
+@media (max-width:734px){.la-grid-demo::after{display:none}.la-grid-demo > .grid-12:not(:nth-child(1)):not(:nth-child(3)){display:none}}
+/* forced colours drop the cell and tile fills: draw their edges */
+@media (forced-colors:active){.la-grid-demo .la-cell,.la-bento > div{border:1px solid CanvasText}}
+.la-grid-head{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:var(--s-4)}
+.la-grid-read{font-size:var(--t-14);color:var(--label-2)}
+.la-grid-read b{color:var(--label);font-variant-numeric:tabular-nums}
+
+/* ── 4 · breakpoints ruler ──────────────────────────────────────────────── */
+.la-ruler{position:relative;margin-top:var(--band-header-gap);padding-top:56px}
+.la-ruler-bar{display:flex;height:56px;border-radius:var(--r-pill);corner-shape:round;overflow:hidden;box-shadow:inset 0 0 0 1px var(--separator)}
+.la-ruler-bar span{display:flex;align-items:center;justify-content:center;min-width:0;font-size:var(--t-14);font-weight:600;color:var(--label);
+  border-inline-end:1px solid var(--separator);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;padding-inline:6px}
+.la-ruler-bar span:last-child{border-inline-end:0}
+.la-ruler-bar span[data-on]{background:var(--label);color:var(--label-inv)}
+.la-ruler-ticks{position:relative;height:28px;margin-top:6px;font-size:var(--t-12);color:var(--label-2);font-variant-numeric:tabular-nums}
+.la-ruler-ticks i{position:absolute;top:0;font-style:normal;translate:-50% 0}
+.la-here{position:absolute;top:0;display:grid;justify-items:center;gap:4px;translate:-50% 0;font-size:var(--t-14);font-weight:600;color:var(--label);white-space:nowrap;
+  transition:left var(--sp-smooth-ms,500ms) var(--sp-smooth,ease)}
+.la-here::after{content:"";width:2px;height:22px;border-radius:1px;background:var(--label)}
+.la-here[data-edge="start"]{translate:-1px 0;justify-items:start}
+.la-here[data-edge="end"]{translate:calc(1px - 100%) 0;justify-items:end}
+.la-bp-table{margin-top:var(--s-9)}
+.la-bp-table td[data-on],.la-bp-table th[data-on]{background:var(--fill-2);color:var(--label)}
+
+/* ── 5 · bands: a real page in a frame, annotated ───────────────────────── */
+.la-bands{display:grid;grid-template-columns:minmax(0,7fr) minmax(0,5fr);gap:var(--s-10);align-items:start;margin-top:var(--band-header-gap)}
+@media (max-width:1068px){.la-bands{grid-template-columns:minmax(0,1fr);gap:var(--s-8)}}
+.la-mini{position:relative;overflow:hidden;border-radius:var(--r-lg);corner-shape:superellipse(var(--k-continuous));
+  box-shadow:0 0 0 1px var(--separator),var(--shadow-tile)}
+.la-mini iframe{display:block;border:0;transform-origin:0 0}
+.la-bands-side{display:grid;gap:var(--s-6);position:sticky;top:96px}
+@media (max-width:1068px){.la-bands-side{position:static}}
+.la-switches{display:grid;gap:0;border-top:1px solid var(--separator)}
+.la-switches label{display:flex;align-items:center;justify-content:space-between;gap:var(--s-4);min-height:64px;border-bottom:1px solid var(--separator);cursor:pointer}
+.la-switches label span{display:grid;gap:2px;font-size:var(--t-17);line-height:var(--t-17-lh)}
+.la-switches label small{font-size:var(--t-14);line-height:var(--t-14-lh);color:var(--label-2)}
+.la-band-read{display:grid;gap:6px;margin:0;padding:0;list-style:none;font-size:var(--t-14);color:var(--label-2)}
+.la-band-read li{display:flex;justify-content:space-between;gap:var(--s-3)}
+.la-band-read b{color:var(--label);font-weight:600;font-variant-numeric:tabular-nums}
+
+/* ── 6 · spacing ────────────────────────────────────────────────────────── */
+.la-space{display:grid;margin-top:var(--band-header-gap);border-top:1px solid var(--separator)}
+.la-space-row{display:grid;grid-template-columns:72px 64px minmax(0,1fr) minmax(0,260px);align-items:center;gap:var(--s-4);min-height:48px;border-bottom:1px solid var(--separator)}
+@media (max-width:734px){.la-space-row{grid-template-columns:56px 48px minmax(0,1fr)}.la-space-row .la-use{display:none}}
+.la-space-row code{font-size:var(--t-12)}
+.la-space-row b{font-variant-numeric:tabular-nums;font-weight:600}
+.la-space-bar{height:16px;border-radius:4px;background:var(--accent-fill);max-width:100%}
+.la-use{font-size:var(--t-14);color:var(--label-2)}
+
+/* ── 7 · radii ──────────────────────────────────────────────────────────── */
+.la-radii{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:var(--grid-gap);margin-top:var(--band-header-gap)}
+@media (max-width:1068px){.la-radii{grid-template-columns:repeat(4,minmax(0,1fr))}}
+@media (max-width:480px){.la-radii{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.la-radius{display:grid;gap:var(--s-2);min-width:0}
+.la-radius-box{aspect-ratio:1;min-height:0;background:var(--c-surface);border-radius:var(--r);corner-shape:superellipse(var(--k-continuous));box-shadow:inset 0 0 0 1px var(--separator)}
+.la-radius-box.capsule{aspect-ratio:2.6;align-self:center}
+.la-radius b{font-size:var(--t-17);font-weight:600}
+.la-radius code{font-size:var(--t-12)}
+.la-radius span{font-size:var(--t-12);line-height:var(--t-12-lh);color:var(--label-2);font-variant-numeric:tabular-nums}
+
+/* ── 8 · continuous vs circular ─────────────────────────────────────────── */
+.la-corner{display:grid;grid-template-columns:minmax(0,6fr) minmax(0,6fr);gap:var(--s-10);align-items:start;margin-top:var(--band-header-gap)}
+@media (max-width:1068px){.la-corner{grid-template-columns:minmax(0,1fr);gap:var(--s-8)}}
+.la-zoom{border-radius:var(--r-lg);corner-shape:superellipse(var(--k-continuous));background:var(--c-surface);padding:var(--s-6)}
+.la-zoom svg{display:block;width:100%;height:auto}
+.la-zoom .la-axis{fill:none;stroke:var(--separator-opaque);stroke-width:1}
+.la-zoom .la-diag{stroke:var(--separator-opaque);stroke-dasharray:3 4}
+.la-zoom .la-se{fill:none;stroke:var(--label);stroke-width:7;opacity:.22}
+.la-zoom .la-ref{fill:none;stroke:var(--series-2);stroke-width:2.5}
+.la-zoom .la-circ{fill:none;stroke:var(--series-1);stroke-width:2;stroke-dasharray:7 5}
+.la-zoom .la-pt{fill:var(--series-2)}
+.la-zoom text{fill:var(--label-2);font-family:var(--font-text)}
+.la-legend{display:flex;flex-wrap:wrap;gap:var(--s-2) var(--s-6);margin-top:var(--s-4);font-size:var(--t-14);color:var(--label)}
+.la-legend span{display:inline-flex;align-items:center;gap:8px}
+.la-legend i{display:inline-block;width:22px;height:0;border-top:2.5px solid var(--series-2)}
+.la-legend i.la-lc{border-top:2px dashed var(--series-1)}
+.la-legend i.la-lv{border-top:7px solid var(--label);opacity:.22}
+.la-real{display:grid;gap:var(--s-6)}
+.la-real-row{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:var(--grid-gap)}
+.la-real figure{margin:0;display:grid;gap:var(--s-2)}
+.la-real figcaption{font-size:var(--t-12);line-height:var(--t-12-lh);color:var(--label-2)}
+.la-spec{position:relative;height:150px}
+.la-spec .la-box{position:absolute;inset:0;background:var(--label)}
+.la-spec .la-box.la-cont{border-radius:calc(var(--la-r) * var(--r-scale));corner-shape:superellipse(var(--k-continuous))}
+.la-spec .la-box.la-round{border-radius:var(--la-r);corner-shape:round}
+.la-spec svg{position:absolute;inset:0;width:100%;height:100%;overflow:visible;pointer-events:none}
+.la-spec path{fill:none;stroke-width:1.5;vector-effect:non-scaling-stroke}
+.la-spec .la-ref{stroke:var(--series-2)}
+.la-nums{margin-top:var(--s-7)}
+@media (max-width:734px){.la-hide-s{display:none}}
+
+/* ── 9 · capsules ───────────────────────────────────────────────────────── */
+.la-caps{display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:var(--s-5)}
+.la-pill{display:inline-flex;align-items:center;height:var(--h-xl);padding:0 var(--s-7);background:var(--label);color:var(--label-inv);font-size:var(--t-17);font-weight:600;border-radius:var(--r-pill)}
+.la-pill.la-true{corner-shape:round}
+.la-pill.la-lozenge{border-radius:calc(var(--h-xl) / 2 * var(--r-scale));corner-shape:superellipse(var(--k-continuous))}
+.la-cap-sizes .btn{cursor:default}   /* specimens, not controls */
+.la-cap-sizes{display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:var(--s-4);margin-top:var(--s-9)}
+.la-cap-read{margin-top:var(--s-4);text-align:center;font-size:var(--t-14);color:var(--label-2)}
+
+/* ── 10 · concentric ────────────────────────────────────────────────────── */
+.la-conc{display:grid;grid-template-columns:minmax(0,7fr) minmax(0,5fr);gap:var(--s-10);align-items:center;margin-top:var(--band-header-gap)}
+@media (max-width:1068px){.la-conc{grid-template-columns:minmax(0,1fr);gap:var(--s-8)}}
+.la-outer{--la-pad:16px;display:grid;padding:var(--la-pad);min-height:340px;border-radius:var(--r-xl);corner-shape:superellipse(var(--k-continuous));
+  background:var(--c-surface);box-shadow:inset 0 0 0 1px var(--separator)}
+.la-inner{display:grid;place-items:center;min-height:0;background:var(--accent-fill);color:var(--accent-ink);corner-shape:superellipse(var(--k-continuous));
+  font-family:var(--font-display);font-size:var(--t-28);font-weight:600}
+.la-conc-side{display:grid;gap:var(--s-6)}
+.la-conc-read{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:var(--s-5) var(--grid-gap);margin:0}
+.la-conc-read div{padding-top:var(--s-3);border-top:1px solid var(--separator)}
+.la-conc-read dt{font-size:var(--t-12);color:var(--label-2)}
+.la-conc-read dd{margin:2px 0 0;font-family:var(--font-display);font-size:var(--t-24);line-height:1.2;font-weight:600;font-variant-numeric:tabular-nums}
+.la-conc-read dd small{display:block;font-family:var(--font-text);font-size:var(--t-12);font-weight:400;color:var(--label-2)}
+.la-trio{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:var(--grid-gap);margin-top:var(--s-12)}
+@media (max-width:734px){.la-trio{grid-template-columns:minmax(0,1fr)}}
+.la-trio figure{margin:0;display:grid;gap:var(--s-3)}
+.la-trio .la-o{display:grid;padding:16px;height:180px;border-radius:calc(32px * var(--r-scale));corner-shape:superellipse(var(--k-continuous));background:var(--c-surface);box-shadow:inset 0 0 0 1px var(--separator)}
+.la-trio .la-i{background:var(--label);corner-shape:superellipse(var(--k-continuous));border-radius:calc(var(--la-ir) * var(--r-scale))}
+.la-trio figcaption{font-size:var(--t-14);line-height:var(--t-14-lh-loose);color:var(--label-2)}
+.la-trio figcaption b{color:var(--label);font-weight:600}
+.la-caps-conc{display:inline-flex;align-items:center;padding:6px;margin-top:var(--s-9);border-radius:var(--r-pill);corner-shape:round;background:var(--c-surface);box-shadow:inset 0 0 0 1px var(--separator)}
+.la-caps-conc span{display:inline-flex;align-items:center;height:40px;padding:0 var(--s-5);font-size:var(--t-14);font-weight:600;background:var(--label);color:var(--label-inv)}
+
+/* ── 11 · rails ─────────────────────────────────────────────────────────── */
+.la-rail-guide{position:relative}
+.la-rail-guide::before{content:"";position:absolute;top:0;bottom:0;left:var(--la-col-x,0);width:2px;background:var(--accent);opacity:.9;z-index:2;pointer-events:none}
+.la-rail-read{margin-top:var(--s-6);font-size:var(--t-14);color:var(--label-2)}
+.la-rail-read b{color:var(--label);font-variant-numeric:tabular-nums}
+.la-rail .scroller-card{justify-content:flex-start}
+.la-rail .scroller-media{place-items:end start;padding:var(--s-6)}
+.la-rail .scroller-media b{position:relative;font-family:var(--font-display);font-size:var(--t-64);line-height:1;font-weight:600;color:var(--on-art-1)}
+</style>
+</head>
+<body>
+
+<!-- ═══ SITE NAV (shared — copy verbatim; set aria-current on this page's link) ═══ -->
+<nav class="globalnav" aria-label="Fluid Design">
+  <div class="globalnav__bar">
+    <a class="globalnav__brand" href="index.html" aria-label="Fluid Design Open home"><i data-sym="sparkles"></i></a>
+    <ul class="globalnav__list">
+      <li class="globalnav__item"><a class="globalnav__link" href="index.html">Overview</a></li>
+      <li class="globalnav__item"><a class="globalnav__link" href="start.html">Start</a></li>
+      <li class="globalnav__item"><a class="globalnav__link" href="docs.html">Docs</a></li>
+      <li class="globalnav__item" data-flyout="gn-foundations"><a class="globalnav__link" href="color.html" aria-current="true">Foundations</a><button class="globalnav__trigger" type="button"><span class="sr-only">Foundations menu</span></button></li>
+      <li class="globalnav__item" data-flyout="gn-components"><a class="globalnav__link" href="components.html">Components</a><button class="globalnav__trigger" type="button"><span class="sr-only">Components menu</span></button></li>
+      <li class="globalnav__item" data-flyout="gn-instruments"><a class="globalnav__link" href="selftest.html">Instruments</a><button class="globalnav__trigger" type="button"><span class="sr-only">Instruments menu</span></button></li>
+    </ul>
+    <div class="globalnav__tools">
+      <button class="globalnav__icon" type="button" data-tone-toggle aria-label="Switch appearance"><i data-sym="circle-half"></i></button>
+      <button class="globalnav__menu" type="button" aria-label="Menu" aria-expanded="false"><i data-sym="lines"></i></button>
+    </div>
+  </div>
+  <div class="globalnav__flyout" id="gn-foundations" hidden>
+    <div class="globalnav__flyout-content">
+      <div class="globalnav__group" data-elevated>
+        <h2 class="globalnav__group-title">Foundations</h2>
+        <ul><li><a class="globalnav__flyout-link" href="color.html">Colour</a></li><li><a class="globalnav__flyout-link" href="type.html">Type</a></li><li><a class="globalnav__flyout-link" href="layout.html" aria-current="page">Layout</a></li><li><a class="globalnav__flyout-link" href="materials.html">Materials</a></li><li><a class="globalnav__flyout-link" href="motion.html">Motion</a></li></ul>
+      </div>
+      <div class="globalnav__group">
+        <h2 class="globalnav__group-title">Content</h2>
+        <ul><li><a class="globalnav__flyout-link" href="symbols.html">Symbols</a></li><li><a class="globalnav__flyout-link" href="data.html">Data</a></li></ul>
+      </div>
+    </div>
+  </div>
+  <div class="globalnav__flyout" id="gn-components" hidden>
+    <div class="globalnav__flyout-content">
+      <div class="globalnav__group" data-elevated>
+        <h2 class="globalnav__group-title">Components</h2>
+        <ul><li><a class="globalnav__flyout-link" href="components.html">Controls</a></li><li><a class="globalnav__flyout-link" href="chrome.html">Chrome</a></li><li><a class="globalnav__flyout-link" href="showcase.html">Product pages</a></li><li><a class="globalnav__flyout-link" href="patterns.html">Patterns</a></li></ul>
+      </div>
+    </div>
+  </div>
+  <div class="globalnav__flyout" id="gn-instruments" hidden>
+    <div class="globalnav__flyout-content">
+      <div class="globalnav__group" data-elevated>
+        <h2 class="globalnav__group-title">Instruments</h2>
+        <ul><li><a class="globalnav__flyout-link" href="selftest.html">Self-test</a></li><li><a class="globalnav__flyout-link" href="audit.html">Audit</a></li></ul>
+      </div>
+    </div>
+  </div>
+</nav>
+
+<!-- ═══ LOCAL NAV (per page: title, one CTA, jump links to this page's sections) ═══ -->
+<div class="localnav" data-localnav-reveal="#hero">
+  <div class="localnav__capsule" data-lg3 data-lg3-priority="3">
+    <a class="localnav__title" href="#top">Layout</a>
+    <button class="localnav__explore" type="button"><span class="localnav__explore-label">Explore</span></button>
+    <a class="localnav__cta" href="start.html">Adopt</a>
+    <div class="localnav__panel" aria-label="Explore Fluid Design">
+      <ul class="localnav__tiles">
+        <li><a class="localnav__tile" href="materials.html" style="--tile-hue: var(--series-1)"><span class="localnav__thumb"><i data-sym="sparkles"></i></span>Materials</a></li>
+        <li><a class="localnav__tile" href="motion.html" style="--tile-hue: var(--series-2)"><span class="localnav__thumb"><i data-sym="waveform"></i></span>Motion</a></li>
+        <li><a class="localnav__tile" href="chrome.html" style="--tile-hue: var(--series-3)"><span class="localnav__thumb"><i data-sym="sidebar"></i></span>Chrome</a></li>
+        <li><a class="localnav__tile" href="components.html" style="--tile-hue: var(--series-4)"><span class="localnav__thumb"><i data-sym="sliders"></i></span>Controls</a></li>
+        <li><a class="localnav__tile" href="showcase.html" style="--tile-hue: var(--series-5)"><span class="localnav__thumb"><i data-sym="grid"></i></span>Product pages</a></li>
+      </ul>
+      <hr class="localnav__rule">
+      <nav class="localnav__jump" aria-label="On this page">
+        <p class="localnav__jump-label">On this page <i data-sym="chevron-down"></i></p>
+        <ul class="localnav__jump-grid">
+          <li class="localnav__jump-item"><a href="#width">Content width</a></li>
+          <li class="localnav__jump-item"><a href="#grid">Grid</a></li>
+          <li class="localnav__jump-item"><a href="#breakpoints">Breakpoints</a></li>
+          <li class="localnav__jump-item"><a href="#bands">Bands</a></li>
+          <li class="localnav__jump-item"><a href="#spacing">Spacing</a></li>
+          <li class="localnav__jump-item"><a href="#radii">Radii</a></li>
+          <li class="localnav__jump-item"><a href="#corners">Corners</a></li>
+          <li class="localnav__jump-item"><a href="#capsules">Capsules</a></li>
+          <li class="localnav__jump-item"><a href="#concentric">Concentric</a></li>
+          <li class="localnav__jump-item"><a href="#rails">Rails</a></li>
+        </ul>
+      </nav>
+    </div>
+  </div>
+</div>
+
+<div class="la-overlay la-tint" aria-hidden="true"><div class="viewport-content"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div></div>
+
+<main id="top">
+
+<!-- ═══ 0 · HERO — stage: dark tiles on the art, so the gutters glow; one
+     glass platter switches the page-wide grid on ═══ -->
+<section class="band hero la-hero" data-band="stage" id="hero" aria-labelledby="la-hero-h">
+  <canvas class="hero-art" data-art="aurora" data-art-seed="7" data-art-contrast="1.25" data-art-vignette=".3" aria-hidden="true"></canvas>
+  <div class="hero-marquee viewport-content">
+    <p class="hero-eyebrow">Layout</p>
+    <h1 class="hero-headline" id="la-hero-h">Room to breathe.</h1>
+    <p class="hero-sub">One 1260-pixel column and twelve tracks<br>Three kinds of band, and continuous corners</p>
+    <div class="hero-media">
+      <div class="la-bento" id="la-bento">
+        <div class="la-s8"><span class="la-tracks" aria-hidden="true"></span><b>8</b><span>columns &middot; <em class="la-num" data-w></em></span></div>
+        <div class="la-s4"><span class="la-tracks" aria-hidden="true"></span><b>4</b><span>columns &middot; <em class="la-num" data-w></em></span></div>
+        <div class="la-s4"><span class="la-tracks" aria-hidden="true"></span><b>4</b><span>columns &middot; <em class="la-num" data-w></em></span></div>
+        <div class="la-s4"><span class="la-tracks" aria-hidden="true"></span><b>4</b><span>columns &middot; <em class="la-num" data-w></em></span></div>
+        <div class="la-s4"><span class="la-tracks" aria-hidden="true"></span><b data-fixed>20</b><span>pixel gutters, at every width</span></div>
+      </div>
+    </div>
+    <div class="hero-platter la-platter" data-lg3 data-lg3-recipe="pill" data-lg3-tone="light" data-lg3-priority="5">
+      <p class="hero-price"><span>Show the grid on this page</span><span>Twelve columns, twenty-pixel gutters</span></p>
+      <input class="switch switch-accent" type="checkbox" role="switch" id="la-grid-toggle" aria-label="Show the twelve-column grid on this page">
+    </div>
+  </div>
+</section>
+
+<!-- ═══ 1 · INTRO ═══ -->
+<section class="band" data-band="story" id="intro" aria-labelledby="la-intro-h">
+  <div class="viewport-content">
+    <div class="lockup" data-reveal="up">
+      <p class="lockup-eyebrow">Layout</p>
+      <h2 class="lockup-headline" id="la-intro-h">One column. Twelve tracks.</h2>
+      <p class="lockup-copy">Every product page hangs off one centred column: <strong>87.5% of the window, never wider than 1260 pixels</strong>. Twelve tracks divide it, twenty pixels apart. Bands stack down the page in a fixed rhythm, and every corner is one of three kinds.</p>
+    </div>
+    <div class="stat-grid stat-grid-center la-stats" data-cols="4">
+      <div class="stat-cell"><p class="stat-value" id="la-n-col" data-count>1260</p><p class="stat-caption">pixel column in this window</p></div>
+      <div class="stat-cell"><p class="stat-value" id="la-n-max" data-count>1260</p><p class="stat-caption">pixels at most</p></div>
+      <div class="stat-cell"><p class="stat-value" id="la-n-cols" data-count>12</p><p class="stat-caption">columns</p></div>
+      <div class="stat-cell"><p class="stat-value" id="la-n-gap" data-count>20</p><p class="stat-caption">pixel gutters</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ 2 · CONTENT WIDTH ═══ -->
+<section class="band" data-band="utility" id="width" aria-labelledby="la-width-h">
+  <div class="viewport-content">
+    <header class="section-header">
+      <h2 class="section-header-headline" id="la-width-h">The column, in this window.</h2>
+    </header>
+  </div>
+  <div class="la-tint">
+    <div class="viewport-content" style="max-width:none;width:auto;margin-inline:max(16px,calc((100% - 1440px) / 2))">
+      <div class="la-window" id="la-window">
+        <p class="la-window-cap" id="la-window-cap">This band is the window</p>
+        <div class="la-window-col" id="la-window-col"><div class="la-window-cols" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div></div>
+        <div class="la-dims"><span>margin <b data-d="l"></b></span><span>column <b data-d="c"></b></span><span>margin <b data-d="r"></b></span></div>
+      </div>
+    </div>
+  </div>
+  <div class="viewport-content">
+    <div class="la-code-grid">
+      <div>
+        <h3>The column</h3>
+        <pre class="doc-code" data-lang="html"><code>&lt;section class="band" data-band="story"&gt;
+  &lt;div class="viewport-content"&gt;
+    &lt;!-- width: 87.5%; max-width: var(--w-content) --&gt;
+  &lt;/div&gt;
+&lt;/section&gt;</code></pre>
+      </div>
+      <div>
+        <h3>The column</h3>
+        <p class="t-body" style="color:var(--label-2)"><code>--global-content-max-width</code> is <strong style="color:var(--label);font-weight:inherit">1260px, and 420px at 734 and below</strong>. Hero media may run to 1680. Nothing in the type changes above 1441; only the margins grow.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ 3 · 12-COLUMN GRID ═══ -->
+<section class="band" data-band="story" id="grid" aria-labelledby="la-grid-h">
+  <div class="viewport-content">
+    <header class="section-header">
+      <h2 class="section-header-headline" id="la-grid-h">Twelve tracks, twenty apart.</h2>
+    </header>
+    <div class="la-grid-head">
+      <label class="choice"><input class="switch" type="checkbox" role="switch" id="la-cols-toggle" checked> Show the columns</label>
+      <p class="la-grid-read" id="la-grid-read"></p>
+    </div>
+    <div class="la-grid-demo la-tint" id="la-grid-demo" data-cols-on>
+      <div class="grid-12"><div class="la-cell span-12"><b>12</b><em data-w></em></div></div>
+      <div class="grid-12"><div class="la-cell span-8"><b>8</b><em data-w></em></div><div class="la-cell span-4"><b>4</b><em data-w></em></div></div>
+      <div class="grid-12"><div class="la-cell span-6 span-sm-6"><b>6</b><em data-w></em></div><div class="la-cell span-6 span-sm-6"><b>6</b><em data-w></em></div></div>
+      <div class="grid-12"><div class="la-cell span-4"><b>4</b><em data-w></em></div><div class="la-cell span-4"><b>4</b><em data-w></em></div><div class="la-cell span-4"><b>4</b><em data-w></em></div></div>
+      <div class="grid-12"><div class="la-cell span-3 span-md-6"><b>3</b><em data-w></em></div><div class="la-cell span-3 span-md-6"><b>3</b><em data-w></em></div><div class="la-cell span-3 span-md-6"><b>3</b><em data-w></em></div><div class="la-cell span-3 span-md-6"><b>3</b><em data-w></em></div></div>
+      <div class="grid-12"><div class="la-cell span-7 start-2"><b>7</b><em data-w></em></div></div>
+    </div>
+    <p class="doc-note la-note" data-kind="measured" id="la-grid-note">Measuring&hellip;</p>
+    <div class="la-code-grid">
+      <div>
+        <h3>Spans and starts</h3>
+        <pre class="doc-code" data-lang="html"><code>&lt;div class="grid-12"&gt;
+  &lt;div class="span-8 span-md-12"&gt;&hellip;&lt;/div&gt;
+  &lt;div class="span-4 span-md-12"&gt;&hellip;&lt;/div&gt;
+  &lt;div class="span-7 start-2"&gt;&hellip;&lt;/div&gt;
+&lt;/div&gt;</code></pre>
+      </div>
+      <div>
+        <h3>Below 735 pixels</h3>
+        <p class="t-body" style="color:var(--label-2)">Every child of <code>.grid-12</code> takes the full row unless it asks for less with <code>.span-sm-N</code>. The two sixes above say <code>span-sm-6</code>, so they stay side by side on a phone; everything else stacks.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ 4 · BREAKPOINTS ═══ -->
+<section class="band" data-band="utility" id="breakpoints" aria-labelledby="la-bp-h">
+  <div class="viewport-content">
+    <header class="section-header">
+      <h2 class="section-header-headline" id="la-bp-h">Four breakpoints.</h2>
+    </header>
+    <div class="la-ruler" id="la-ruler">
+      <span class="la-here" id="la-here">1440</span>
+      <div class="la-ruler-bar" id="la-ruler-bar">
+        <span data-bp="3" data-short="XS">X-small</span><span data-bp="2" data-short="S">Small</span><span data-bp="1" data-short="M">Medium</span><span data-bp="0" data-short="L">Large</span><span data-bp="-1" data-short="XL">X-large</span>
+      </div>
+      <div class="la-ruler-ticks" id="la-ruler-ticks"></div>
+    </div>
+    <div class="doc-table la-bp-table">
+      <table class="table" id="la-bp-table">
+        <thead><tr><th>At</th><th class="num" data-c="3">&le; 480</th><th class="num" data-c="2">&le; 734</th><th class="num" data-c="1">&le; 1068</th><th class="num" data-c="0">1069&ndash;1440</th><th class="num" data-c="-1">&ge; 1441</th></tr></thead>
+        <tbody>
+          <tr><td>Hero headline</td><td class="num" data-c="3">48</td><td class="num" data-c="2">48</td><td class="num" data-c="1">64</td><td class="num" data-c="0">80</td><td class="num" data-c="-1">80</td></tr>
+          <tr><td>Lockup headline</td><td class="num" data-c="3">40</td><td class="num" data-c="2">48</td><td class="num" data-c="1">64</td><td class="num" data-c="0">80</td><td class="num" data-c="-1">80</td></tr>
+          <tr><td>Section headline</td><td class="num" data-c="3">32</td><td class="num" data-c="2">32</td><td class="num" data-c="1">40</td><td class="num" data-c="0">48</td><td class="num" data-c="-1">48</td></tr>
+          <tr><td>Column</td><td class="num" data-c="3">87.5%</td><td class="num" data-c="2">87.5%, &le; 420</td><td class="num" data-c="1">87.5%</td><td class="num" data-c="0">87.5%, &le; 1260</td><td class="num" data-c="-1">1260</td></tr>
+          <tr><td>Story band</td><td class="num" data-c="3">80</td><td class="num" data-c="2">80</td><td class="num" data-c="1">96</td><td class="num" data-c="0">128</td><td class="num" data-c="-1">128</td></tr>
+          <tr><td>Utility and stage band</td><td class="num" data-c="3">112</td><td class="num" data-c="2">112</td><td class="num" data-c="1">120</td><td class="num" data-c="0">144</td><td class="num" data-c="-1">144</td></tr>
+          <tr><td>Bottom, with a bar parked</td><td class="num" data-c="3">144</td><td class="num" data-c="2">144</td><td class="num" data-c="1">176</td><td class="num" data-c="0">224</td><td class="num" data-c="-1">224</td></tr>
+          <tr><td>Header to content</td><td class="num" data-c="3">32</td><td class="num" data-c="2">32</td><td class="num" data-c="1">40</td><td class="num" data-c="0">48</td><td class="num" data-c="-1">48</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="doc-note la-note" data-kind="measured" id="la-bp-note">Measuring&hellip;</p>
+  </div>
+</section>
+
+<!-- ═══ 5 · BANDS ═══ -->
+<section class="band" data-band="story" id="bands" aria-labelledby="la-bands-h">
+  <div class="viewport-content">
+    <div class="lockup lockup-start" data-reveal="up">
+      <p class="lockup-eyebrow">Bands</p>
+      <h2 class="lockup-headline" id="la-bands-h">Story, utility, stage.</h2>
+      <p class="lockup-copy">A page is a stack of full-width bands. <strong>White story bands</strong> carry the argument, <strong>grey utility bands</strong> carry the details, <strong>black stage bands</strong> carry material and film. The frame is a real page at 1440 pixels, measured as it renders.</p>
+    </div>
+    <div class="la-bands">
+      <div class="la-mini" id="la-mini"><iframe id="la-mini-frame" title="A five-band page at 1440 pixels, annotated with its paddings" tabindex="-1"></iframe></div>
+      <div class="la-bands-side">
+        <div class="la-switches">
+          <label><span>Collapse the seam<small>Two grey bands in a row share one padding.</small></span><input class="switch" type="checkbox" role="switch" data-mini="seam" checked></label>
+          <label><span>Fade the story band<small>White runs down, then blends into the grey below.</small></span><input class="switch" type="checkbox" role="switch" data-mini="fade"></label>
+          <label><span>Park a glass bar<small>The band keeps 224 pixels underneath it.</small></span><input class="switch" type="checkbox" role="switch" data-mini="bar" checked></label>
+        </div>
+        <ul class="la-band-read" id="la-band-read"></ul>
+        <pre class="doc-code" data-lang="html"><code>&lt;section class="band" data-band="story"&gt;&hellip;
+&lt;section class="band" data-band="utility"&gt;&hellip;
+&lt;section class="band" data-band="utility"
+         data-band-seam="keep"&gt;&hellip;
+&lt;section class="band" data-band="stage"&gt;&hellip;
+&lt;section class="band" data-band="utility"
+         data-band-bar&gt;&hellip;</code></pre>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ 6 · SPACING ═══ -->
+<section class="band" data-band="utility" id="spacing" aria-labelledby="la-space-h">
+  <div class="viewport-content">
+    <header class="section-header">
+      <h2 class="section-header-headline" id="la-space-h">Fourteen steps of space.</h2>
+    </header>
+    <div class="la-space" id="la-space"></div>
+  </div>
+</section>
+
+<!-- ═══ 7 · RADII ═══ -->
+<section class="band" data-band="story" id="radii" aria-labelledby="la-radii-h">
+  <div class="viewport-content">
+    <div class="lockup lockup-start" data-reveal="up">
+      <p class="lockup-eyebrow">Radii</p>
+      <h2 class="lockup-headline" id="la-radii-h">Twenty-eight is the radius.</h2>
+      <p class="lockup-copy">Cards, galleries and modals all use <strong>28</strong>. Everything else is a step either side of it. Each is drawn as a <strong>continuous corner</strong>, so the number you write is the nominal radius and the curve is a continuous one.</p>
+    </div>
+    <div class="la-radii" id="la-radii"></div>
+  </div>
+</section>
+
+<!-- ═══ 8 · CONTINUOUS VS CIRCULAR ═══ -->
+<section class="band" data-band="utility" id="corners" aria-labelledby="la-corner-h">
+  <div class="viewport-content">
+    <header class="section-header">
+      <h2 class="section-header-headline" id="la-corner-h">A corner that eases in.</h2>
+      <div class="segmented" role="radiogroup" aria-label="Radius to compare" id="la-r-pick"><button role="radio" data-value="12">12</button><button role="radio" data-value="18">18</button><button role="radio" aria-checked="true" data-value="28">28</button><button role="radio" data-value="44">44</button></div>
+    </header>
+    <div class="la-corner">
+      <figure class="la-zoom" style="margin:0">
+        <svg id="la-zoom-svg" role="img" aria-labelledby="la-zoom-t"><title id="la-zoom-t">One corner magnified six times: the reference continuous corner, the superellipse drawn under it, and a circle of the same radius.</title></svg>
+        <div class="la-legend" aria-hidden="true"><span><i></i>Reference continuous corner</span><span><i class="la-lv"></i>Superellipse, as CSS draws it</span><span><i class="la-lc"></i>a circle, same radius</span></div>
+        <p class="t-caption" id="la-zoom-cap" style="margin-top:var(--s-3);color:var(--label-2)"></p>
+      </figure>
+      <div class="la-real">
+        <p class="t-body" style="color:var(--label-2)">A circular corner bends all at once. A continuous corner eases into the straight edge, so it starts earlier and cuts in no deeper. CSS draws it with <code>corner-shape: superellipse(1.71)</code> and the radius scaled by 1.53 &mdash; <strong style="color:var(--label);font-weight:inherit">the same curve within a fraction of a pixel</strong>. Browsers without <code>corner-shape</code> get the circle of equal mass.</p>
+        <div class="la-real-row" id="la-real-row"></div>
+      </div>
+    </div>
+    <div class="doc-table la-nums">
+      <table class="table"><thead><tr><th class="num">Radius</th><th class="num">Reference inset at 45&deg;</th><th class="num">Superellipse inset</th><th class="num">Difference</th><th class="num la-hide-s">Circle inset</th><th class="num">CSS radius</th><th class="num la-hide-s">Worst gap on the curve</th></tr></thead><tbody id="la-corner-rows"></tbody></table>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ 9 · CAPSULES ═══ -->
+<section class="band" data-band="story" id="capsules" aria-labelledby="la-caps-h">
+  <div class="viewport-content">
+    <header class="section-header">
+      <h2 class="section-header-headline" id="la-caps-h">A capsule is not a corner.</h2>
+    </header>
+    <div class="doc-dodont">
+      <div class="doc-do">
+        <div class="doc-specimen"><span class="la-pill la-true" id="la-pill-true">Capsule</span></div>
+        <p class="doc-verdict">Height over two, <code>corner-shape: round</code>: true semicircle ends.</p>
+      </div>
+      <div class="doc-dont">
+        <div class="doc-specimen"><span class="la-pill la-lozenge">Lozenge</span></div>
+        <p class="doc-verdict">The continuous curve on a pill squares its ends off.</p>
+      </div>
+    </div>
+    <div class="la-cap-sizes">
+      <span class="btn btn-s">Small 24</span><span class="btn">Medium 36</span><span class="btn btn-primary btn-l">Large 44</span><span class="btn btn-secondary btn-xl">Extra large 56</span>
+    </div>
+    <p class="la-cap-read" id="la-cap-read"></p>
+  </div>
+</section>
+
+<!-- ═══ 10 · CONCENTRIC ═══ -->
+<section class="band" data-band="utility" id="concentric" aria-labelledby="la-conc-h">
+  <div class="viewport-content">
+    <div class="lockup lockup-start" data-reveal="up">
+      <p class="lockup-eyebrow">Concentric</p>
+      <h2 class="lockup-headline" id="la-conc-h">Inside radius, derived.</h2>
+      <p class="lockup-copy">A shape inside a shape shares its centre: <strong>inner radius = outer radius &minus; the gap</strong>, never below 6. Mark the child <code>data-concentric</code> and the gap is measured, not assumed &mdash; drag the slider and watch it re-derive.</p>
+    </div>
+    <div class="la-conc">
+      <div class="la-outer" id="la-outer" data-concentric-box>
+        <div class="la-inner" id="la-inner" data-concentric>Aa</div>
+      </div>
+      <div class="la-conc-side">
+        <label class="t-caption" for="la-pad" style="color:var(--label-2)">Gap between the shapes</label>
+        <input class="slider" type="range" id="la-pad" min="4" max="48" step="1" value="16">
+        <dl class="la-conc-read" id="la-conc-read">
+          <div><dt>Outer radius</dt><dd data-k="outer">&mdash;</dd></div>
+          <div><dt>Gap, measured</dt><dd data-k="gap">&mdash;</dd></div>
+          <div><dt>Inner radius</dt><dd data-k="inner">&mdash;</dd></div>
+          <div><dt>Gap at 45&deg;</dt><dd data-k="diag">&mdash;</dd></div>
+        </dl>
+      </div>
+    </div>
+    <p class="doc-note la-note" data-kind="measured" id="la-conc-note">Measuring&hellip;</p>
+    <div class="la-trio">
+      <figure><div class="la-o"><div class="la-i" style="--la-ir:4px"></div></div><figcaption><b>Pinched.</b> The inner corner is tighter than the gap allows.</figcaption></figure>
+      <figure><div class="la-o"><div class="la-i" style="--la-ir:16px"></div></div><figcaption><b>Concentric.</b> 32 outside, a 16 gap, 16 inside.</figcaption></figure>
+      <figure><div class="la-o"><div class="la-i" style="--la-ir:32px"></div></div><figcaption><b>Flared.</b> The same radius inside and out bulges at the corner.</figcaption></figure>
+    </div>
+    <div class="la-caps-conc" aria-label="A capsule inside a capsule"><span class="capsule">A capsule&rsquo;s child is a capsule</span></div>
+  </div>
+</section>
+
+<!-- ═══ 11 · RAILS ═══ -->
+<section class="band" data-band="story" id="rails" aria-labelledby="la-rail-h">
+  <div class="viewport-content">
+    <header class="section-header">
+      <h2 class="section-header-headline" id="la-rail-h">Rails bleed. Their first card doesn&rsquo;t.</h2>
+    </header>
+  </div>
+  <div class="scroller la-rail la-rail-guide" id="la-rail" aria-label="A full-bleed rail">
+    <div class="scroller-rail">
+      <ul class="scroller-list">
+        <li class="scroller-item"><div class="scroller-card"><p class="scroller-eyebrow">The column edge</p><h3 class="scroller-headline">The first card starts where the text does.</h3><div class="scroller-media"><canvas data-art="aurora" data-art-seed="2" aria-hidden="true"></canvas></div></div></li>
+        <li class="scroller-item"><div class="scroller-card"><p class="scroller-eyebrow">Snap</p><h3 class="scroller-headline">Every card snaps back to that edge.</h3><div class="scroller-media"><canvas data-art="twilight" data-art-seed="6" aria-hidden="true"></canvas></div></div></li>
+        <li class="scroller-item"><div class="scroller-card"><p class="scroller-eyebrow">Bleed</p><h3 class="scroller-headline">The last runs out to the window.</h3><div class="scroller-media"><canvas data-art="deep" data-art-seed="3" aria-hidden="true"></canvas></div></div></li>
+        <li class="scroller-item"><div class="scroller-card"><p class="scroller-eyebrow">Paddles</p><h3 class="scroller-headline">Two round paddles page it, one card at a time.</h3><div class="scroller-media"><canvas data-art="dawn" data-art-seed="8" aria-hidden="true"></canvas></div></div></li>
+        <li class="scroller-item"><div class="scroller-card"><p class="scroller-eyebrow">Padding</p><h3 class="scroller-headline">max(6.25%, (100% &minus; 1260) &divide; 2).</h3><div class="scroller-media"><canvas data-art="ember" data-art-seed="5" aria-hidden="true"></canvas></div></div></li>
+        <li class="scroller-item"><div class="scroller-card"><p class="scroller-eyebrow">Direct child</p><h3 class="scroller-headline">A rail sits straight in its band, outside the column.</h3><div class="scroller-media"><canvas data-art="aurora" data-art-seed="11" aria-hidden="true"></canvas></div></div></li>
+      </ul>
+    </div>
+  </div>
+  <div class="viewport-content">
+    <p class="la-rail-read" id="la-rail-read">Measuring&hellip;</p>
+    <div class="la-code-grid">
+      <div>
+        <h3>The markup</h3>
+        <pre class="doc-code" data-lang="html"><code>&lt;section class="band" data-band="story"&gt;
+  &lt;div class="viewport-content"&gt;&hellip;header&hellip;&lt;/div&gt;
+  &lt;div class="scroller"&gt;           &lt;!-- a direct child of the band --&gt;
+    &lt;div class="scroller-rail"&gt;&lt;ul class="scroller-list"&gt;&hellip;&lt;/ul&gt;&lt;/div&gt;
+  &lt;/div&gt;
+&lt;/section&gt;</code></pre>
+      </div>
+      <div>
+        <h3>Your own rail</h3>
+        <pre class="doc-code" data-lang="css"><code>/* .rail is the same padding, for any row that scrolls */
+.my-row { overflow-x: auto; }
+/* &lt;div class="rail my-row"&gt; as a direct child of .band */</code></pre>
+      </div>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<!-- ═══ FOOTER (shared — copy verbatim) ═══ -->
+<footer class="band" data-band="utility" data-band-seam="keep">
+  <div class="viewport-content stack-4">
+    <p class="t-caption" style="color: var(--label-2)">Fluid Design Open &middot; Type follows the system face where one exists and Inter elsewhere. Device art is original.</p>
+    <p class="t-caption"><a href="index.html">Overview</a> &middot; <a href="start.html">Start</a> &middot; <a href="docs.html">Docs</a> &middot; <a href="components.html">Components</a> &middot; <a href="selftest.html">Self-test</a> &middot; <a href="audit.html">Audit</a></p>
+  </div>
+</footer>
+
+<script src="assets/geom.js"></script>
+<script src="assets/spring.js"></script>
+<script src="assets/palette.js"></script>
+<script src="assets/art3.js"></script>
+<script src="assets/lg3-core.js"></script>
+<script src="assets/fg3.js"></script>
+<script src="assets/symbols.js"></script>
+<script src="assets/chart.js"></script>
+<script src="assets/motion.js"></script>
+<script src="assets/anim.js"></script>
+<script src="assets/device.js"></script>
+<script src="assets/ui.js"></script>
+<script src="assets/chrome.js"></script>
+<script src="assets/showcase.js"></script>
+<script src="assets/docs.js"></script>   <!-- documentation pages only -->
+<script>
+/* layout.html \u2014 the page's own specimens. Every number shown is read from
+   the element that carries the class or token (getBoundingClientRect,
+   getComputedStyle), or computed by GEOM, the engine the corners use. */
+(function () {
+  'use strict';
+  var doc = document, html = doc.documentElement, G = window.GEOM;
+  var $ = function (s, r) { return (r || doc).querySelector(s); };
+  var $$ = function (s, r) { return [].slice.call((r || doc).querySelectorAll(s)); };
+  function r1(v) { return Math.round(v * 10) / 10; }
+  function rootVar(n) { return getComputedStyle(html).getPropertyValue('--' + n).trim(); }
+  function w(el) { return el.getBoundingClientRect().width; }
+
+  /* -- 0 \u00b7 hero: widths on the tiles, and the page-wide grid switch ----- */
+  function readBento() {
+    /* how many of the bento's own tracks each tile spans, measured, so the
+       labels and stripes stay true when the grid drops to six on phones */
+    var bento = $('#la-bento'), bcs = getComputedStyle(bento), tr = bcs.gridTemplateColumns.split(' ').map(parseFloat), cw = tr[0] || 1, gp = parseFloat(bcs.columnGap) || 0;
+    $$('#la-bento > div').forEach(function (tile) {
+      var n = Math.max(1, Math.round((w(tile) + gp) / (cw + gp))), t = $('.la-tracks', tile), b = $('b', tile);
+      if (t && t.children.length !== n) t.innerHTML = new Array(n + 1).join('<i></i>');
+      if (b && !b.hasAttribute('data-fixed')) b.textContent = n;
+    });
+    $$('#la-bento [data-w]').forEach(function (e) { e.textContent = Math.round(w(e.closest('div'))) + ' px'; }); }
+  var gridToggle = $('#la-grid-toggle');
+  gridToggle.addEventListener('change', function () { html.toggleAttribute('data-la-grid', gridToggle.checked); });
+
+  /* -- 1 \u00b7 stats --------------------------------------------------------- */
+  function readStats() {
+    var col = w($('.viewport-content', $('#intro')));
+    $('#la-n-col').textContent = Math.round(col);
+    $('#la-n-max').textContent = parseFloat(rootVar('w-content'));
+    $('#la-n-cols').textContent = parseFloat(rootVar('grid-cols'));
+    $('#la-n-gap').textContent = parseFloat(rootVar('grid-gap'));
+  }
+
+  /* -- 2 \u00b7 the window ---------------------------------------------------- */
+  function readWindow() {
+    /* the drawing is this window at scale: W is the real window, C the real
+       .viewport-content, and the column is drawn at C / W of the drawing */
+    var col = $('#la-window-col'), W = html.clientWidth, C = w($('.viewport-content', $('#width'))), m = (W - C) / 2;
+    col.style.width = (C / W * 100) + '%'; col.style.maxWidth = 'none';
+    $('[data-d="l"]').textContent = Math.round(m) + ' px';
+    $('[data-d="r"]').textContent = Math.round(m) + ' px';
+    $('[data-d="c"]').textContent = Math.round(C) + ' px';
+    $('#la-window-cap').textContent = 'This window, ' + W + ' px, drawn to scale \u00b7 87.5% of it is ' + Math.round(W * 0.875) + (C < W * 0.875 - 1 ? ', capped at ' + Math.round(C) : '');
+  }
+
+  /* -- 3 \u00b7 grid ---------------------------------------------------------- */
+  function readGrid() {
+    var demo = $('#la-grid-demo'), g = $('.grid-12', demo), cs = getComputedStyle(g);
+    var tracks = cs.gridTemplateColumns.split(' ').map(parseFloat).filter(function (x) { return x > 0; });
+    var colw = tracks[0] || 0, gap = parseFloat(cs.columnGap) || 0;
+    demo.style.setProperty('--la-colw', colw + 'px');
+    $$('.la-cell [data-w]', demo).forEach(function (e) { e.textContent = r1(w(e.closest('.la-cell'))) + ' px'; });
+    /* the big number is the span this window DRAWS, measured in its own
+       tracks (on a phone a span-8 takes all twelve), never the authored one */
+    $$('.la-cell', demo).forEach(function (c) {
+      var cw = w(c), b = $('b', c);
+      if (cw && b && colw) b.textContent = Math.max(1, Math.round((cw + gap) / (colw + gap)));
+    });
+    var total = w(g);
+    $('#la-grid-read').innerHTML = 'Column <b>' + r1(colw) + ' px</b> &middot; gutter <b>' + gap + ' px</b> &middot; grid <b>' + Math.round(total) + ' px</b>';
+    $('#la-grid-note').innerHTML = 'At 1260 pixels a column is (1260 &minus; 11 &times; 20) &divide; 12 = <b>86.67 px</b>, the width the nested grid measures. In this window it is <b>' + r1(colw) + ' px</b>' +
+      (matchMedia('(max-width:734px)').matches ? ' &mdash; below 735 pixels every child takes the full row unless it asks for less, so the columns are not drawn, and of the six rows only two differ: a full row, and the <code>span-sm-6</code> pair.' : '.');
+  }
+  $('#la-cols-toggle').addEventListener('change', function (e) { $('#la-grid-demo').toggleAttribute('data-cols-on', e.target.checked); });
+
+  /* -- 4 \u00b7 breakpoints ruler --------------------------------------------- */
+  var MINW = 320, MAXW = 1680, EDGES = [320, 480, 734, 1068, 1440, 1680];
+  function pos(x) { return (Math.max(MINW, Math.min(MAXW, x)) - MINW) / (MAXW - MINW) * 100; }
+  (function buildRuler() {
+    var bar = $('#la-ruler-bar'), spans = $$('span', bar);
+    spans.forEach(function (s, i) { s.style.flex = '0 0 ' + (pos(EDGES[i + 1]) - pos(EDGES[i])) + '%'; });
+    $('#la-ruler-ticks').innerHTML = [320, 480, 734, 1068, 1440].map(function (x) { return '<i style="left:' + pos(x) + '%">' + x + '</i>'; }).join('');
+  })();
+  function bucketOf(x) { return x <= 480 ? 3 : x <= 734 ? 2 : x <= 1068 ? 1 : x <= 1440 ? 0 : -1; }
+  function readRuler() {
+    var x = html.clientWidth, b = bucketOf(x);
+    var here = $('#la-here'); here.style.left = pos(x) + '%'; here.textContent = 'This window, ' + x + ' px';
+    /* near an end of the ruler the label hangs inward from the tick instead
+       of centring on it, so it is never pushed off the screen */
+    var rw = $('#la-ruler').clientWidth, cx = pos(x) / 100 * rw, hw = here.offsetWidth / 2;
+    if (cx < hw) here.setAttribute('data-edge', 'start'); else if (cx > rw - hw) here.setAttribute('data-edge', 'end'); else here.removeAttribute('data-edge');
+    $$('#la-ruler-bar span').forEach(function (s) {
+      s.toggleAttribute('data-on', +s.getAttribute('data-bp') === b);
+      /* a segment too narrow for its name (X-small is 41px at 402) takes its abbreviation */
+      var long = s.getAttribute('data-long') || s.textContent;
+      s.setAttribute('data-long', long); s.textContent = long; s.removeAttribute('title');
+      if (s.scrollWidth > s.clientWidth + 1) { s.textContent = s.getAttribute('data-short'); s.title = long; }
+    });
+    $$('#la-bp-table [data-c]').forEach(function (c) { c.toggleAttribute('data-on', +c.getAttribute('data-c') === b); });
+    var band = $('#breakpoints'), cs = getComputedStyle(band);
+    var hero = getComputedStyle($('.hero-headline')).fontSize, lock = getComputedStyle($('.lockup-headline')).fontSize;
+    $('#la-bp-note').innerHTML = 'Read from this page now: the hero headline is <b>' + parseFloat(hero) + ' px</b>, the lockup headline <b>' + parseFloat(lock) + ' px</b>, this utility band is padded <b>' + parseFloat(cs.paddingTop) + ' px</b> on top' +
+      ' and the section header sits <b>' + parseFloat(getComputedStyle($('.section-header', band)).marginBottom) + ' px</b> above its content. The highlighted column is this window.';
+  }
+
+  /* -- 5 \u00b7 bands: a real page in a frame --------------------------------- */
+  var mini = $('#la-mini-frame'), MW = 1440, MH = 2600, state = { seam: true, fade: false, bar: true };
+  function hrefOf(part) { var l = $('link[rel="stylesheet"][href*="' + part + '"]'); return l ? l.href : ''; }
+  function miniDoc() {
+    var t = html.getAttribute('data-tone') === 'dark' ? 'dark' : 'light';
+    var links = ['fg3-tokens', 'fg3-color', 'fg3.css', 'fg3-components', 'fg3-showcase'].map(function (p) { return '<link rel="stylesheet" href="' + hrefOf(p) + '">'; }).join('');
+    var cards = '<div class="cards"><div class="card"><b>Card</b><p>28 radius, on the band&rsquo;s own surface.</p></div><div class="card"><b>Card</b><p>A step lighter or darker than the band.</p></div><div class="card"><b>Card</b><p>Opaque. Glass never holds content.</p></div></div>';
+    return '<!doctype html><html lang="en" data-tone="' + t + '"><head><meta charset="utf-8">' + links + '<style>' +
+      'html{scrollbar-width:none;overflow:hidden}body{margin:0}' +
+      '.cards{display:grid;grid-template-columns:repeat(3,1fr);gap:20px}.card{min-height:160px}.card b{font-size:21px}.card p{margin-top:8px;color:var(--label-2)}' +
+      '.pad{position:absolute;left:0;right:0;pointer-events:none;display:flex;align-items:center;justify-content:flex-start;padding-left:48px;' +
+      'background:repeating-linear-gradient(135deg,color-mix(in srgb,var(--accent) 18%,transparent) 0 8px,transparent 8px 16px)}' +
+      '.pad span{font:600 26px/1 var(--font-display);padding:8px 18px;border-radius:999px;background:var(--label);color:var(--label-inv)}' +
+      '.bar{position:absolute;left:50%;bottom:84px;translate:-50% 0;display:flex;align-items:center;gap:16px;height:56px;padding:0 10px 0 24px;border-radius:999px;' +
+      'background:var(--mat-platter-bg);-webkit-backdrop-filter:var(--mat-platter-filter);backdrop-filter:var(--mat-platter-filter);box-shadow:var(--mat-platter-ring);font:600 17px/1 var(--font-text);z-index:2}' +
+      '.bar i{display:block;width:36px;height:36px;border-radius:50%;background:var(--label)}' +
+      '</style></head><body>' +
+      '<section class="band" data-band="story" id="b1"><div class="viewport-content"><div class="lockup"><p class="lockup-eyebrow">Story</p><h1 class="lockup-headline">Hello, fold.</h1><p class="lockup-copy">White bands carry the argument, <strong>one idea to a viewport</strong>.</p></div></div></section>' +
+      '<section class="band" data-band="utility" id="b2"><div class="viewport-content"><header class="section-header"><h2 class="section-header-headline">Utility.</h2></header>' + cards + '</div></section>' +
+      '<section class="band" data-band="utility" id="b3"><div class="viewport-content">' + cards + '</div></section>' +
+      '<section class="band" data-band="stage" data-tone="dark" id="b4"><div class="viewport-content"><div class="lockup"><h2 class="lockup-headline">Stage.</h2><p class="lockup-copy">Black, for material and film.</p></div></div></section>' +
+      '<section class="band" data-band="utility" id="b5"><div class="viewport-content"><header class="section-header"><h2 class="section-header-headline">A bar parks here.</h2></header>' + cards + '</div><div class="bar">Highlights<i></i></div></section>' +
+      '</body></html>';
+  }
+  function applyMini() {
+    var d; try { d = mini.contentDocument; } catch (e) { return; }
+    if (!d || !d.getElementById('b1')) return;
+    var b1 = d.getElementById('b1'), b3 = d.getElementById('b3'), b5 = d.getElementById('b5');
+    if (state.fade) b1.setAttribute('data-band-fade', 'utility'); else b1.removeAttribute('data-band-fade');
+    if (state.seam) b3.removeAttribute('data-band-seam'); else b3.setAttribute('data-band-seam', 'keep');
+    if (state.bar) b5.setAttribute('data-band-bar', ''); else b5.removeAttribute('data-band-bar');
+    d.querySelector('.bar').style.display = state.bar ? '' : 'none';
+    $$('.pad', d.body).forEach(function (p) { p.parentNode.removeChild(p); });
+    var read = [], KIND = { b1: 'Story', b2: 'Utility', b3: 'Utility, second', b4: 'Stage', b5: 'Utility, with a bar' };
+    ['b1', 'b2', 'b3', 'b4', 'b5'].forEach(function (id) {
+      var band = d.getElementById(id), cs = d.defaultView.getComputedStyle(band), pt = parseFloat(cs.paddingTop), pb = parseFloat(cs.paddingBottom);
+      [['top', pt], ['bottom', pb]].forEach(function (p) {
+        if (p[1] < 1) return;
+        var el = d.createElement('div'); el.className = 'pad';
+        el.style[p[0]] = '0'; el.style.height = p[1] + 'px';
+        el.innerHTML = '<span>' + Math.round(p[1]) + '</span>';
+        band.appendChild(el);
+      });
+      read.push('<li><span>' + KIND[id] + '</span><b>' + Math.round(pt) + ' / ' + Math.round(pb) + '</b></li>');
+    });
+    $('#la-band-read').innerHTML = '<li><span>Band, at 1440</span><span>top / bottom</span></li>' + read.join('');
+    MH = Math.ceil(d.body.getBoundingClientRect().height);
+    layoutMini();
+  }
+  function layoutMini() {
+    var box = $('#la-mini'), s = (box.clientWidth || 600) / MW;
+    mini.style.width = MW + 'px'; mini.style.height = MH + 'px'; mini.style.transform = 'scale(' + s + ')';
+    box.style.height = Math.round(MH * s) + 'px';
+  }
+  mini.addEventListener('load', function () { setTimeout(applyMini, 30); });
+  $$('[data-mini]').forEach(function (i) { i.addEventListener('change', function () { state[i.getAttribute('data-mini')] = i.checked; applyMini(); }); });
+
+  /* -- 6 \u00b7 spacing (values read from the tokens) ------------------------- */
+  var USE = { 1: 'hairline offsets, badge padding', 2: 'icon to label', 3: 'tight stacks, row padding', 4: 'control padding, phone gutter', 5: 'the grid gutter', 6: 'card padding on phones',
+    7: 'card padding', 8: 'between groups', 9: 'section header to content', 10: 'between blocks', 11: 'story band on phones', 12: 'story band at 1068', 13: 'a story band', 14: 'a utility band' };
+  (function buildSpace() {
+    var h = '';
+    for (var i = 1; i <= 14; i++) {
+      h += '<div class="la-space-row"><code>--s-' + i + '</code><b data-s="' + i + '"></b><span class="la-space-bar" style="width:var(--s-' + i + ')"></span><span class="la-use">' + USE[i] + '</span></div>';
+    }
+    $('#la-space').innerHTML = h;
+  })();
+  function readSpace() { $$('[data-s]').forEach(function (b) { b.textContent = parseFloat(rootVar('s-' + b.getAttribute('data-s'))); }); }
+
+  /* -- 7 \u00b7 radii --------------------------------------------------------- */
+  var RADII = [['xs', 8, 'small rectangular buttons'], ['sm', 12, 'block buttons, fields'], ['md', 18, 'tiles, small platters'], ['lg', 28, 'cards, galleries, modals'],
+    ['xl', 32, 'expanded floating chrome'], ['2xl', 44, 'sheets, big panels'], ['pill', 999, 'capsules']];
+  $('#la-radii').innerHTML = RADII.map(function (r) {
+    var cap = r[0] === 'pill';
+    return '<div class="la-radius"><span class="la-radius-box' + (cap ? ' capsule' : '') + '" style="--r:var(--r-' + r[0] + ')" data-r="' + r[0] + '"></span>' +
+      '<b>' + (cap ? 'Capsule' : r[1]) + '</b><code>--r-' + r[0] + '</code><span data-rv="' + r[0] + '"></span><span>' + r[2] + '</span></div>';
+  }).join('');
+  function readRadii() {
+    $$('[data-rv]').forEach(function (s) {
+      var k = s.getAttribute('data-rv'), box = $('[data-r="' + k + '"]'), cs = getComputedStyle(box);
+      var shape = cs.getPropertyValue('corner-shape') || cs.cornerShape || '';
+      s.textContent = k === 'pill' ? 'height \u00f7 2, round' : 'CSS ' + r1(parseFloat(cs.borderTopLeftRadius)) + ' px' + (shape ? ' \u00b7 ' + shape.replace(/\s/g, '') : '');
+    });
+  }
+
+  /* -- 8 \u00b7 continuous vs circular, from GEOM (the method of the corner study) - */
+  var rPick = 28;
+  function seCorner(R, k) {
+    var n = G.expFromK(k), o = [];
+    for (var i = 0; i <= 160; i++) { var th = i / 160 * Math.PI / 2; o.push({ x: R * (1 - Math.pow(Math.cos(th), 2 / n)), y: R * (1 - Math.pow(Math.sin(th), 2 / n)) }); }
+    return o;
+  }
+  function pts(p, S) { return 'M' + p.map(function (q) { return (q.x * S).toFixed(2) + ',' + (q.y * S).toFixed(2); }).join('L'); }
+  function drawZoom() {
+    if (!G) return;
+    var svg = $('#la-zoom-svg'), r = rPick, S = 520 / (r * 1.7), W = r * 1.7 * S, c = G.continuous(r);
+    while (svg.lastChild && svg.lastChild.nodeName !== 'title') svg.removeChild(svg.lastChild);
+    svg.setAttribute('viewBox', '-12 -40 ' + (W + 24) + ' ' + (W + 52));
+    var NS = 'http://www.w3.org/2000/svg', add = function (n, a, txt) { var e = doc.createElementNS(NS, n); Object.keys(a).forEach(function (k) { e.setAttribute(k, a[k]); }); if (txt) e.textContent = txt; svg.appendChild(e); return e; };
+    add('path', { class: 'la-axis', d: 'M0,' + W + 'L0,0L' + W + ',0' });
+    add('line', { class: 'la-diag', x1: 0, y1: 0, x2: W * 0.62, y2: W * 0.62 });
+    add('path', { class: 'la-se', d: pts(seCorner(c.radius, c.k), S) });
+    add('path', { class: 'la-circ', d: pts(seCorner(r, 1), S) });
+    add('path', { class: 'la-ref', d: pts(G.contCorner(r, 64).map(function (p) { return { x: p.x, y: p.y }; }), S) });
+    var ins = G.contInset(r) * S;
+    $('#la-zoom-cap').textContent = 'The ticks mark where each curve leaves the edge: the circle at ' + r + ' px, the continuous corner at ' + r1(r * 1.53) + ' px. Both cut in ' + G.contInset(r).toFixed(2) + ' px at 45\u00b0 (the dot).';
+    add('circle', { class: 'la-pt', cx: ins, cy: ins, r: 6 });
+    add('text', { x: W * 0.64, y: W * 0.6, 'font-size': 18 }, '45\u00b0');
+    add('line', { class: 'la-diag', x1: r * 1.53 * S, y1: -12, x2: r * 1.53 * S, y2: 12 });
+    add('line', { class: 'la-diag', x1: r * S, y1: -12, x2: r * S, y2: 12 });
+    add('text', { x: r * 1.53 * S, y: -18, 'font-size': 17, 'text-anchor': 'middle' }, r1(r * 1.53));
+    add('text', { x: r * S, y: -18, 'font-size': 17, 'text-anchor': 'middle' }, r);
+  }
+  function drawReal() {
+    if (!G) return;
+    var box = $('#la-real-row'), r = rPick, ww = 240, hh = 150;
+    var spec = function (cls, title, overlay) {
+      return '<figure><div class="la-spec" style="--la-r:' + r + 'px"><div class="la-box ' + cls + '"></div>' +
+        '<svg viewBox="0 0 ' + ww + ' ' + hh + '" preserveAspectRatio="none" aria-hidden="true"><path class="la-ref" d="' + G.contPath(ww, hh, r) + '"/></svg></div><figcaption>' + title + '</figcaption></figure>';
+    };
+    box.innerHTML = spec('la-cont', 'Superellipse corner, with the reference path on top', true) + spec('la-round', 'A circle of radius ' + r + ', with the reference path on top', true);
+    $$('.la-spec', box).forEach(function (s) { s.style.height = hh + 'px'; s.style.width = '100%'; });
+  }
+  function tableCorners() {
+    if (!G) return;
+    var C = G.CONTINUOUS;
+    $('#la-corner-rows').innerHTML = [8, 12, 18, 28, 32, 44].map(function (r) {
+      var c = G.continuous(r), ref = G.contInset(r), se = G.superellipseInset(c.radius, c.k), d = se - ref;
+      return '<tr' + (r === rPick ? ' style="font-weight:600"' : '') + '><td class="num">' + r + '</td><td class="num">' + ref.toFixed(2) + '</td><td class="num">' + se.toFixed(2) + '</td><td class="num">' + (d >= 0 ? '+' : '\u2212') + Math.abs(d).toFixed(3) + '</td><td class="num la-hide-s">' +
+        (r * (1 - Math.SQRT1_2)).toFixed(2) + '</td><td class="num">' + c.radius.toFixed(2) + '</td><td class="num la-hide-s">' + (C.hausdorffPerR * r).toFixed(2) + ' px</td></tr>';
+    }).join('');
+  }
+  $('#la-r-pick').addEventListener('change', function (e) { rPick = +e.detail.value; drawZoom(); drawReal(); tableCorners(); });
+
+  /* -- 9 \u00b7 capsules ------------------------------------------------------ */
+  function readCaps() {
+    var p = $('#la-pill-true'), cs = getComputedStyle(p), hgt = p.getBoundingClientRect().height;
+    var b = $('.la-cap-sizes .btn-l'), bh = b.getBoundingClientRect().height, bcs = getComputedStyle(b);
+    var shp = function (v) { v = String(v || 'round').replace(/\s+/g, ''); return v === 'superellipse(1)' || v === 'round' ? 'round' : v; };
+    $('#la-cap-read').textContent = 'Measured: the capsule is ' + r1(hgt) + ' px tall with ' + shp(cs.getPropertyValue('corner-shape')) + ' ends; the large button is ' + r1(bh) + ' px, ' +
+      shp(bcs.getPropertyValue('corner-shape')) + ' too. Every short control is a capsule.';
+  }
+
+  /* -- 10 \u00b7 concentric: FG3 derives it, this reads it back --------------- */
+  var outer = $('#la-outer'), inner = $('#la-inner'), pad = $('#la-pad');
+  function readConc() {
+    if (window.FG3 && FG3.concentric) FG3.concentric(outer.parentNode);
+    var ocs = getComputedStyle(outer), Ro = parseFloat(ocs.borderTopLeftRadius);
+    var orect = outer.getBoundingClientRect(), irect = inner.getBoundingClientRect();
+    var gap = Math.min(irect.left - orect.left, irect.top - orect.top);
+    var ri = parseFloat(inner.getAttribute('data-concentric-r')) || parseFloat(getComputedStyle(inner).borderTopLeftRadius);
+    var k = G ? G.CONTINUOUS.k : 1.71, scale = G ? G.CONTINUOUS.rScale : 1.53;
+    var insO = G ? G.superellipseInset(Ro, k) : 0, insI = G ? G.superellipseInset(ri, k) : 0;
+    var diag = Math.SQRT2 * (gap + insI - insO);
+    var set = function (key, main, sub) { $('[data-k="' + key + '"]', $('#la-conc-read')).innerHTML = main + '<small>' + sub + '</small>'; };
+    set('outer', r1(Ro) + ' px', '32 &times; ' + scale + ', continuous');
+    set('gap', r1(gap) + ' px', 'measured from the boxes');
+    set('inner', r1(ri) + ' px', 'written by FG3.concentric');
+    set('diag', r1(diag) + ' px', (diag / gap).toFixed(2) + '&times; the edge gap');
+    /* The reference rule subtracts in points, before the continuous scale: (32 - gap) x 1.53 */
+    var nominal = Ro / scale, refR = Math.max(6, (nominal - gap) * scale), contDiag = Math.SQRT2 * (gap + (G ? G.superellipseInset(refR, k) : 0) - insO);
+    $('#la-conc-note').innerHTML = Math.abs(ri - refR) < 1
+      ? 'The derived radius matches the reference rule &mdash; ' + r1(nominal) + ' &minus; ' + r1(gap) + ', scaled by ' + scale + ' &mdash; so the gap holds at <b>' + (diag / gap).toFixed(2) + '&times;</b> all the way round the corner.'
+      : 'The reference rule subtracts the gap in points, before the continuous scale: (' + r1(nominal) + ' &minus; ' + r1(gap) + ') &times; ' + scale + ' = <b>' + r1(refR) + ' px</b>, which keeps the gap at <b>' + (contDiag / gap).toFixed(2) + '&times;</b> at 45&deg;. ' +
+        'FG3.concentric subtracts after scaling and writes <b>' + r1(ri) + ' px</b>, so the gap swells to ' + (diag / gap).toFixed(2) + '&times; at the corner. The three below are drawn to the reference rule.';
+  }
+  pad.addEventListener('input', function () { outer.style.setProperty('--la-pad', pad.value + 'px'); requestAnimationFrame(function () { requestAnimationFrame(readConc); }); });
+
+  /* -- 11 \u00b7 rails -------------------------------------------------------- */
+  function readRail() {
+    var rail = $('#la-rail'), r = $('.scroller-rail', rail), first = $('.scroller-item', rail), col = $('.viewport-content', $('#rails'));
+    if (!r || !first) return;
+    var rr = rail.getBoundingClientRect(), fx = first.getBoundingClientRect().left - rr.left + r.scrollLeft, cx = col.getBoundingClientRect().left - rr.left;
+    rail.style.setProperty('--la-col-x', (cx - 1) + 'px');
+    var padL = parseFloat(getComputedStyle(r).paddingLeft);
+    $('#la-rail-read').innerHTML = 'Measured: the rail is <b>' + Math.round(rr.width) + ' px</b> wide, padded <b>' + r1(padL) + ' px</b>; the first card starts <b>' + r1(fx) + ' px</b> in, and the text column at <b>' + r1(cx) + ' px</b>' +
+      (Math.abs(fx - cx) < 1 ? ' &mdash; the same line, marked in the accent.' : ' &mdash; off by ' + r1(Math.abs(fx - cx)) + ' px.');
+  }
+
+  /* -- orchestration ----------------------------------------------------- */
+  function readAll() { readBento(); readStats(); readWindow(); readGrid(); readRuler(); readSpace(); readRadii(); readCaps(); readConc(); readRail(); }
+  doc.addEventListener('fg3:ready', function () {
+    readAll(); drawZoom(); drawReal(); tableCorners();
+    mini.srcdoc = miniDoc();
+    setTimeout(readConc, 120);
+  });
+  doc.addEventListener('fg3:tone', function () { mini.srcdoc = miniDoc(); });
+  var rz = 0;
+  window.addEventListener('resize', function () { clearTimeout(rz); rz = setTimeout(function () { readAll(); layoutMini(); }, 120); });
+  readStats();   /* before boot: the intro count-up animates to the measured numbers */
+  window.__layoutPage = { readAll: readAll, readConc: readConc, applyMini: applyMini };
+})();
+</script>
+<script>FG3.boot(); if (window.DOCS) DOCS.mount();</script>
+</body>
+</html>

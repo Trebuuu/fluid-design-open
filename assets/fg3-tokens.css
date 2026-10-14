@@ -1,0 +1,323 @@
+/* ═══════════════════════════════════════════════════════════════════════════
+   fg3-tokens.css — Fluid Design Open · every NON-colour token
+   ───────────────────────────────────────────────────────────────────────────
+   Load FIRST (before fg3-color.css). Colour values live in the colour module's fg3-color.css;
+   the only colours here are the material recipes and shadows, which are
+   per-tone recipes rather than roles.
+
+   Measured, not invented: every number below is a measured value from a
+   reference layout or type scale. Change one only with a new
+   measurement.
+
+   FAMILIES
+     --font-text --font-display --font-mono      stacks (Inter bundled)
+     --t-<step>[-lh|-ls|-ff]                     the 14-step web ramp + 10
+     --t-<role>-{fs,lh,ls,ff}                    web roles, re-pointed per breakpoint
+     --t-ui-<role>-{fs,lh,ls,ff}                 app ramp, "Large" size; compact = "M"
+     --s-1 … --s-14                              spacing 4 … 144
+     --r-xs … --r-2xl --r-pill  --r-scale --k-continuous   radius + corner hooks
+     --h-s … --h-xxl --touch                     control heights / round controls
+     --w-content --w-content-hero --w-prose --grid-cols --grid-gap   layout
+     --band-pad-{story,utility,bar,reduced} --band-header-gap --band-stage-bg
+     --bp-*                                      breakpoints (documentation only)
+     --z-*                                       stacking
+     --d-* --ease-*                              durations and curves (springs: spring)
+     --focus-w --focus-offset --focus-offset-inline   focus ring
+     --mat-{chrome,platter,control}-{bg,filter,ring,…}  web materials (per tone)
+     --shadow-*                                  elevation (almost none is used)
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* Inter 4, variable (wght 100–900, opsz 14–32). Declared under its own name:
+   a same-named @font-face shadows any locally installed static Inter, so the
+   metrics are the bundled ones everywhere. System-font devices never reach it —
+   -apple-system comes first and gives the system font with automatic optical sizes. */
+@font-face{font-family:"Inter";font-style:normal;font-weight:100 900;font-display:swap;
+  src:url(./inter-latin.woff2) format("woff2")}
+@font-face{font-family:"Inter";font-style:italic;font-weight:100 900;font-display:swap;
+  src:url(./inter-latin-italic.woff2) format("woff2")}
+@font-face{font-family:"Geist Mono";font-style:normal;font-weight:400 600;font-display:swap;
+  src:url(./geist-mono-latin.woff2) format("woff2")}
+
+:root{
+  /* ── 1 · FONT STACKS ────────────────────────────────────────────────────
+     Text switches from the text cut to the display cut at 19px (no rule anywhere sets 18px).
+     With -apple-system the OS does it by optical size;
+     a named system face only matters where it is installed elsewhere; Inter follows its
+     opsz axis via font-optical-sizing:auto. --t-display-from records the
+     switch so a role that crosses it at a breakpoint changes stack with it. */
+  --font-text:-apple-system,BlinkMacSystemFont,"Inter","Helvetica Neue",Arial,sans-serif;
+  --font-display:-apple-system,BlinkMacSystemFont,"Inter","Helvetica Neue",Arial,sans-serif;
+  --font-mono:"Geist Mono",ui-monospace,Menlo,Consolas,monospace;
+  --font:var(--font-text);
+  --t-display-from:19px;
+
+  /* ── 2 · THE WEB RAMP ─────────────────
+     Sizes are rem so the ramp follows the reader's font-size setting (the
+     web's Dynamic Type). html is 106.25% → 1rem = 17px at the browser
+     default, so every step computes to the px.
+     Line-heights are the unitless ratios (never px: a px leading breaks
+     under a size override). Tracking is em,
+     per step: negative for big Display, positive 19–32, negative for Text. */
+  --t-96:calc(96rem / 17); --t-96-lh:1.0416666667; --t-96-ls:-.015em;
+  --t-80:calc(80rem / 17); --t-80-lh:1.05;         --t-80-ls:-.015em;
+  --t-64:calc(64rem / 17); --t-64-lh:1.0625;       --t-64-ls:-.009em;
+  --t-56:calc(56rem / 17); --t-56-lh:1.0714285714; --t-56-ls:-.005em;
+  --t-48:calc(48rem / 17); --t-48-lh:1.0834933333; --t-48-ls:-.003em;
+  --t-40:calc(40rem / 17); --t-40-lh:1.1;          --t-40-ls:0em;
+  --t-32:calc(32rem / 17); --t-32-lh:1.125;        --t-32-ls:.004em;
+  --t-28:calc(28rem / 17); --t-28-lh:1.1428571429; --t-28-ls:.007em;
+  --t-24:calc(24rem / 17); --t-24-lh:1.1666666667; --t-24-ls:.009em;
+  --t-21:calc(21rem / 17); --t-21-lh:1.1904761905; --t-21-ls:.011em; --t-21-lh-loose:1.381002381;
+  --t-19:calc(19rem / 17); --t-19-lh:1.2105263158; --t-19-ls:.012em; --t-19-lh-loose:1.4211026316;
+  --t-17:1rem;             --t-17-lh:1.2353641176; --t-17-ls:-.022em; --t-17-lh-loose:1.4705882353; --t-17-lh-button:1.1764805882;
+  --t-14:calc(14rem / 17); --t-14-lh:1.2857742857; --t-14-ls:-.016em; --t-14-lh-loose:1.4285914286;
+  --t-12:calc(12rem / 17); --t-12-lh:1.3333733333; --t-12-ls:-.01em;
+  --t-10:calc(10rem / 17); --t-10-lh:1.2;          --t-10-ls:-.008em;   /* badges, "New" only */
+
+  /* ── 3 · WEB ROLES at ≥1069 (re-pointed below at 1068 / 734 / 480) ──────
+     Each role names the class it copies. Nothing grows above 1441:
+     there is no type rule there. */
+  /* hero — marquee-headline (duo) 80/64/48; SPEC adds 40 at ≤480        */
+  --t-hero-fs:var(--t-80); --t-hero-lh:var(--t-80-lh); --t-hero-ls:var(--t-80-ls); --t-hero-ff:var(--font-display);
+  /* headline — modal-header-headline 56/48/40, 32 at ≤480                 */
+  --t-headline-fs:var(--t-56); --t-headline-lh:var(--t-56-lh); --t-headline-ls:var(--t-56-ls); --t-headline-ff:var(--font-display);
+  /* section — section-header-headline (18pro, ios27, duo) 48/40/32         */
+  --t-section-fs:var(--t-48); --t-section-lh:var(--t-48-lh); --t-section-ls:var(--t-48-ls); --t-section-ff:var(--font-display);
+  /* title — localnav-product-expanded (duo) 40/32/24                      */
+  --t-title-fs:var(--t-40); --t-title-lh:var(--t-40-lh); --t-title-ls:var(--t-40-ls); --t-title-ff:var(--font-display);
+  /* subtitle — feature-card-headline 28/24/21                             */
+  --t-subtitle-fs:var(--t-28); --t-subtitle-lh:var(--t-28-lh); --t-subtitle-ls:var(--t-28-ls); --t-subtitle-ff:var(--font-display);
+  /* lede — ric-type-lockup-xxl-copy (duo) 21/29 → 19/27 at ≤734, 400      */
+  --t-lede-fs:var(--t-21); --t-lede-lh:var(--t-21-lh-loose); --t-lede-ls:var(--t-21-ls); --t-lede-ff:var(--font-display);
+  /* body — body 17/25 at every breakpoint                                 */
+  --t-body-fs:var(--t-17); --t-body-lh:var(--t-17-lh-loose); --t-body-ls:var(--t-17-ls); --t-body-ff:var(--font-text);
+  /* callout — tile-callout (home) 19/23 → 17/21 → 14/18                   */
+  --t-callout-fs:var(--t-19); --t-callout-lh:var(--t-19-lh); --t-callout-ls:var(--t-19-ls); --t-callout-ff:var(--font-display);
+  /* caption — body-reduced-tight 14/18 everywhere                         */
+  --t-caption-fs:var(--t-14); --t-caption-lh:var(--t-14-lh); --t-caption-ls:var(--t-14-ls); --t-caption-ff:var(--font-text);
+  /* micro — caption / sosumi 12/16 everywhere                             */
+  --t-micro-fs:var(--t-12); --t-micro-lh:var(--t-12-lh); --t-micro-ls:var(--t-12-ls); --t-micro-ff:var(--font-text);
+  /* eyebrow — ric-type-lockup-xxl-eyebrow (duo) 21/21 → 19/23 at ≤734     */
+  --t-eyebrow-fs:var(--t-21); --t-eyebrow-lh:1; --t-eyebrow-ls:var(--t-21-ls); --t-eyebrow-ff:var(--font-display);
+  /* stat — duo .stat-reduced value 40/40 (measured at 1440 AND 402)       */
+  --t-stat-fs:var(--t-40); --t-stat-lh:1; --t-stat-ls:var(--t-40-ls); --t-stat-ff:var(--font-display);
+  /* stat caption — 14/18 above/below the value (measured both widths)     */
+  --t-stat-caption-fs:var(--t-14); --t-stat-caption-lh:var(--t-14-lh); --t-stat-caption-ls:var(--t-14-ls); --t-stat-caption-ff:var(--font-text);
+
+  /* ── 4 · THE APP RAMP — "Large" size ─────
+     Leading as the unitless ratio leading/size; tracking from the
+     tracking table in 1/1000 em. Weights: defaults (Regular, Headline Semibold);
+     Large Title 700 per SPEC. `.ui-emphasized` gives the Dec-2025 weights. */
+  --t-ui-large-title-fs:calc(34rem / 17); --t-ui-large-title-lh:1.2058823529; --t-ui-large-title-ls:.012em;  --t-ui-large-title-ff:var(--font-display);
+  --t-ui-title1-fs:calc(28rem / 17);      --t-ui-title1-lh:1.2142857143;      --t-ui-title1-ls:.014em;       --t-ui-title1-ff:var(--font-display);
+  --t-ui-title2-fs:calc(22rem / 17);      --t-ui-title2-lh:1.2727272727;      --t-ui-title2-ls:-.012em;      --t-ui-title2-ff:var(--font-display);
+  --t-ui-title3-fs:calc(20rem / 17);      --t-ui-title3-lh:1.25;              --t-ui-title3-ls:-.023em;      --t-ui-title3-ff:var(--font-display);
+  --t-ui-headline-fs:1rem;                --t-ui-headline-lh:1.2941176471;    --t-ui-headline-ls:-.026em;    --t-ui-headline-ff:var(--font-text);
+  --t-ui-body-fs:1rem;                    --t-ui-body-lh:1.2941176471;        --t-ui-body-ls:-.026em;        --t-ui-body-ff:var(--font-text);
+  --t-ui-callout-fs:calc(16rem / 17);     --t-ui-callout-lh:1.3125;           --t-ui-callout-ls:-.02em;      --t-ui-callout-ff:var(--font-text);
+  --t-ui-subhead-fs:calc(15rem / 17);     --t-ui-subhead-lh:1.3333333333;     --t-ui-subhead-ls:-.016em;     --t-ui-subhead-ff:var(--font-text);
+  --t-ui-footnote-fs:calc(13rem / 17);    --t-ui-footnote-lh:1.3846153846;    --t-ui-footnote-ls:-.006em;    --t-ui-footnote-ff:var(--font-text);
+  --t-ui-caption1-fs:calc(12rem / 17);    --t-ui-caption1-lh:1.3333333333;    --t-ui-caption1-ls:0em;        --t-ui-caption1-ff:var(--font-text);
+  --t-ui-caption2-fs:calc(11rem / 17);    --t-ui-caption2-lh:1.1818181818;    --t-ui-caption2-ls:.006em;     --t-ui-caption2-ff:var(--font-text);
+
+  /* ── 5 · SPACING (SPEC §3) ────────────────────────────────────────────── */
+  --s-1:4px;  --s-2:8px;  --s-3:12px; --s-4:16px; --s-5:20px;  --s-6:24px;  --s-7:32px;
+  --s-8:40px; --s-9:48px; --s-10:64px; --s-11:80px; --s-12:96px; --s-13:128px; --s-14:144px;
+
+  /* ── 6 · RADIUS + CORNER HOOKS ──────────────────────────────────────────
+     Values are the circular radii.
+     A "continuous" corner is corner-shape:superellipse(var(--k-continuous))
+     with the radius multiplied by --r-scale so its visual mass matches a continuous corner.
+     HOOK — the two numbers are the geometry module's (geom.js GEOM.CONTINUOUS, "--k" there):
+     a Lamé curve fitted to the continuous corner by onset (1.53 r) and
+     45° inset (0.2915 r ≈ a circle's 0.2929 r, so the MASS equals a
+     circular 28px card). Override on :root only — the --r-* below substitute
+     --r-scale there. k 2 / scale 1 gives a plain squircle. Caveat: a scaled radius
+     that reaches half a short box clamps into a squircle-ended pill; short
+     controls are .capsule (true semicircle ends). */
+  --k-continuous:1.71;
+  --r-scale:1.53;
+  --r-xs:calc(8px * var(--r-scale));    /* small rect buttons                    */
+  --r-sm:calc(12px * var(--r-scale));   /* block buttons (super), fields         */
+  --r-md:calc(18px * var(--r-scale));   /* tiles, small platters, collapsed nav  */
+  --r-lg:calc(28px * var(--r-scale));   /* cards, galleries, modals — THE radius */
+  --r-xl:calc(32px * var(--r-scale));   /* expanded floating chrome              */
+  --r-2xl:calc(44px * var(--r-scale));  /* sheets, big panels                    */
+  --r-pill:999px;                       /* capsule                               */
+  --r-min:6px;                          /* concentric floor   */
+
+  /* control heights = round-control diameters (24/36/44/56/90) */
+  --h-s:24px; --h-m:36px; --h-l:44px; --h-xl:56px; --h-xxl:90px;
+  --touch:44px;
+
+  /* ── 7 · LAYOUT ────────────────────────────────── */
+  --w-content:1260px;        /* .viewport-content cap; 420px at ≤734       */
+  --w-content-hero:1680px;
+  --w-prose:680px;           /* prose measure                              */
+  --w-min:320px;             /* body min-width                             */
+  --grid-cols:12;
+  --grid-gap:20px;           /* --ric-gap                                  */
+
+  /* ── 8 · BANDS — re-pointed per breakpoint below ──── */
+  --band-pad-story:128px;    /* white story bands 128/96/80                */
+  --band-pad-utility:144px;  /* grey utility & stage bands 144/120/112     */
+  --band-pad-bar:224px;      /* bottom of a band holding a sticky glass bar */
+  --band-pad-reduced:120px;  /* --global-section-padding-top-reduced       */
+  --band-header-gap:48px;    /* section header → content 48/40/32          */
+  --band-fade-extra:69px;    /* .section-design fades over pb + 69px       */
+  --band-stage-bg:#000;      /* target of data-band-fade="stage"           */
+
+  /* ── 9 · BREAKPOINTS — documentation; media queries are literal ───────
+     xlarge ≥1441 (layout only, no type) · large 1069–1440 (base) ·
+     medium ≤1068 · small ≤734 · xsmall ≤480 · nav switch ≤833 / ≥834.   */
+  --bp-xlarge:1441px; --bp-medium:1068px; --bp-small:734px; --bp-xsmall:480px; --bp-nav:833px;
+
+  /* ── 10 · STACKING (use this scale instead of raw z-indexes) ────── */
+  --z-base:0; --z-raised:10; --z-sticky:100; --z-edge:200; --z-chrome:300;
+  --z-float:400; --z-scrim:500; --z-modal:600; --z-toast:700; --z-tooltip:800;
+
+  /* ── 11 · DURATIONS + CURVES (SPEC §5) ────────────
+     Curves are for fire-and-forget scroll choreography and colour swaps;
+     anything interactive uses the spring engine's springs (--sp-*). */
+  --d-100:100ms; --d-120:120ms; --d-200:200ms; --d-240:240ms; --d-300:300ms;
+  --d-320:320ms; --d-400:400ms; --d-500:500ms; --d-700:700ms; --d-800:800ms; --d-900:900ms;
+  --d-stagger-rapid:20ms; --d-stagger-short:40ms; --d-stagger-medium:80ms; --d-stagger:150ms;
+  /* the same four by value, the names fg3-motion.css and API.md use: aliases,
+     so the numbers have one home */
+  --stagger-20:var(--d-stagger-rapid); --stagger-40:var(--d-stagger-short);
+  --stagger-80:var(--d-stagger-medium); --stagger-150:var(--d-stagger);
+  --ease-standard:cubic-bezier(.4,0,.6,1);      /* 312 uses: nav, flyouts, curtains */
+  --ease-decel:cubic-bezier(0,0,.2,1);          /* films modal                      */
+  --ease-out-cubic:cubic-bezier(.33,1,.68,1);   /* caption cross-fades              */
+  --ease-in-out-quad:cubic-bezier(.45,0,.55,1); /* staggered fade-in, gallery       */
+  --ease-in-out-cubic:cubic-bezier(.65,0,.35,1);/* modal open .8s                   */
+  --ease-card:cubic-bezier(0,0,.5,1);           /* card hover scale .3s             */
+  --ease-pop:cubic-bezier(.3,2,.5,1);           /* swatch pop-in, overshoot         */
+  --ease-exit:cubic-bezier(.11,0,.5,0);         /* easeInQuad: fast plain exits     */
+  --ease-nav:cubic-bezier(.28,.11,.32,1);       /* localnav material / pill hover   */
+  --ease-overlay:cubic-bezier(.66,0,.1,1);      /* card overlay              */
+  --ease-out-quint:cubic-bezier(.23,1,.32,1);   /* interrupted gallery slide        */
+
+  /* ── 12 · FOCUS ─
+     Colour: fg3.css uses var(--focus-color, var(--accent)) AT THE ELEMENT, so
+     it follows a band's tone. Do not alias it here: a :root alias would
+     freeze the page tone's accent into every dark band. */
+  --focus-w:2px; --focus-offset:3px; --focus-offset-inline:1px;
+
+  /* ── 13 · MATERIAL SHAPE (tone-independent parts) ────────────────────── */
+  --mat-chrome-filter-live:saturate(180%) blur(20px);
+  --mat-platter-filter-live:blur(20px);
+  --mat-control-filter-live:none;          /* alpha fill only */
+  --mat-ring-w:1px;
+}
+
+/* ── responsive re-pointing ───────────────────────────────────────────────── */
+@media (max-width:1068px){
+  :root{
+    --t-hero-fs:var(--t-64); --t-hero-lh:var(--t-64-lh); --t-hero-ls:var(--t-64-ls);
+    --t-headline-fs:var(--t-48); --t-headline-lh:var(--t-48-lh); --t-headline-ls:var(--t-48-ls);
+    --t-section-fs:var(--t-40); --t-section-lh:var(--t-40-lh); --t-section-ls:var(--t-40-ls);
+    --t-title-fs:var(--t-32); --t-title-lh:var(--t-32-lh); --t-title-ls:var(--t-32-ls);
+    --t-subtitle-fs:var(--t-24); --t-subtitle-lh:var(--t-24-lh); --t-subtitle-ls:var(--t-24-ls);
+    --t-callout-fs:var(--t-17); --t-callout-lh:var(--t-17-lh); --t-callout-ls:var(--t-17-ls); --t-callout-ff:var(--font-text);
+    --band-pad-story:96px; --band-pad-utility:120px; --band-pad-bar:176px; --band-pad-reduced:80px;
+    --band-header-gap:40px;
+  }
+}
+@media (max-width:734px){
+  :root{
+    --t-hero-fs:var(--t-48); --t-hero-lh:var(--t-48-lh); --t-hero-ls:var(--t-48-ls);
+    --t-headline-fs:var(--t-40); --t-headline-lh:var(--t-40-lh); --t-headline-ls:var(--t-40-ls);
+    --t-section-fs:var(--t-32); --t-section-lh:var(--t-32-lh); --t-section-ls:var(--t-32-ls);
+    --t-title-fs:var(--t-24); --t-title-lh:var(--t-24-lh); --t-title-ls:var(--t-24-ls);
+    --t-subtitle-fs:var(--t-21); --t-subtitle-lh:var(--t-21-lh); --t-subtitle-ls:var(--t-21-ls);
+    --t-lede-fs:var(--t-19); --t-lede-lh:var(--t-19-lh-loose); --t-lede-ls:var(--t-19-ls);
+    --t-callout-fs:var(--t-14); --t-callout-lh:var(--t-14-lh); --t-callout-ls:var(--t-14-ls);
+    --t-eyebrow-fs:var(--t-19); --t-eyebrow-lh:var(--t-19-lh); --t-eyebrow-ls:var(--t-19-ls);
+    --w-content:420px;
+    --band-pad-story:80px; --band-pad-utility:112px; --band-pad-bar:144px; --band-pad-reduced:56px;
+    --band-header-gap:32px;
+  }
+}
+@media (max-width:480px){
+  :root{
+    --t-hero-fs:var(--t-40); --t-hero-lh:var(--t-40-lh); --t-hero-ls:var(--t-40-ls);
+    --t-headline-fs:var(--t-32); --t-headline-lh:var(--t-32-lh); --t-headline-ls:var(--t-32-ls);
+  }
+}
+
+/* Compact density: the whole app ramp one size step down — the
+   "M" column, tracking re-read from the tracking table. */
+[data-density="compact"]{
+  --t-ui-large-title-fs:calc(33rem / 17); --t-ui-large-title-lh:1.2121212121; --t-ui-large-title-ls:.012em;
+  --t-ui-title1-fs:calc(27rem / 17);      --t-ui-title1-lh:1.2222222222;      --t-ui-title1-ls:.011em;
+  --t-ui-title2-fs:calc(21rem / 17);      --t-ui-title2-lh:1.2380952381;      --t-ui-title2-ls:-.018em;
+  --t-ui-title3-fs:calc(19rem / 17);      --t-ui-title3-lh:1.2631578947;      --t-ui-title3-ls:-.024em;
+  --t-ui-headline-fs:calc(16rem / 17);    --t-ui-headline-lh:1.3125;          --t-ui-headline-ls:-.02em;
+  --t-ui-body-fs:calc(16rem / 17);        --t-ui-body-lh:1.3125;              --t-ui-body-ls:-.02em;
+  --t-ui-callout-fs:calc(15rem / 17);     --t-ui-callout-lh:1.3333333333;     --t-ui-callout-ls:-.016em;
+  --t-ui-subhead-fs:calc(14rem / 17);     --t-ui-subhead-lh:1.3571428571;     --t-ui-subhead-ls:-.011em;
+  --t-ui-footnote-fs:calc(12rem / 17);    --t-ui-footnote-lh:1.3333333333;    --t-ui-footnote-ls:0em;
+  --t-ui-caption1-fs:calc(11rem / 17);    --t-ui-caption1-lh:1.1818181818;    --t-ui-caption1-ls:.006em;
+  --t-ui-caption2-fs:calc(11rem / 17);    --t-ui-caption2-lh:1.1818181818;    --t-ui-caption2-ls:.006em;
+}
+
+/* ═════════════════════════════════════════════════════════════════════════
+   MATERIAL RECIPES + ELEVATION, per tone
+   ═════════════════════════════════════════════════════════════════════════
+   The web materials: chrome = the nav
+   recipe, platter = capsules on media, control = the alpha control fill.
+   Consume the RESOLVED names:   background:var(--mat-X-bg);
+   backdrop-filter:var(--mat-X-filter); box-shadow:var(--mat-X-ring).
+   They re-resolve on every [data-tone] element, so a dark band gets dark
+   glass, and they switch themselves for no-backdrop engines, reduced
+   transparency, increased contrast and forced colours (below + fg3.css).
+   The raw -fill / -fill-fallback / -fill-solid are the ingredients. */
+:root,[data-tone="light"]{
+  --mat-chrome-fill:rgba(250,250,252,.8);  --mat-chrome-fill-fallback:rgba(250,250,252,.92); --mat-chrome-fill-solid:#fafafc;
+  --mat-chrome-keyline:rgba(0,0,0,.16);
+  --mat-platter-fill:rgba(232,232,237,.72); --mat-platter-fill-fallback:rgba(232,232,237,.92); --mat-platter-fill-solid:#e8e8ed;
+  --mat-platter-keyline:rgba(0,0,0,.11);   /* inset .5px glow on pose chips */
+  --mat-control-fill:rgba(210,210,215,.64); --mat-control-fill-hover:rgba(223,223,227,.6976); --mat-control-fill-active:rgba(193,193,198,.6544);
+  --mat-control-fill-solid:#e8e8ed; --mat-control-fill-solid-hover:#ececf0; --mat-control-fill-solid-active:#dfdfe4;
+  --mat-control-ink:rgba(0,0,0,.56);
+
+  /* the soft two-layer tile shadow for white tiles on light bands, the opt-in .tile-shadow, the knob, and the lift. */
+  --shadow-tile:0 1px 2px rgba(20,16,40,.05),0 12px 30px -22px rgba(20,16,40,.5);
+  --shadow-hairline:inset 0 0 0 1px rgba(0,0,0,.055);
+  --shadow-offset-tile:8px 8px 16px 0 rgba(0,0,0,.08);
+  --shadow-knob:0 1px 3px rgba(0,0,0,.3);
+  --shadow-lift:0 4px 14px rgba(24,18,44,.08),0 28px 64px -20px rgba(24,18,44,.22);
+}
+/* A stage band is dark before FG3.boot() tags it (and with no script):
+   :where() keeps the specificity of the [data-tone] rules, so fg3.css's
+   reduced-transparency / contrast overrides still win once it is tagged. */
+[data-tone="dark"],:where(.band[data-band="stage"]:not([data-tone])){
+  --mat-chrome-fill:rgba(22,22,23,.8);     --mat-chrome-fill-fallback:rgba(22,22,23,.88);   --mat-chrome-fill-solid:#161617;
+  --mat-chrome-keyline:rgba(255,255,255,.24);
+  --mat-platter-fill:rgba(51,51,54,.72);   --mat-platter-fill-fallback:rgba(51,51,54,.88);  --mat-platter-fill-solid:#333336;
+  --mat-platter-keyline:rgba(255,255,255,.11); /* inferred: no dark value is specified */
+  --mat-control-fill:rgba(66,66,69,.72);   --mat-control-fill-hover:rgba(73,73,76,.7256);   --mat-control-fill-active:rgba(57,57,60,.7424);
+  --mat-control-fill-solid:#333336; --mat-control-fill-solid-hover:#37373a; --mat-control-fill-solid-active:#2f2f32;
+  --mat-control-ink:rgba(255,255,255,.8);
+
+  --shadow-tile:0 2px 6px rgba(0,0,0,.30),0 10px 24px -8px rgba(0,0,0,.44);
+  --shadow-hairline:inset 0 0 0 1px rgba(255,255,255,.10);
+  --shadow-offset-tile:8px 8px 16px 0 rgba(0,0,0,.32);
+  --shadow-knob:0 1px 3px rgba(0,0,0,.5);
+  --shadow-lift:0 4px 14px rgba(0,0,0,.32),0 28px 64px -18px rgba(0,0,0,.56);
+}
+/* The resolved names. Declared on every tone carrier so var() re-resolves
+   against that element's own fills. */
+:root,[data-tone],:where(.band[data-band="stage"]){
+  --mat-chrome-bg:var(--mat-chrome-fill);   --mat-chrome-filter:var(--mat-chrome-filter-live);
+  --mat-chrome-ring:0 0 0 var(--mat-ring-w) var(--mat-chrome-keyline);
+  --mat-platter-bg:var(--mat-platter-fill); --mat-platter-filter:var(--mat-platter-filter-live);
+  --mat-platter-ring:inset 0 0 .5px 0 var(--mat-platter-keyline);
+  --mat-control-bg:var(--mat-control-fill); --mat-control-bg-hover:var(--mat-control-fill-hover);
+  --mat-control-bg-active:var(--mat-control-fill-active); --mat-control-filter:var(--mat-control-filter-live);
+}
+/* No backdrop-filter at all: raise the fill to .92 / .88. */
+@supports not ((backdrop-filter:blur(1px)) or (-webkit-backdrop-filter:blur(1px))){
+  :root,[data-tone],:where(.band[data-band="stage"]){ --mat-chrome-bg:var(--mat-chrome-fill-fallback); --mat-platter-bg:var(--mat-platter-fill-fallback); }
+}

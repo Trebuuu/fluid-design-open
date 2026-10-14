@@ -1,0 +1,211 @@
+/* ═══════════════════════════════════════════════════════════════════════════
+   fg3-chart.css — DATA DISPLAY (Fluid Design Open)
+   ───────────────────────────────────────────────────────────────────────────
+   Charts plus rings, dial and strip. One rule decides the
+   rest: A CHART IS CONTENT — opaque, never on glass, nothing translucent on it.
+   Every colour is a role, so a chart re-tones with the palette. Text beside a
+   mark wears the label inks, never the series colour (the mark carries identity).
+
+   PUBLIC  [data-chart] (color = the series; --ch-w stroke; --ch-surface = the
+   card under it, for the gaps between touching segments) · .chart-svg ·
+   .ch-ok/.ch-warn/.ch-bad/.ch-quiet/.ch-series-1…6 · [data-chart-legend] ·
+   .metric .metric-name .metric-value .metric-delta(.up/.down) — .m-* names would
+   collide with the motion namespace.
+   Dial kinds: .k-done .k-active .k-planned .k-empty .k-lost .k-warm .k-idle .k-error
+   (.ch-dial-sep: the hairline where two spans touch)
+   Rings states: .is-cooling .is-restricted .is-missing · strip: .is-empty .is-lost
+   [data-chart-held]: an entrance waiting for first sight (chart.js mount) ·
+   refusal: [data-chart-refused], or structurally a chart under glass with no
+   .card / .list-inset / [data-surface] between (a large-detent sheet is opaque)
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+[data-chart]{
+  display:block;position:relative;
+  color:var(--accent);
+  --ch-w:2;
+  --ch-surface:var(--bg-1);
+}
+.chart-svg{ display:block;width:100%;height:100%;overflow:visible }
+[data-chart]:focus-visible{ outline:2px solid var(--accent);outline-offset:4px;border-radius:12px }
+
+/* The one thing this file will not do, said in place: a rule nobody can see
+   is a rule nobody follows. A chart with glass above it is refused unless an
+   opaque surface (.card, .list-inset, [data-surface]) sits between the two
+   (that surface is the chart's ground) or the glass is a sheet at its large
+   detent, where an sheet is opaque. chart.js marks the same decision with
+   [data-chart-refused]; the structural rule covers the page before boot.
+   :where() keeps both at one attribute's weight, so a page can restyle them. */
+[data-chart]:where(:is([data-lg3],.lg3) *):not(:where(:is([data-lg3],.lg3) :is(.card,.list-inset,[data-surface]):not([data-lg3],.lg3) *, .sheet[data-detent="large"] *)),
+[data-chart-refused]{ outline:2px dashed var(--bad);outline-offset:3px }
+/* The message sits on an OPAQUE plate at 12px: where it appears the ground is
+   glass over art, and 11px on a 16% wash of that could not be read. */
+[data-chart]:where(:is([data-lg3],.lg3) *):not(:where(:is([data-lg3],.lg3) :is(.card,.list-inset,[data-surface]):not([data-lg3],.lg3) *, .sheet[data-detent="large"] *))::after,
+[data-chart-refused]::after{
+  content:"a chart is content \2014  it does not go on glass";
+  position:absolute;left:50%;top:50%;translate:-50% -50%;z-index:1;
+  box-sizing:border-box;inline-size:max-content;max-inline-size:100%;
+  padding:2px 8px;border-radius:8px;text-align:center;
+  background:var(--bg-1);
+  font-weight:600;font-size:12px;line-height:16px;color:var(--bad-strong);
+}
+[data-chart-missing]{
+  min-height:28px;border-radius:12px;
+  box-shadow:inset 0 0 0 1.5px var(--bad);
+  background:color-mix(in srgb,var(--bad) 14%,transparent);
+}
+
+/* ── marks ──────────────────────────────────────────────────────────── */
+.ch-line{ fill:none;stroke:currentColor;stroke-width:var(--ch-w);stroke-linecap:round;stroke-linejoin:round;
+  /* the box is scaled until a resize redraws it (chart.js frame); this keeps the line's weight */
+  vector-effect:non-scaling-stroke }
+.ch-area{ fill:currentColor;opacity:.16;stroke:none;
+  /* a CSS mask, not an SVG gradient: a gradient needs an id per instance */
+  -webkit-mask-image:linear-gradient(to bottom,#000 0%,transparent 92%);
+          mask-image:linear-gradient(to bottom,#000 0%,transparent 92%) }
+.ch-end{ fill:currentColor;stroke:var(--ch-surface);stroke-width:1.5;vector-effect:non-scaling-stroke }
+.ch-bar{ fill:currentColor;opacity:.55;transition:opacity 160ms linear }
+.ch-bar.is-on,[data-chart]:hover .ch-bar:hover{ opacity:1 }
+.ch-grid line{ stroke:var(--separator);stroke-width:1;vector-effect:non-scaling-stroke }
+/* The readout is hidden until asked: only the point you ask about is labelled. */
+.ch-rule,.ch-cursor{ opacity:0;transition:opacity 140ms linear;pointer-events:none }
+.ch-rule{ stroke:var(--label-4);stroke-width:1;stroke-dasharray:3 3;vector-effect:non-scaling-stroke }
+.ch-cursor{ fill:currentColor;stroke:var(--ch-surface);stroke-width:1.5;vector-effect:non-scaling-stroke }
+[data-reading] .ch-rule,[data-reading] .ch-cursor{ opacity:1 }
+[data-chart="series"],[data-chart="strip"],[data-chart="dial"]{ cursor:crosshair }
+
+/* ── ring ───────────────────────────────────────────────────────────── */
+[data-chart="ring"]{ display:inline-grid;place-items:center;width:84px;height:84px;flex:0 0 auto }
+[data-chart="ring"] .chart-svg{ position:absolute;inset:0 }
+.ch-ring-track{ fill:none;stroke:var(--fill-2);stroke-width:8 }
+.ch-ring-fill{ fill:none;stroke:currentColor;stroke-width:8;stroke-linecap:round;
+  /* a meter that snaps hides that a cap was just spent */
+  transition:stroke-dashoffset var(--sp-sheet-ms,509ms) var(--sp-sheet,cubic-bezier(.32,.72,0,1)) }
+.ch-ring-label{ position:relative;font-size:17px;font-weight:600;letter-spacing:-.022em;color:var(--label);font-variant-numeric:tabular-nums }
+
+/* ── rings: The activity rings. The track is the ring's own hue, dimmed —
+   the ring reads as ONE object filling up, not a bar on a grey rail. ──── */
+[data-chart="rings"]{ display:inline-grid;place-items:center;width:132px;aspect-ratio:1;flex:0 0 auto }
+[data-chart="rings"] .chart-svg{ position:absolute;inset:0 }
+.ch-rings-track{ fill:none;stroke:currentColor;opacity:.2 }
+.ch-rings-arc,.ch-rings-lap{ fill:none;stroke:currentColor;stroke-linecap:round }
+/* The second lap's leading end casts a shadow so the overlap reads. */
+.ch-rings-lap{ filter:drop-shadow(var(--shadow-knob,0 1px 3px color-mix(in srgb,var(--label) 30%,transparent))) }
+/* Cooling (a capability on its 24 h cool-off) is striped and drifts slowly;
+   restricted (the platform said so, with a date) is dimmed on a dashed rail;
+   missing is drawn as missing — a dashed rail and no arc, never a zero. */
+.ch-rings-ring.is-cooling .ch-rings-arc{ stroke-linecap:butt;stroke-dasharray:1.1 1.4;animation:ch-stripe 3.2s linear infinite }
+@keyframes ch-stripe{ to{ stroke-dashoffset:-2.5 } }
+.ch-rings-ring.is-restricted .ch-rings-arc{ opacity:.42 }
+.ch-rings-ring.is-restricted .ch-rings-track,.ch-rings-ring.is-missing .ch-rings-track{ stroke-dasharray:.6 1.6;opacity:.45 }
+.ch-rings-center{ position:relative;font-size:13px;font-weight:600;letter-spacing:-.01em;color:var(--label);
+  font-variant-numeric:tabular-nums;text-align:center;line-height:1.2;max-width:50%;overflow-wrap:anywhere }
+[data-chart-legend]{ list-style:none;margin:0;padding:0;display:flex;flex-wrap:wrap;gap:4px 14px;font-size:13px;line-height:18px }
+.ch-legend-item{ display:inline-flex;align-items:center;gap:6px }
+.ch-legend-item i{ width:8px;height:8px;border-radius:50%;background:currentColor;flex:0 0 auto }
+.ch-legend-name{ color:var(--label) }
+.ch-legend-value{ color:var(--label-2);font-variant-numeric:tabular-nums }
+.ch-legend-item.is-cooling i{ background:repeating-linear-gradient(45deg,currentColor 0 2px,transparent 2px 3.5px) }
+.ch-legend-item.is-restricted i{ background:none;box-shadow:inset 0 0 0 1.5px currentColor }
+
+/* ── dial: a day on a 24-hour clock ─────────────────────────────────────── */
+[data-chart="dial"]{ width:240px;max-width:100%;aspect-ratio:1;flex:0 0 auto }
+.ch-dial-track{ fill:none;stroke:var(--fill-3) }
+.ch-dial-tick{ stroke:var(--label-4);stroke-width:.5;stroke-linecap:round }
+.ch-dial-tick.is-major{ stroke:var(--label-3);stroke-width:.8 }
+.ch-dial-hour{ fill:var(--label-2);font-size:5.2px;font-weight:600;font-variant-numeric:tabular-nums;letter-spacing:.02em }
+/* Segments are not outlined: a surface stroke round every short span read as
+   a barcode at 220–260px. Where two spans TOUCH, chart.js draws one surface
+   hairline (.ch-dial-sep, its width scaled to the shorter span) so two
+   batches back to back still read as two. */
+.ch-dial-seg{ fill:currentColor;stroke:none;transition:opacity 140ms linear }
+.ch-dial-sep{ stroke:var(--ch-surface);stroke-linecap:butt;pointer-events:none }
+.ch-dial-seg.k-active{ fill:currentColor }
+.ch-dial-seg.k-planned{ opacity:.26 }
+.ch-dial-seg.k-empty{ fill:none;stroke:currentColor;stroke-width:.55;opacity:.8 }
+.ch-dial-seg.k-lost{ fill:none;stroke:var(--label-3);stroke-width:.5;stroke-dasharray:1 .8 }
+.ch-dial-seg.k-warm{ fill:var(--label-3);opacity:.45 }
+.ch-dial-seg.k-idle{ fill:var(--fill-1) }
+.ch-dial-seg.k-error{ fill:var(--bad) }
+[data-reading] .ch-dial-seg:not(.is-on){ opacity:.4 }
+[data-reading] .ch-dial-seg.k-planned:not(.is-on){ opacity:.14 }
+.ch-dial-seg.is-on{ stroke:var(--label);stroke-width:.7 }
+.ch-dial-hand line{ stroke:var(--label);stroke-width:.9;stroke-linecap:round }
+.ch-dial-hand circle{ fill:var(--label) }
+
+/* ── strip: height = asked, fill = landed, OUTLINE = nothing landed ─────── */
+[data-chart="strip"]{ height:58px }
+.ch-strip-base{ stroke:var(--separator);stroke-width:1 }
+.ch-strip-asked{ fill:currentColor;opacity:.22 }
+.ch-strip-landed{ fill:currentColor }
+.ch-strip-outline{ fill:none;stroke:currentColor;stroke-width:1.2;opacity:.8 }
+.ch-strip-mark.is-lost .ch-strip-outline{ stroke:var(--label-3);stroke-dasharray:3 2.5;opacity:1 }
+.ch-strip-mark{ transition:opacity 140ms linear }
+[data-reading] .ch-strip-mark:not(.is-on){ opacity:.42 }
+/* A mark grows up from the baseline when it arrives; an empty one draws its
+   outline instead. First draw only, never on resize. */
+.ch-enter .ch-strip-mark:not(.is-empty){
+  transform-box:fill-box;transform-origin:50% 100%;
+  animation:ch-grow var(--sp-snappy-ms,642ms) var(--sp-snappy,cubic-bezier(.32,.72,0,1)) both;
+  animation-delay:calc(var(--i,0) * 14ms);
+}
+.ch-enter .ch-strip-mark.is-empty .ch-strip-outline{
+  stroke-dasharray:400;animation:ch-draw 700ms var(--ease-out-cubic,cubic-bezier(.33,1,.68,1)) both;
+  animation-delay:calc(var(--i,0) * 14ms);
+}
+.ch-enter .ch-strip-mark.is-lost .ch-strip-outline{ animation:none;stroke-dasharray:3 2.5 }
+@keyframes ch-grow{ from{ transform:scaleY(0) } }
+@keyframes ch-draw{ from{ stroke-dashoffset:400 } to{ stroke-dashoffset:0 } }
+
+/* ── entrance held until first seen (CHART.mount, [data-chart-held]) ──────
+   The geometry is already final; what is held is the motion: the strip waits
+   at its first frame, the rings' arcs and the dial's segments are not shown
+   yet (they spring / sweep in from nothing when seen). Print shows them. */
+.ch-enter[data-chart-held] .ch-strip-mark,
+.ch-enter[data-chart-held] .ch-strip-outline{ animation-play-state:paused }
+[data-chart-held] .ch-rings-arc,[data-chart-held] .ch-rings-lap,[data-chart-held] .ch-dial-segs{ visibility:hidden }
+
+/* ── in a row: label · number · shape ───────────────────────────────────── */
+.metric{ display:flex;align-items:center;gap:16px;min-height:44px }
+.metric .metric-name{ font-size:14px;color:var(--label-2);flex:0 0 auto }
+.metric [data-chart="sparkline"]{ flex:1;min-width:60px;height:28px }
+.metric .metric-value{ font-size:17px;font-weight:600;letter-spacing:-.022em;font-variant-numeric:tabular-nums;
+  flex:0 0 auto;min-width:4ch;text-align:end }
+.metric .metric-delta{ font:600 12px/1 "Geist Mono",ui-monospace,monospace;flex:0 0 auto;min-width:5ch;text-align:end }
+.metric .metric-delta.up{ color:var(--ok) } .metric .metric-delta.down{ color:var(--bad) }
+
+/* ── the series colour: the accent by default, a semantic or a data hue when
+   the series MEANS something. Not several accents in one view. ─────────── */
+[data-chart].ch-ok{ color:var(--ok) } [data-chart].ch-warn{ color:var(--warn) }
+[data-chart].ch-bad{ color:var(--bad) } [data-chart].ch-quiet{ color:var(--label-3) }
+[data-chart].ch-series-1{ color:var(--series-1) } [data-chart].ch-series-2{ color:var(--series-2) }
+[data-chart].ch-series-3{ color:var(--series-3) } [data-chart].ch-series-4{ color:var(--series-4) }
+[data-chart].ch-series-5{ color:var(--series-5) } [data-chart].ch-series-6{ color:var(--series-6) }
+
+/* ── accessibility and print ───────────────────────────────────────────── */
+@media (prefers-reduced-motion: reduce){
+  /* A meter still moves — it reports a value — but slower and without
+     overshoot; the drifting stripes and the entry growth go. */
+  .ch-ring-fill{ transition-duration:1.2s;transition-timing-function:linear }
+  .ch-bar,.ch-strip-mark{ transition:none }
+  .ch-rings-ring.is-cooling .ch-rings-arc{ animation:none }
+  .ch-enter .ch-strip-mark,.ch-enter .ch-strip-outline{ animation:none }
+}
+@media (prefers-contrast: more){
+  .ch-area{ opacity:.2 } .ch-bar{ opacity:.8 } [data-chart]{ --ch-w:2.6 }
+  .ch-strip-asked{ opacity:.34 } .ch-rings-track{ opacity:.3 } .ch-dial-seg.k-planned{ opacity:.4 }
+}
+[data-contrast="more"] .ch-area{ opacity:.2 } [data-contrast="more"] .ch-bar{ opacity:.8 } [data-contrast="more"] [data-chart]{ --ch-w:2.6 }
+[data-contrast="more"] .ch-strip-asked{ opacity:.34 } [data-contrast="more"] .ch-rings-track{ opacity:.3 }
+@media print{
+  .ch-rule,.ch-cursor{ display:none } .ch-area{ opacity:.18 }
+  [data-chart-held] .ch-rings-arc,[data-chart-held] .ch-rings-lap,[data-chart-held] .ch-dial-segs{ visibility:visible }
+  .ch-enter[data-chart-held] .ch-strip-mark,.ch-enter[data-chart-held] .ch-strip-outline{ animation:none }
+}
+/* Forced colours paint a background as Canvas, so a legend key drawn as a
+   background vanished (measured: rgb(255,255,255) on a white Canvas) while the
+   rings' SVG strokes keep their hue. The key keeps its paint too, so key and
+   ring still match, plus a ring of the system ink so it shows on any Canvas. */
+@media (forced-colors: active){
+  .ch-legend-item i{ forced-color-adjust:none;box-shadow:0 0 0 1px CanvasText }
+  .ch-legend-item.is-restricted i{ box-shadow:inset 0 0 0 1.5px currentColor,0 0 0 1px CanvasText }
+}

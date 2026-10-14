@@ -1,0 +1,855 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Symbols &middot; Fluid Design Open</title>
+<!--
+  The Fluid Design Open page template. Every page of the site copies this skeleton VERBATIM
+  (head, site nav, footer, scripts) and replaces only: the <title>, the
+  aria-current link in the nav, the local-nav capsule's title/jump links, and
+  <main>.
+
+  Do NOT put data-tone on <html> unless the page must be pinned: an author
+  tone beats the reader's appearance toggle (FG3 precedence).
+-->
+<script>
+/* Tone without a flash (fg3.js header): reader's choice › author › host › system. */
+try{var d=document.documentElement,t=localStorage.getItem('fg3-tone');
+if(!d.hasAttribute('data-tone')){d.setAttribute('data-tone',t||d.getAttribute(
+'data-theme')||(matchMedia('(prefers-color-scheme: dark)').matches?'dark':
+'light'));d.setAttribute('data-tone-auto','')}}catch(e){}
+</script>
+<link rel="stylesheet" href="assets/fg3-tokens.css">
+<link rel="stylesheet" href="assets/fg3-color.css">
+<link rel="stylesheet" href="assets/fg3-springs.css">
+<link rel="stylesheet" href="assets/fg3.css">
+<link rel="stylesheet" href="assets/lg3.css">
+<link rel="stylesheet" href="assets/fg3-motion.css">
+<link rel="stylesheet" href="assets/fg3-components.css">
+<link rel="stylesheet" href="assets/fg3-chrome.css">
+<link rel="stylesheet" href="assets/fg3-showcase.css">
+<link rel="stylesheet" href="assets/fg3-symbols.css">
+<link rel="stylesheet" href="assets/fg3-chart.css">
+<link rel="stylesheet" href="assets/fg3-device.css">
+<link rel="stylesheet" href="assets/fg3-docs.css">    <!-- documentation pages only -->
+<style>
+/* Page layout only: roles and tokens, never a colour value (SPEC §2).
+   Page-local classes are prefixed sy- (symbols). */
+
+.sy-surface{background:var(--c-surface);border-radius:var(--r-lg);corner-shape:superellipse(var(--k-continuous))}
+.sy-p{margin:0;font-size:var(--t-17);line-height:var(--t-17-lh);letter-spacing:var(--t-17-ls);color:var(--label-2)}
+.sy-p strong{color:var(--label);font-weight:inherit}
+.sy-h3{margin:0 0 6px;font-family:var(--t-ui-headline-ff);font-size:var(--t-ui-headline-fs);line-height:var(--t-ui-headline-lh);letter-spacing:var(--t-ui-headline-ls);font-weight:600}
+.sy-read{margin:0;font-size:var(--t-14);line-height:var(--t-14-lh);letter-spacing:var(--t-14-ls);color:var(--label-2);font-variant-numeric:tabular-nums}
+.sy-read b{color:var(--label);font-weight:600}
+.sy-mono{font-family:var(--font-mono);font-size:var(--t-12);line-height:var(--t-12-lh);letter-spacing:0}
+.sy-stack{display:grid;gap:var(--s-5);align-content:start}
+.sy-cols{display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:var(--s-9) var(--grid-gap)}
+.sy-cols > *{grid-column:span 6;min-width:0}
+.sy-below{margin-top:var(--s-8)}
+/* inline code inherits a grey paragraph ink; on its fill that is 4.38:1 (measured) */
+:where(p,li,td,dd) > code{color:var(--label-2-on-fill)}
+.doc-note code{color:var(--label)}
+
+/* ── 1 · hero ───────────────────────────────────────────────────────────── */
+.sy-hero{padding-bottom:var(--s-12)}
+.sy-specimen{margin-top:var(--s-11);padding:64px 48px 56px;text-align:center}
+.sy-line{margin:0;display:flex;flex-wrap:wrap;justify-content:center;align-items:baseline;gap:.2em .9em;
+  font-family:var(--t-headline-ff);font-size:var(--t-headline-fs);line-height:var(--t-headline-lh);letter-spacing:var(--t-headline-ls);font-weight:600}
+.sy-line > span{white-space:nowrap}
+.sy-line .sym{margin-inline-end:.18em}
+.sy-line .sy-accent{color:var(--accent)}
+.sy-specimen .sy-read{margin-top:28px}
+.sy-wall{display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:26px 0;margin-top:var(--s-9);font-size:34px;color:var(--label)}
+.sy-wall > span{display:grid;place-items:center}
+
+/* ── 2 · all glyphs ─────────────────────────────────────────────────────── */
+.sy-browser{display:grid;grid-template-columns:minmax(0,1fr) 340px;gap:var(--grid-gap);align-items:start}
+.sy-tools{display:grid;gap:14px;margin-bottom:20px}
+.sy-tools .search{max-width:420px}
+.sy-chips{display:flex;flex-wrap:wrap;gap:8px}
+ul.sy-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(112px,1fr));gap:10px;margin:0;padding:0;list-style:none}
+.sy-tile{position:relative;display:grid;justify-items:center;align-content:center;gap:12px;width:100%;min-height:112px;padding:18px 6px 14px;
+  border:0;border-radius:var(--r-md);corner-shape:superellipse(var(--k-continuous));background:var(--c-surface);color:var(--label);cursor:pointer;
+  font-size:30px;transition:background-color var(--d-100) linear}
+@media (hover:hover){ .sy-tile:hover{background:var(--fill-2)} }
+.sy-tile[aria-pressed="true"]{box-shadow:inset 0 0 0 2px var(--accent)}
+.sy-tile .sym{--sym-optical:1.5}
+.sy-tile .sy-name{font-family:var(--font-mono);font-size:var(--t-12);line-height:1.25;letter-spacing:0;color:var(--label-2);word-break:break-word;text-align:center;max-width:100%}
+.sy-tile[data-new]::after{content:"";position:absolute;inset-block-start:12px;inset-inline-end:12px;width:6px;height:6px;border-radius:50%;background:var(--accent)}
+.sy-tile[hidden]{display:none}
+.sy-grid li[hidden]{display:none}
+.sy-empty{padding:48px 24px}
+.sy-insp{position:sticky;top:88px;padding:24px;display:grid;grid-template-columns:minmax(0,1fr);gap:18px;min-width:0}
+.sy-insp-big{display:grid;place-items:center;height:168px;border-radius:var(--r-md);corner-shape:superellipse(var(--k-continuous));background:var(--bg-2);font-size:96px}
+.band[data-band="story"] .sy-insp-big{background:var(--bg-1)}
+.sy-insp-big .sym{--sym-optical:1.2}
+.sy-insp-name{display:flex;align-items:baseline;justify-content:space-between;gap:12px}
+.sy-insp-name b{font-family:var(--font-mono);font-size:var(--t-17);letter-spacing:0;font-weight:600}
+.sy-insp-sizes{display:flex;flex-wrap:wrap;align-items:baseline;justify-content:space-between;gap:12px 4px;color:var(--label);min-width:0}
+.sy-insp-sizes span{display:inline-flex;align-items:baseline;gap:.2em;font-weight:600}
+.sy-insp-modes{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;font-size:28px;text-align:center}
+.sy-insp-modes div{display:grid;gap:6px;justify-items:center;padding:12px 4px;border-radius:14px;background:var(--bg-2)}
+.band[data-band="story"] .sy-insp-modes div{background:var(--bg-1)}
+.sy-insp-modes small{font-size:var(--t-12);color:var(--label-2)}
+.sy-insp .doc-code{white-space:pre-wrap;word-break:break-word}
+.sy-flags{display:flex;flex-wrap:wrap;gap:6px}
+/* Where the inspector stacks below the grid (≤1068), the selection also shows
+   where the finger is: a toolbar that sticks to the viewport's bottom while
+   the grid is on screen and settles under it at the end. Glass, as chrome. */
+.sy-pick{display:none}
+.sy-pick .toolbar__group{min-width:0}
+.sy-pick-go{min-width:0}
+.sy-pick-glyph{display:inline-flex;font-size:20px}
+.sy-pick-name{min-width:0;overflow:hidden;text-overflow:ellipsis;font-family:var(--font-mono);font-size:var(--t-ui-subhead-fs);letter-spacing:0}
+.sy-pick-go > .sy-pick-more{font-size:12px;color:var(--label-2)}
+
+/* ── 3 · rendering modes ────────────────────────────────────────────────── */
+.sy-modes{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:var(--grid-gap)}
+.sy-mode{display:grid;grid-template-rows:auto 1fr auto;gap:18px;padding:28px 24px}
+.sy-mode-row{display:flex;flex-wrap:wrap;gap:14px;font-size:34px;align-items:center;min-height:80px}
+.sy-mode .sy-mono{color:var(--label-2)}
+
+/* ── 4 · symbols as type ────────────────────────────────────────────────── */
+.sy-type{padding:12px 32px}
+.sy-row{display:grid;grid-template-columns:150px minmax(0,1fr) 190px;align-items:center;gap:20px;padding:20px 0;border-top:1px solid var(--separator)}
+.sy-row:first-child{border-top:0}
+.sy-row-role b{display:block;font-size:var(--t-14);font-weight:600;color:var(--label)}
+.sy-row-role span{font-size:var(--t-12);color:var(--label-2);font-family:var(--font-mono);letter-spacing:0}
+.sy-spec{position:relative;white-space:nowrap;overflow:hidden;padding-block:4px}
+.sy-spec-in{position:relative;display:inline-block}
+.sy-guide{position:absolute;inset-inline:-8px;height:1px;background:color-mix(in srgb,var(--accent) 55%,transparent);pointer-events:none}
+.sy-guide.base{background:color-mix(in srgb,var(--label) 30%,transparent)}
+.sy-base{display:inline-block;width:0;height:0;vertical-align:baseline}
+.sy-weights{margin-bottom:18px}
+.sy-legend{display:flex;flex-wrap:wrap;gap:8px 20px;margin-top:14px}
+.sy-legend i{display:inline-block;width:18px;height:2px;vertical-align:middle;margin-inline-end:8px;background:color-mix(in srgb,var(--accent) 55%,transparent)}
+.sy-legend i.b{background:color-mix(in srgb,var(--label) 30%,transparent)}
+
+/* ── 5 · variable value ─────────────────────────────────────────────────── */
+.sy-var{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;font-size:72px;text-align:center;padding:48px 24px 36px}
+.sy-var > div{display:grid;gap:14px;justify-items:center}
+.sy-var .sy-mono{font-size:var(--t-12);color:var(--label-2)}
+.sy-var-ctl{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:16px;align-items:center;padding:0 32px 32px}
+.sy-var-ctl .slider{width:100%}
+
+/* ── 6 · right to left ──────────────────────────────────────────────────── */
+.sy-dirs{display:grid;grid-template-columns:1fr 1fr;gap:var(--grid-gap)}
+.sy-dir{padding:28px}
+.sy-dir-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(88px,1fr));gap:18px 8px;margin-top:18px;font-size:30px}
+.sy-dir-grid div{display:grid;gap:8px;justify-items:center;text-align:center}
+.sy-dir-grid .sy-mono{font-size:11px;color:var(--label-2);word-break:break-word}
+.sy-dir-grid [data-mirror] .sym{color:var(--accent)}
+.sy-dir-head{display:flex;justify-content:space-between;align-items:baseline;gap:12px}
+
+/* ── 7 · replace ────────────────────────────────────────────────────────── */
+.sy-replace{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:var(--grid-gap)}
+.sy-rep{display:grid;justify-items:center;align-content:center;gap:18px;min-height:240px;padding:28px 20px;text-align:center}
+.sy-rep .btn-icon{font-size:26px}
+.sy-rep .sy-mono{color:var(--label-2)}
+
+/* ── 8 · rules ──────────────────────────────────────────────────────────── */
+.sy-rules{display:grid;gap:var(--s-9)}
+.sy-rules .doc-specimen{min-height:180px}
+.sy-bad-size{display:inline-flex;align-items:center;gap:8px;font-size:var(--t-14);color:var(--label)}
+.sy-bad-size .sym{width:30px;height:30px;vertical-align:middle}
+.sy-good-size{display:inline-flex;align-items:center;gap:.4em;font-size:var(--t-14);color:var(--label)}
+.sy-tabs{display:flex;gap:28px;font-size:24px}
+.sy-tabs span{display:grid;justify-items:center;gap:4px}
+.sy-tabs small{font-size:10px;font-weight:600;letter-spacing:0}
+.sy-tabs-brand span{color:var(--accent)}
+
+@media (max-width:1068px){
+  .sy-browser{grid-template-columns:1fr}
+  .sy-insp{position:relative;top:auto;grid-template-columns:200px minmax(0,1fr);align-items:start}
+  .sy-insp > :not(.sy-insp-big){grid-column:2}
+  .sy-insp-big{grid-row:span 5;height:200px}
+  .sy-pick{display:flex;position:sticky;bottom:max(16px,env(safe-area-inset-bottom));z-index:2;margin-top:16px}
+  .sy-modes{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .sy-replace{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .sy-row{grid-template-columns:130px minmax(0,1fr)}
+  .sy-row-read{grid-column:2}
+}
+@media (max-width:734px){
+  .sy-cols > *{grid-column:span 12}
+  .sy-specimen{padding:40px 20px 36px}
+  .sy-line{font-size:var(--t-32);line-height:var(--t-32-lh);letter-spacing:var(--t-32-ls)}
+  .sy-wall{grid-template-columns:repeat(6,minmax(0,1fr));font-size:28px}
+  .sy-wall > span:nth-child(n+19){display:none}
+  .sy-insp{grid-template-columns:1fr}
+  .sy-insp > :not(.sy-insp-big){grid-column:auto}
+  .sy-insp-big{grid-row:auto;height:150px}
+  ul.sy-grid{grid-template-columns:repeat(3,minmax(0,1fr))}
+  .sy-tile{min-height:100px;font-size:26px}
+  .sy-modes,.sy-dirs{grid-template-columns:1fr}
+  .sy-replace{grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+  .sy-rep{min-height:200px;padding:20px 10px;gap:14px}
+  .sy-rep .btn-l{padding-inline:14px}
+  .sy-type{padding:6px 20px}
+  .sy-row{grid-template-columns:1fr;gap:8px}
+  .sy-row-read{grid-column:auto}
+  .sy-var{grid-template-columns:repeat(3,1fr);font-size:56px;row-gap:28px}
+  .sy-var-ctl{padding:0 20px 24px}
+}
+</style>
+</head>
+<body>
+
+<!-- ═══ SITE NAV (shared — copy verbatim; set aria-current on this page's link) ═══ -->
+<nav class="globalnav" aria-label="Fluid Design">
+  <div class="globalnav__bar">
+    <a class="globalnav__brand" href="index.html" aria-label="Fluid Design Open home"><i data-sym="sparkles"></i></a>
+    <ul class="globalnav__list">
+      <li class="globalnav__item"><a class="globalnav__link" href="index.html">Overview</a></li>
+      <li class="globalnav__item"><a class="globalnav__link" href="start.html">Start</a></li>
+      <li class="globalnav__item"><a class="globalnav__link" href="docs.html">Docs</a></li>
+      <li class="globalnav__item" data-flyout="gn-foundations"><a class="globalnav__link" href="color.html">Foundations</a><button class="globalnav__trigger" type="button"><span class="sr-only">Foundations menu</span></button></li>
+      <li class="globalnav__item" data-flyout="gn-components"><a class="globalnav__link" href="components.html">Components</a><button class="globalnav__trigger" type="button"><span class="sr-only">Components menu</span></button></li>
+      <li class="globalnav__item" data-flyout="gn-instruments"><a class="globalnav__link" href="selftest.html">Instruments</a><button class="globalnav__trigger" type="button"><span class="sr-only">Instruments menu</span></button></li>
+    </ul>
+    <div class="globalnav__tools">
+      <button class="globalnav__icon" type="button" data-tone-toggle aria-label="Switch appearance"><i data-sym="circle-half"></i></button>
+      <button class="globalnav__menu" type="button" aria-label="Menu" aria-expanded="false"><i data-sym="lines"></i></button>
+    </div>
+  </div>
+  <div class="globalnav__flyout" id="gn-foundations" hidden>
+    <div class="globalnav__flyout-content">
+      <div class="globalnav__group" data-elevated>
+        <h2 class="globalnav__group-title">Foundations</h2>
+        <ul><li><a class="globalnav__flyout-link" href="color.html">Colour</a></li><li><a class="globalnav__flyout-link" href="type.html">Type</a></li><li><a class="globalnav__flyout-link" href="layout.html">Layout</a></li><li><a class="globalnav__flyout-link" href="materials.html">Materials</a></li><li><a class="globalnav__flyout-link" href="motion.html">Motion</a></li></ul>
+      </div>
+      <div class="globalnav__group">
+        <h2 class="globalnav__group-title">Content</h2>
+        <ul><li><a class="globalnav__flyout-link" href="symbols.html" aria-current="page">Symbols</a></li><li><a class="globalnav__flyout-link" href="data.html">Data</a></li></ul>
+      </div>
+    </div>
+  </div>
+  <div class="globalnav__flyout" id="gn-components" hidden>
+    <div class="globalnav__flyout-content">
+      <div class="globalnav__group" data-elevated>
+        <h2 class="globalnav__group-title">Components</h2>
+        <ul><li><a class="globalnav__flyout-link" href="components.html">Controls</a></li><li><a class="globalnav__flyout-link" href="chrome.html">Chrome</a></li><li><a class="globalnav__flyout-link" href="showcase.html">Product pages</a></li><li><a class="globalnav__flyout-link" href="patterns.html">Patterns</a></li></ul>
+      </div>
+    </div>
+  </div>
+  <div class="globalnav__flyout" id="gn-instruments" hidden>
+    <div class="globalnav__flyout-content">
+      <div class="globalnav__group" data-elevated>
+        <h2 class="globalnav__group-title">Instruments</h2>
+        <ul><li><a class="globalnav__flyout-link" href="selftest.html">Self-test</a></li><li><a class="globalnav__flyout-link" href="audit.html">Audit</a></li></ul>
+      </div>
+    </div>
+  </div>
+</nav>
+
+<!-- ═══ LOCAL NAV (per page: title, one CTA, jump links to this page's sections) ═══ -->
+<div class="localnav" data-localnav-reveal="#hero">
+  <div class="localnav__capsule" data-lg3 data-lg3-priority="3">
+    <a class="localnav__title" href="#top">Symbols</a>
+    <button class="localnav__explore" type="button"><span class="localnav__explore-label">Explore</span></button>
+    <a class="localnav__cta" href="start.html">Adopt</a>
+    <div class="localnav__panel" aria-label="Explore Fluid Design">
+      <ul class="localnav__tiles">
+        <li><a class="localnav__tile" href="materials.html" style="--tile-hue: var(--series-1)"><span class="localnav__thumb"><i data-sym="sparkles"></i></span>Materials</a></li>
+        <li><a class="localnav__tile" href="motion.html" style="--tile-hue: var(--series-2)"><span class="localnav__thumb"><i data-sym="waveform"></i></span>Motion</a></li>
+        <li><a class="localnav__tile" href="chrome.html" style="--tile-hue: var(--series-3)"><span class="localnav__thumb"><i data-sym="sidebar"></i></span>Chrome</a></li>
+        <li><a class="localnav__tile" href="components.html" style="--tile-hue: var(--series-4)"><span class="localnav__thumb"><i data-sym="sliders"></i></span>Controls</a></li>
+        <li><a class="localnav__tile" href="showcase.html" style="--tile-hue: var(--series-5)"><span class="localnav__thumb"><i data-sym="grid"></i></span>Product pages</a></li>
+      </ul>
+      <hr class="localnav__rule">
+      <nav class="localnav__jump" aria-label="On this page">
+        <p class="localnav__jump-label">On this page <i data-sym="chevron-down"></i></p>
+        <ul class="localnav__jump-grid">
+          <li class="localnav__jump-item"><a href="#glyphs">All glyphs</a></li>
+          <li class="localnav__jump-item"><a href="#modes">Rendering modes</a></li>
+          <li class="localnav__jump-item"><a href="#type">With text</a></li>
+          <li class="localnav__jump-item"><a href="#variable">Variable value</a></li>
+          <li class="localnav__jump-item"><a href="#rtl">Right to left</a></li>
+          <li class="localnav__jump-item"><a href="#replace">Replace</a></li>
+          <li class="localnav__jump-item"><a href="#rules">Rules</a></li>
+        </ul>
+      </nav>
+    </div>
+  </div>
+</div>
+
+<main id="top">
+
+<!-- ═══ 1 · HERO ═══ -->
+<section class="band sy-hero" data-band="story" id="hero" aria-labelledby="sy-hero-h">
+  <div class="viewport-content">
+    <div class="lockup">
+      <p class="lockup-eyebrow">Symbols</p>
+      <h1 class="lockup-headline" id="sy-hero-h">Symbols are type.</h1>
+      <p class="lockup-copy"><span id="sy-count">76</span> glyphs on one 24-unit grid. <strong>They size with the text, sit on its cap height and take their weight from its role</strong>, so a caption&rsquo;s glyph is drawn heavier than a title&rsquo;s.</p>
+    </div>
+    <div class="sy-surface sy-specimen" data-reveal="up">
+      <p class="sy-line t-headline" aria-label="312 likes, Follow, Send, 6:00 batches">
+        <span><i data-sym="heart" data-sym-class="sy-accent"></i>312</span>
+        <span><i data-sym="person-add"></i>Follow</span>
+        <span><i data-sym="paperplane"></i>Send</span>
+        <span><i data-sym="clock"></i>6:00</span>
+      </p>
+      <p class="sy-read">One line at the headline role. Every glyph is 1&nbsp;em, centred on the cap height, stroked <b id="sy-hero-stroke">1.24</b> units at this size.</p>
+      <div class="sy-wall" aria-hidden="true" data-reveal="stagger" id="sy-wall"><span data-staggered-item><i data-sym="phone"></i></span><span data-staggered-item><i data-sym="phone-fold" data-sym-class="sym-hier"></i></span><span data-staggered-item><i data-sym="sparkles" data-sym-class="sym-palette"></i></span><span data-staggered-item><i data-sym="waveform"></i></span><span data-staggered-item><i data-sym="target" data-sym-class="sym-hier"></i></span><span data-staggered-item><i data-sym="bubble"></i></span><span data-staggered-item><i data-sym="paperplane"></i></span><span data-staggered-item><i data-sym="person-add" data-sym-class="sym-palette"></i></span><span data-staggered-item><i data-sym="bolt"></i></span><span data-staggered-item><i data-sym="flame"></i></span><span data-staggered-item><i data-sym="shield" data-sym-class="sym-hier"></i></span><span data-staggered-item><i data-sym="map"></i></span><span data-staggered-item><i data-sym="calendar" data-sym-class="sym-palette"></i></span><span data-staggered-item><i data-sym="chart-bar" data-sym-class="sym-hier"></i></span><span data-staggered-item><i data-sym="camera"></i></span><span data-staggered-item><i data-sym="record"></i></span><span data-staggered-item><i data-sym="sliders" data-sym-class="sym-hier"></i></span><span data-staggered-item><i data-sym="lock" data-sym-class="sym-palette"></i></span><span data-staggered-item><i data-sym="bell"></i></span><span data-staggered-item><i data-sym="star" data-sym-class="sym-hier"></i></span><span data-staggered-item><i data-sym="gear"></i></span><span data-staggered-item><i data-sym="house"></i></span><span data-staggered-item><i data-sym="magnifier" data-sym-class="sym-palette"></i></span><span data-staggered-item><i data-sym="heart"></i></span></div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ 2 · ALL GLYPHS ═══ -->
+<section class="band" data-band="utility" id="glyphs" aria-labelledby="sy-glyphs-h">
+  <div class="viewport-content">
+    <header class="section-header">
+      <h2 class="section-header-headline" id="sy-glyphs-h">Every glyph, one grid.</h2>
+      <a class="section-header-link" href="#rules">How to use them <i data-sym="chevron-right"></i></a>
+    </header>
+    <div class="sy-browser">
+      <div>
+        <div class="sy-tools">
+          <div class="search"><input type="search" id="sy-q" placeholder="Search 76 symbols" aria-label="Search symbols" autocomplete="off"></div>
+          <div class="sy-chips" role="group" aria-label="Filter by kind" id="sy-chips">
+            <button class="chip" type="button" aria-pressed="true" data-cat="">All</button>
+            <button class="chip" type="button" aria-pressed="false" data-cat="new">New in 1.0</button>
+            <button class="chip" type="button" aria-pressed="false" data-cat="navigation">Navigation</button>
+            <button class="chip" type="button" aria-pressed="false" data-cat="actions">Actions</button>
+            <button class="chip" type="button" aria-pressed="false" data-cat="status">Status</button>
+            <button class="chip" type="button" aria-pressed="false" data-cat="objects">Objects</button>
+            <button class="chip" type="button" aria-pressed="false" data-cat="text">Text and layout</button>
+            <button class="chip" type="button" aria-pressed="false" data-cat="media">Media</button>
+            <button class="chip" type="button" aria-pressed="false" data-cat="levels">Levels</button>
+          </div>
+          <p class="sy-read" id="sy-found" role="status">76 symbols</p>
+        </div>
+        <ul class="sy-grid" id="sy-grid" aria-label="Symbols">
+          <li><button class="sy-tile" type="button" data-name="chevron-right" data-cat="navigation" aria-pressed="false"><i data-sym="chevron-right"></i><span class="sy-name">chevron-right</span></button></li>
+          <li><button class="sy-tile" type="button" data-name="chevron-left" data-cat="navigation" aria-pressed="false"><i data-sym="chevron-left"></i><span class="sy-name">chevron-left</span></button></li>
+          <li><button class="sy-tile" type="button" data-name="chevron-down" data-cat="navigation" aria-pressed="false"><i data-sym="chevron-down"></i><span class="sy-name">chevron-down</span></button></li>
+          <li><button class="sy-tile" type="button" data-name="chevron-up" data-cat="navigation" aria-pressed="false"><i data-sym="chevron-up"></i><span class="sy-name">chevron-up</span></button></li>
+          <li><button class="sy-tile" type="button" data-name="arrow-right" data-cat="navigation" aria-pressed="false"><i data-sym="arrow-right"></i><span class="sy-name">arrow-right</span></button></li>
+          <li><button class="sy-tile" type="button" data-name="arrow-left" data-cat="navigation" aria-pressed="false"><i data-sym="arrow-left"></i><span class="sy-name">arrow-left</span></button></li>
+          <li><button class="sy-tile" type="button" data-name="arrow-up" data-cat="navigation" aria-pressed="false"><i data-sym="arrow-up"></i><span class="sy-name">arrow-up</span></button></li>
+          <li><button class="sy-tile" type="button" data-name="arrow-down" data-cat="navigation" aria-pressed="false"><i data-sym="arrow-down"></i><span class="sy-name">arrow-down</span></button></li>
+          <li><button class="sy-tile" type="button" data-name="arrow-up-right" data-cat="navigation" aria-pressed="false"><i data-sym="arrow-up-right"></i><span class="sy-name">arrow-up-right</span></button></li>
+          <li><button class="sy-tile" type="button" data-name="arrow-clockwise" data-cat="navigation" data-keys="refresh reload retry" aria-pressed="false"><i data-sym="arrow-clockwise"></i><span class="sy-name">arrow-clockwise</span></button></li>
+          <li><button class="sy-tile" type="button" data-name="arrow-down-tray" data-cat="navigation" data-keys="download save" aria-pressed="false"><i data-sym="arrow-down-tray"></i><span class="sy-name">arrow-down-tray</span></button></li>
+          <li><button class="sy-tile" type="button" data-name="spinner" data-cat="navigation" data-keys="loading busy" aria-pressed="false"><i data-sym="spinner"></i><span class="sy-name">spinner</span></button></li>
+          <li><button class="sy-tile" type="button" data-name="plus" data-cat="actions" aria-pressed="false"><i data-sym="plus"></i><span class="sy-name">plus</span></button></li>
+          <li><button class="sy-tile" type="button" data-name="minus" data-cat="actions" aria-pressed="false"><i data-sym="minus"></i><span class="sy-name">minus</span></button></li>
+          <li><button class="sy-tile" type="button" data-name="xmark" data-cat="actions" data-keys="close cancel dismiss" aria-pressed="false"><i data-sym="xmark"></i><span class="sy-name">xmark</span></button></li>
+          <li><button class="sy-tile" type="button" data-name="checkmark" data-cat="actions" data-keys="done tick confirm" aria-pressed="false"><i data-sym="checkmark"></i><span class="sy-name">checkmark</span></button></li>
+          <li><button class="sy-tile" type="button" data-name="ellipsis" data-cat="actions" data-keys="more overflow" aria-pressed="false"><i data-sym="ellipsis"></i><span class="sy-name">ellipsis</span></button></li>
+          <li><button class="sy-tile" type="button" data-name="magnifier" data-cat="actions" data-keys="search find" aria-pressed="false"><i data-sym="magnifier"></i><span class="sy-name">magnifier</span></button></li>
+          <li><button class="sy-tile" type="button" data-name="pencil" data-cat="actions" data-keys="edit write" aria-pressed="false"><i data-sym="pencil"></i><span class="sy-name">pencil</span></button></li>
+          <li><button class="sy-tile" type="button" data-name="trash" data-cat="actions" data-keys="delete remove bin" aria-pressed="false"><i data-sym="trash"></i><span class="sy-name">trash</span></button></li>
+          <li><button class="sy-tile" type="button" data-name="link" data-cat="actions" data-keys="url" aria-pressed="false"><i data-sym="link"></i><span class="sy-name">link</span></button></li>
+          <li><button class="sy-tile" type="button" data-name="info" data-cat="status" data-keys="about help" aria-pressed="false"><i data-sym="info"></i><span class="sy-name">info</span></button></li>
+          <li><button class="sy-tile" type="button" data-name="exclamation" data-cat="status" data-keys="attention" aria-pressed="false"><i data-sym="exclamation"></i><span class="sy-name">exclamation</span></button></li>
+          <li><button class="sy-tile" type="button" data-name="exclamation-triangle" data-cat="status" data-keys="warning caution" aria-pressed="false"><i data-sym="exclamation-triangle"></i><span class="sy-name">exclamation-triangle</span></button></li>
+          <li><button class="sy-tile" type="button" data-name="checkmark-circle" data-cat="status" data-keys="success ok" aria-pressed="false"><i data-sym="checkmark-circle"></i><span class="sy-name">checkmark-circle</span></button></li>
+          <li><button class="sy-tile" type="button" data-name="xmark-circle" data-cat="status" data-keys="error failed" aria-pressed="false"><i data-sym="xmark-circle"></i><span class="sy-name">xmark-circle</span></button></li>
+          <li><button class="sy-tile" type="button" data-name="clock" data-cat="status" data-keys="time recent" aria-pressed="false"><i data-sym="clock"></i><span class="sy-name">clock</span></button></li>
+          <li><button class="sy-tile" type="button" data-name="doc" data-cat="objects" data-keys="file page" aria-pressed="false"><i data-sym="doc"></i><span class="sy-name">doc</span></button></li>
+          <li><button class="sy-tile" type="button" data-name="folder" data-cat="objects" data-keys="directory" aria-pressed="false"><i data-sym="folder"></i><span class="sy-name">folder</span></button></li>
+          <li><button class="sy-tile" type="button" data-name="house" data-cat="objects" data-keys="home" aria-pressed="false"><i data-sym="house"></i><span class="sy-name">house</span></button></li>
+          <li><button class="sy-tile" type="button" data-name="person" data-cat="objects" aria-pressed="false"><i data-sym="person"></i><span class="sy-name">person</span></button></li>
+          <li><button class="sy-tile" type="button" data-name="bookmark" data-cat="objects" data-keys="save" aria-pressed="false"><i data-sym="bookmark"></i><span class="sy-name">bookmark</span></button></li>
+          <li><button class="sy-tile" type="button" data-name="star" data-cat="objects" data-keys="favourite rating" aria-pressed="false"><i data-sym="star"></i><span class="sy-name">star</span></button></li>
+          <li><button class="sy-tile" type="button" data-name="bell" data-cat="objects" data-keys="notification alert" aria-pressed="false"><i data-sym="bell"></i><span class="sy-name">bell</span></button></li>
+          <li><button class="sy-tile" type="button" data-name="gear" data-cat="objects" data-keys="settings preferences" aria-pressed="false"><i data-sym="gear"></i><span class="sy-name">gear</span></button></li>
+          <li><button class="sy-tile" type="button" data-name="sidebar" data-cat="text" data-keys="panel" aria-pressed="false"><i data-sym="sidebar"></i><span class="sy-name">sidebar</span></button></li>
+          <li><button class="sy-tile" type="button" data-name="grid" data-cat="text" data-keys="apps" aria-pressed="false"><i data-sym="grid"></i><span class="sy-name">grid</span></button></li>
+          <li><button class="sy-tile" type="button" data-name="lines" data-cat="text" data-keys="menu" aria-pressed="false"><i data-sym="lines"></i><span class="sy-name">lines</span></button></li>
+          <li><button class="sy-tile" type="button" data-name="bold" data-cat="text" aria-pressed="false"><i data-sym="bold"></i><span class="sy-name">bold</span></button></li>
+          <li><button class="sy-tile" type="button" data-name="italic" data-cat="text" aria-pressed="false"><i data-sym="italic"></i><span class="sy-name">italic</span></button></li>
+          <li><button class="sy-tile" type="button" data-name="play" data-cat="media" aria-pressed="false"><i data-sym="play"></i><span class="sy-name">play</span></button></li>
+          <li><button class="sy-tile" type="button" data-name="pause" data-cat="media" aria-pressed="false"><i data-sym="pause"></i><span class="sy-name">pause</span></button></li>
+          <li><button class="sy-tile" type="button" data-name="backward" data-cat="media" aria-pressed="false"><i data-sym="backward"></i><span class="sy-name">backward</span></button></li>
+          <li><button class="sy-tile" type="button" data-name="forward" data-cat="media" aria-pressed="false"><i data-sym="forward"></i><span class="sy-name">forward</span></button></li>
+          <li><button class="sy-tile" type="button" data-name="signal" data-cat="levels" data-keys="strength network" aria-pressed="false"><i data-sym="signal"></i><span class="sy-name">signal</span></button></li>
+          <li><button class="sy-tile" type="button" data-name="speaker" data-cat="levels" data-keys="volume sound" aria-pressed="false"><i data-sym="speaker"></i><span class="sy-name">speaker</span></button></li>
+          <li><button class="sy-tile" type="button" data-name="battery" data-cat="levels" data-keys="power charge" aria-pressed="false"><i data-sym="battery"></i><span class="sy-name">battery</span></button></li>
+          <li><button class="sy-tile" type="button" data-name="phone" data-cat="objects" data-keys="device mobile" data-new aria-pressed="false"><i data-sym="phone"></i><span class="sy-name">phone</span></button></li>
+          <li><button class="sy-tile" type="button" data-name="phone-fold" data-cat="objects" data-keys="foldable duo device" data-new aria-pressed="false"><i data-sym="phone-fold"></i><span class="sy-name">phone-fold</span></button></li>
+          <li><button class="sy-tile" type="button" data-name="bolt" data-cat="status" data-keys="fast batch" data-new aria-pressed="false"><i data-sym="bolt"></i><span class="sy-name">bolt</span></button></li>
+          <li><button class="sy-tile" type="button" data-name="flame" data-cat="status" data-keys="hot trending" data-new aria-pressed="false"><i data-sym="flame"></i><span class="sy-name">flame</span></button></li>
+          <li><button class="sy-tile" type="button" data-name="heart" data-cat="objects" data-keys="like love" data-new aria-pressed="false"><i data-sym="heart"></i><span class="sy-name">heart</span></button></li>
+          <li><button class="sy-tile" type="button" data-name="person-add" data-cat="actions" data-keys="follow add user" data-new aria-pressed="false"><i data-sym="person-add"></i><span class="sy-name">person-add</span></button></li>
+          <li><button class="sy-tile" type="button" data-name="person-remove" data-cat="actions" data-keys="unfollow remove user" data-new aria-pressed="false"><i data-sym="person-remove"></i><span class="sy-name">person-remove</span></button></li>
+          <li><button class="sy-tile" type="button" data-name="bubble" data-cat="objects" data-keys="message chat reply comment" data-new aria-pressed="false"><i data-sym="bubble"></i><span class="sy-name">bubble</span></button></li>
+          <li><button class="sy-tile" type="button" data-name="paperplane" data-cat="actions" data-keys="send share" data-new aria-pressed="false"><i data-sym="paperplane"></i><span class="sy-name">paperplane</span></button></li>
+          <li><button class="sy-tile" type="button" data-name="target" data-cat="objects" data-keys="goal reviewers" data-new aria-pressed="false"><i data-sym="target"></i><span class="sy-name">target</span></button></li>
+          <li><button class="sy-tile" type="button" data-name="map" data-cat="objects" data-keys="route place" data-new aria-pressed="false"><i data-sym="map"></i><span class="sy-name">map</span></button></li>
+          <li><button class="sy-tile" type="button" data-name="sliders" data-cat="actions" data-keys="shape shapes controls filter" data-new aria-pressed="false"><i data-sym="sliders"></i><span class="sy-name">sliders</span></button></li>
+          <li><button class="sy-tile" type="button" data-name="shield" data-cat="status" data-keys="privacy security" data-new aria-pressed="false"><i data-sym="shield"></i><span class="sy-name">shield</span></button></li>
+          <li><button class="sy-tile" type="button" data-name="waveform" data-cat="media levels" data-keys="audio voice" data-new aria-pressed="false"><i data-sym="waveform"></i><span class="sy-name">waveform</span></button></li>
+          <li><button class="sy-tile" type="button" data-name="record" data-cat="media" data-keys="recording" data-new aria-pressed="false"><i data-sym="record"></i><span class="sy-name">record</span></button></li>
+          <li><button class="sy-tile" type="button" data-name="camera" data-cat="objects" data-keys="photo" data-new aria-pressed="false"><i data-sym="camera"></i><span class="sy-name">camera</span></button></li>
+          <li><button class="sy-tile" type="button" data-name="list-bullet" data-cat="text" data-keys="list" data-new aria-pressed="false"><i data-sym="list-bullet"></i><span class="sy-name">list-bullet</span></button></li>
+          <li><button class="sy-tile" type="button" data-name="calendar" data-cat="objects" data-keys="schedule date" data-new aria-pressed="false"><i data-sym="calendar"></i><span class="sy-name">calendar</span></button></li>
+          <li><button class="sy-tile" type="button" data-name="chart-bar" data-cat="text levels" data-keys="stats chart graph" data-new aria-pressed="false"><i data-sym="chart-bar"></i><span class="sy-name">chart-bar</span></button></li>
+          <li><button class="sy-tile" type="button" data-name="sparkles" data-cat="objects" data-keys="magic ai new" data-new aria-pressed="false"><i data-sym="sparkles"></i><span class="sy-name">sparkles</span></button></li>
+          <li><button class="sy-tile" type="button" data-name="play-pause" data-cat="media" data-keys="toggle" data-new aria-pressed="false"><i data-sym="play-pause"></i><span class="sy-name">play-pause</span></button></li>
+          <li><button class="sy-tile" type="button" data-name="circle-half" data-cat="objects" data-keys="appearance tone" data-new aria-pressed="false"><i data-sym="circle-half"></i><span class="sy-name">circle-half</span></button></li>
+          <li><button class="sy-tile" type="button" data-name="sun" data-cat="objects" data-keys="light" data-new aria-pressed="false"><i data-sym="sun"></i><span class="sy-name">sun</span></button></li>
+          <li><button class="sy-tile" type="button" data-name="moon" data-cat="objects" data-keys="dark" data-new aria-pressed="false"><i data-sym="moon"></i><span class="sy-name">moon</span></button></li>
+          <li><button class="sy-tile" type="button" data-name="lock" data-cat="status" data-keys="locked private" data-new aria-pressed="false"><i data-sym="lock"></i><span class="sy-name">lock</span></button></li>
+          <li><button class="sy-tile" type="button" data-name="eye" data-cat="actions" data-keys="show reveal visible password" data-new aria-pressed="false"><i data-sym="eye"></i><span class="sy-name">eye</span></button></li>
+          <li><button class="sy-tile" type="button" data-name="eye-slash" data-cat="actions" data-keys="hide conceal password" data-new aria-pressed="false"><i data-sym="eye-slash"></i><span class="sy-name">eye-slash</span></button></li>
+          <li><button class="sy-tile" type="button" data-name="stop" data-cat="media" data-keys="halt end" data-new aria-pressed="false"><i data-sym="stop"></i><span class="sy-name">stop</span></button></li>
+          <li><button class="sy-tile" type="button" data-name="wifi" data-cat="levels" data-keys="network wireless connection" data-new aria-pressed="false"><i data-sym="wifi"></i><span class="sy-name">wifi</span></button></li>
+        </ul>
+        <div class="empty-state sy-empty" id="sy-empty" hidden>
+          <p class="empty-state-title">No symbol by that name</p>
+          <p class="empty-state-body">Try a plainer word: <b>search</b>, <b>close</b>, <b>follow</b>, <b>settings</b>.</p>
+        </div>
+        <div class="toolbar sy-pick" id="sy-pick" aria-label="Selected symbol">
+          <div class="toolbar__group" data-lg3 data-lg3-interactive data-text>
+            <a class="toolbar__item sy-pick-go" href="#sy-insp" aria-label="heart, every size and mode"><span class="sy-pick-glyph"><i data-sym="heart"></i></span><span class="sy-pick-name">heart</span><i data-sym="chevron-down" data-sym-class="sy-pick-more"></i></a>
+          </div>
+          <div class="toolbar__spacer"></div>
+          <button class="toolbar__primary" type="button" data-lg3 data-lg3-interactive id="sy-pick-copy"><i data-sym="doc"></i><span>Copy</span></button>
+        </div>
+      </div>
+      <aside class="sy-surface sy-insp" id="sy-insp" aria-label="Selected symbol">
+        <div class="sy-insp-big" id="sy-insp-big"><i data-sym="heart"></i></div>
+        <div class="sy-insp-name"><b id="sy-insp-name">heart</b><span class="sy-flags" id="sy-insp-flags"></span></div>
+        <div class="sy-insp-sizes" id="sy-insp-sizes" aria-label="At five sizes"></div>
+        <div class="sy-insp-modes" id="sy-insp-modes"></div>
+<pre class="doc-code" data-lang="html" id="sy-insp-code"><code>&lt;i data-sym="heart"&gt;&lt;/i&gt;</code></pre>
+      </aside>
+    </div>
+    <p class="sy-read sy-below" id="sy-copy-hint">Select a glyph to see it at every size and in every mode; the Copy button takes its markup. Arrow keys move through the grid. An accent dot marks the <span id="sy-new-n">29</span> glyphs new in 1.0.</p>
+  </div>
+</section>
+
+<!-- ═══ 3 · RENDERING MODES ═══ -->
+<section class="band" data-band="story" id="modes" aria-labelledby="sy-modes-h">
+  <div class="viewport-content">
+    <div class="lockup" data-reveal="up">
+      <p class="lockup-eyebrow">Rendering modes</p>
+      <h2 class="lockup-headline" id="sy-modes-h">One markup. Four looks.</h2>
+      <p class="lockup-copy">Each glyph is drawn in up to four layers. <strong>A class decides how they are inked</strong>, and the colours cross into the glyph as inherited custom properties.</p>
+    </div>
+    <div class="sy-modes" style="margin-top:var(--s-11)">
+      <div class="sy-surface sy-mode" data-reveal="up">
+        <div><h3 class="sy-h3">Monochrome</h3><p class="sy-read">Every layer takes the text colour. The default, and the only mode on glass.</p></div>
+        <div class="sy-mode-row"><i data-sym="person-add"></i><i data-sym="camera"></i><i data-sym="target"></i><i data-sym="waveform"></i><i data-sym="exclamation-triangle"></i></div>
+        <code class="sy-mono">&lt;i data-sym="camera"&gt;</code>
+      </div>
+      <div class="sy-surface sy-mode" data-reveal="up">
+        <div><h3 class="sy-h3">Hierarchical</h3><p class="sy-read">The secondary layers fade to 58% and 30% of the ink, so the meaning leads.</p></div>
+        <div class="sy-mode-row"><i data-sym="person-add" data-sym-class="sym-hier"></i><i data-sym="camera" data-sym-class="sym-hier"></i><i data-sym="target" data-sym-class="sym-hier"></i><i data-sym="waveform" data-sym-class="sym-hier"></i><i data-sym="exclamation-triangle" data-sym-class="sym-hier"></i></div>
+        <code class="sy-mono">data-sym-class="sym-hier"</code>
+      </div>
+      <div class="sy-surface sy-mode" data-reveal="up">
+        <div><h3 class="sy-h3">Palette</h3><p class="sy-read">Layer two takes the accent, layer three a tertiary grey. Set your own with <code>--sym-layer-2</code>.</p></div>
+        <div class="sy-mode-row"><i data-sym="person-add" data-sym-class="sym-palette"></i><i data-sym="camera" data-sym-class="sym-palette"></i><i data-sym="target" data-sym-class="sym-palette"></i><i data-sym="waveform" data-sym-class="sym-palette"></i><i data-sym="exclamation-triangle" data-sym-class="sym-palette"></i></div>
+        <code class="sy-mono">data-sym-class="sym-palette"</code>
+      </div>
+      <div class="sy-surface sy-mode" data-reveal="up">
+        <div><h3 class="sy-h3">Semantic</h3><p class="sy-read">A status tint from the palette roles, only where the glyph carries a state.</p></div>
+        <div class="sy-mode-row"><i data-sym="checkmark-circle" data-sym-class="sym-ok"></i><i data-sym="exclamation-triangle" data-sym-class="sym-warn"></i><i data-sym="xmark-circle" data-sym-class="sym-bad"></i><i data-sym="shield" data-sym-class="sym-ok"></i><i data-sym="flame" data-sym-class="sym-warn"></i></div>
+        <code class="sy-mono">data-sym-class="sym-ok"</code>
+      </div>
+    </div>
+    <p class="doc-note sy-below" data-kind="chosen">A fourth symbol mode could be multicolour. This set has no fixed-colour artwork, so the status tint takes that place.</p>
+  </div>
+</section>
+
+<!-- ═══ 4 · SYMBOLS AS TYPE ═══ -->
+<section class="band" data-band="utility" id="type" aria-labelledby="sy-type-h">
+  <div class="viewport-content">
+    <header class="section-header">
+      <h2 class="section-header-headline" id="sy-type-h">Sized with the text. Weighted by its role.</h2>
+    </header>
+    <div class="sy-weights">
+      <div class="segmented" role="radiogroup" aria-label="Text weight" id="sy-weight">
+        <button role="radio" aria-checked="true" data-value="regular">Regular</button>
+        <button role="radio" data-value="semibold">Semibold</button>
+        <button role="radio" data-value="bold">Bold</button>
+      </div>
+    </div>
+    <div class="sy-surface sy-type" id="sy-type-rows">
+      <div class="sy-row" data-px="11"><div class="sy-row-role"><b>Caption 2</b><span>.ui-caption2 &middot; 11 px</span></div>
+        <div class="sy-spec ui-caption2"><span class="sy-spec-in"><i data-sym="phone"></i> Phones <i data-sym="heart"></i> Like <i data-sym="chevron-right"></i><span class="sy-base"></span></span></div><p class="sy-read sy-row-read">&ndash;</p></div>
+      <div class="sy-row" data-px="13"><div class="sy-row-role"><b>Footnote</b><span>.ui-footnote &middot; 13 px</span></div>
+        <div class="sy-spec ui-footnote"><span class="sy-spec-in"><i data-sym="phone"></i> Phones <i data-sym="heart"></i> Like <i data-sym="chevron-right"></i><span class="sy-base"></span></span></div><p class="sy-read sy-row-read">&ndash;</p></div>
+      <div class="sy-row" data-px="17"><div class="sy-row-role"><b>Body</b><span>.ui-body &middot; 17 px</span></div>
+        <div class="sy-spec ui-body"><span class="sy-spec-in"><i data-sym="phone"></i> Phones <i data-sym="heart"></i> Like <i data-sym="chevron-right"></i><span class="sy-base"></span></span></div><p class="sy-read sy-row-read">&ndash;</p></div>
+      <div class="sy-row" data-px="28"><div class="sy-row-role"><b>Title 1</b><span>.ui-title1 &middot; 28 px</span></div>
+        <div class="sy-spec ui-title1"><span class="sy-spec-in"><i data-sym="phone"></i> Phones <i data-sym="heart"></i> Like <i data-sym="chevron-right"></i><span class="sy-base"></span></span></div><p class="sy-read sy-row-read">&ndash;</p></div>
+      <div class="sy-row" data-px="48"><div class="sy-row-role"><b>Section</b><span>.t-section &middot; 48 px</span></div>
+        <div class="sy-spec t-section"><span class="sy-spec-in"><i data-sym="phone"></i> Phones <i data-sym="heart"></i> Like <i data-sym="chevron-right"></i><span class="sy-base"></span></span></div><p class="sy-read sy-row-read">&ndash;</p></div>
+    </div>
+    <div class="sy-legend sy-read"><span><i></i>Cap height</span><span><i class="b"></i>Baseline</span><span>Stroke and centre offset are measured live in this browser.</span></div>
+    <div class="sy-cols sy-below">
+      <p class="sy-p">A glyph is <strong>1&nbsp;em square</strong> and drops <strong>0.13&nbsp;em</strong> below the baseline, which centres it on the cap height in both SF and Inter. Its stroke comes from the <strong>type role</strong>: 2.15 units at caption sizes, 1.24 at display sizes. Change the weight and the glyph follows the text.</p>
+<pre class="doc-code" data-lang="html"><code>&lt;p class="ui-footnote"&gt;
+  &lt;i data-sym="heart"&gt;&lt;/i&gt; Like
+&lt;/p&gt;
+&lt;!-- heavier with the text --&gt;
+&lt;b class="ui-headline sym-semibold"&gt;&hellip;&lt;/b&gt;</code></pre>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ 5 · VARIABLE VALUE ═══ -->
+<section class="band" data-band="story" id="variable" aria-labelledby="sy-var-h">
+  <div class="viewport-content">
+    <header class="section-header">
+      <h2 class="section-header-headline" id="sy-var-h">One glyph, every level.</h2>
+    </header>
+    <div class="sy-surface">
+      <div class="sy-var" id="sy-var">
+        <div><i data-sym="signal" data-sym-class="sym-variable"></i><span class="sy-mono">signal</span></div>
+        <div><i data-sym="speaker" data-sym-class="sym-variable"></i><span class="sy-mono">speaker</span></div>
+        <div><i data-sym="battery" data-sym-class="sym-variable"></i><span class="sy-mono">battery</span></div>
+        <div><i data-sym="waveform" data-sym-class="sym-variable"></i><span class="sy-mono">waveform</span></div>
+        <div><i data-sym="chart-bar" data-sym-class="sym-variable"></i><span class="sy-mono">chart-bar</span></div>
+      </div>
+      <div class="sy-var-ctl"><label class="sy-read" for="sy-value">Value</label><input class="slider" type="range" id="sy-value" min="0" max="100" value="45"><output class="sy-read" for="sy-value" id="sy-value-out"><b>0.45</b></output></div>
+    </div>
+    <div class="sy-cols sy-below">
+      <p class="sy-p">Layers light up as <code>--sym-value</code> passes a quarter, a half and three quarters. <strong>The first bar is never driven</strong>, so no signal still reads as a signal symbol and not as a broken image. Set the value on the glyph itself, from a selector or from script.</p>
+<pre class="doc-code" data-lang="html"><code>&lt;span class="wifi-weak"&gt;
+  &lt;i data-sym="signal" data-sym-class="sym-variable"&gt;&lt;/i&gt;
+&lt;/span&gt;
+&lt;style&gt;.wifi-weak .sym-variable { --sym-value: .5 }&lt;/style&gt;</code></pre>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ 6 · RIGHT TO LEFT ═══ -->
+<section class="band" data-band="utility" id="rtl" aria-labelledby="sy-rtl-h">
+  <div class="viewport-content">
+    <header class="section-header">
+      <h2 class="section-header-headline" id="sy-rtl-h">Arrows turn. Clocks don&rsquo;t.</h2>
+    </header>
+    <div class="sy-dirs">
+      <div class="sy-surface sy-dir">
+        <div class="sy-dir-head"><h3 class="sy-h3">Left to right</h3><span class="sy-read">dir="ltr"</span></div>
+        <div class="sy-dir-grid" id="sy-ltr"></div>
+      </div>
+      <div class="sy-surface sy-dir">
+        <div class="sy-dir-head"><h3 class="sy-h3">Right to left</h3><span class="sy-read">dir="rtl"</span></div>
+        <div class="sy-dir-grid" id="sy-rtl" dir="rtl"></div>
+      </div>
+    </div>
+    <div class="sy-cols sy-below">
+      <p class="sy-p"><strong id="sy-dir-n">15</strong> glyphs have a handedness and mirror under <code>dir="rtl"</code> (in accent above). Clocks, the clockwise arrow, vertical arrows and devices never flip. The flip is on the inner <code>&lt;use&gt;</code>, so a glyph that is also animating keeps its mirror.</p>
+      <p class="doc-note" data-kind="rule">Add <code>sym-noflip</code> when a directional glyph means a physical direction, such as a media control that must match hardware.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ 7 · REPLACE ═══ -->
+<section class="band" data-band="story" id="replace" aria-labelledby="sy-rep-h">
+  <div class="viewport-content">
+    <div class="lockup" data-reveal="up">
+      <p class="lockup-eyebrow">Content transitions</p>
+      <h2 class="lockup-headline" id="sy-rep-h">Change the glyph, not the button.</h2>
+      <p class="lockup-copy"><strong>SYM.replace</strong> is a replace transition: the old glyph shrinks away, the new one arrives on the toggle spring, in the same box. Press each one.</p>
+    </div>
+    <div class="sy-replace" style="margin-top:var(--s-11)">
+      <div class="sy-surface sy-rep">
+        <button class="btn btn-icon btn-xl" type="button" id="sy-r-play" aria-label="Play"><i data-sym="play"></i></button>
+        <p class="sy-read"><b>Play</b> &harr; <b>Pause</b></p><code class="sy-mono">play &harr; pause</code>
+      </div>
+      <div class="sy-surface sy-rep">
+        <button class="btn btn-l" type="button" id="sy-r-follow" aria-pressed="false"><i data-sym="person-add"></i><span>Follow</span></button>
+        <p class="sy-read"><b>Follow</b> &harr; <b>Following</b></p><code class="sy-mono">person-add &harr; checkmark</code>
+      </div>
+      <div class="sy-surface sy-rep">
+        <button class="btn btn-secondary btn-l" type="button" id="sy-r-copy"><i data-sym="doc"></i><span>Copy</span></button>
+        <p class="sy-read">Confirms, then returns</p><code class="sy-mono">doc &rarr; checkmark &rarr; doc</code>
+      </div>
+      <div class="sy-surface sy-rep">
+        <button class="btn btn-icon btn-xl" type="button" id="sy-r-rec" aria-label="Start recording"><i data-sym="record" data-sym-class="sym-bad"></i></button>
+        <p class="sy-read"><b>Record</b> &harr; <b>Stop</b></p><code class="sy-mono">record &harr; pause</code>
+      </div>
+    </div>
+    <div class="sy-cols sy-below">
+      <p class="sy-p">Under reduced motion the swap is immediate and the new glyph fades in over 120&nbsp;ms. <strong>Which glyph is showing is information</strong>, and it survives.</p>
+<pre class="doc-code" data-lang="js"><code>button.addEventListener('click', () =&gt; {
+  playing = !playing;
+  SYM.replace(button, playing ? 'pause' : 'play');
+  button.setAttribute('aria-label', playing ? 'Pause' : 'Play');
+});</code></pre>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ 8 · RULES ═══ -->
+<section class="band" data-band="utility" id="rules" aria-labelledby="sy-rules-h">
+  <div class="viewport-content">
+    <header class="section-header">
+      <h2 class="section-header-headline" id="sy-rules-h">Use them like words.</h2>
+    </header>
+    <div class="sy-rules">
+      <div class="doc-dodont">
+        <div class="doc-do">
+          <div class="doc-specimen"><span class="sy-good-size ui-subhead"><i data-sym="clock"></i> Updated 2 min ago</span></div>
+          <p class="doc-verdict">Let the glyph take the text&rsquo;s size and stroke. It is 1&nbsp;em and reads as part of the line.</p>
+        </div>
+        <div class="doc-dont">
+          <div class="doc-specimen"><span class="sy-bad-size"><i data-sym="clock"></i> Updated 2 min ago</span></div>
+          <p class="doc-verdict">Pin a glyph to a pixel size next to small text. It shouts, and its thin stroke no longer matches the letters.</p>
+        </div>
+      </div>
+      <div class="doc-dodont">
+        <div class="doc-do">
+          <div class="doc-specimen"><div class="sy-tabs"><span><i data-sym="house"></i><small>Home</small></span><span><i data-sym="calendar"></i><small>Plan</small></span><span><i data-sym="chart-bar"></i><small>Stats</small></span></div></div>
+          <p class="doc-verdict">Keep bars monochrome and put colour in the content. Glass labels and glyphs follow its ink.</p>
+        </div>
+        <div class="doc-dont">
+          <div class="doc-specimen"><div class="sy-tabs sy-tabs-brand"><span><i data-sym="house"></i><small>Home</small></span><span><i data-sym="calendar"></i><small>Plan</small></span><span><i data-sym="chart-bar"></i><small>Stats</small></span></div></div>
+          <p class="doc-verdict">Tint every tab in the brand hue. When everything is coloured, nothing stands out.</p>
+        </div>
+      </div>
+      <div class="sy-cols">
+        <div class="sy-stack">
+          <h3 class="sy-h3">Name what a glyph means</h3>
+          <p class="sy-p">Beside a label a glyph is decoration and is hidden from assistive technology. <strong>Standing alone, it needs a name</strong>: <code>data-sym-label</code> gives it <code>role="img"</code> and a title. On an icon-only button, name the button instead.</p>
+<pre class="doc-code" data-lang="html"><code>&lt;i data-sym="shield" data-sym-label="Protected"&gt;&lt;/i&gt;
+&lt;button class="btn btn-icon" aria-label="Search"&gt;
+  &lt;i data-sym="magnifier"&gt;&lt;/i&gt;
+&lt;/button&gt;</code></pre>
+        </div>
+        <div class="sy-stack">
+          <h3 class="sy-h3">Unknown names show themselves</h3>
+          <p class="sy-p">A misspelt name renders a red square and logs a warning, so a missing icon never passes for a spacing bug. <code>shape</code> is an alias of <code>sliders</code>.</p>
+          <div class="doc-specimen" style="min-height:120px"><span class="sy-good-size ui-body"><span data-sym-missing aria-hidden="true"></span> <code>data-sym="hart"</code></span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<script>
+/* symbols.html — page behaviour, on fg3:ready (SYM has mounted every
+   [data-sym] by then; content built here is mounted with SYM.mount). */
+(function () {
+  'use strict';
+  var doc = document, MID = ' ' + String.fromCharCode(183) + ' ';
+  function $(s, r) { return (r || doc).querySelector(s); }
+  function $$(s, r) { return Array.prototype.slice.call((r || doc).querySelectorAll(s)); }
+  function guard(name, fn) { try { fn(); } catch (e) { if (window.console) console.error('[symbols] ' + name, e); } }
+  function toast(msg, ok) { if (window.UI && UI.toast) UI.toast(msg, { kind: ok === false ? 'bad' : 'ok' }); }
+  function copy(text, label) {
+    var done = function (ok) { toast(ok ? 'Copied ' + label : 'The clipboard is not available here', ok); };
+    try { navigator.clipboard.writeText(text).then(function () { done(true); }, function () { done(false); }); } catch (e) { done(false); }
+  }
+
+  doc.addEventListener('fg3:ready', function () {
+    if (!window.SYM) return;
+    guard('hero', hero);
+    guard('browser', browser);
+    guard('type', typeRows);
+    guard('variable', variable);
+    guard('rtl', rtl);
+    guard('replace', replace);
+  });
+
+  function hero() {
+    var n = SYM.count();
+    $('#sy-count').textContent = String(n);
+    $('#sy-q').setAttribute('placeholder', 'Search ' + n + ' symbols');
+    var s = $('.sy-line .sym');
+    if (s) $('#sy-hero-stroke').textContent = parseFloat(getComputedStyle(s).getPropertyValue('--sym-optical')).toFixed(2);
+  }
+
+  /* ── the searchable grid and the inspector ─────────────────────────── */
+  function browser() {
+    var q = $('#sy-q'), grid = $('#sy-grid'), found = $('#sy-found'), empty = $('#sy-empty');
+    /* Any glyph the set has but the grid lacks gets a tile, so this page can
+       never again quote SYM.count() while showing fewer symbols. */
+    SYM.names().forEach(function (n) {
+      if (grid.querySelector('.sy-tile[data-name="' + n + '"]')) return;
+      var li = document.createElement('li');
+      li.innerHTML = '<button class="sy-tile" type="button" data-name="' + n + '" data-cat="objects" data-new aria-pressed="false"><i data-sym="' + n + '"></i><span class="sy-name">' + n + '</span></button>';
+      grid.appendChild(li); SYM.mount(li);
+    });
+    var tiles = $$('.sy-tile', grid), cat = '';
+    var total = tiles.length;
+    $('#sy-new-n').textContent = String(tiles.filter(function (t) { return t.hasAttribute('data-new'); }).length);
+    function filter() {
+      var term = q.value.trim().toLowerCase(), n = 0;
+      tiles.forEach(function (t) {
+        var name = t.getAttribute('data-name'), keys = t.getAttribute('data-keys') || '', cats = t.getAttribute('data-cat') || '';
+        var okCat = !cat || (cat === 'new' ? t.hasAttribute('data-new') : (' ' + cats + ' ').indexOf(' ' + cat + ' ') >= 0);
+        var okTerm = !term || name.indexOf(term) >= 0 || keys.indexOf(term) >= 0 || cats.indexOf(term) >= 0;
+        var show = okCat && okTerm;
+        t.parentNode.hidden = !show;
+        if (show) n++;
+      });
+      found.textContent = n === total ? total + ' symbols' : n + ' of ' + total + ' symbols';
+      /* keep one visible tile in the tab order */
+      var cur = tiles.filter(function (x) { return x.tabIndex === 0 && !x.parentNode.hidden; })[0], firstVis = tiles.filter(function (x) { return !x.parentNode.hidden; })[0];
+      if (!cur && firstVis) tiles.forEach(function (x) { x.tabIndex = x === firstVis ? 0 : -1; });
+      empty.hidden = n > 0;
+    }
+    q.addEventListener('input', filter);
+    $$('#sy-chips .chip').forEach(function (c) {
+      c.addEventListener('click', function () {
+        cat = c.getAttribute('data-cat');
+        $$('#sy-chips .chip').forEach(function (x) { x.setAttribute('aria-pressed', String(x === c)); });
+        filter();
+      });
+    });
+    var insp = {
+      big: $('#sy-insp-big'), name: $('#sy-insp-name'), flags: $('#sy-insp-flags'), sizes: $('#sy-insp-sizes'), modes: $('#sy-insp-modes'), code: $('#sy-insp-code code')
+    };
+    function select(t, focus) {
+      tiles.forEach(function (x) { x.setAttribute('aria-pressed', String(x === t)); x.tabIndex = x === t ? 0 : -1; });
+      var n = t.getAttribute('data-name');
+      insp.big.innerHTML = ''; insp.big.appendChild(SYM.build(n, '', n));
+      insp.name.textContent = n;
+      var flags = [];
+      if (t.hasAttribute('data-new')) flags.push('<span class="badge badge-accent">New in 1.0</span>');
+      if (SYM.DIRECTIONAL[n]) flags.push('<span class="badge">Mirrors in RTL</span>');
+      insp.flags.innerHTML = flags.join('');
+      insp.sizes.innerHTML = [11, 13, 17, 28, 40].map(function (px) {
+        var role = px <= 11 ? 'ui-caption2' : px <= 13 ? 'ui-footnote' : px <= 17 ? 'ui-body' : px <= 28 ? 'ui-title1' : 't-section';
+        return '<span class="' + role + '" style="font-size:' + px + 'px;line-height:1"><i data-sym="' + n + '"></i>Aa</span>';
+      }).join('');
+      insp.modes.innerHTML = [['', 'Mono'], ['sym-hier', 'Hier.'], ['sym-palette', 'Palette'], ['sym-variable', 'Value']].map(function (m) {
+        return '<div><i data-sym="' + n + '"' + (m[0] ? ' data-sym-class="' + m[0] + '"' : '') + '></i><small>' + m[1] + '</small></div>';
+      }).join('');
+      SYM.mount(insp.sizes); SYM.mount(insp.modes);
+      $$('.sym-variable', insp.modes).forEach(function (g) { g.style.setProperty('--sym-value', '.5'); });
+      insp.code.textContent = '<i data-sym="' + n + '"></i>';
+      if (pick.name.textContent !== n) {
+        SYM.replace(pick.glyph, n);
+        pick.name.textContent = n; pick.go.setAttribute('aria-label', n + ', every size and mode');
+      }
+      if (focus) t.focus();
+    }
+    var pick = { glyph: $('#sy-pick .sy-pick-glyph'), name: $('#sy-pick .sy-pick-name'), go: $('#sy-pick .sy-pick-go') };
+    $('#sy-pick-copy').addEventListener('click', function () { var n = pick.name.textContent; copy('<i data-sym="' + n + '"></i>', n); });
+    tiles.forEach(function (t) {
+      t.addEventListener('click', function () { select(t); });
+      t.addEventListener('dblclick', function () { copy('<i data-sym="' + t.getAttribute('data-name') + '"></i>', t.getAttribute('data-name')); });
+    });
+    /* arrow keys move through the visible tiles, like a grid */
+    grid.addEventListener('keydown', function (e) {
+      var t = e.target.closest && e.target.closest('.sy-tile'); if (!t) return;
+      var vis = tiles.filter(function (x) { return !x.parentNode.hidden; }), i = vis.indexOf(t);
+      var cols = Math.max(1, Math.round(grid.clientWidth / (t.offsetWidth + 10)));
+      var to = e.key === 'ArrowRight' ? i + 1 : e.key === 'ArrowLeft' ? i - 1 : e.key === 'ArrowDown' ? i + cols : e.key === 'ArrowUp' ? i - cols : -2;
+      if (to === -2) return;
+      e.preventDefault();
+      if (vis[to]) { tiles.forEach(function (x) { x.tabIndex = x === vis[to] ? 0 : -1; }); vis[to].focus(); }
+    });
+    var first = tiles.filter(function (t) { return t.getAttribute('data-name') === 'heart'; })[0] || tiles[0];
+    select(first);
+    filter();
+  }
+
+  /* ── symbols as type: measure what the browser actually drew ────────── */
+  function typeRows() {
+    var rows = $$('#sy-type-rows .sy-row'), cv = doc.createElement('canvas').getContext('2d');
+    function measure() {
+      rows.forEach(function (row) {
+        var spec = row.querySelector('.sy-spec'), inner = row.querySelector('.sy-spec-in'), sym = spec.querySelector('.sym');
+        if (!sym) return;
+        var cs = getComputedStyle(spec), px = parseFloat(cs.fontSize);
+        var lab = row.querySelector('.sy-row-role span');
+        lab.textContent = lab.textContent.replace(/[0-9.]+ px$/, (Math.round(px * 10) / 10) + ' px');
+        cv.font = cs.fontWeight + ' ' + cs.fontSize + ' ' + cs.fontFamily;
+        var cap = cv.measureText('H').actualBoundingBoxAscent;
+        var base = inner.querySelector('.sy-base').getBoundingClientRect().bottom, ir = inner.getBoundingClientRect();
+        var r = sym.getBoundingClientRect(), off = (r.top + r.height / 2) - (base - cap / 2);
+        var so = getComputedStyle(sym), stroke = parseFloat(so.getPropertyValue('--sym-optical')) * (parseFloat(so.getPropertyValue('--sym-weight')) || 1) * px / 24;
+        row.querySelector('.sy-row-read').innerHTML = 'Stroke <b>' + stroke.toFixed(2) + ' px</b>' + MID + 'centre <b>' + (off >= 0 ? '+' : String.fromCharCode(8722)) + Math.abs(off).toFixed(2) + ' px</b>';
+        $$('.sy-guide', inner).forEach(function (g) { g.remove(); });
+        var g1 = doc.createElement('span'), g2 = doc.createElement('span');
+        g1.className = 'sy-guide'; g2.className = 'sy-guide base';
+        g1.style.top = (base - cap - ir.top).toFixed(1) + 'px'; g2.style.top = (base - ir.top).toFixed(1) + 'px';
+        inner.appendChild(g1); inner.appendChild(g2);
+      });
+    }
+    var host = $('#sy-type-rows');
+    var seg = $('#sy-weight');
+    seg.addEventListener('change', function (e) {
+      var w = e.detail.item.getAttribute('data-value');
+      host.classList.remove('sym-regular', 'sym-semibold', 'sym-bold');
+      host.classList.add('sym-' + w);
+      $$('.sy-spec', host).forEach(function (s) { s.style.fontWeight = w === 'regular' ? '' : w === 'semibold' ? '600' : '700'; });
+      measure();
+    });
+    (doc.fonts && doc.fonts.ready ? doc.fonts.ready : Promise.resolve()).then(function () { requestAnimationFrame(measure); setTimeout(measure, 300); });
+    addEventListener('resize', function () { setTimeout(measure, 60); });
+  }
+
+  function variable() {
+    var inp = $('#sy-value'), out = $('#sy-value-out'), host = $('#sy-var');
+    function paint() {
+      var v = inp.value / 100;
+      /* .sym-variable declares --sym-value:1 on the glyph itself, so the value must be set there, not inherited */
+      $$('.sym-variable', host).forEach(function (g) { g.style.setProperty('--sym-value', v.toFixed(2)); });
+      out.innerHTML = '<b>' + v.toFixed(2) + '</b>';
+    }
+    inp.addEventListener('input', paint);
+    paint();
+  }
+
+  function rtl() {
+    var dir = Object.keys(SYM.DIRECTIONAL), extra = ['clock', 'arrow-clockwise', 'arrow-up', 'phone', 'bolt'];
+    var list = dir.concat(extra.filter(function (n) { return SYM.has(n); }));
+    ['#sy-ltr', '#sy-rtl'].forEach(function (id) {
+      var g = $(id);
+      g.innerHTML = list.map(function (n) { return '<div' + (SYM.DIRECTIONAL[n] ? ' data-mirror' : '') + '><i data-sym="' + n + '"></i><span class="sy-mono">' + n + '</span></div>'; }).join('');
+      SYM.mount(g);
+    });
+    $('#sy-dir-n').textContent = String(dir.length);
+  }
+
+  function replace() {
+    var play = $('#sy-r-play'), on = false;
+    play.addEventListener('click', function () { on = !on; SYM.replace(play, on ? 'pause' : 'play'); play.setAttribute('aria-label', on ? 'Pause' : 'Play'); });
+    var fol = $('#sy-r-follow'), f = false;
+    fol.addEventListener('click', function () {
+      f = !f; SYM.replace(fol, f ? 'checkmark' : 'person-add');
+      fol.setAttribute('aria-pressed', String(f));
+      fol.querySelector('span').textContent = f ? 'Following' : 'Follow';
+    });
+    var cp = $('#sy-r-copy'), t = 0;
+    cp.addEventListener('click', function () {
+      clearTimeout(t);
+      SYM.replace(cp, 'checkmark'); cp.querySelector('span').textContent = 'Copied';
+      t = setTimeout(function () { SYM.replace(cp, 'doc'); cp.querySelector('span').textContent = 'Copy'; }, 1600);
+    });
+    var rec = $('#sy-r-rec'), r = false;
+    rec.addEventListener('click', function () { r = !r; SYM.replace(rec, r ? 'pause' : 'record'); rec.setAttribute('aria-label', r ? 'Stop recording' : 'Start recording'); });
+  }
+})();
+</script>
+</main>
+
+<!-- ═══ FOOTER (shared — copy verbatim) ═══ -->
+<footer class="band" data-band="utility" data-band-seam="keep">
+  <div class="viewport-content stack-4">
+    <p class="t-caption" style="color: var(--label-2)">Fluid Design Open 1.0 &middot; A glass-and-spring design language with Fluid&rsquo;s colour. Type uses the system UI font where available and Inter elsewhere. Device art is original.</p>
+    <p class="t-caption"><a href="index.html">Overview</a> &middot; <a href="start.html">Start</a> &middot; <a href="docs.html">Docs</a> &middot; <a href="components.html">Components</a> &middot; <a href="selftest.html">Self-test</a> &middot; <a href="audit.html">Audit</a></p>
+  </div>
+</footer>
+
+<script src="assets/geom.js"></script>
+<script src="assets/spring.js"></script>
+<script src="assets/palette.js"></script>
+<script src="assets/art3.js"></script>
+<script src="assets/lg3-core.js"></script>
+<script src="assets/fg3.js"></script>
+<script src="assets/symbols.js"></script>
+<script src="assets/chart.js"></script>
+<script src="assets/motion.js"></script>
+<script src="assets/anim.js"></script>
+<script src="assets/device.js"></script>
+<script src="assets/ui.js"></script>
+<script src="assets/chrome.js"></script>
+<script src="assets/showcase.js"></script>
+<script src="assets/docs.js"></script>   <!-- documentation pages only -->
+<script>FG3.boot(); if (window.DOCS) DOCS.mount();</script>
+</body>
+</html>

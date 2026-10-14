@@ -1,0 +1,355 @@
+/* ═══════════════════════════════════════════════════════════════════════════
+   fg3.css — Fluid Design Open · base
+   ───────────────────────────────────────────────────────────────────────────
+   Reset · base · tone plumbing · type roles (web .t-* and app .ui-*) ·
+   layout (.viewport-content .grid-12 .rail section.band) · layer model ·
+   links · focus · utilities · corners · number roll · accessibility modes.
+   Buttons are the components'. Colour VALUES are the colour module's (fg3-color.css); this file only
+   consumes roles (--bg-1 --bg-2 --label --label-2 --link --accent …).
+
+   CLASS / ATTRIBUTE CONTRACT
+     .t-hero .t-headline .t-section .t-title .t-subtitle .t-lede .t-body
+     .t-callout .t-caption .t-micro .t-eyebrow .t-stat .t-stat-caption
+     .ui-large-title .ui-title1 .ui-title2 .ui-title3 .ui-headline .ui-body
+     .ui-callout .ui-subhead .ui-footnote .ui-caption1 .ui-caption2
+       + .ui-emphasized  · [data-density="compact"] (tokens)
+     .viewport-content  .grid-12 > .span-N .span-md-N .span-sm-N .start-N …
+     .rail   .band[data-band="story|utility|stage"] [data-band-bar]
+       [data-band-fade="utility|story|stage"] [data-band-seam="keep|collapse"]
+     .layer-content  .link  .stack(-N) .cluster .sr-only .tabular .balance
+     .pretty .center .prose  .corner-continuous .r-xs…r-2xl .capsule
+     [data-tone="light|dark"] (any element)  [data-fg3-corner] [data-fg3-capsule] (set by FG3;
+       data-fg3-corner="off" written by an author opts an element out of the corner pass)
+     .fg3-roll (set by FG3.rollNumber)
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* ── 1 · RESET ─────────────────────────────────────────────────────────── */
+*,*::before,*::after{box-sizing:border-box}
+body,h1,h2,h3,h4,h5,h6,p,figure,blockquote,dl,dd,pre,fieldset{margin:0}
+fieldset{padding:0;border:0}
+/* :where() — zero specificity, so a page's single-class list rule (.x{margin-top})
+   beats the reset instead of silently losing to (0,1,1). */
+:where(ul[class],ol[class]){list-style:none;margin:0;padding:0}
+[hidden]{display:none !important}          /* loses to any display rule otherwise */
+img,picture,video,canvas{display:block;max-width:100%}
+img,video{height:auto}
+input,button,textarea,select{font:inherit;letter-spacing:inherit;color:inherit}
+button{margin:0;padding:0;border:0;background:none;cursor:pointer}
+table{border-collapse:collapse}
+
+/* ── 2 · BASE ───────────────────────────────────────────────────────────────
+   html is 106.25%: 1rem = 17px at the browser default, so the
+   rem ramp computes to the pixels AND follows a reader who raised their
+   default font size (the web's Dynamic Type; FG3 also demotes the page to
+   no-fd-enhanced when it sees that, like the TextZoom validator).
+   No scroll-behavior:smooth — it turns every deep link into an animation
+   that a hidden tab never finishes. */
+html{font-size:106.25%;-webkit-text-size-adjust:100%;text-size-adjust:100%;
+  -webkit-tap-highlight-color:transparent;background:var(--bg-1);color:var(--label)}
+body{min-width:var(--w-min);
+  font-family:var(--t-body-ff);font-size:var(--t-body-fs);line-height:var(--t-body-lh);
+  letter-spacing:var(--t-body-ls);font-weight:400;
+  font-optical-sizing:auto;font-synthesis-weight:none;
+  -webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;
+  background:var(--bg-1);color:var(--label);
+  overflow-x:hidden;overflow-x:clip}      /* clip: no horizontal page scroll, sticky still works */
+h1,h2,h3,h4,h5,h6{font-family:var(--font-display);font-weight:600;text-wrap:balance}
+p{text-wrap:pretty}
+code,kbd,samp,pre{font-family:var(--font-mono);font-size:.94em;letter-spacing:0}
+::selection{background:color-mix(in srgb,var(--accent) 28%,transparent)}
+/* CJK, Arabic and Thai set tracking to 0. */
+:is(:lang(ar),:lang(ja),:lang(ko),:lang(zh),:lang(th)){letter-spacing:0 !important}
+
+/* ── 3 · TONE PLUMBING ─────────────────────────────────────────────────────
+   A tone is an attribute, on <html> or on any band. The role VALUES arrive
+   from fg3-color.css under the same selectors; here the element only has to
+   tell the UA which scheme it is (form controls, scrollbars) and re-read its
+   ink, because `color` computed on <html> would otherwise flow into a dark
+   band still holding the light label. FG3.boot() sets html[data-tone]. */
+html[data-tone="light"],[data-tone="light"]{color-scheme:light}
+html[data-tone="dark"],[data-tone="dark"]{color-scheme:dark}
+[data-tone]{color:var(--label)}
+
+/* ── 4 · TYPE — the web ramp (marketing surfaces) ───────────────────────────
+   Every role reads four tokens re-pointed per breakpoint in fg3-tokens.css,
+   so 1068 / 734 / 480 live in ONE place and a component can reach a role's
+   numbers (var(--t-hero-fs)) without re-deriving them. */
+.t-hero    {font-family:var(--t-hero-ff);font-size:var(--t-hero-fs);line-height:var(--t-hero-lh);letter-spacing:var(--t-hero-ls);font-weight:600}
+.t-headline{font-family:var(--t-headline-ff);font-size:var(--t-headline-fs);line-height:var(--t-headline-lh);letter-spacing:var(--t-headline-ls);font-weight:600}
+.t-section {font-family:var(--t-section-ff);font-size:var(--t-section-fs);line-height:var(--t-section-lh);letter-spacing:var(--t-section-ls);font-weight:600}
+.t-title   {font-family:var(--t-title-ff);font-size:var(--t-title-fs);line-height:var(--t-title-lh);letter-spacing:var(--t-title-ls);font-weight:600}
+.t-subtitle{font-family:var(--t-subtitle-ff);font-size:var(--t-subtitle-fs);line-height:var(--t-subtitle-lh);letter-spacing:var(--t-subtitle-ls);font-weight:600}
+.t-lede    {font-family:var(--t-lede-ff);font-size:var(--t-lede-fs);line-height:var(--t-lede-lh);letter-spacing:var(--t-lede-ls);font-weight:400}
+.t-body    {font-family:var(--t-body-ff);font-size:var(--t-body-fs);line-height:var(--t-body-lh);letter-spacing:var(--t-body-ls);font-weight:400}
+.t-callout {font-family:var(--t-callout-ff);font-size:var(--t-callout-fs);line-height:var(--t-callout-lh);letter-spacing:var(--t-callout-ls);font-weight:400}
+.t-caption {font-family:var(--t-caption-ff);font-size:var(--t-caption-fs);line-height:var(--t-caption-lh);letter-spacing:var(--t-caption-ls);font-weight:400}
+.t-micro   {font-family:var(--t-micro-ff);font-size:var(--t-micro-fs);line-height:var(--t-micro-lh);letter-spacing:var(--t-micro-ls);font-weight:400}
+.t-eyebrow {font-family:var(--t-eyebrow-ff);font-size:var(--t-eyebrow-fs);line-height:var(--t-eyebrow-lh);letter-spacing:var(--t-eyebrow-ls);font-weight:600}
+.t-stat    {font-family:var(--t-stat-ff);font-size:var(--t-stat-fs);line-height:var(--t-stat-lh);letter-spacing:var(--t-stat-ls);font-weight:600}
+.t-stat-caption{font-family:var(--t-stat-caption-ff);font-size:var(--t-stat-caption-fs);line-height:var(--t-stat-caption-lh);letter-spacing:var(--t-stat-caption-ls);font-weight:400}
+
+.t-hero,.t-headline,.t-section,.t-title,.t-subtitle,.t-eyebrow{text-wrap:balance}
+.t-lede,.t-body,.t-callout,.t-caption,.t-micro{text-wrap:pretty}
+/* Headlines and the eyebrow INHERIT ink (measured: The eyebrow is the
+   body ink #1d1d1f, not an accent). Grey roles: The lockup copy is
+   #6e6e73 with <strong> highlights in the headline ink AT THE SAME WEIGHT —
+   emphasis by colour, not boldness; tile callouts and
+   sosumi are grey too. */
+.t-lede,.t-callout,.t-micro{color:var(--label-2)}
+.t-lede :is(strong,b){color:var(--label);font-weight:inherit}
+.t-lede{max-width:var(--w-prose)}
+
+/* ── 5 · TYPE — the app ramp (console, phone companion) ─────────────────── */
+.ui-large-title{font-family:var(--t-ui-large-title-ff);font-size:var(--t-ui-large-title-fs);line-height:var(--t-ui-large-title-lh);letter-spacing:var(--t-ui-large-title-ls);font-weight:700}
+.ui-title1  {font-family:var(--t-ui-title1-ff);font-size:var(--t-ui-title1-fs);line-height:var(--t-ui-title1-lh);letter-spacing:var(--t-ui-title1-ls);font-weight:400}
+.ui-title2  {font-family:var(--t-ui-title2-ff);font-size:var(--t-ui-title2-fs);line-height:var(--t-ui-title2-lh);letter-spacing:var(--t-ui-title2-ls);font-weight:400}
+.ui-title3  {font-family:var(--t-ui-title3-ff);font-size:var(--t-ui-title3-fs);line-height:var(--t-ui-title3-lh);letter-spacing:var(--t-ui-title3-ls);font-weight:400}
+.ui-headline{font-family:var(--t-ui-headline-ff);font-size:var(--t-ui-headline-fs);line-height:var(--t-ui-headline-lh);letter-spacing:var(--t-ui-headline-ls);font-weight:600}
+.ui-body    {font-family:var(--t-ui-body-ff);font-size:var(--t-ui-body-fs);line-height:var(--t-ui-body-lh);letter-spacing:var(--t-ui-body-ls);font-weight:400}
+.ui-callout {font-family:var(--t-ui-callout-ff);font-size:var(--t-ui-callout-fs);line-height:var(--t-ui-callout-lh);letter-spacing:var(--t-ui-callout-ls);font-weight:400}
+.ui-subhead {font-family:var(--t-ui-subhead-ff);font-size:var(--t-ui-subhead-fs);line-height:var(--t-ui-subhead-lh);letter-spacing:var(--t-ui-subhead-ls);font-weight:400}
+.ui-footnote{font-family:var(--t-ui-footnote-ff);font-size:var(--t-ui-footnote-fs);line-height:var(--t-ui-footnote-lh);letter-spacing:var(--t-ui-footnote-ls);font-weight:400}
+.ui-caption1{font-family:var(--t-ui-caption1-ff);font-size:var(--t-ui-caption1-fs);line-height:var(--t-ui-caption1-lh);letter-spacing:var(--t-ui-caption1-ls);font-weight:400}
+.ui-caption2{font-family:var(--t-ui-caption2-ff);font-size:var(--t-ui-caption2-fs);line-height:var(--t-ui-caption2-lh);letter-spacing:var(--t-ui-caption2-ls);font-weight:400}
+/* "emphasized" weights: Bold for the three titles and the
+   large title, Semibold for everything else. */
+.ui-emphasized:is(.ui-large-title,.ui-title1,.ui-title2){font-weight:700}
+.ui-emphasized:is(.ui-title3,.ui-headline,.ui-body,.ui-callout,.ui-subhead,.ui-footnote,.ui-caption1,.ui-caption2){font-weight:600}
+.ui-large-title,.ui-title1,.ui-title2,.ui-title3{text-wrap:balance}
+
+/* ── 6 · LAYOUT ─────────────────────────────────────────────────────────────
+   One content column: 87.5% capped at 1260 (420 at ≤734). */
+.viewport-content{width:87.5%;max-width:var(--w-content);margin-inline:auto}
+.prose{max-width:var(--w-prose)}
+
+/* 12 columns, 20px gap (the nested bento grid measures 86.66px columns at
+   1260). Placement is two longhands so a span and a start combine. At ≤734
+   every child stacks to the full row unless it says .span-sm-N. */
+.grid-12{display:grid;grid-template-columns:repeat(var(--grid-cols),minmax(0,1fr));gap:var(--grid-gap)}
+.span-1{grid-column-end:span 1}.span-2{grid-column-end:span 2}.span-3{grid-column-end:span 3}
+.span-4{grid-column-end:span 4}.span-5{grid-column-end:span 5}.span-6{grid-column-end:span 6}
+.span-7{grid-column-end:span 7}.span-8{grid-column-end:span 8}.span-9{grid-column-end:span 9}
+.span-10{grid-column-end:span 10}.span-11{grid-column-end:span 11}.span-12{grid-column-end:span 12}
+.start-1{grid-column-start:1}.start-2{grid-column-start:2}.start-3{grid-column-start:3}
+.start-4{grid-column-start:4}.start-5{grid-column-start:5}.start-6{grid-column-start:6}
+.start-7{grid-column-start:7}.start-8{grid-column-start:8}.start-9{grid-column-start:9}
+.start-10{grid-column-start:10}.start-11{grid-column-start:11}.start-12{grid-column-start:12}
+@media (max-width:1068px){
+  .span-md-1{grid-column-end:span 1}.span-md-2{grid-column-end:span 2}.span-md-3{grid-column-end:span 3}
+  .span-md-4{grid-column-end:span 4}.span-md-5{grid-column-end:span 5}.span-md-6{grid-column-end:span 6}
+  .span-md-7{grid-column-end:span 7}.span-md-8{grid-column-end:span 8}.span-md-9{grid-column-end:span 9}
+  .span-md-10{grid-column-end:span 10}.span-md-11{grid-column-end:span 11}.span-md-12{grid-column-end:span 12}
+  .start-md-auto{grid-column-start:auto}.start-md-1{grid-column-start:1}.start-md-2{grid-column-start:2}
+  .start-md-3{grid-column-start:3}.start-md-4{grid-column-start:4}.start-md-5{grid-column-start:5}
+  .start-md-7{grid-column-start:7}
+}
+@media (max-width:734px){
+  .grid-12>*{grid-column:auto / span 12}
+  .span-sm-1{grid-column-end:span 1}.span-sm-2{grid-column-end:span 2}.span-sm-3{grid-column-end:span 3}
+  .span-sm-4{grid-column-end:span 4}.span-sm-5{grid-column-end:span 5}.span-sm-6{grid-column-end:span 6}
+  .span-sm-7{grid-column-end:span 7}.span-sm-8{grid-column-end:span 8}.span-sm-9{grid-column-end:span 9}
+  .span-sm-10{grid-column-end:span 10}.span-sm-11{grid-column-end:span 11}.span-sm-12{grid-column-end:span 12}
+  .start-sm-1{grid-column-start:1}.start-sm-2{grid-column-start:2}.start-sm-3{grid-column-start:3}
+  .start-sm-4{grid-column-start:4}.start-sm-5{grid-column-start:5}.start-sm-7{grid-column-start:7}
+}
+
+/* A full-bleed rail (galleries, scrollers): padded so its first item lines
+   up with the content column and its last can scroll to the edge:
+   max(6.25vw, (100vw − 1260)/2). Written in % of the band so a classic
+   scrollbar cannot shift it off the column; place it as a DIRECT child of a
+   band, not inside .viewport-content. */
+.rail{padding-inline:max(6.25%,calc((100% - var(--w-content)) / 2));
+  scroll-padding-inline:max(6.25%,calc((100% - var(--w-content)) / 2))}
+
+/* ── 7 · BANDS ──────────────────────────────────────────────────────────────
+   story   = the page ground, 128/96/80                   (duo white bands)
+   utility = --bg-2, 144/120/112                          (duo #f5f5f7 bands)
+   stage   = dark ground for material & film, 144/120/112 (dark tone; FG3.boot
+             adds data-tone="dark" when the author left it off)
+   data-band-bar  bottom 224/176/144 (a sticky glass bar parks inside).
+   Only .band is padded: a bare <section> carries nothing.
+   Every rule that sets --band-pt/--band-pb/--band-bg is ONE class of
+   specificity (.band:where(…)), so a page's own single class on the band
+   (.x{--band-pt:var(--s-11)}) overrides the kind, the bar room and the seam. */
+.band{position:relative;background-color:var(--band-bg,var(--bg-1));color:var(--label);
+  --band-pt:var(--band-pad-story);--band-pb:var(--band-pad-story);
+  padding-block:var(--band-pt) var(--band-pb)}
+.band:where([data-band="utility"]){--band-bg:var(--bg-2);--band-pt:var(--band-pad-utility);--band-pb:var(--band-pad-utility)}
+.band:where([data-band="stage"]){--band-bg:var(--bg-1);--band-pt:var(--band-pad-utility);--band-pb:var(--band-pad-utility);color-scheme:dark}
+.band:where([data-band-bar]){--band-pb:var(--band-pad-bar)}
+
+/* Seam collapse. Consecutive GREY bands are collapsed into one sheet
+   (one padding between) but
+   keeps 128 + 128 between consecutive WHITE story bands (Display →
+   Versatility → Cameras, §2.10). So utility and stage collapse by default,
+   story does not; data-band-seam="collapse|keep" on the LOWER band decides
+   explicitly. The lower band loses its top, so an upper band's 224px bar
+   room survives. Same kind AND same tone attribute, or it is not a seam. */
+.band:where(.band[data-band="utility"]:not([data-tone])+[data-band="utility"]:not([data-tone]):not([data-band-seam="keep"]),
+.band[data-band="utility"][data-tone="light"]+[data-band="utility"][data-tone="light"]:not([data-band-seam="keep"]),
+.band[data-band="utility"][data-tone="dark"]+[data-band="utility"][data-tone="dark"]:not([data-band-seam="keep"]),
+.band[data-band="stage"]+[data-band="stage"]:not([data-band-seam="keep"]),
+.band+[data-band-seam="collapse"]){--band-pt:0px}
+
+/* A band may FADE into the next instead of cutting: The .section-design
+   runs white down to calc(100% − 128px − 69px) then blends to #f5f5f7.
+   Default target is the utility ground; name another with the value. */
+.band[data-band-fade]{--band-fade-to:var(--bg-2);
+  background-image:linear-gradient(var(--band-bg,var(--bg-1)) calc(100% - var(--band-pb) - var(--band-fade-extra)),var(--band-fade-to))}
+.band[data-band-fade="story"]{--band-fade-to:var(--bg-1)}
+.band[data-band-fade="stage"]{--band-fade-to:var(--band-stage-bg)}
+
+/* The site footer (the template's body > footer) is the global footer,
+   not a utility band: ac-globalfooter pads a section 17px on top, ends its
+   legal row ~20px above the page end and sets a 980px column — the .footnotes measure, so the two line up at every width. The
+   utility rhythm put 144px above and below two caption lines. Wins over
+   the band's one class. */
+body>footer.band{--band-pt:17px;--band-pb:max(21px,env(safe-area-inset-bottom))}
+body>footer.band>.viewport-content{max-width:980px}
+/* After a grey band the ground does not change, so the footer keyline
+   (the sosumi's border-bottom, rgba(0,0,0,.16) = --separator) marks the end. */
+main:has(>.band[data-band="utility"]:not([data-tone]):last-of-type)+footer.band{--band-pt:0px}
+main:has(>.band[data-band="utility"]:not([data-tone]):last-of-type)+footer.band>.viewport-content::before{
+  content:"";display:block;border-top:1px solid var(--separator);margin-bottom:17px}
+
+/* ── 8 · THE LAYER MODEL ────────────────────────────────────────────────────
+   Glass is chrome; content is opaque. Inside .layer-content the material is
+   removed STRUCTURALLY — a rule people cannot forget, not a guideline. The
+   !important beats the inline backdrop-filter an engine writes. */
+.layer-content :is([data-lg3],.lg3){
+  -webkit-backdrop-filter:none !important;backdrop-filter:none !important;filter:none !important;
+  background:var(--bg-2) !important;box-shadow:inset 0 0 0 1px var(--separator) !important}
+
+/* ── 9 · LINKS + FOCUS ──────────────────────────────────────────────────────
+   Prose links (an <a> with no class, or .link) take the link ink, no
+   underline until hover. A classed <a> is a component and styles itself. */
+a{color:inherit;text-decoration:none}
+a:not([class]),.link{color:var(--link)}
+a:not([class]):hover,.link:hover{text-decoration:underline}
+/* 2px accent ring, 3px off a container, 1px off an inline link.
+   The outline follows the element's own border-radius and corner-shape, so
+   no radius is forced here (forcing border-radius:inherit on the focused
+   element would reshape anything that did not re-declare its own). */
+:focus-visible{outline:var(--focus-w) solid var(--focus-color,var(--accent));outline-offset:var(--focus-offset)}
+/* On glass the ring goes INSIDE, in the glass ink. Outside it sits on art whose
+   colour nothing controls (an accent ring over art measured 1.2-2.9:1); inside,
+   the glass ink is the one colour made legible on that glass (data-lg3-text). */
+:is(.lg3,[data-lg3]):focus-visible{outline-color:var(--focus-color,currentColor);outline-offset:calc(-1 * var(--focus-w) - 2px)}
+a:not([class]):focus-visible,.link:focus-visible{outline-offset:var(--focus-offset-inline);border-radius:2px}
+/* The corner fallback's clip would cut the ring: while focused the clip is
+   dropped and a "square" box takes the equal-mass circle FG3 keeps in --fg3-r. */
+[data-fg3-corner="clip"]:focus-visible,[data-fg3-corner="square"]:focus-visible{clip-path:none !important}
+[data-fg3-corner="square"]:focus-visible{border-radius:var(--fg3-r) !important}
+
+/* ── 10 · UTILITIES ─────────────────────────────────────────────────────── */
+.stack>*+*,.stack-1>*+*,.stack-2>*+*,.stack-3>*+*,.stack-4>*+*,.stack-5>*+*,.stack-6>*+*,
+.stack-7>*+*,.stack-8>*+*,.stack-9>*+*,.stack-10>*+*,.stack-11>*+*,.stack-12>*+*,
+.stack-13>*+*,.stack-14>*+*{margin-block-start:var(--stack-gap)}
+.stack{--stack-gap:var(--s-4)}
+.stack-1{--stack-gap:var(--s-1)}.stack-2{--stack-gap:var(--s-2)}.stack-3{--stack-gap:var(--s-3)}
+.stack-4{--stack-gap:var(--s-4)}.stack-5{--stack-gap:var(--s-5)}.stack-6{--stack-gap:var(--s-6)}
+.stack-7{--stack-gap:var(--s-7)}.stack-8{--stack-gap:var(--s-8)}.stack-9{--stack-gap:var(--s-9)}
+.stack-10{--stack-gap:var(--s-10)}.stack-11{--stack-gap:var(--s-11)}.stack-12{--stack-gap:var(--s-12)}
+.stack-13{--stack-gap:var(--s-13)}.stack-14{--stack-gap:var(--s-14)}
+.cluster{display:flex;flex-wrap:wrap;align-items:center;gap:var(--cluster-gap,var(--s-3))}
+.sr-only{position:absolute !important;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;
+  clip:rect(0 0 0 0);clip-path:inset(50%);white-space:nowrap;border:0}
+.tabular{font-variant-numeric:tabular-nums}
+.balance{text-wrap:balance}
+.pretty{text-wrap:pretty}
+.center{text-align:center;margin-inline:auto}
+
+/* ── 11 · CORNERS — three kinds only ─────────────────────
+   fixed  .corner-continuous (+ .r-*)   token radius × --r-scale, superellipse
+   capsule .capsule                     true semicircle ends, never a squircle
+   concentric [data-concentric]         derived by FG3 from the measured gap
+   Where corner-shape is unsupported FG3 redraws EVERY element any rule
+   shapes: an exact clip-path, or — where a clip would cut a shadow, hairline
+   or border — the circle of equal 45° mass (the own corner). Where
+   a scaled radius clamps on a short box, FG3 snaps it to a true capsule. */
+.corner-continuous{border-radius:var(--r,var(--r-lg));corner-shape:superellipse(var(--k,var(--k-continuous)))}
+.r-xs{--r:var(--r-xs)}.r-sm{--r:var(--r-sm)}.r-md{--r:var(--r-md)}
+.r-lg{--r:var(--r-lg)}.r-xl{--r:var(--r-xl)}.r-2xl{--r:var(--r-2xl)}
+.capsule{--k:1;border-radius:var(--r-pill);corner-shape:round}
+
+/* ── 12 · NUMBER ROLL (FG3.rollNumber) ──────────────────────────────────────
+   Each digit is a clipped slot holding a 0–9 strip. The slot's in-flow ghost
+   digit keeps width AND baseline (an overflow-clipped inline-block would sit
+   on its bottom edge instead of the text baseline). Travel is a spring from
+   fg3-springs.css when present. Every visible glyph is generated from data-g,
+   so the hidden twin is the number's only text (copy, find, innerText). The
+   drawing is unselectable: a strip's block cells otherwise put a line break
+   into a copied sentence ("1,225\n of a 2,160 cap"). */
+.fg3-roll-vis{white-space:nowrap;font-variant-numeric:tabular-nums;-webkit-user-select:none;user-select:none}
+.fg3-roll-vis [data-g]::before{content:attr(data-g)}
+.fg3-roll-d{position:relative;display:inline-block;clip-path:inset(0)}
+.fg3-roll-g{visibility:hidden}
+.fg3-roll-s{position:absolute;inset:0 0 auto 0;display:flex;flex-direction:column;
+  transform:translateY(calc(var(--d,0) * -10%));
+  transition:transform var(--sp-snappy-ms,500ms) var(--sp-snappy,cubic-bezier(.33,1,.68,1));
+  transition-delay:var(--roll-delay,0ms)}
+.fg3-roll-s>span{display:block}
+
+/* ── 13 · ACCESSIBILITY MODES ───────────────────────────────────────────────
+   REDUCED MOTION — deliberately NO `*{animation-duration:1ms!important}`.
+   shipping that blanket would zero every state-reporting indicator (the
+   working sheen, spinners, pulses: 1ms × 1 iteration) and, because
+   transition-property defaults to `all`, made EVERY style change on EVERY
+   element animate for 80ms, so JS layout reads went stale. Here reduced motion removes displacement where displacement is
+   declared: smooth scrolling here; choreography via html.no-fd-enhanced
+   (FG3's gate) and fg3-motion.css (spring); the roll snaps. */
+@media (prefers-reduced-motion:reduce){
+  html{scroll-behavior:auto}
+  .fg3-roll-s{transition:none}
+}
+html.fd-reduced-motion .fg3-roll-s{transition:none}
+
+/* REDUCED TRANSPARENCY — media query for Chromium, html[data-reduce-
+   transparency] for everything else (Safari cannot report it; LG3 sets the
+   attribute from its toggle). Materials go solid and stop sampling. */
+@media (prefers-reduced-transparency:reduce){
+  :root,[data-tone]{--mat-chrome-bg:var(--mat-chrome-fill-solid);--mat-platter-bg:var(--mat-platter-fill-solid);
+    --mat-control-bg:var(--mat-control-fill-solid);--mat-control-bg-hover:var(--mat-control-fill-solid-hover);
+    --mat-control-bg-active:var(--mat-control-fill-solid-active);
+    --mat-chrome-filter:none;--mat-platter-filter:none;--mat-control-filter:none}
+}
+html[data-reduce-transparency],html[data-reduce-transparency] [data-tone]{
+  --mat-chrome-bg:var(--mat-chrome-fill-solid);--mat-platter-bg:var(--mat-platter-fill-solid);
+  --mat-control-bg:var(--mat-control-fill-solid);--mat-control-bg-hover:var(--mat-control-fill-solid-hover);
+  --mat-control-bg-active:var(--mat-control-fill-solid-active);
+  --mat-chrome-filter:none;--mat-platter-filter:none;--mat-control-filter:none}
+
+/* INCREASED CONTRAST — the role values are the colour module's; here the materials thicken
+   (fill to the no-backdrop opacity, a 1.5px keyline) and the ring
+   widens. html[data-contrast="more"] is the same switch, on demand. */
+@media (prefers-contrast:more){
+  :root,[data-tone]{--mat-chrome-bg:var(--mat-chrome-fill-fallback);--mat-platter-bg:var(--mat-platter-fill-fallback);--mat-ring-w:1.5px}
+  :root{--focus-w:3px}
+}
+html[data-contrast="more"],html[data-contrast="more"] [data-tone]{
+  --mat-chrome-bg:var(--mat-chrome-fill-fallback);--mat-platter-bg:var(--mat-platter-fill-fallback);--mat-ring-w:1.5px}
+html[data-contrast="more"]{--focus-w:3px}
+
+/* FORCED COLOURS keeps backdrop-filter and background-image and removes
+   box-shadow — the wrong halves. So the
+   material is switched off explicitly, edges come back as outlines, and only
+   system colours are named. */
+@media (forced-colors:active){
+  :root,[data-tone]{--mat-chrome-bg:Canvas;--mat-platter-bg:Canvas;--mat-control-bg:ButtonFace;
+    --mat-chrome-filter:none;--mat-platter-filter:none;--mat-control-filter:none}
+  :is([data-lg3],.lg3){-webkit-backdrop-filter:none !important;backdrop-filter:none !important;
+    background:Canvas !important;background-image:none !important;color:CanvasText;
+    outline:1px solid CanvasText;outline-offset:-1px}
+  .band[data-band-fade]{background-image:none}
+  /* The reset takes every button's border, and forced colours then paints a
+     button as bare text; its background (the only mark of the selected one
+     in a set — a tone toggle, a segmented choice) is forced away too. So a
+     button's edge comes back as a 1px ButtonText outline inside the box,
+     and the SELECTED one wears a 2px Highlight ring. Zero specificity: a
+     component's own forced-colours rules (components, chrome) win. */
+  :where(button,[role="button"]){outline:1px solid ButtonText;outline-offset:-1px}
+  :where(button,[role="button"],[role="tab"],[role="radio"],[role="option"]):where([aria-pressed="true"],[aria-checked="true"],[aria-selected="true"]){
+    outline:2px solid Highlight;outline-offset:-2px}
+  :focus-visible{outline-color:Highlight}
+  a:not([class]),.link{color:LinkText}
+}

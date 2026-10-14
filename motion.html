@@ -1,0 +1,2028 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Motion &middot; Fluid Design Open</title>
+<!--
+  The Fluid Design Open page template. Every page of the site copies this skeleton VERBATIM
+  (head, site nav, footer, scripts) and replaces only: the <title>, the
+  aria-current link in the nav, the local-nav capsule's title/jump links, and
+  <main>.
+
+  Do NOT put data-tone on <html> unless the page must be pinned: an author
+  tone beats the reader's appearance toggle (FG3 precedence).
+-->
+<script>
+/* Tone without a flash (fg3.js header): reader's choice › author › host › system. */
+try{var d=document.documentElement,t=localStorage.getItem('fg3-tone');
+if(!d.hasAttribute('data-tone')){d.setAttribute('data-tone',t||d.getAttribute(
+'data-theme')||(matchMedia('(prefers-color-scheme: dark)').matches?'dark':
+'light'));d.setAttribute('data-tone-auto','')}}catch(e){}
+</script>
+<link rel="stylesheet" href="assets/fg3-tokens.css">
+<link rel="stylesheet" href="assets/fg3-color.css">
+<link rel="stylesheet" href="assets/fg3-springs.css">
+<link rel="stylesheet" href="assets/fg3.css">
+<link rel="stylesheet" href="assets/lg3.css">
+<link rel="stylesheet" href="assets/fg3-motion.css">
+<link rel="stylesheet" href="assets/fg3-components.css">
+<link rel="stylesheet" href="assets/fg3-chrome.css">
+<link rel="stylesheet" href="assets/fg3-showcase.css">
+<link rel="stylesheet" href="assets/fg3-symbols.css">
+<link rel="stylesheet" href="assets/fg3-chart.css">
+<link rel="stylesheet" href="assets/fg3-device.css">
+<link rel="stylesheet" href="assets/fg3-docs.css">    <!-- documentation pages only -->
+<style>
+/* Page layout only: roles and tokens, never a colour value (SPEC §2).
+   Page-local classes are prefixed with the page's own short name (e.g. mo- on
+   motion.html) so they can never collide with a system class. */
+
+/* ── shared ─────────────────────────────────────────────────────────────── */
+/* inline code sits on --fill-2: its ink is the on-fill secondary (colour contract), not the grey it inherits */
+:where(p,li,td,dd) > code{color:var(--label-2-on-fill)}
+.mo-head{max-width:860px}
+.mo-head > .t-lede{margin-top:var(--s-5)}
+.mo-head-center{margin-inline:auto;text-align:center}
+.mo-head-center > .t-lede{margin-inline:auto}
+.mo-after,ul.mo-after{margin-top:var(--band-header-gap)}
+.mo-cap{margin:0;font-size:var(--t-14);line-height:var(--t-14-lh);letter-spacing:var(--t-14-ls);color:var(--label-2)}
+.mo-out{min-height:1.43em;margin:0;font-size:var(--t-14);line-height:var(--t-14-lh);letter-spacing:var(--t-14-ls);
+  color:var(--label-2);font-variant-numeric:tabular-nums}
+.mo-out b{color:var(--label);font-weight:600}
+.mo-row{display:flex;flex-wrap:wrap;align-items:center;gap:var(--s-3)}
+.mo-h3{font-family:var(--font-display);font-size:var(--t-ui-title3-fs);line-height:var(--t-ui-title3-lh);letter-spacing:var(--t-ui-title3-ls);font-weight:600}
+.mo-kicker{margin:0 0 var(--s-2);font-size:var(--t-14);line-height:var(--t-14-lh);font-weight:600;color:var(--label-2)}
+.mo-code-line{display:inline-block;max-width:100%;overflow-x:auto;padding:4px 10px;border-radius:8px;background:var(--fill-2);
+  font:400 var(--t-12)/1.6 var(--font-mono);letter-spacing:0;color:var(--label);white-space:nowrap;vertical-align:middle}
+.mo-swatch{display:inline-block;width:10px;height:10px;border-radius:50%;background:var(--c,currentColor);vertical-align:0}
+.mo-swatch.is-dash{width:14px;height:0;border-radius:0;background:none;border-top:2px dashed var(--c,currentColor);vertical-align:3px}
+
+/* ── 1 · hero: a glass drop that becomes a capsule on a spring ─────────── */
+.mo-hero{--hero-art-from:40%;--hero-art-to:82%}
+.mo-hero .hero-headline{max-width:14ch}
+.mo-hero .hero-sub{color:var(--label-2)}
+.mo-hero-stage{flex:1 1 auto;align-self:stretch;display:grid;place-content:center;justify-items:center;gap:var(--s-5);
+  min-height:260px;padding-block:var(--s-6) var(--s-10)}
+.mo-hero-note{margin:0;min-height:1.3em;font-size:var(--t-14);line-height:var(--t-14-lh);letter-spacing:var(--t-14-ls);
+  color:var(--label-2);font-variant-numeric:tabular-nums;text-align:center}
+.mo-drop-slot{position:relative;display:grid;place-items:center;width:min(460px,86vw);height:88px}
+/* the spring itself, drawn behind the glass: time runs across the page, the
+   capsule sits where the curve has settled, so the lens bends the line */
+.mo-wave{position:absolute;left:calc(50% - 50vw);width:100vw;top:calc(50% - 60px);height:300px;overflow:visible;pointer-events:none}
+.mo-wave path{fill:none;stroke:color-mix(in srgb,var(--on-art-1) 88%,transparent);stroke-width:2;stroke-linecap:round;stroke-linejoin:round;
+  vector-effect:non-scaling-stroke;stroke-dasharray:1000;stroke-dashoffset:0;transition:stroke-dashoffset var(--mo-wave-ms,1500ms) linear}
+.mo-wave line{stroke:color-mix(in srgb,var(--on-art-1) 30%,transparent);stroke-width:1;stroke-dasharray:4 6;vector-effect:non-scaling-stroke}
+.mo-wave.is-reset path{transition:none;stroke-dashoffset:1000}
+.mo-drop{--p:var(--progress,1);position:relative;display:flex;align-items:center;gap:2px;overflow:clip;
+  width:calc(56px + (min(460px,86vw) - 56px) * var(--p));height:calc(56px * (1 + .32 * (1 - var(--p))));
+  padding:6px;border-radius:var(--r-pill);corner-shape:round}
+.mo-drop > button{flex:1 1 0;min-width:0;height:44px;border-radius:var(--r-pill);white-space:nowrap;
+  font-size:var(--t-ui-subhead-fs);line-height:1;letter-spacing:var(--t-ui-subhead-ls);font-weight:600;
+  opacity:calc(clamp(0,(var(--p) - .6) * 2.5,1) * .78);transition:background-color var(--d-200) linear}
+.mo-drop > button[aria-checked="true"]{opacity:clamp(0,(var(--p) - .6) * 2.5,1);background:color-mix(in srgb,currentColor 16%,transparent)}
+.mo-drop > button:focus-visible{outline-offset:-3px}
+html.mo-intro .mo-drop{--progress:0;visibility:hidden}
+/* LEGIBILITY on text-bearing glass over mid-tone art: the same share of LG3's
+   reduce-transparency fill components gives its glass buttons (fg3-components.css) */
+@media not (prefers-contrast:more){
+  .mo-drop.lg3[data-lg3-appearance="dark"]>.lg3__tint{background:color-mix(in srgb,var(--lg3-rt-dark) 42%,transparent)}
+  .mo-drop.lg3[data-lg3-appearance="light"]>.lg3__tint{background:color-mix(in srgb,var(--lg3-rt-light) 48%,transparent)}
+  /* larger text on larger glass: the share components gives menus and alerts */
+  :is(.mo-pp,.mo-cc).lg3[data-lg3-appearance="dark"]>.lg3__tint{background:color-mix(in srgb,var(--lg3-rt-dark) 60%,transparent)}
+  :is(.mo-pp,.mo-cc).lg3[data-lg3-appearance="light"]>.lg3__tint{background:color-mix(in srgb,var(--lg3-rt-light) 62%,transparent)}
+  /* chrome components on this page's art (reported: their labels measured 2.5–3.8:1 here) */
+  :is(.mo-lc-host .live-capsule__glass,.mo-tb-screen .tabbar__bar).lg3[data-lg3-appearance="dark"]>.lg3__tint{background:color-mix(in srgb,var(--lg3-rt-dark) 55%,transparent)}
+  :is(.mo-lc-host .live-capsule__glass,.mo-tb-screen .tabbar__bar).lg3[data-lg3-appearance="light"]>.lg3__tint{background:color-mix(in srgb,var(--lg3-rt-light) 58%,transparent)}
+}
+
+/* ── 2 · springs: a sticky stage and the twenty-four ───────────────────── */
+.mo-sl{display:grid;grid-template-columns:minmax(0,5fr) minmax(0,7fr);gap:var(--grid-gap);align-items:start}
+.mo-sl-stage{position:sticky;top:84px;overflow:clip;border-radius:var(--r-lg);corner-shape:superellipse(var(--k-continuous));
+  background:var(--c-surface);box-shadow:var(--c-card-shadow)}
+.mo-sl-art{position:relative;height:208px;overflow:clip;container-type:inline-size;isolation:isolate}
+.mo-sl-art > canvas{position:absolute;inset:0;width:100%;height:100%;z-index:-1}
+.mo-sl-track{position:absolute;left:36px;right:36px;top:50%;border-top:1.5px dashed color-mix(in srgb,var(--on-art-1) 55%,transparent)}
+.mo-sl-track::before,.mo-sl-track::after{content:"";position:absolute;top:-7px;width:1.5px;height:13px;background:color-mix(in srgb,var(--on-art-1) 70%,transparent)}
+.mo-sl-track::before{left:0}.mo-sl-track::after{right:0}
+.mo-sl-rider{position:absolute;left:36px;top:50%;width:64px;height:64px;margin:-32px 0 0 -32px;--x:0;
+  translate:calc(var(--x) * (100cqw - 72px)) 0;transition:translate var(--mo-ms,642ms) var(--mo-ease,var(--ease-standard))}
+.mo-sl-chip{width:64px;height:64px;border-radius:50%}
+.mo-sl-tag{display:none}
+.mo-sl-info{padding:var(--s-7) var(--s-7) var(--s-6)}
+.mo-sl-title{display:flex;align-items:baseline;justify-content:space-between;gap:var(--s-4)}
+.mo-sl-name{font-family:var(--font-display);font-size:var(--t-28);line-height:var(--t-28-lh);letter-spacing:var(--t-28-ls);font-weight:600}
+.mo-sl-settle{font-size:var(--t-17);font-weight:600;color:var(--label-2);font-variant-numeric:tabular-nums;white-space:nowrap}
+.mo-sl-use{margin:var(--s-1) 0 var(--s-4)}
+.mo-sl-stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:var(--s-3);margin:var(--s-5) 0 var(--s-4);padding:0}
+.mo-sl-stats div{min-width:0}
+.mo-sl-stats dt{font-size:var(--t-12);line-height:var(--t-12-lh);color:var(--label-2)}
+.mo-sl-stats dd{margin:2px 0 0;font-size:var(--t-19);line-height:1.2;font-weight:600;font-variant-numeric:tabular-nums;white-space:nowrap}
+.mo-sl-plot{display:block;width:100%;height:200px;overflow:visible}
+.mo-sl-legend{display:flex;flex-wrap:wrap;gap:var(--s-2) var(--s-5);margin:var(--s-3) 0 var(--s-5)}
+.mo-sl-list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.mo-sp{display:grid;gap:4px;width:100%;height:100%;padding:18px 20px 16px;text-align:start;border-radius:var(--r-md);
+  corner-shape:superellipse(var(--k-continuous));background:var(--c-surface);color:var(--label);box-shadow:var(--c-card-shadow);
+  transition:box-shadow var(--d-200) linear}
+.mo-sp:hover{box-shadow:var(--c-card-shadow),inset 0 0 0 1px var(--separator)}
+.mo-sp[aria-pressed="true"]{box-shadow:var(--c-card-shadow),inset 0 0 0 2px var(--accent)}
+.mo-sp-head{display:flex;flex-wrap:wrap;align-items:baseline;justify-content:space-between;gap:0 var(--s-2)}
+.mo-sp-name{font-size:var(--t-17);line-height:var(--t-17-lh);font-weight:600;letter-spacing:var(--t-17-ls)}
+.mo-sp-ms{font-size:var(--t-14);color:var(--label-2);font-variant-numeric:tabular-nums}
+.mo-sp-use{font-size:var(--t-12);line-height:var(--t-12-lh);color:var(--label-2)}
+.mo-sp-plot{display:block;width:100%;height:56px;margin:6px 0 2px;overflow:visible}
+.mo-sp-meta{font-size:var(--t-12);line-height:var(--t-12-lh);color:var(--label-2);font-variant-numeric:tabular-nums}
+.mo-plot-curve{fill:none;stroke:var(--accent);stroke-width:2;stroke-linecap:round;stroke-linejoin:round;vector-effect:non-scaling-stroke}
+.mo-plot-css{fill:none;stroke:var(--label);stroke-width:1.25;stroke-dasharray:3 4;opacity:.62;vector-effect:non-scaling-stroke}
+.mo-plot-one{stroke:var(--separator);stroke-width:1;stroke-dasharray:3 3;vector-effect:non-scaling-stroke}
+.mo-plot-axis{stroke:var(--separator);stroke-width:1;vector-effect:non-scaling-stroke}
+.mo-plot-settle{stroke:var(--label-4);stroke-width:1;vector-effect:non-scaling-stroke}
+.mo-plot-text{fill:var(--label-2);font-size:12px;font-family:var(--font-text);font-variant-numeric:tabular-nums}
+.mo-plot-head{fill:var(--accent);stroke:var(--c-surface);stroke-width:2}
+.mo-plot-peak{fill:var(--label);stroke:var(--c-surface);stroke-width:1.5}
+
+/* ── 3 · interrupt ──────────────────────────────────────────────────────── */
+.mo-rt{display:grid;gap:var(--s-6)}
+.mo-lanes{display:grid;gap:14px}
+.mo-lane{display:grid;grid-template-columns:250px minmax(0,1fr);gap:var(--s-5);align-items:center}
+.mo-lane-label{display:grid;gap:2px;font-size:var(--t-14);line-height:var(--t-14-lh)}
+.mo-lane-label b{font-weight:600}
+.mo-lane-label span{color:var(--label-2)}
+.mo-track{position:relative;height:48px;border-radius:var(--r-pill);background:var(--fill-2)}
+.mo-puck{position:absolute;left:6px;top:6px;width:36px;height:36px;border-radius:50%;background:var(--c);box-shadow:var(--shadow-knob,none)}
+.mo-puck-css{transition:transform var(--sp-snappy-ms) var(--sp-snappy)}
+.mo-rt-plot{display:block;width:100%;height:220px;border-radius:var(--r-sm);background:var(--bg-1);overflow:visible}
+.mo-rt-legend{display:flex;flex-wrap:wrap;gap:var(--s-2) var(--s-6)}
+.mo-rt-table{margin-top:calc(-1 * var(--s-2))}
+
+/* ── 4 · curves ─────────────────────────────────────────────────────────── */
+.mo-cv-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:var(--grid-gap)}
+.mo-cv{display:grid;align-content:start;gap:4px;padding:var(--s-6) var(--s-6) var(--s-5);border-radius:var(--r-lg);
+  corner-shape:superellipse(var(--k-continuous));background:var(--c-surface);box-shadow:var(--c-card-shadow)}
+.mo-cv-plot{width:112px;height:112px;margin:-6px 0 var(--s-2) -10px;overflow:visible}
+.mo-cv-box{fill:none;stroke:var(--separator);stroke-width:1}
+.mo-cv-arm{stroke:var(--label-4);stroke-width:1}
+.mo-cv-knob{fill:var(--c-surface);stroke:var(--label-3);stroke-width:1.5}
+.mo-cv-curve{fill:none;stroke:var(--accent);stroke-width:2.25;stroke-linecap:round}
+.mo-cv-name{margin:0;font:600 var(--t-14)/1.3 var(--font-mono);letter-spacing:0}
+.mo-cv-val{margin:0;font:400 var(--t-12)/1.5 var(--font-mono);letter-spacing:0;color:var(--label-2)}
+.mo-cv-use{margin:var(--s-2) 0 0;font-size:var(--t-14);line-height:var(--t-14-lh);color:var(--label-2)}
+.mo-cv-lane{position:relative;display:block;height:14px;margin-top:var(--s-4);border-radius:7px;background:var(--fill-2);container-type:inline-size}
+.mo-cv-lane i{position:absolute;left:1px;top:1px;width:12px;height:12px;border-radius:50%;background:var(--accent-solid);
+  transition:translate 1000ms var(--mo-ease)}
+.mo-cv-grid.is-on .mo-cv-lane i{translate:calc(100cqw - 14px) 0}
+.mo-when{margin-top:var(--s-10)}
+
+/* ── 5 · thirteen tiers ───────────────────────────────────────────────────── */
+.mo-mx{display:grid;grid-template-columns:170px repeat(4,minmax(0,1fr));gap:10px}
+.mo-mx-colhead{padding:0 4px var(--s-2)}
+.mo-mx-colhead b,.mo-mx-rowhead b{display:block;font-size:var(--t-17);line-height:var(--t-17-lh);font-weight:600}
+.mo-mx-colhead span,.mo-mx-rowhead span{display:block;font-size:var(--t-12);line-height:var(--t-12-lh);color:var(--label-2)}
+.mo-mx-rowhead{align-self:center;padding:var(--s-3) var(--s-2) var(--s-3) 0}
+.mo-mx-cell{position:relative;display:grid;grid-template-rows:auto 1fr auto;gap:var(--s-3);min-height:176px;padding:14px 14px 12px;
+  border-radius:var(--r-md);corner-shape:superellipse(var(--k-continuous));background:var(--c-surface)}
+.mo-mx-cell.is-empty{background:none;display:grid;place-items:center;color:var(--label-4)}
+.mo-mx-cell.is-empty::after{content:"";width:28px;height:1.5px;border-radius:1px;background:var(--separator-opaque)}
+.mo-mx-where{display:none}
+.mo-mx-cls{margin:0;font:400 var(--t-12)/1.45 var(--font-mono);letter-spacing:0;color:var(--label-2)}
+.mo-mx-spec{display:grid;place-items:center;align-content:center;gap:var(--s-2);min-height:64px;text-align:center}
+.mo-mx-go{display:flex;flex-wrap:wrap;gap:6px;justify-content:center}
+.mo-push{position:relative;width:100%;height:56px;overflow:clip;border-radius:12px;background:var(--bg-1)}
+.mo-push > span{position:absolute;inset:0;display:grid;place-items:center;font-size:var(--t-14);font-weight:600}
+.mo-disc{display:inline-flex;align-items:center;gap:6px;font-size:var(--t-14);font-weight:600;color:var(--link)}
+.mo-disc .sym{transition:rotate var(--sp-toggle-ms) var(--sp-toggle)}
+.mo-disc[aria-expanded="true"] .sym{rotate:180deg}
+.mo-coll p{margin:6px 0 0;font-size:var(--t-12);line-height:var(--t-12-lh);color:var(--label-2)}
+.mo-rows{width:100%;display:grid;gap:4px;font-size:var(--t-12);line-height:1.3}
+.mo-rows li{padding:6px 8px;border-radius:8px;background:var(--bg-1);text-align:start;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.mo-press{min-height:44px;padding:0 18px;border-radius:var(--r-pill);background:var(--label);color:var(--label-inv);font-size:var(--t-14);font-weight:600}
+.mo-pop{display:inline-grid;place-items:center;width:48px;height:48px;border-radius:50%;background:var(--ok);color:var(--ok-ink);font-size:22px}
+.mo-field{display:grid;place-items:center start;width:100%;height:40px;padding:0 12px;border-radius:10px;background:var(--bg-1);
+  box-shadow:inset 0 0 0 1px var(--separator);font-size:var(--t-14);color:var(--label-2);letter-spacing:.2em}
+.mo-live{display:inline-flex;align-items:center;gap:8px;font-size:var(--t-14);font-weight:600}
+.mo-live i{width:10px;height:10px;border-radius:50%;background:var(--ok)}
+.mo-live i.is-accent{background:var(--accent-solid)}
+.mo-spin{display:inline-grid;place-items:center;font-size:24px;color:var(--label-2)}
+.mo-bar{width:100%}
+.mo-count{font-size:var(--t-28);line-height:1.1;font-weight:600;font-variant-numeric:tabular-nums}
+.mo-count-cap{font-size:var(--t-12);color:var(--label-2)}
+.mo-glyph{display:inline-grid;place-items:center;width:48px;height:48px;border-radius:50%;background:var(--fill-1);font-size:20px}
+.mo-sheen-tile{position:relative;width:100%;height:64px;border-radius:12px;overflow:hidden}
+.mo-sheen-tile > canvas{position:absolute;inset:0;width:100%;height:100%}
+.mo-drift-dot{width:14px;height:14px;border-radius:50%;background:var(--accent-solid);--m-dx:22px;--m-dy:-8px}
+
+/* ── 6 · reduced motion: the preview twins ──────────────────────────────── */
+.mo-rm-bar{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:var(--s-4) var(--s-8);
+  padding:var(--s-4) var(--s-6);border-radius:var(--r-lg);corner-shape:superellipse(var(--k-continuous));background:var(--c-surface)}
+.mo-rm-bar .choice{font-size:var(--t-17);font-weight:600}
+.mo-rm-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:var(--grid-gap);margin-top:var(--grid-gap)}
+.mo-rm{display:grid;grid-template-rows:auto auto 1fr auto;gap:var(--s-3);padding:var(--s-6);border-radius:var(--r-lg);
+  corner-shape:superellipse(var(--k-continuous));background:var(--c-surface);box-shadow:var(--c-card-shadow)}
+.mo-rm h3{font-size:var(--t-19);line-height:1.25;font-weight:600}
+.mo-rm-rule{margin:0;font-size:var(--t-14);line-height:var(--t-14-lh);color:var(--label-2)}
+.mo-rm-spec{display:grid;place-items:center;min-height:96px;border-radius:14px;background:var(--bg-2)}
+[data-band="utility"] .mo-rm-spec{background:var(--bg-2)}
+.mo-rm-meas{margin:0;font:400 var(--t-12)/1.5 var(--font-mono);letter-spacing:0;color:var(--label-2);min-height:3em}
+.mo-rm-meas b{color:var(--label);font-weight:600}
+.mo-rm-tile{width:88px;height:56px;border-radius:12px;background:var(--accent-fill)}
+.mo-rm > .btn{justify-self:start}
+/* PREVIEW ONLY: the same declarations fg3-motion.css applies under
+   prefers-reduced-motion, scoped to the specimens so a reader can compare
+   without changing a system setting (requested as a system hook). */
+[data-mo-reduce] .m-enter-up{animation-name:m-fade-in;animation-duration:140ms;animation-timing-function:linear}
+[data-mo-reduce] :is(.m-shake,.m-nudge,.m-pop){animation:m-flash 700ms var(--ease-out-cubic)}
+[data-mo-reduce] .m-shake{--m-flash:color-mix(in srgb,var(--bad) 26%,transparent)}
+[data-mo-reduce] .m-spin{animation-duration:2.4s}
+[data-mo-reduce] .m-pulse{animation-duration:3.4s}
+[data-mo-reduce] .m-bar.m-working > i::after{animation-duration:3s}
+[data-mo-reduce] .m-sheen::after{animation:none;opacity:0}
+[data-mo-reduce] .m-press:active{transform:none;background-color:var(--fill-1);color:var(--label)}
+[data-mo-reduce] .mo-rm-morph{transition:none}
+[data-mo-reduce] .mo-rm-scene{--progress:1 !important}
+.mo-rm-morph{width:calc(44px + 120px * var(--mo-p,0));height:44px;border-radius:var(--r-pill);background:var(--accent-fill);
+  transition:width var(--sp-morph-ms) var(--sp-morph)}
+.mo-rm-scene{--progress:0;width:120px;height:8px;border-radius:4px;background:var(--fill-1);overflow:hidden}
+.mo-rm-scene i{display:block;height:100%;width:calc(var(--progress) * 100%);background:var(--accent-solid)}
+
+/* ── 7 · morphs: one number, four shapes (stage band) ──────────────────── */
+.mo-mg{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:var(--grid-gap)}
+.mo-mt{display:grid;grid-template-rows:auto 1fr;overflow:clip;border-radius:var(--r-lg);corner-shape:superellipse(var(--k-continuous));
+  background:var(--bg-2)}
+.mo-mt-art{position:relative;height:360px;overflow:clip;container-type:inline-size;isolation:isolate}
+.mo-mt-art > canvas{position:absolute;inset:0;width:100%;height:100%;z-index:-1}
+.mo-mt-foot{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:end;gap:var(--s-4) var(--s-6);padding:var(--s-6) var(--s-7) var(--s-7)}
+.mo-mt-foot h3{font-size:var(--t-21);line-height:1.2;font-weight:600}
+.mo-mt-foot .mo-code-line{margin-top:var(--s-2)}
+.mo-mt-foot .mo-row{grid-column:1 / -1}
+.mo-gauge{display:grid;justify-items:end;gap:2px;text-align:end}
+.mo-gauge-var{font:400 var(--t-12)/1.3 var(--font-mono);letter-spacing:0;color:var(--label-2)}
+.mo-gauge-val{font-family:var(--font-display);font-size:var(--t-32);line-height:1;font-weight:600;font-variant-numeric:tabular-nums;letter-spacing:-.01em}
+.mo-gauge-bar{position:relative;width:132px;height:6px;margin-top:6px;border-radius:3px;background:var(--fill-1)}
+.mo-gauge-bar i{position:absolute;left:0;top:0;bottom:0;width:calc(clamp(0,var(--g,0),1.3) / 1.3 * 100%);border-radius:3px;background:var(--accent-solid)}
+.mo-gauge-bar::after{content:"";position:absolute;left:calc(100% / 1.3);top:-4px;bottom:-4px;width:1.5px;background:var(--label-2)}
+.mo-gauge-trace{display:block;width:132px;height:28px;margin-top:4px;overflow:visible}
+.mo-gauge-trace path{fill:none;stroke:var(--accent);stroke-width:1.5;vector-effect:non-scaling-stroke}
+.mo-gauge-trace line{stroke:var(--separator);stroke-dasharray:2 2;vector-effect:non-scaling-stroke}
+/* a · pill → panel, local-nav geometry on one --progress */
+.mo-pp{--p:var(--progress,0);position:absolute;left:50%;top:32px;translate:-50% 0;display:grid;align-content:start;overflow:clip;
+  width:calc(236px + (min(460px,100cqw - 48px) - 236px) * var(--p));height:calc(52px + 196px * var(--p));
+  padding:calc(8px + 14px * var(--p)) calc(8px + 14px * var(--p)) 0 calc(20px + 4px * var(--p));
+  border-radius:calc(32px - 14px * (1 - var(--p)))}
+.mo-pp-bar{display:flex;align-items:center;justify-content:space-between;gap:var(--s-3);height:36px}
+.mo-pp-title{font-size:calc(17px + 11px * var(--p));line-height:1;font-weight:600;letter-spacing:-.01em;white-space:nowrap}
+.mo-pp-btn{height:36px;padding:0 16px;border-radius:var(--r-pill);background:color-mix(in srgb,currentColor 14%,transparent);
+  font-size:var(--t-14);font-weight:600;white-space:nowrap}
+.mo-pp-list{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:calc(22px * var(--p))}
+.mo-pp-list li{padding:11px 14px;border-radius:14px;background:color-mix(in srgb,currentColor 10%,transparent);font-size:var(--t-14);font-weight:600;
+  opacity:clamp(0,(var(--p) - .45) * 2.2,1);translate:0 calc(-18px * (1 - var(--p)))}
+/* b · chip → card */
+.mo-cc{--p:var(--progress,0);position:absolute;left:50%;top:40px;translate:-50% 0;overflow:clip;
+  width:calc(212px + (min(380px,100cqw - 48px) - 212px) * var(--p));height:calc(52px + 172px * var(--p));
+  border-radius:calc(26px + 2px * var(--p));corner-shape:round}
+.mo-cc-chip{display:flex;align-items:center;gap:10px;width:100%;height:52px;padding:0 16px 0 10px;text-align:start;
+  font-size:var(--t-17);font-weight:600;white-space:nowrap}
+.mo-cc-chip:focus-visible{outline-offset:-4px}
+.mo-cc-icon{display:grid;place-items:center;flex:none;width:32px;height:32px;border-radius:50%;box-shadow:inset 0 0 0 1.5px currentColor;rotate:calc(45deg * var(--p))}
+.mo-cc-body{margin:0;padding:4px 22px 0;font-size:var(--t-17);line-height:var(--t-17-lh);opacity:clamp(0,(var(--p) - .5) * 2.4,1)}
+/* c · a phone-sized scroll view with a real tab bar */
+.mo-tb-screen{position:absolute;left:50%;top:28px;bottom:28px;width:min(320px,100cqw - 48px);translate:-50% 0;overflow:clip;
+  border-radius:40px;background:var(--bg-1);box-shadow:0 0 0 6px color-mix(in srgb,var(--label) 12%,transparent)}
+.mo-tb-screen .tabbar{--tb-h:58px}
+.mo-tb-scroll{position:absolute;inset:0;overflow:auto;scrollbar-width:none;overscroll-behavior:contain}
+.mo-tb-scroll::-webkit-scrollbar{display:none}
+.mo-tb-feed{display:grid;gap:10px;padding:18px 12px 160px}
+.mo-tb-feed p{margin:4px 6px 0;font-size:var(--t-ui-title2-fs);line-height:var(--t-ui-title2-lh);font-weight:700}
+.mo-tb-card{position:relative;height:150px;overflow:clip;border-radius:22px}
+.mo-tb-card canvas{position:absolute;inset:0;width:100%;height:100%}
+.mo-tb-screen .tabbar{--tb-max:300px}
+/* d · the live capsule over art */
+.mo-lc-host{position:absolute;inset:36px 0 auto;display:grid;justify-items:center}
+
+/* ── 8 · gestures ───────────────────────────────────────────────────────── */
+.mo-gs-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:var(--grid-gap)}
+.mo-gs{display:grid;align-content:start;gap:var(--s-4)}
+.mo-gs .t-caption{color:var(--label-2)}
+.mo-drag{position:relative;height:420px;overflow:clip;border-radius:var(--r-md);corner-shape:superellipse(var(--k-continuous));
+  background:var(--bg-1);touch-action:none}
+.mo-drag-rail{position:absolute;left:18px;right:18px;height:0;border-top:1px dashed var(--label-4);top:var(--y)}
+.mo-drag-rail span{position:absolute;right:0;top:-22px;font-size:var(--t-12);color:var(--label-2)}
+.mo-sheet{position:absolute;left:18px;right:18px;top:24px;height:136px;display:grid;justify-items:center;align-content:start;gap:10px;
+  padding:10px 20px 20px;border-radius:24px;background:var(--bg-2);box-shadow:var(--shadow-lift,0 8px 24px rgba(0,0,0,.2));
+  cursor:grab;user-select:none;touch-action:none}
+.mo-sheet[data-m-dragging]{cursor:grabbing}
+.mo-sheet-grab{width:36px;height:5px;border-radius:3px;background:var(--label-3)}
+.mo-sheet b{font-size:var(--t-17);font-weight:600}
+.mo-sheet span{font-size:var(--t-14);color:var(--label-2);text-align:center}
+.mo-duo-wrap{display:grid;justify-items:center;padding:var(--s-6) 0 var(--s-2)}
+.mo-duo-wrap .device{--device-width:min(460px,100%)}
+.mo-duo-app{position:absolute;inset:0;display:grid;grid-template-columns:1fr 1fr;background:var(--bg-2);color:var(--label);font-family:var(--font-text)}
+.mo-duo-app > div{padding:40px 28px}
+.mo-duo-app > div + div{background:var(--bg-1)}
+.mo-duo-app h4{margin:6px 0 14px;font-size:30px;line-height:36px;font-weight:700}
+.mo-duo-app small{font-size:14px;color:var(--label-2);font-weight:600}
+.mo-duo-app li{display:flex;justify-content:space-between;padding:12px 0;border-top:1px solid var(--separator);font-size:17px}
+.mo-duo-app li span:last-child{color:var(--label-2)}
+.mo-duo-outer{position:absolute;inset:0;padding:52px 22px;background:var(--bg-1);color:var(--label);font-family:var(--font-text)}
+.mo-duo-outer b{display:block;font-size:64px;line-height:1;font-weight:600;letter-spacing:-.02em;margin-top:8px}
+.mo-kv{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:var(--s-3);margin:0}
+.mo-kv dt{font-size:var(--t-12);color:var(--label-2)}
+.mo-kv dd{margin:2px 0 0;font-size:var(--t-17);font-weight:600;font-variant-numeric:tabular-nums}
+
+/* ── 9 · view transitions ───────────────────────────────────────────────── */
+.mo-vt{position:relative}
+.mo-vt-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:var(--grid-gap)}
+.mo-vt-card{display:grid;overflow:clip;text-align:start;border-radius:var(--r-lg);corner-shape:superellipse(var(--k-continuous));
+  background:var(--c-surface);box-shadow:var(--c-card-shadow);--m-radius:var(--r-lg)}
+.mo-vt-media{position:relative;display:block;height:240px;overflow:clip}
+.mo-vt-media canvas{position:absolute;inset:0;width:100%;height:100%}
+.mo-vt-cap{display:grid;gap:2px;padding:var(--s-5) var(--s-6) var(--s-6)}
+.mo-vt-cap b{font-size:var(--t-21);line-height:1.2;font-weight:600}
+.mo-vt-cap span{font-size:var(--t-14);color:var(--label-2)}
+.mo-vt-detail{display:grid;grid-template-columns:minmax(0,7fr) minmax(0,5fr);overflow:clip;border-radius:var(--r-lg);
+  corner-shape:superellipse(var(--k-continuous));background:var(--c-surface);box-shadow:var(--c-card-shadow)}
+.mo-vt-detail .mo-vt-media{height:460px}
+.mo-vt-detail-copy{display:grid;align-content:center;gap:var(--s-4);padding:var(--s-10) var(--s-9)}
+.mo-vt-detail-copy h3{font-size:var(--t-40);line-height:1.1;font-weight:600;letter-spacing:var(--t-40-ls)}
+.mo-vt-detail-copy p{margin:0;font-size:var(--t-17);line-height:var(--t-17-lh);color:var(--label-2)}
+::view-transition-group(mo-vt-media){animation-duration:var(--sp-morph-ms);animation-timing-function:var(--sp-morph)}
+
+/* ── 10 · the scroll system ─────────────────────────────────────────────── */
+.mo-format{display:grid;grid-template-columns:minmax(0,5fr) minmax(0,7fr);gap:var(--s-10);align-items:start}
+.mo-ex{display:grid;grid-template-columns:minmax(0,5fr) minmax(0,7fr);gap:var(--s-9) var(--s-10);align-items:center;
+  padding-block:var(--s-11);border-top:1px solid var(--separator)}
+.mo-ex-copy{display:grid;gap:var(--s-4);align-content:start}
+.mo-ex-copy h3{font-size:var(--t-28);line-height:var(--t-28-lh);letter-spacing:var(--t-28-ls);font-weight:600}
+.mo-ex-copy > p{margin:0;font-size:var(--t-17);line-height:var(--t-17-lh);color:var(--label-2)}
+.mo-ex-copy > p strong{color:var(--label);font-weight:inherit}
+.mo-path{display:inline-flex;align-items:center;gap:8px;justify-self:start;min-height:28px;padding:4px 12px;border-radius:var(--r-pill);
+  background:var(--fill-1);font-size:var(--t-12);line-height:1.3;font-weight:600;color:var(--label-2-on-fill)}
+.mo-path i{width:8px;height:8px;border-radius:50%;background:var(--label-3)}
+.mo-path[data-path="css"] i{background:var(--ok)}
+.mo-path[data-path="js"] i{background:var(--accent-solid)}
+.mo-ex-stage{min-width:0}
+.mo-stag{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.mo-stag > div{display:grid;align-content:end;min-height:150px;padding:var(--s-5);border-radius:var(--r-md);
+  corner-shape:superellipse(var(--k-continuous));background:var(--c-surface)}
+.mo-stag b{font-size:var(--t-28);line-height:1.1;font-weight:600;font-variant-numeric:tabular-nums}
+.mo-stag span{font-size:var(--t-14);color:var(--label-2)}
+.mo-raw{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.mo-raw > div{display:grid;place-items:center;align-content:center;gap:6px;min-height:200px;border-radius:var(--r-md);
+  corner-shape:superellipse(var(--k-continuous));background:var(--c-surface);text-align:center;padding:var(--s-5)}
+.mo-raw b{font-size:var(--t-21);font-weight:600}
+.mo-par{position:relative;height:440px;overflow:clip;border-radius:var(--r-lg);corner-shape:superellipse(var(--k-continuous));isolation:isolate;background:var(--bg-2)}
+.mo-par-back{position:absolute;inset:-14vh 0;z-index:-1}
+.mo-par-back canvas{width:100%;height:100%}
+.mo-par-front{position:absolute;right:8%;bottom:10%;width:44%;height:62%;overflow:clip;border-radius:var(--r-md);
+  corner-shape:superellipse(var(--k-continuous));box-shadow:0 18px 40px -12px color-mix(in srgb,var(--band-stage-bg) 60%,transparent)}
+.mo-par-front canvas{width:100%;height:100%}
+.mo-clip{height:min(72vh,640px);overflow:clip;--clip-inset:6.25vw;--clip-radius:28px;position:relative;isolation:isolate}
+.mo-clip > canvas{position:absolute;inset:0;width:100%;height:100%;z-index:-1}
+.mo-clip-copy{position:absolute;left:0;right:0;bottom:0;padding:0 max(6.25vw,calc((100vw - var(--w-content)) / 2)) var(--s-9);
+  display:grid;gap:var(--s-2)}
+.mo-clip-copy p{margin:0;max-width:640px}
+.mo-clip-scrim{position:absolute;inset:auto 0 0;height:60%;z-index:-1;background:linear-gradient(transparent,color-mix(in srgb,var(--band-stage-bg) 72%,transparent))}
+.mo-scene-ring{position:absolute;z-index:1;left:50%;top:73%;width:min(32vh,260px,62vw);aspect-ratio:1;translate:-50% -50%;overflow:visible;pointer-events:none}
+.mo-scene-ring circle{fill:none;stroke-width:8}
+.mo-scene-ring .mo-ring-track{stroke:color-mix(in srgb,var(--on-art-1) 22%,transparent)}
+.mo-scene-ring .mo-ring-fill{stroke:var(--on-art-1);stroke-linecap:round;stroke-dasharray:283;stroke-dashoffset:calc(283 * (1 - var(--progress,1)))}
+.mo-gate{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:var(--s-4) var(--s-8);margin-top:var(--s-6);
+  padding:var(--s-6) var(--s-7);border-radius:var(--r-lg);corner-shape:superellipse(var(--k-continuous));background:var(--c-surface)}
+.mo-gate .choice{font-size:var(--t-17);font-weight:600}
+.mo-stats-line{display:flex;flex-wrap:wrap;gap:var(--s-2) var(--s-6);margin-top:var(--s-4)}
+
+/* ── 11 · the control bar ───────────────────────────────────────────────── */
+.mo-gal-card-copy{position:absolute;inset:auto 0 0;padding:0 var(--s-8) var(--s-8);color:var(--on-art-1)}
+/* the bar floats only once the captions are above it: its sticky box begins
+   45% of a card above where it parks, so the drop arrives over the cards'
+   lower half, never over a caption */
+.mo-cb-hold{display:flow-root;margin-top:calc(var(--gallery-h) * -.45);pointer-events:none}
+.mo-cb-hold::before{content:"";display:block;height:calc(var(--gallery-h) * .45)}
+.mo-cb-hold > .control-bar{pointer-events:auto}
+
+/* ── responsive ─────────────────────────────────────────────────────────── */
+@media (max-width:1068px){
+  .mo-sl{grid-template-columns:minmax(0,1fr)}
+  .mo-sl-stage{display:contents}
+  .mo-sl-art{position:sticky;top:72px;z-index:3;height:128px;border-radius:var(--r-md);corner-shape:superellipse(var(--k-continuous))}
+  /* the strip stays while the grid scrolls: it carries the spring's name */
+  .mo-sl-tag{display:block;position:absolute;left:10px;top:8px;margin:0;padding:3px 10px;border-radius:var(--r-pill);
+    background:var(--bg-1);color:var(--label);   /* content over art: an opaque label, not text on the art */
+    font:600 var(--t-ui-subhead-fs)/1.2 var(--font-text);font-variant-numeric:tabular-nums;white-space:nowrap}
+  .mo-sl-info{border-radius:var(--r-lg);corner-shape:superellipse(var(--k-continuous));background:var(--c-surface);box-shadow:var(--c-card-shadow)}
+  .mo-cv-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .mo-mx{grid-template-columns:130px repeat(4,minmax(0,1fr))}
+  .mo-rm-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .mo-mg,.mo-gs-grid{grid-template-columns:minmax(0,1fr)}
+  .mo-format,.mo-ex{grid-template-columns:minmax(0,1fr)}
+  .mo-vt-detail{grid-template-columns:minmax(0,1fr)}
+  .mo-vt-detail .mo-vt-media{height:340px}
+  .mo-vt-detail-copy{padding:var(--s-8)}
+}
+@media (max-width:734px){
+  .mo-drop-slot{width:min(460px,100%)}
+  .mo-drop{width:calc(56px + (min(460px,100%) - 56px) * var(--p))}
+  .mo-sl-stats{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .mo-sl-info{padding:var(--s-6)}
+  .mo-sl-name{font-size:var(--t-24)}
+  .mo-sp{padding:14px 14px 12px}
+  .mo-sp-name{font-size:var(--t-14)}
+  .mo-sp-ms{font-size:var(--t-12)}
+  .mo-lane{grid-template-columns:minmax(0,1fr);gap:var(--s-2)}
+  .mo-rt-plot{height:180px}
+  .mo-mx{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr)}
+  .mo-mx-colhead,.mo-mx-corner{display:none}
+  .mo-mx-rowhead{grid-column:1 / -1;padding:var(--s-5) 0 0}
+  .mo-mx-cell.is-empty{display:none}
+  .mo-mx-where{display:block;margin:0;font-size:var(--t-12);font-weight:600;color:var(--label)}
+  .mo-rm-grid{grid-template-columns:minmax(0,1fr)}
+  .mo-mt-art{height:300px}
+  .mo-mt-foot{grid-template-columns:minmax(0,1fr);padding:var(--s-5) var(--s-5) var(--s-6)}
+  .mo-gauge{justify-items:start;text-align:start}
+  .mo-vt-grid{grid-template-columns:minmax(0,1fr)}
+  .mo-vt-media{height:180px}
+  .mo-kv{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .mo-stag > div{min-height:120px}
+  .mo-par{height:340px}
+  .mo-gate{grid-template-columns:minmax(0,1fr)}
+  .mo-ex{padding-block:var(--s-10)}
+  .mo-clip-copy{padding-bottom:var(--s-7)}
+}
+@media (max-width:734px){
+  /* phones: a curve card is a row — the plot beside its words */
+  .mo-cv-grid{grid-template-columns:minmax(0,1fr);gap:12px}
+  .mo-cv{grid-template-columns:88px minmax(0,1fr);column-gap:var(--s-4);row-gap:2px;padding:var(--s-5)}
+  .mo-cv-plot{grid-row:1 / span 3;width:88px;height:88px;margin:-4px 0 0 -8px}
+  .mo-cv-name,.mo-cv-val,.mo-cv-use{grid-column:2}
+  .mo-cv-val{overflow-wrap:anywhere}
+  .mo-cv-use{margin-top:var(--s-1)}
+  .mo-cv-lane{grid-column:1 / -1;margin-top:var(--s-3)}
+  /* the when-table reads as a list */
+  .mo-when thead{display:none}
+  .mo-when :is(table,tbody,tr,td){display:block;width:100%}
+  .mo-when tr{padding:var(--s-4) 0;border-bottom:1px solid var(--separator)}
+  .mo-when td{padding:0 !important;border:0 !important}
+  .mo-when td:first-child{font-weight:600}
+  .mo-when td + td{margin-top:4px;color:var(--label-2)}
+}
+@media (max-width:480px){
+  .mo-sl-list{grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:8px}
+}
+@media (prefers-reduced-motion:reduce){
+  .mo-sl-rider,.mo-puck-css,.mo-cv-lane i,.mo-disc .sym,.mo-rm-morph{transition:none}
+}
+#mo-scene .scene-copy > p{color:var(--on-art-1)}   /* 4.40:1 in the second ink over this art */
+</style>
+</head>
+<body>
+
+<!-- ═══ SITE NAV (shared — copy verbatim; set aria-current on this page's link) ═══ -->
+<nav class="globalnav" aria-label="Fluid Design">
+  <div class="globalnav__bar">
+    <a class="globalnav__brand" href="index.html" aria-label="Fluid Design Open home"><i data-sym="sparkles"></i></a>
+    <ul class="globalnav__list">
+      <li class="globalnav__item"><a class="globalnav__link" href="index.html">Overview</a></li>
+      <li class="globalnav__item"><a class="globalnav__link" href="start.html">Start</a></li>
+      <li class="globalnav__item"><a class="globalnav__link" href="docs.html">Docs</a></li>
+      <li class="globalnav__item" data-flyout="gn-foundations"><a class="globalnav__link" href="color.html">Foundations</a><button class="globalnav__trigger" type="button"><span class="sr-only">Foundations menu</span></button></li>
+      <li class="globalnav__item" data-flyout="gn-components"><a class="globalnav__link" href="components.html">Components</a><button class="globalnav__trigger" type="button"><span class="sr-only">Components menu</span></button></li>
+      <li class="globalnav__item" data-flyout="gn-instruments"><a class="globalnav__link" href="selftest.html">Instruments</a><button class="globalnav__trigger" type="button"><span class="sr-only">Instruments menu</span></button></li>
+    </ul>
+    <div class="globalnav__tools">
+      <button class="globalnav__icon" type="button" data-tone-toggle aria-label="Switch appearance"><i data-sym="circle-half"></i></button>
+      <button class="globalnav__menu" type="button" aria-label="Menu" aria-expanded="false"><i data-sym="lines"></i></button>
+    </div>
+  </div>
+  <div class="globalnav__flyout" id="gn-foundations" hidden>
+    <div class="globalnav__flyout-content">
+      <div class="globalnav__group" data-elevated>
+        <h2 class="globalnav__group-title">Foundations</h2>
+        <ul><li><a class="globalnav__flyout-link" href="color.html">Colour</a></li><li><a class="globalnav__flyout-link" href="type.html">Type</a></li><li><a class="globalnav__flyout-link" href="layout.html">Layout</a></li><li><a class="globalnav__flyout-link" href="materials.html">Materials</a></li><li><a class="globalnav__flyout-link" href="motion.html" aria-current="page">Motion</a></li></ul>
+      </div>
+      <div class="globalnav__group">
+        <h2 class="globalnav__group-title">Content</h2>
+        <ul><li><a class="globalnav__flyout-link" href="symbols.html">Symbols</a></li><li><a class="globalnav__flyout-link" href="data.html">Data</a></li></ul>
+      </div>
+    </div>
+  </div>
+  <div class="globalnav__flyout" id="gn-components" hidden>
+    <div class="globalnav__flyout-content">
+      <div class="globalnav__group" data-elevated>
+        <h2 class="globalnav__group-title">Components</h2>
+        <ul><li><a class="globalnav__flyout-link" href="components.html">Controls</a></li><li><a class="globalnav__flyout-link" href="chrome.html">Chrome</a></li><li><a class="globalnav__flyout-link" href="showcase.html">Product pages</a></li><li><a class="globalnav__flyout-link" href="patterns.html">Patterns</a></li></ul>
+      </div>
+    </div>
+  </div>
+  <div class="globalnav__flyout" id="gn-instruments" hidden>
+    <div class="globalnav__flyout-content">
+      <div class="globalnav__group" data-elevated>
+        <h2 class="globalnav__group-title">Instruments</h2>
+        <ul><li><a class="globalnav__flyout-link" href="selftest.html">Self-test</a></li><li><a class="globalnav__flyout-link" href="audit.html">Audit</a></li></ul>
+      </div>
+    </div>
+  </div>
+</nav>
+
+<!-- ═══ LOCAL NAV (per page: title, one CTA, jump links to this page's sections) ═══ -->
+<div class="localnav" data-localnav-reveal="#hero">
+  <div class="localnav__capsule" data-lg3 data-lg3-priority="3">
+    <a class="localnav__title" href="#top">Motion</a>
+    <button class="localnav__explore" type="button"><span class="localnav__explore-label">Explore</span></button>
+    <a class="localnav__cta" href="start.html">Adopt</a>
+    <div class="localnav__panel" aria-label="Explore Fluid Design">
+      <ul class="localnav__tiles">
+        <li><a class="localnav__tile" href="materials.html" style="--tile-hue: var(--series-1)"><span class="localnav__thumb"><i data-sym="sparkles"></i></span>Materials</a></li>
+        <li><a class="localnav__tile" href="motion.html" style="--tile-hue: var(--series-2)"><span class="localnav__thumb"><i data-sym="waveform"></i></span>Motion</a></li>
+        <li><a class="localnav__tile" href="chrome.html" style="--tile-hue: var(--series-3)"><span class="localnav__thumb"><i data-sym="sidebar"></i></span>Chrome</a></li>
+        <li><a class="localnav__tile" href="components.html" style="--tile-hue: var(--series-4)"><span class="localnav__thumb"><i data-sym="sliders"></i></span>Controls</a></li>
+        <li><a class="localnav__tile" href="showcase.html" style="--tile-hue: var(--series-5)"><span class="localnav__thumb"><i data-sym="grid"></i></span>Product pages</a></li>
+      </ul>
+      <hr class="localnav__rule">
+      <nav class="localnav__jump" aria-label="On this page">
+        <p class="localnav__jump-label">On this page <i data-sym="chevron-down"></i></p>
+        <ul class="localnav__jump-grid">
+          <li class="localnav__jump-item"><a href="#springs">Springs</a></li>
+          <li class="localnav__jump-item"><a href="#interrupt">Interrupt</a></li>
+          <li class="localnav__jump-item"><a href="#curves">Curves</a></li>
+          <li class="localnav__jump-item"><a href="#tiers">Tiers</a></li>
+          <li class="localnav__jump-item"><a href="#reduced">Reduced motion</a></li>
+          <li class="localnav__jump-item"><a href="#morphs">Morphs</a></li>
+          <li class="localnav__jump-item"><a href="#gestures">Gestures</a></li>
+          <li class="localnav__jump-item"><a href="#transitions">Transitions</a></li>
+          <li class="localnav__jump-item"><a href="#scroll">Scroll</a></li>
+          <li class="localnav__jump-item"><a href="#bar">Control bar</a></li>
+        </ul>
+      </nav>
+    </div>
+  </div>
+</div>
+
+<main id="top">
+<script>
+/* Before first paint: the hero drop waits for its entrance (unless the
+   reader asked for less motion). A deadline shows it whatever happens. */
+(function () { try {
+  if (!matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    var h = document.documentElement; h.classList.add('mo-intro');
+    setTimeout(function () { h.classList.remove('mo-intro'); }, 4000);
+  }
+} catch (e) {} })();
+</script>
+
+<!-- ═══ 1 · HERO ═════════════════════════════════════════════════════════ -->
+<section class="band hero mo-hero" data-band="stage" id="hero" aria-labelledby="mo-hero-h">
+  <canvas class="hero-art" data-art="twilight" data-art-seed="17" data-art-contrast="1.18" data-art-drift aria-hidden="true"></canvas>
+  <div class="hero-marquee viewport-content">
+    <p class="hero-eyebrow">Motion</p>
+    <h1 class="hero-headline" id="mo-hero-h">Everything springs.</h1>
+    <p class="hero-sub">Anything you touch moves on a spring you can catch mid-flight.<br>Anything you scroll past plays on a timeline you drive.</p>
+    <div class="mo-hero-stage">
+      <p class="mo-hero-note" id="mo-drop-note" aria-live="polite">drop &middot; stiffness 100, damping 8 &middot; settles in 1,498 ms</p>
+      <div class="mo-drop-slot">
+        <svg class="mo-wave" id="mo-wave" viewBox="0 0 1000 300" preserveAspectRatio="none" aria-hidden="true"><line x1="0" x2="1000" y1="60" y2="60"/><path pathLength="1000" d=""/></svg>
+        <div class="mo-drop" id="mo-drop" data-lg3 data-lg3-recipe="pill" data-lg3-priority="6" data-lg3-interactive role="radiogroup" aria-label="Replay the capsule on a spring">
+          <button type="button" role="radio" aria-checked="false" data-spring="smooth">Smooth</button>
+          <button type="button" role="radio" aria-checked="false" data-spring="snappy">Snappy</button>
+          <button type="button" role="radio" aria-checked="false" data-spring="bouncy">Bouncy</button>
+          <button type="button" role="radio" aria-checked="true" data-spring="drop">Drop</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ 2 · SPRINGS ══════════════════════════════════════════════════════ -->
+<section class="band" data-band="utility" id="springs" aria-labelledby="mo-springs-h">
+  <div class="viewport-content">
+    <header class="section-header">
+      <h2 class="section-header-headline" id="mo-springs-h">Twenty-four springs. Two numbers each.</h2>
+      <a class="section-header-link" href="#interrupt">Catch one mid-flight <i data-sym="chevron-right"></i></a>
+    </header>
+    <p class="t-lede">A spring is a <strong>duration</strong> and a <strong>bounce</strong>, the way SwiftUI writes it; stiffness and damping fall out of those two. Every named spring is generated into <code>fg3-springs.css</code> as a CSS <code>linear()</code> curve plus the duration it is normalised to. Pick one to play it on the glass chip.</p>
+    <div class="mo-sl mo-after">
+      <div class="mo-sl-stage">
+        <div class="mo-sl-art" aria-hidden="true">
+          <canvas data-art="aurora" data-art-seed="9" data-art-contrast="1.15"></canvas>
+          <span class="mo-sl-track"></span>
+          <p class="mo-sl-tag" id="mo-sl-tag">bouncy &middot; 730 ms</p>
+          <div class="mo-sl-rider" id="mo-sl-rider"><div class="mo-sl-chip" data-lg3 data-lg3-priority="4" data-lg3-size="small"></div></div>
+        </div>
+        <div class="mo-sl-info">
+          <div class="mo-sl-title"><h3 class="mo-sl-name" id="mo-sl-name">bouncy</h3><span class="mo-sl-settle" id="mo-sl-settle">730 ms</span></div>
+          <p class="mo-cap mo-sl-use" id="mo-sl-use">SwiftUI .bouncy &middot; playful confirmations</p>
+          <code class="mo-code-line" id="mo-sl-code">transition: translate var(--sp-bouncy-ms) var(--sp-bouncy);</code>
+          <dl class="mo-sl-stats">
+            <div><dt>Duration</dt><dd id="mo-sl-d">0.50 s</dd></div>
+            <div><dt>Bounce</dt><dd id="mo-sl-b">0.30</dd></div>
+            <div><dt>Damping ratio &zeta;</dt><dd id="mo-sl-z">0.70</dd></div>
+            <div><dt>Peak</dt><dd id="mo-sl-p">1.046</dd></div>
+          </dl>
+          <svg class="mo-sl-plot" id="mo-sl-plot" role="img" aria-labelledby="mo-sl-plot-t"><title id="mo-sl-plot-t">Step response of the selected spring</title></svg>
+          <div class="mo-sl-legend">
+            <span class="mo-cap"><i class="mo-swatch" style="--c: var(--accent)"></i> the spring, solved</span>
+            <span class="mo-cap"><i class="mo-swatch is-dash" style="--c: var(--label-2)"></i> the <code>linear()</code> CSS plays</span>
+          </div>
+          <div class="mo-row">
+            <button class="btn btn-primary btn-m" type="button" id="mo-sl-play">Play bouncy</button>
+            <button class="btn btn-secondary btn-m" type="button" id="mo-sl-all">Play all 24</button>
+          </div>
+        </div>
+      </div>
+      <ul class="mo-sl-list" id="mo-sl-list" aria-label="Named springs">
+        <li><button class="mo-sp" type="button" data-spring="smooth" aria-pressed="false">
+          <span class="mo-sp-head"><span class="mo-sp-name">smooth</span><span class="mo-sp-ms">674 ms</span></span>
+          <span class="mo-sp-use">SwiftUI .smooth &middot; the default, no overshoot</span>
+          <svg class="mo-sp-plot" viewBox="0 0 200 64" preserveAspectRatio="none" aria-hidden="true"><line class="mo-plot-one" x1="0" x2="200" y1="16" y2="16"/><line class="mo-plot-settle" x1="84.2" x2="84.2" y1="60" y2="10"/><path class="mo-plot-curve" d="M0.0 54.0L0.4 54.0L1.0 53.8L1.7 53.5L2.6 52.9L3.5 52.1L4.6 51.0L5.7 49.7L6.9 48.2L8.1 46.6L9.4 44.8L10.7 42.9L12.1 41.0L13.5 39.0L15.0 37.1L16.5 35.2L18.1 33.4L19.7 31.6L21.3 30.0L23.0 28.5L24.7 27.0L26.5 25.7L28.2 24.5L30.1 23.4L31.9 22.5L33.8 21.6L35.7 20.8L37.6 20.1L39.6 19.5L41.6 19.0L43.6 18.6L45.7 18.2L47.7 17.8L49.8 17.5L52.0 17.3L54.1 17.1L56.3 16.9L58.5 16.7L60.7 16.6L63.0 16.5L65.2 16.4L67.5 16.3L69.8 16.3L72.2 16.2L74.5 16.2L76.9 16.1L79.3 16.1L81.8 16.1L84.2 16.0H200"/></svg>
+          <span class="mo-sp-meta">0.50&nbsp;s &middot; bounce&nbsp;0.00 &middot; &zeta;&nbsp;1.00</span>
+        </button></li>
+        <li><button class="mo-sp" type="button" data-spring="snappy" aria-pressed="false">
+          <span class="mo-sp-head"><span class="mo-sp-name">snappy</span><span class="mo-sp-ms">642 ms</span></span>
+          <span class="mo-sp-use">SwiftUI .snappy &middot; quick, a hint of bounce</span>
+          <svg class="mo-sp-plot" viewBox="0 0 200 64" preserveAspectRatio="none" aria-hidden="true"><line class="mo-plot-one" x1="0" x2="200" y1="16" y2="16"/><line class="mo-plot-settle" x1="80.2" x2="80.2" y1="60" y2="10"/><path class="mo-plot-curve" d="M0.0 54.0L0.4 54.0L0.9 53.8L1.7 53.5L2.5 53.0L3.4 52.2L4.4 51.1L5.4 49.9L6.5 48.4L7.7 46.7L8.9 44.8L10.2 42.8L11.5 40.8L12.9 38.7L14.3 36.6L15.7 34.5L17.2 32.5L18.8 30.5L20.3 28.7L21.9 27.0L23.5 25.4L25.2 23.9L26.9 22.6L28.6 21.5L30.4 20.5L32.2 19.6L34.0 18.8L35.8 18.1L37.7 17.6L39.6 17.1L41.5 16.8L43.5 16.5L45.5 16.3L47.5 16.1L49.5 16.0L51.5 15.9L53.6 15.8L55.7 15.8L57.8 15.8L60.0 15.8L62.1 15.8L64.3 15.8L66.5 15.8L68.8 15.8L71.0 15.8L73.3 15.9L75.6 15.9L77.9 15.9L80.2 16.0H200"/></svg>
+          <span class="mo-sp-meta">0.50&nbsp;s &middot; bounce&nbsp;0.15 &middot; &zeta;&nbsp;0.85 &middot; peak&nbsp;1.006</span>
+        </button></li>
+        <li><button class="mo-sp" type="button" data-spring="bouncy" aria-pressed="false">
+          <span class="mo-sp-head"><span class="mo-sp-name">bouncy</span><span class="mo-sp-ms">730 ms</span></span>
+          <span class="mo-sp-use">SwiftUI .bouncy &middot; playful confirmations</span>
+          <svg class="mo-sp-plot" viewBox="0 0 200 64" preserveAspectRatio="none" aria-hidden="true"><line class="mo-plot-one" x1="0" x2="200" y1="16" y2="16"/><line class="mo-plot-settle" x1="91.3" x2="91.3" y1="60" y2="10"/><path class="mo-plot-curve" d="M0.0 54.0L0.4 54.0L1.1 53.8L1.9 53.4L2.8 52.7L3.8 51.6L5.0 50.3L6.2 48.6L7.4 46.6L8.8 44.4L10.2 42.0L11.6 39.5L13.1 36.9L14.7 34.2L16.3 31.6L17.9 29.2L19.6 26.8L21.4 24.6L23.1 22.6L24.9 20.8L26.8 19.3L28.7 18.0L30.6 16.9L32.6 16.0L34.6 15.4L36.6 14.9L38.7 14.5L40.8 14.3L42.9 14.3L45.1 14.3L47.3 14.3L49.5 14.5L51.8 14.6L54.0 14.8L56.3 15.0L58.7 15.2L61.0 15.4L63.4 15.5L65.8 15.6L68.3 15.8L70.7 15.9L73.2 15.9L75.7 16.0L78.3 16.0L80.8 16.1L83.4 16.1L86.0 16.1L88.7 16.1L91.3 16.0H200"/></svg>
+          <span class="mo-sp-meta">0.50&nbsp;s &middot; bounce&nbsp;0.30 &middot; &zeta;&nbsp;0.70 &middot; peak&nbsp;1.046</span>
+        </button></li>
+        <li><button class="mo-sp" type="button" data-spring="interactive" aria-pressed="false">
+          <span class="mo-sp-head"><span class="mo-sp-name">interactive</span><span class="mo-sp-ms">191 ms</span></span>
+          <span class="mo-sp-use">.interactiveSpring &middot; tracks a finger</span>
+          <svg class="mo-sp-plot" viewBox="0 0 200 64" preserveAspectRatio="none" aria-hidden="true"><line class="mo-plot-one" x1="0" x2="200" y1="16" y2="16"/><line class="mo-plot-settle" x1="23.9" x2="23.9" y1="60" y2="10"/><path class="mo-plot-curve" d="M0.0 54.0L0.1 54.0L0.3 53.8L0.5 53.5L0.7 53.0L1.0 52.2L1.3 51.2L1.6 49.9L1.9 48.4L2.3 46.8L2.7 44.9L3.0 43.0L3.4 41.0L3.8 38.9L4.3 36.8L4.7 34.7L5.1 32.7L5.6 30.8L6.1 29.0L6.5 27.3L7.0 25.7L7.5 24.3L8.0 23.0L8.5 21.8L9.1 20.8L9.6 19.9L10.1 19.1L10.7 18.4L11.2 17.8L11.8 17.4L12.4 17.0L13.0 16.7L13.6 16.4L14.2 16.2L14.8 16.1L15.4 16.0L16.0 15.9L16.6 15.9L17.2 15.8L17.9 15.8L18.5 15.8L19.2 15.8L19.8 15.8L20.5 15.8L21.2 15.9L21.8 15.9L22.5 15.9L23.2 15.9L23.9 16.0H200"/></svg>
+          <span class="mo-sp-meta">0.15&nbsp;s &middot; bounce&nbsp;0.14 &middot; &zeta;&nbsp;0.86 &middot; peak&nbsp;1.005</span>
+        </button></li>
+        <li><button class="mo-sp" type="button" data-spring="press" aria-pressed="false">
+          <span class="mo-sp-head"><span class="mo-sp-name">press</span><span class="mo-sp-ms">271 ms</span></span>
+          <span class="mo-sp-use">A button going down</span>
+          <svg class="mo-sp-plot" viewBox="0 0 200 64" preserveAspectRatio="none" aria-hidden="true"><line class="mo-plot-one" x1="0" x2="200" y1="16" y2="16"/><line class="mo-plot-settle" x1="33.9" x2="33.9" y1="60" y2="10"/><path class="mo-plot-curve" d="M0.0 54.0L0.2 54.0L0.4 53.9L0.7 53.6L1.0 53.1L1.4 52.3L1.8 51.4L2.3 50.2L2.8 48.8L3.3 47.2L3.8 45.5L4.3 43.6L4.9 41.7L5.4 39.7L6.0 37.7L6.7 35.7L7.3 33.8L7.9 31.9L8.6 30.1L9.3 28.4L9.9 26.8L10.7 25.4L11.4 24.0L12.1 22.8L12.8 21.7L13.6 20.8L14.4 19.9L15.1 19.2L15.9 18.6L16.7 18.0L17.6 17.6L18.4 17.2L19.2 16.9L20.1 16.6L20.9 16.4L21.8 16.3L22.7 16.2L23.5 16.1L24.4 16.0L25.3 15.9L26.3 15.9L27.2 15.9L28.1 15.9L29.1 15.9L30.0 15.9L31.0 15.9L31.9 15.9L32.9 15.9L33.9 16.0H200"/></svg>
+          <span class="mo-sp-meta">0.22&nbsp;s &middot; bounce&nbsp;0.12 &middot; &zeta;&nbsp;0.88 &middot; peak&nbsp;1.003</span>
+        </button></li>
+        <li><button class="mo-sp" type="button" data-spring="toggle" aria-pressed="false">
+          <span class="mo-sp-head"><span class="mo-sp-name">toggle</span><span class="mo-sp-ms">412 ms</span></span>
+          <span class="mo-sp-use">Switches and small state changes</span>
+          <svg class="mo-sp-plot" viewBox="0 0 200 64" preserveAspectRatio="none" aria-hidden="true"><line class="mo-plot-one" x1="0" x2="200" y1="16" y2="16"/><line class="mo-plot-settle" x1="51.5" x2="51.5" y1="60" y2="10"/><path class="mo-plot-curve" d="M0.0 54.0L0.2 54.0L0.6 53.8L1.1 53.5L1.6 53.0L2.2 52.2L2.8 51.1L3.5 49.8L4.2 48.3L4.9 46.6L5.7 44.8L6.5 42.8L7.4 40.7L8.3 38.6L9.2 36.5L10.1 34.4L11.1 32.4L12.0 30.5L13.0 28.6L14.1 26.9L15.1 25.3L16.2 23.9L17.3 22.6L18.4 21.4L19.5 20.4L20.6 19.5L21.8 18.8L23.0 18.1L24.2 17.6L25.4 17.1L26.6 16.8L27.9 16.5L29.2 16.3L30.5 16.1L31.8 16.0L33.1 15.9L34.4 15.8L35.7 15.8L37.1 15.8L38.5 15.8L39.9 15.8L41.3 15.8L42.7 15.8L44.1 15.8L45.6 15.8L47.0 15.9L48.5 15.9L50.0 15.9L51.5 16.0H200"/></svg>
+          <span class="mo-sp-meta">0.32&nbsp;s &middot; bounce&nbsp;0.15 &middot; &zeta;&nbsp;0.85 &middot; peak&nbsp;1.006</span>
+        </button></li>
+        <li><button class="mo-sp" type="button" data-spring="move" aria-pressed="false">
+          <span class="mo-sp-head"><span class="mo-sp-name">move</span><span class="mo-sp-ms">592 ms</span></span>
+          <span class="mo-sp-use">Things that change place</span>
+          <svg class="mo-sp-plot" viewBox="0 0 200 64" preserveAspectRatio="none" aria-hidden="true"><line class="mo-plot-one" x1="0" x2="200" y1="16" y2="16"/><line class="mo-plot-settle" x1="74.0" x2="74.0" y1="60" y2="10"/><path class="mo-plot-curve" d="M0.0 54.0L0.3 54.0L0.9 53.8L1.5 53.5L2.3 53.0L3.1 52.2L4.0 51.1L5.0 49.8L6.0 48.3L7.1 46.5L8.2 44.6L9.4 42.6L10.6 40.5L11.9 38.3L13.2 36.2L14.5 34.0L15.9 32.0L17.3 30.0L18.7 28.1L20.2 26.4L21.7 24.7L23.3 23.3L24.8 22.0L26.4 20.8L28.0 19.8L29.7 18.9L31.4 18.2L33.1 17.5L34.8 17.0L36.6 16.6L38.3 16.3L40.1 16.0L42.0 15.9L43.8 15.7L45.7 15.6L47.6 15.6L49.5 15.6L51.4 15.6L53.4 15.6L55.3 15.6L57.3 15.7L59.4 15.7L61.4 15.7L63.4 15.8L65.5 15.8L67.6 15.8L69.7 15.9L71.9 15.9L74.0 16.0H200"/></svg>
+          <span class="mo-sp-meta">0.46&nbsp;s &middot; bounce&nbsp;0.18 &middot; &zeta;&nbsp;0.82 &middot; peak&nbsp;1.011</span>
+        </button></li>
+        <li><button class="mo-sp" type="button" data-spring="sheet" aria-pressed="false">
+          <span class="mo-sp-head"><span class="mo-sp-name">sheet</span><span class="mo-sp-ms">509 ms</span></span>
+          <span class="mo-sp-use">Sheets and large panels</span>
+          <svg class="mo-sp-plot" viewBox="0 0 200 64" preserveAspectRatio="none" aria-hidden="true"><line class="mo-plot-one" x1="0" x2="200" y1="16" y2="16"/><line class="mo-plot-settle" x1="63.6" x2="63.6" y1="60" y2="10"/><path class="mo-plot-curve" d="M0.0 54.0L0.3 54.0L0.7 53.9L1.3 53.7L2.0 53.5L2.7 53.0L3.5 52.4L4.3 51.7L5.2 50.8L6.1 49.8L7.1 48.6L8.1 47.3L9.1 45.9L10.2 44.5L11.3 42.9L12.5 41.4L13.7 39.8L14.9 38.2L16.1 36.6L17.4 35.0L18.7 33.5L20.0 32.0L21.3 30.5L22.7 29.2L24.1 27.9L25.5 26.6L27.0 25.5L28.4 24.4L29.9 23.4L31.4 22.5L32.9 21.7L34.5 20.9L36.0 20.3L37.6 19.7L39.2 19.1L40.9 18.6L42.5 18.2L44.2 17.8L45.9 17.5L47.6 17.2L49.3 17.0L51.0 16.8L52.7 16.6L54.5 16.5L56.3 16.4L58.1 16.3L59.9 16.2L61.7 16.1L63.6 16.0H200"/></svg>
+          <span class="mo-sp-meta">0.55&nbsp;s &middot; bounce&nbsp;0.10 &middot; &zeta;&nbsp;0.90</span>
+        </button></li>
+        <li><button class="mo-sp" type="button" data-spring="morph" aria-pressed="false">
+          <span class="mo-sp-head"><span class="mo-sp-name">morph</span><span class="mo-sp-ms">758 ms</span></span>
+          <span class="mo-sp-use">Shape changes: pill &rarr; panel</span>
+          <svg class="mo-sp-plot" viewBox="0 0 200 64" preserveAspectRatio="none" aria-hidden="true"><line class="mo-plot-one" x1="0" x2="200" y1="16" y2="16"/><line class="mo-plot-settle" x1="94.8" x2="94.8" y1="60" y2="10"/><path class="mo-plot-curve" d="M0.0 54.0L0.4 54.0L1.1 53.8L2.0 53.5L2.9 53.0L4.0 52.2L5.2 51.2L6.4 49.9L7.7 48.4L9.1 46.6L10.5 44.7L12.0 42.7L13.6 40.6L15.2 38.4L16.9 36.1L18.6 34.0L20.4 31.8L22.2 29.8L24.0 27.8L25.9 26.0L27.8 24.3L29.8 22.8L31.8 21.5L33.8 20.2L35.9 19.2L38.0 18.3L40.2 17.6L42.3 16.9L44.6 16.4L46.8 16.0L49.1 15.7L51.4 15.5L53.7 15.4L56.1 15.3L58.5 15.2L60.9 15.2L63.3 15.3L65.8 15.3L68.3 15.4L70.9 15.4L73.4 15.5L76.0 15.6L78.6 15.6L81.2 15.7L83.9 15.8L86.6 15.8L89.3 15.9L92.0 15.9L94.8 16.0H200"/></svg>
+          <span class="mo-sp-meta">0.60&nbsp;s &middot; bounce&nbsp;0.22 &middot; &zeta;&nbsp;0.78 &middot; peak&nbsp;1.020</span>
+        </button></li>
+        <li><button class="mo-sp" type="button" data-spring="select" aria-pressed="false">
+          <span class="mo-sp-head"><span class="mo-sp-name">select</span><span class="mo-sp-ms">514 ms</span></span>
+          <span class="mo-sp-use">The tab bar&rsquo;s selection lens</span>
+          <svg class="mo-sp-plot" viewBox="0 0 200 64" preserveAspectRatio="none" aria-hidden="true"><line class="mo-plot-one" x1="0" x2="200" y1="16" y2="16"/><line class="mo-plot-settle" x1="64.3" x2="64.3" y1="60" y2="10"/><path class="mo-plot-curve" d="M0.0 54.0L0.3 54.0L0.8 53.8L1.3 53.5L2.0 53.0L2.7 52.2L3.5 51.1L4.3 49.9L5.2 48.3L6.2 46.6L7.2 44.8L8.2 42.8L9.2 40.7L10.3 38.6L11.5 36.5L12.6 34.4L13.8 32.4L15.0 30.5L16.3 28.6L17.6 26.9L18.9 25.3L20.2 23.9L21.6 22.6L23.0 21.4L24.4 20.4L25.8 19.5L27.2 18.8L28.7 18.1L30.2 17.6L31.7 17.1L33.3 16.8L34.9 16.5L36.4 16.3L38.0 16.1L39.7 16.0L41.3 15.9L43.0 15.8L44.7 15.8L46.4 15.8L48.1 15.8L49.8 15.8L51.6 15.8L53.3 15.8L55.1 15.8L56.9 15.8L58.7 15.9L60.6 15.9L62.4 15.9L64.3 16.0H200"/></svg>
+          <span class="mo-sp-meta">0.40&nbsp;s &middot; bounce&nbsp;0.15 &middot; &zeta;&nbsp;0.85 &middot; peak&nbsp;1.006</span>
+        </button></li>
+        <li><button class="mo-sp" type="button" data-spring="lift" aria-pressed="false">
+          <span class="mo-sp-head"><span class="mo-sp-name">lift</span><span class="mo-sp-ms">337 ms</span></span>
+          <span class="mo-sp-use">The lens lifting on press</span>
+          <svg class="mo-sp-plot" viewBox="0 0 200 64" preserveAspectRatio="none" aria-hidden="true"><line class="mo-plot-one" x1="0" x2="200" y1="16" y2="16"/><line class="mo-plot-settle" x1="42.1" x2="42.1" y1="60" y2="10"/><path class="mo-plot-curve" d="M0.0 54.0L0.2 54.0L0.5 53.8L0.9 53.5L1.3 52.9L1.8 52.1L2.3 51.0L2.8 49.7L3.4 48.2L4.0 46.6L4.7 44.8L5.4 42.9L6.0 41.0L6.8 39.0L7.5 37.1L8.3 35.2L9.0 33.4L9.8 31.6L10.7 30.0L11.5 28.4L12.4 27.0L13.2 25.7L14.1 24.5L15.0 23.4L16.0 22.5L16.9 21.6L17.9 20.8L18.8 20.1L19.8 19.5L20.8 19.0L21.8 18.5L22.8 18.2L23.9 17.8L24.9 17.5L26.0 17.3L27.1 17.1L28.2 16.9L29.3 16.7L30.4 16.6L31.5 16.5L32.6 16.4L33.8 16.3L34.9 16.3L36.1 16.2L37.3 16.2L38.5 16.1L39.7 16.1L40.9 16.1L42.1 16.0H200"/></svg>
+          <span class="mo-sp-meta">0.25&nbsp;s &middot; bounce&nbsp;0.00 &middot; &zeta;&nbsp;1.00</span>
+        </button></li>
+        <li><button class="mo-sp" type="button" data-spring="hold" aria-pressed="false">
+          <span class="mo-sp-head"><span class="mo-sp-name">hold</span><span class="mo-sp-ms">557 ms</span></span>
+          <span class="mo-sp-use">A held press growing</span>
+          <svg class="mo-sp-plot" viewBox="0 0 200 64" preserveAspectRatio="none" aria-hidden="true"><line class="mo-plot-one" x1="0" x2="200" y1="16" y2="16"/><line class="mo-plot-settle" x1="69.7" x2="69.7" y1="60" y2="10"/><path class="mo-plot-curve" d="M0.0 54.0L0.3 54.0L0.8 53.8L1.4 53.3L2.1 52.5L2.9 51.2L3.8 49.6L4.7 47.7L5.7 45.3L6.7 42.7L7.8 39.9L8.9 36.9L10.0 33.9L11.2 30.8L12.4 27.8L13.7 25.0L15.0 22.4L16.3 20.1L17.7 18.0L19.0 16.3L20.5 14.9L21.9 13.8L23.4 13.0L24.9 12.5L26.4 12.2L28.0 12.2L29.5 12.3L31.1 12.6L32.8 12.9L34.4 13.4L36.1 13.8L37.8 14.3L39.5 14.7L41.2 15.1L43.0 15.4L44.8 15.7L46.6 16.0L48.4 16.1L50.2 16.3L52.1 16.3L54.0 16.4L55.9 16.4L57.8 16.4L59.7 16.3L61.7 16.3L63.7 16.2L65.7 16.2L67.7 16.1L69.7 16.0H200"/></svg>
+          <span class="mo-sp-meta">0.36&nbsp;s &middot; bounce&nbsp;0.41 &middot; &zeta;&nbsp;0.59 &middot; peak&nbsp;1.101</span>
+        </button></li>
+        <li><button class="mo-sp" type="button" data-spring="follow" aria-pressed="false">
+          <span class="mo-sp-head"><span class="mo-sp-name">follow</span><span class="mo-sp-ms">181 ms</span></span>
+          <span class="mo-sp-use">Finger follow, 20 ms behind</span>
+          <svg class="mo-sp-plot" viewBox="0 0 200 64" preserveAspectRatio="none" aria-hidden="true"><line class="mo-plot-one" x1="0" x2="200" y1="16" y2="16"/><line class="mo-plot-settle" x1="22.6" x2="22.6" y1="60" y2="10"/><path class="mo-plot-curve" d="M0.0 54.0L0.1 54.0L0.3 53.9L0.5 53.7L0.7 53.5L1.0 53.0L1.2 52.4L1.5 51.7L1.8 50.8L2.2 49.8L2.5 48.6L2.9 47.3L3.2 45.9L3.6 44.5L4.0 43.0L4.4 41.4L4.9 39.8L5.3 38.2L5.7 36.6L6.2 35.0L6.6 33.5L7.1 32.0L7.6 30.6L8.1 29.2L8.6 27.9L9.1 26.7L9.6 25.5L10.1 24.4L10.6 23.5L11.2 22.6L11.7 21.7L12.3 21.0L12.8 20.3L13.4 19.7L14.0 19.1L14.5 18.7L15.1 18.2L15.7 17.9L16.3 17.5L16.9 17.3L17.5 17.0L18.1 16.8L18.8 16.6L19.4 16.5L20.0 16.4L20.7 16.3L21.3 16.2L22.0 16.1L22.6 16.0H200"/></svg>
+          <span class="mo-sp-meta">0.20&nbsp;s &middot; bounce&nbsp;0.10 &middot; &zeta;&nbsp;0.90</span>
+        </button></li>
+        <li><button class="mo-sp" type="button" data-spring="settle" aria-pressed="false">
+          <span class="mo-sp-head"><span class="mo-sp-name">settle</span><span class="mo-sp-ms">850 ms</span></span>
+          <span class="mo-sp-use">Glass settling at rest</span>
+          <svg class="mo-sp-plot" viewBox="0 0 200 64" preserveAspectRatio="none" aria-hidden="true"><line class="mo-plot-one" x1="0" x2="200" y1="16" y2="16"/><line class="mo-plot-settle" x1="106.2" x2="106.2" y1="60" y2="10"/><path class="mo-plot-curve" d="M0.0 54.0L0.5 54.0L1.2 53.8L2.2 53.5L3.3 52.9L4.5 52.1L5.8 51.0L7.2 49.7L8.6 48.2L10.2 46.5L11.8 44.8L13.5 42.9L15.3 40.9L17.1 39.0L18.9 37.1L20.8 35.2L22.8 33.4L24.8 31.6L26.9 30.0L29.0 28.4L31.2 27.0L33.4 25.7L35.6 24.5L37.9 23.4L40.3 22.4L42.6 21.6L45.0 20.8L47.5 20.1L49.9 19.5L52.5 19.0L55.0 18.5L57.6 18.1L60.2 17.8L62.9 17.5L65.5 17.3L68.3 17.1L71.0 16.9L73.8 16.7L76.6 16.6L79.4 16.5L82.3 16.4L85.2 16.3L88.1 16.3L91.1 16.2L94.0 16.2L97.0 16.1L100.1 16.1L103.1 16.1L106.2 16.0H200"/></svg>
+          <span class="mo-sp-meta">0.63&nbsp;s &middot; bounce&nbsp;0.00 &middot; &zeta;&nbsp;1.00</span>
+        </button></li>
+        <li><button class="mo-sp" type="button" data-spring="card" aria-pressed="false">
+          <span class="mo-sp-head"><span class="mo-sp-name">card</span><span class="mo-sp-ms">645 ms</span></span>
+          <span class="mo-sp-use">Product viewer card morph</span>
+          <svg class="mo-sp-plot" viewBox="0 0 200 64" preserveAspectRatio="none" aria-hidden="true"><line class="mo-plot-one" x1="0" x2="200" y1="16" y2="16"/><line class="mo-plot-settle" x1="80.6" x2="80.6" y1="60" y2="10"/><path class="mo-plot-curve" d="M0.0 54.0L0.4 54.0L0.9 53.8L1.7 53.5L2.5 53.0L3.4 52.2L4.4 51.1L5.4 49.8L6.6 48.3L7.7 46.6L9.0 44.7L10.3 42.7L11.6 40.6L13.0 38.5L14.4 36.3L15.8 34.2L17.3 32.2L18.9 30.2L20.4 28.4L22.0 26.7L23.7 25.1L25.3 23.6L27.1 22.3L28.8 21.2L30.6 20.2L32.4 19.3L34.2 18.5L36.0 17.9L37.9 17.4L39.8 16.9L41.8 16.6L43.7 16.3L45.7 16.1L47.7 16.0L49.8 15.8L51.8 15.8L53.9 15.7L56.0 15.7L58.1 15.7L60.3 15.7L62.5 15.7L64.7 15.8L66.9 15.8L69.1 15.8L71.4 15.8L73.7 15.9L76.0 15.9L78.3 15.9L80.6 16.0H200"/></svg>
+          <span class="mo-sp-meta">0.50&nbsp;s &middot; bounce&nbsp;0.16 &middot; &zeta;&nbsp;0.84 &middot; peak&nbsp;1.008</span>
+        </button></li>
+        <li><button class="mo-sp" type="button" data-spring="tour" aria-pressed="false">
+          <span class="mo-sp-head"><span class="mo-sp-name">tour</span><span class="mo-sp-ms">780 ms</span></span>
+          <span class="mo-sp-use">Pose chip &rarr; card</span>
+          <svg class="mo-sp-plot" viewBox="0 0 200 64" preserveAspectRatio="none" aria-hidden="true"><line class="mo-plot-one" x1="0" x2="200" y1="16" y2="16"/><line class="mo-plot-settle" x1="97.5" x2="97.5" y1="60" y2="10"/><path class="mo-plot-curve" d="M0.0 54.0L0.4 54.0L1.1 53.8L2.0 53.3L3.0 52.5L4.1 51.3L5.3 49.7L6.6 47.7L7.9 45.3L9.4 42.7L10.8 39.9L12.4 36.9L14.0 33.8L15.7 30.7L17.4 27.7L19.1 24.9L20.9 22.3L22.8 19.9L24.7 17.8L26.6 16.1L28.6 14.6L30.7 13.5L32.7 12.7L34.8 12.2L37.0 12.0L39.1 12.0L41.3 12.1L43.6 12.4L45.9 12.8L48.2 13.2L50.5 13.7L52.9 14.2L55.3 14.7L57.7 15.1L60.2 15.5L62.7 15.8L65.2 16.0L67.7 16.2L70.3 16.3L72.9 16.4L75.6 16.4L78.2 16.4L80.9 16.4L83.6 16.4L86.3 16.3L89.1 16.2L91.9 16.2L94.7 16.1L97.5 16.0H200"/></svg>
+          <span class="mo-sp-meta">0.50&nbsp;s &middot; bounce&nbsp;0.42 &middot; &zeta;&nbsp;0.58 &middot; peak&nbsp;1.107</span>
+        </button></li>
+        <li><button class="mo-sp" type="button" data-spring="snap" aria-pressed="false">
+          <span class="mo-sp-head"><span class="mo-sp-name">snap</span><span class="mo-sp-ms">432 ms</span></span>
+          <span class="mo-sp-use">Interactive morph, no bounce</span>
+          <svg class="mo-sp-plot" viewBox="0 0 200 64" preserveAspectRatio="none" aria-hidden="true"><line class="mo-plot-one" x1="0" x2="200" y1="16" y2="16"/><line class="mo-plot-settle" x1="54.0" x2="54.0" y1="60" y2="10"/><path class="mo-plot-curve" d="M0.0 54.0L0.2 54.0L0.6 53.8L1.1 53.5L1.7 52.9L2.3 52.1L2.9 51.0L3.6 49.7L4.4 48.2L5.2 46.5L6.0 44.8L6.9 42.9L7.7 40.9L8.7 39.0L9.6 37.1L10.6 35.2L11.6 33.4L12.6 31.6L13.7 30.0L14.7 28.4L15.8 27.0L17.0 25.7L18.1 24.5L19.3 23.4L20.5 22.4L21.7 21.6L22.9 20.8L24.1 20.1L25.4 19.5L26.7 19.0L27.9 18.5L29.3 18.1L30.6 17.8L31.9 17.5L33.3 17.3L34.7 17.1L36.1 16.9L37.5 16.7L38.9 16.6L40.4 16.5L41.8 16.4L43.3 16.3L44.8 16.3L46.3 16.2L47.8 16.2L49.3 16.1L50.8 16.1L52.4 16.1L54.0 16.0H200"/></svg>
+          <span class="mo-sp-meta">0.32&nbsp;s &middot; bounce&nbsp;0.00 &middot; &zeta;&nbsp;1.00</span>
+        </button></li>
+        <li><button class="mo-sp" type="button" data-spring="drop" aria-pressed="false">
+          <span class="mo-sp-head"><span class="mo-sp-name">drop</span><span class="mo-sp-ms">1,498 ms</span></span>
+          <span class="mo-sp-use">The control bar&rsquo;s liquid drop</span>
+          <svg class="mo-sp-plot" viewBox="0 0 200 64" preserveAspectRatio="none" aria-hidden="true"><line class="mo-plot-one" x1="0" x2="200" y1="16" y2="16"/><line class="mo-plot-settle" x1="187.2" x2="187.2" y1="60" y2="10"/><path class="mo-plot-curve" d="M0.0 54.0L0.8 53.9L2.2 53.4L3.9 52.3L5.8 50.5L7.9 47.8L10.2 44.3L12.6 40.1L15.2 35.4L18.0 30.4L20.8 25.4L23.8 20.5L26.9 16.2L30.1 12.5L33.4 9.6L36.7 7.6L40.2 6.6L43.8 6.4L47.4 6.9L51.2 8.1L55.0 9.7L58.8 11.4L62.8 13.2L66.8 14.9L70.9 16.3L75.1 17.4L79.4 18.1L83.7 18.4L88.0 18.4L92.5 18.1L97.0 17.7L101.5 17.2L106.1 16.6L110.8 16.2L115.5 15.8L120.3 15.5L125.2 15.4L130.1 15.4L135.0 15.4L140.0 15.6L145.0 15.7L150.2 15.9L155.3 16.0L160.5 16.1L165.8 16.1L171.1 16.2L176.4 16.1L181.8 16.1L187.2 16.0H200"/></svg>
+          <span class="mo-sp-meta">0.63&nbsp;s &middot; bounce&nbsp;0.60 &middot; &zeta;&nbsp;0.40 &middot; peak&nbsp;1.254</span>
+        </button></li>
+        <li><button class="mo-sp" type="button" data-spring="bubble" aria-pressed="false">
+          <span class="mo-sp-head"><span class="mo-sp-name">bubble</span><span class="mo-sp-ms">1,226 ms</span></span>
+          <span class="mo-sp-use">Control bar bubble width</span>
+          <svg class="mo-sp-plot" viewBox="0 0 200 64" preserveAspectRatio="none" aria-hidden="true"><line class="mo-plot-one" x1="0" x2="200" y1="16" y2="16"/><line class="mo-plot-settle" x1="153.3" x2="153.3" y1="60" y2="10"/><path class="mo-plot-curve" d="M0.0 54.0L0.7 53.9L1.8 53.6L3.2 52.9L4.7 51.6L6.5 49.8L8.3 47.4L10.3 44.5L12.5 41.1L14.7 37.4L17.0 33.6L19.5 29.6L22.0 25.8L24.6 22.2L27.3 19.0L30.1 16.1L32.9 13.8L35.8 12.0L38.8 10.8L41.9 10.1L45.0 9.8L48.2 10.0L51.4 10.4L54.7 11.1L58.1 12.0L61.5 12.9L65.0 13.8L68.5 14.7L72.1 15.4L75.7 16.0L79.4 16.5L83.1 16.8L86.9 17.0L90.7 17.0L94.6 17.0L98.5 16.9L102.5 16.7L106.5 16.5L110.5 16.3L114.6 16.2L118.7 16.1L122.9 16.0L127.1 15.9L131.4 15.8L135.7 15.8L140.0 15.8L144.4 15.9L148.8 15.9L153.3 16.0H200"/></svg>
+          <span class="mo-sp-meta">0.63&nbsp;s &middot; bounce&nbsp;0.50 &middot; &zeta;&nbsp;0.50 &middot; peak&nbsp;1.163</span>
+        </button></li>
+        <li><button class="mo-sp" type="button" data-spring="content" aria-pressed="false">
+          <span class="mo-sp-head"><span class="mo-sp-name">content</span><span class="mo-sp-ms">848 ms</span></span>
+          <span class="mo-sp-use">Control bar content slide</span>
+          <svg class="mo-sp-plot" viewBox="0 0 200 64" preserveAspectRatio="none" aria-hidden="true"><line class="mo-plot-one" x1="0" x2="200" y1="16" y2="16"/><line class="mo-plot-settle" x1="106.0" x2="106.0" y1="60" y2="10"/><path class="mo-plot-curve" d="M0.0 54.0L0.5 54.0L1.2 53.8L2.2 53.5L3.3 52.9L4.5 52.1L5.8 51.0L7.2 49.7L8.6 48.2L10.2 46.5L11.8 44.8L13.5 42.9L15.2 40.9L17.0 39.0L18.9 37.1L20.8 35.2L22.8 33.4L24.8 31.6L26.8 30.0L29.0 28.4L31.1 27.0L33.3 25.7L35.6 24.5L37.8 23.4L40.2 22.4L42.5 21.6L44.9 20.8L47.4 20.1L49.8 19.5L52.3 19.0L54.9 18.5L57.5 18.1L60.1 17.8L62.7 17.5L65.4 17.3L68.1 17.1L70.8 16.9L73.6 16.7L76.4 16.6L79.2 16.5L82.1 16.4L85.0 16.3L87.9 16.3L90.9 16.2L93.8 16.2L96.8 16.1L99.8 16.1L102.9 16.1L106.0 16.0H200"/></svg>
+          <span class="mo-sp-meta">0.63&nbsp;s &middot; bounce&nbsp;0.00 &middot; &zeta;&nbsp;1.00</span>
+        </button></li>
+        <li><button class="mo-sp" type="button" data-spring="dots" aria-pressed="false">
+          <span class="mo-sp-head"><span class="mo-sp-name">dots</span><span class="mo-sp-ms">524 ms</span></span>
+          <span class="mo-sp-use">Dot shift, --progress-intro</span>
+          <svg class="mo-sp-plot" viewBox="0 0 200 64" preserveAspectRatio="none" aria-hidden="true"><line class="mo-plot-one" x1="0" x2="200" y1="16" y2="16"/><line class="mo-plot-settle" x1="65.5" x2="65.5" y1="60" y2="10"/><path class="mo-plot-curve" d="M0.0 54.0L0.3 54.0L0.8 53.9L1.4 53.6L2.0 53.1L2.8 52.4L3.6 51.5L4.4 50.3L5.3 48.8L6.3 47.2L7.3 45.4L8.3 43.4L9.4 41.3L10.5 39.1L11.7 36.9L12.9 34.6L14.1 32.4L15.3 30.3L16.6 28.2L17.9 26.2L19.2 24.4L20.6 22.7L22.0 21.2L23.4 19.9L24.8 18.7L26.3 17.6L27.8 16.8L29.3 16.1L30.8 15.5L32.4 15.1L33.9 14.8L35.5 14.5L37.1 14.4L38.8 14.4L40.4 14.4L42.1 14.4L43.8 14.5L45.5 14.6L47.2 14.8L49.0 14.9L50.8 15.1L52.6 15.2L54.4 15.4L56.2 15.5L58.0 15.6L59.9 15.7L61.7 15.8L63.6 15.9L65.5 16.0H200"/></svg>
+          <span class="mo-sp-meta">0.44&nbsp;s &middot; bounce&nbsp;0.29 &middot; &zeta;&nbsp;0.71 &middot; peak&nbsp;1.043</span>
+        </button></li>
+        <li><button class="mo-sp" type="button" data-spring="nav-in" aria-pressed="false">
+          <span class="mo-sp-head"><span class="mo-sp-name">nav-in</span><span class="mo-sp-ms">600 ms</span></span>
+          <span class="mo-sp-use">Local nav opens</span>
+          <svg class="mo-sp-plot" viewBox="0 0 200 64" preserveAspectRatio="none" aria-hidden="true"><line class="mo-plot-one" x1="0" x2="200" y1="16" y2="16"/><line class="mo-plot-settle" x1="75.0" x2="75.0" y1="60" y2="10"/><path class="mo-plot-curve" d="M0.0 54.0L0.3 53.6L0.9 53.0L1.5 52.2L2.3 51.1L3.2 49.8L4.1 48.3L5.1 46.7L6.1 45.0L7.2 43.1L8.3 41.3L9.5 39.4L10.8 37.5L12.0 35.6L13.4 33.8L14.7 32.1L16.1 30.4L17.5 28.9L19.0 27.4L20.5 26.1L22.0 24.9L23.6 23.8L25.2 22.8L26.8 21.9L28.4 21.1L30.1 20.3L31.8 19.7L33.5 19.2L35.3 18.7L37.0 18.3L38.8 17.9L40.7 17.6L42.5 17.4L44.4 17.1L46.3 16.9L48.2 16.8L50.1 16.6L52.1 16.5L54.1 16.4L56.1 16.4L58.1 16.3L60.1 16.2L62.2 16.2L64.3 16.2L66.4 16.1L68.5 16.1L70.7 16.1L72.8 16.1L75.0 16.0H200"/></svg>
+          <span class="mo-sp-meta">spring(1.5, 28, 28) &middot; &zeta;&nbsp;2.16</span>
+        </button></li>
+        <li><button class="mo-sp" type="button" data-spring="nav-out" aria-pressed="false">
+          <span class="mo-sp-head"><span class="mo-sp-name">nav-out</span><span class="mo-sp-ms">400 ms</span></span>
+          <span class="mo-sp-use">Local nav closes</span>
+          <svg class="mo-sp-plot" viewBox="0 0 200 64" preserveAspectRatio="none" aria-hidden="true"><line class="mo-plot-one" x1="0" x2="200" y1="16" y2="16"/><line class="mo-plot-settle" x1="50.0" x2="50.0" y1="60" y2="10"/><path class="mo-plot-curve" d="M0.0 54.0L0.2 53.4L0.6 52.4L1.0 51.1L1.5 49.7L2.1 48.0L2.7 46.2L3.4 44.4L4.1 42.4L4.8 40.4L5.6 38.5L6.4 36.5L7.2 34.6L8.0 32.8L8.9 31.1L9.8 29.5L10.7 27.9L11.7 26.5L12.7 25.3L13.7 24.1L14.7 23.0L15.7 22.1L16.8 21.2L17.9 20.5L18.9 19.8L20.1 19.3L21.2 18.8L22.3 18.3L23.5 18.0L24.7 17.6L25.9 17.4L27.1 17.1L28.3 16.9L29.6 16.8L30.9 16.6L32.1 16.5L33.4 16.4L34.7 16.3L36.1 16.3L37.4 16.2L38.7 16.2L40.1 16.1L41.5 16.1L42.9 16.1L44.3 16.1L45.7 16.1L47.1 16.0L48.5 16.0L50.0 16.0H200"/></svg>
+          <span class="mo-sp-meta">spring(0.75, 20, 20) &middot; &zeta;&nbsp;2.58</span>
+        </button></li>
+        <li><button class="mo-sp" type="button" data-spring="legacy" aria-pressed="false">
+          <span class="mo-sp-head"><span class="mo-sp-name">legacy</span><span class="mo-sp-ms">710 ms</span></span>
+          <span class="mo-sp-use">Response .55, damping .825</span>
+          <svg class="mo-sp-plot" viewBox="0 0 200 64" preserveAspectRatio="none" aria-hidden="true"><line class="mo-plot-one" x1="0" x2="200" y1="16" y2="16"/><line class="mo-plot-settle" x1="88.7" x2="88.7" y1="60" y2="10"/><path class="mo-plot-curve" d="M0.0 54.0L0.4 54.0L1.0 53.8L1.8 53.5L2.7 53.0L3.7 52.2L4.8 51.1L6.0 49.8L7.2 48.3L8.5 46.5L9.9 44.6L11.3 42.6L12.7 40.5L14.3 38.3L15.8 36.2L17.4 34.0L19.1 32.0L20.7 30.0L22.5 28.1L24.2 26.4L26.1 24.8L27.9 23.3L29.8 22.0L31.7 20.9L33.6 19.8L35.6 19.0L37.6 18.2L39.7 17.6L41.7 17.1L43.8 16.7L46.0 16.4L48.1 16.1L50.3 15.9L52.5 15.8L54.8 15.7L57.0 15.6L59.3 15.6L61.6 15.6L64.0 15.6L66.4 15.7L68.7 15.7L71.2 15.7L73.6 15.8L76.1 15.8L78.6 15.8L81.1 15.9L83.6 15.9L86.2 15.9L88.7 16.0H200"/></svg>
+          <span class="mo-sp-meta">0.55&nbsp;s &middot; bounce&nbsp;0.18 &middot; &zeta;&nbsp;0.82 &middot; peak&nbsp;1.010</span>
+        </button></li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ 3 · INTERRUPT ════════════════════════════════════════════════════ -->
+<section class="band" data-band="story" id="interrupt" aria-labelledby="mo-rt-h">
+  <div class="viewport-content">
+    <div class="mo-head">
+      <h2 class="t-section" id="mo-rt-h">Catch it mid-flight.</h2>
+      <p class="t-lede">Press <strong>Send</strong> twice, quickly. A spring re-aimed in flight keeps its velocity: it coasts on for a moment and turns smoothly. A CSS transition starts the new move from rest, so the trace kinks. <strong>That kink is what a finger feels.</strong></p>
+    </div>
+    <div class="card mo-rt mo-after">
+      <div class="mo-lanes">
+        <div class="mo-lane"><p class="mo-lane-label"><b>MOTION.spring</b><span>JavaScript, analytic, re-aimed</span></p><div class="mo-track"><i class="mo-puck" id="mo-pk-js" style="--c: var(--series-1)"></i></div></div>
+        <div class="mo-lane"><p class="mo-lane-label"><b>MOTION.glide</b><span>WAAPI + <code>linearFrom()</code>, on the compositor</span></p><div class="mo-track"><i class="mo-puck" id="mo-pk-glide" style="--c: var(--series-2)"></i></div></div>
+        <div class="mo-lane"><p class="mo-lane-label"><b>CSS transition</b><span>same spring curve, restarts at rest</span></p><div class="mo-track"><i class="mo-puck mo-puck-css" id="mo-pk-css" style="--c: var(--label-3)"></i></div></div>
+      </div>
+      <div class="mo-row">
+        <button class="btn btn-primary btn-l" type="button" id="mo-rt-send">Send</button>
+        <button class="btn btn-secondary btn-l" type="button" id="mo-rt-test">Run the 160 ms test</button>
+      </div>
+      <svg class="mo-rt-plot" id="mo-rt-plot" role="img" aria-labelledby="mo-rt-plot-t"><title id="mo-rt-plot-t">Position of each puck over time</title></svg>
+      <div class="mo-rt-legend">
+        <span class="mo-cap"><i class="mo-swatch" style="--c: var(--series-1)"></i> MOTION.spring</span>
+        <span class="mo-cap"><i class="mo-swatch" style="--c: var(--series-2)"></i> MOTION.glide</span>
+        <span class="mo-cap"><i class="mo-swatch is-dash" style="--c: var(--label-3)"></i> CSS transition</span>
+        <span class="mo-cap"><i class="mo-swatch is-dash" style="--c: var(--label-4)"></i> re-aimed here</span>
+      </div>
+      <div class="doc-table mo-rt-table">
+        <table class="table">
+          <thead><tr><th scope="col">Lane</th><th scope="col" class="num">Velocity before (px/s)</th><th scope="col" class="num">Velocity after</th><th scope="col" class="num">Coasted on</th></tr></thead>
+          <tbody id="mo-rt-rows">
+            <tr><td>MOTION.spring</td><td class="num">&mdash;</td><td class="num">&mdash;</td><td class="num">&mdash;</td></tr>
+            <tr><td>MOTION.glide</td><td class="num">&mdash;</td><td class="num">&mdash;</td><td class="num">&mdash;</td></tr>
+            <tr><td>CSS transition</td><td class="num">&mdash;</td><td class="num">&mdash;</td><td class="num">&mdash;</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="mo-out" id="mo-rt-out" role="status">Measured on this page, in this browser, when you run it.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ 4 · CURVES ═══════════════════════════════════════════════════════ -->
+<section class="band" data-band="utility" id="curves" aria-labelledby="mo-cv-h">
+  <div class="viewport-content">
+    <header class="section-header">
+      <h2 class="section-header-headline" id="mo-cv-h">Curves for choreography. Springs for touch.</h2>
+      <button class="section-header-link" type="button" id="mo-cv-play">Play the curves <i data-sym="play"></i></button>
+    </header>
+    <p class="t-lede">A curve is fire-and-forget: it knows its duration before it starts and cannot be caught. That suits scroll reveals and entrances nobody touches. These are the <strong>eight most-used curves</strong>, measured from production stylesheets and played here over one second so the shapes compare.</p>
+    <ul class="mo-cv-grid mo-after" id="mo-cv-grid">
+        <li class="mo-cv" style="--mo-ease: var(--ease-standard)">
+          <svg class="mo-cv-plot" viewBox="0 0 120 120" aria-hidden="true"><rect class="mo-cv-box" x="10.0" y="28.0" width="100" height="76"/><line class="mo-cv-arm" x1="10.0" y1="104.0" x2="50.0" y2="104.0"/><line class="mo-cv-arm" x1="110.0" y1="28.0" x2="70.0" y2="28.0"/><path class="mo-cv-curve" d="M10.0 104.0C50.0 104.0 70.0 28.0 110.0 28.0"/><circle class="mo-cv-knob" cx="50.0" cy="104.0" r="3"/><circle class="mo-cv-knob" cx="70.0" cy="28.0" r="3"/></svg>
+          <p class="mo-cv-name">--ease-standard</p>
+          <p class="mo-cv-val">cubic-bezier(0.4, 0, 0.6, 1)</p>
+          <p class="mo-cv-use">The most-used curve: nav, flyouts, curtains</p>
+          <span class="mo-cv-lane" aria-hidden="true"><i></i></span>
+        </li>
+        <li class="mo-cv" style="--mo-ease: var(--ease-in-out-quad)">
+          <svg class="mo-cv-plot" viewBox="0 0 120 120" aria-hidden="true"><rect class="mo-cv-box" x="10.0" y="28.0" width="100" height="76"/><line class="mo-cv-arm" x1="10.0" y1="104.0" x2="55.0" y2="104.0"/><line class="mo-cv-arm" x1="110.0" y1="28.0" x2="65.0" y2="28.0"/><path class="mo-cv-curve" d="M10.0 104.0C55.0 104.0 65.0 28.0 110.0 28.0"/><circle class="mo-cv-knob" cx="55.0" cy="104.0" r="3"/><circle class="mo-cv-knob" cx="65.0" cy="28.0" r="3"/></svg>
+          <p class="mo-cv-name">--ease-in-out-quad</p>
+          <p class="mo-cv-val">cubic-bezier(0.45, 0, 0.55, 1)</p>
+          <p class="mo-cv-use">Staggered fade-in and gallery moves (easeInOutQuad)</p>
+          <span class="mo-cv-lane" aria-hidden="true"><i></i></span>
+        </li>
+        <li class="mo-cv" style="--mo-ease: var(--ease-out-cubic)">
+          <svg class="mo-cv-plot" viewBox="0 0 120 120" aria-hidden="true"><rect class="mo-cv-box" x="10.0" y="28.0" width="100" height="76"/><line class="mo-cv-arm" x1="10.0" y1="104.0" x2="43.0" y2="28.0"/><line class="mo-cv-arm" x1="110.0" y1="28.0" x2="78.0" y2="28.0"/><path class="mo-cv-curve" d="M10.0 104.0C43.0 28.0 78.0 28.0 110.0 28.0"/><circle class="mo-cv-knob" cx="43.0" cy="28.0" r="3"/><circle class="mo-cv-knob" cx="78.0" cy="28.0" r="3"/></svg>
+          <p class="mo-cv-name">--ease-out-cubic</p>
+          <p class="mo-cv-val">cubic-bezier(0.33, 1, 0.68, 1)</p>
+          <p class="mo-cv-use">Caption cross-fades (easeOutCubic)</p>
+          <span class="mo-cv-lane" aria-hidden="true"><i></i></span>
+        </li>
+        <li class="mo-cv" style="--mo-ease: var(--ease-in-out-cubic)">
+          <svg class="mo-cv-plot" viewBox="0 0 120 120" aria-hidden="true"><rect class="mo-cv-box" x="10.0" y="28.0" width="100" height="76"/><line class="mo-cv-arm" x1="10.0" y1="104.0" x2="75.0" y2="104.0"/><line class="mo-cv-arm" x1="110.0" y1="28.0" x2="45.0" y2="28.0"/><path class="mo-cv-curve" d="M10.0 104.0C75.0 104.0 45.0 28.0 110.0 28.0"/><circle class="mo-cv-knob" cx="75.0" cy="104.0" r="3"/><circle class="mo-cv-knob" cx="45.0" cy="28.0" r="3"/></svg>
+          <p class="mo-cv-name">--ease-in-out-cubic</p>
+          <p class="mo-cv-val">cubic-bezier(0.65, 0, 0.35, 1)</p>
+          <p class="mo-cv-use">The modal opening over .8 s</p>
+          <span class="mo-cv-lane" aria-hidden="true"><i></i></span>
+        </li>
+        <li class="mo-cv" style="--mo-ease: var(--ease-decel)">
+          <svg class="mo-cv-plot" viewBox="0 0 120 120" aria-hidden="true"><rect class="mo-cv-box" x="10.0" y="28.0" width="100" height="76"/><line class="mo-cv-arm" x1="10.0" y1="104.0" x2="10.0" y2="104.0"/><line class="mo-cv-arm" x1="110.0" y1="28.0" x2="30.0" y2="28.0"/><path class="mo-cv-curve" d="M10.0 104.0C10.0 104.0 30.0 28.0 110.0 28.0"/><circle class="mo-cv-knob" cx="10.0" cy="104.0" r="3"/><circle class="mo-cv-knob" cx="30.0" cy="28.0" r="3"/></svg>
+          <p class="mo-cv-name">--ease-decel</p>
+          <p class="mo-cv-val">cubic-bezier(0, 0, 0.2, 1)</p>
+          <p class="mo-cv-use">Things arriving: the films modal</p>
+          <span class="mo-cv-lane" aria-hidden="true"><i></i></span>
+        </li>
+        <li class="mo-cv" style="--mo-ease: var(--ease-card)">
+          <svg class="mo-cv-plot" viewBox="0 0 120 120" aria-hidden="true"><rect class="mo-cv-box" x="10.0" y="28.0" width="100" height="76"/><line class="mo-cv-arm" x1="10.0" y1="104.0" x2="10.0" y2="104.0"/><line class="mo-cv-arm" x1="110.0" y1="28.0" x2="60.0" y2="28.0"/><path class="mo-cv-curve" d="M10.0 104.0C10.0 104.0 60.0 28.0 110.0 28.0"/><circle class="mo-cv-knob" cx="10.0" cy="104.0" r="3"/><circle class="mo-cv-knob" cx="60.0" cy="28.0" r="3"/></svg>
+          <p class="mo-cv-name">--ease-card</p>
+          <p class="mo-cv-val">cubic-bezier(0, 0, 0.5, 1)</p>
+          <p class="mo-cv-use">Card hover growth over .3 s</p>
+          <span class="mo-cv-lane" aria-hidden="true"><i></i></span>
+        </li>
+        <li class="mo-cv" style="--mo-ease: var(--ease-pop)">
+          <svg class="mo-cv-plot" viewBox="0 0 120 120" aria-hidden="true"><rect class="mo-cv-box" x="10.0" y="28.0" width="100" height="76"/><line class="mo-cv-arm" x1="10.0" y1="104.0" x2="40.0" y2="-48.0"/><line class="mo-cv-arm" x1="110.0" y1="28.0" x2="60.0" y2="28.0"/><path class="mo-cv-curve" d="M10.0 104.0C40.0 -48.0 60.0 28.0 110.0 28.0"/><circle class="mo-cv-knob" cx="40.0" cy="-48.0" r="3"/><circle class="mo-cv-knob" cx="60.0" cy="28.0" r="3"/></svg>
+          <p class="mo-cv-name">--ease-pop</p>
+          <p class="mo-cv-val">cubic-bezier(0.3, 2, 0.5, 1)</p>
+          <p class="mo-cv-use">Colour swatches popping in, 400 ms</p>
+          <span class="mo-cv-lane" aria-hidden="true"><i></i></span>
+        </li>
+        <li class="mo-cv" style="--mo-ease: var(--ease-exit)">
+          <svg class="mo-cv-plot" viewBox="0 0 120 120" aria-hidden="true"><rect class="mo-cv-box" x="10.0" y="28.0" width="100" height="76"/><line class="mo-cv-arm" x1="10.0" y1="104.0" x2="21.0" y2="104.0"/><line class="mo-cv-arm" x1="110.0" y1="28.0" x2="60.0" y2="104.0"/><path class="mo-cv-curve" d="M10.0 104.0C21.0 104.0 60.0 104.0 110.0 28.0"/><circle class="mo-cv-knob" cx="21.0" cy="104.0" r="3"/><circle class="mo-cv-knob" cx="60.0" cy="104.0" r="3"/></svg>
+          <p class="mo-cv-name">--ease-exit</p>
+          <p class="mo-cv-val">cubic-bezier(0.11, 0, 0.5, 0)</p>
+          <p class="mo-cv-use">Plain exits (easeInQuad), 320 ms</p>
+          <span class="mo-cv-lane" aria-hidden="true"><i></i></span>
+        </li>
+    </ul>
+    <div class="mo-when">
+      <h3 class="mo-h3">Which one, when</h3>
+      <div class="doc-table" style="margin-top: var(--s-4)">
+        <table class="table">
+          <thead><tr><th scope="col">When it</th><th scope="col">Use</th><th scope="col">Token</th></tr></thead>
+          <tbody>
+            <tr><td>answers a touch: toggles, presses, drags</td><td>a spring &mdash; it can be caught and re-aimed</td><td><code>--sp-toggle</code> <code>--sp-press</code> <code>MOTION.spring</code></td></tr>
+            <tr><td>changes shape: pill to panel, chip to card</td><td>one spring-driven number, CSS derives the shape</td><td><code>MOTION.progress</code> <code>--sp-morph</code></td></tr>
+            <tr><td>enters as you scroll, once</td><td>easeInOutQuad over .7&ndash;.9 s, staggered .15 s</td><td><code>data-reveal</code> <code>--ease-in-out-quad</code></td></tr>
+            <tr><td>tracks the scroll position</td><td>linear in scroll, optionally lerp-smoothed</td><td><code>data-anim-keyframe</code> <code>"ease": 0.1</code></td></tr>
+            <tr><td>leaves the screen</td><td>easeInQuad, 320 ms: exits are quick and plain</td><td><code>--ease-exit</code> <code>--d-320</code></td></tr>
+            <tr><td>changes colour on hover</td><td>nothing &mdash; hover colours swap instantly</td><td>&mdash;</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="doc-note" data-kind="rule" style="margin-top: var(--s-6)">If a finger can interrupt it, it is a spring. If nobody can, a curve is fine &mdash; and it should still come from this list.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ 5 · THIRTEEN TIERS ═════════════════════════════════════════════════ -->
+<section class="band" data-band="story" id="tiers" aria-labelledby="mo-mx-h">
+  <div class="viewport-content">
+    <div class="mo-head">
+      <h2 class="t-section" id="mo-mx-h">Thirteen tiers, two axes.</h2>
+      <p class="t-lede">Every motion class in <code>fg3-motion.css</code> is filed by <strong>how it behaves</strong> and <strong>what it is for</strong>. The purpose decides what happens under reduced motion, so a wrong filing is a lie about what happened. Every filled cell below is live.</p>
+    </div>
+    <div class="mo-mx mo-after" id="mo-mx">
+      <div class="mo-mx-corner" aria-hidden="true"></div>
+      <div class="mo-mx-colhead"><b>Discrete</b><span>runs once</span></div>
+      <div class="mo-mx-colhead"><b>Indefinite</b><span>until removed</span></div>
+      <div class="mo-mx-colhead"><b>Transition</b><span>in or out</span></div>
+      <div class="mo-mx-colhead"><b>Content</b><span>one thing becomes another</span></div>
+
+      <div class="mo-mx-rowhead"><b>Navigational</b><span>where am I</span></div>
+      <div class="mo-mx-cell is-empty"></div>
+      <div class="mo-mx-cell is-empty"></div>
+      <div class="mo-mx-cell"><p class="mo-mx-where">Transition</p><p class="mo-mx-cls">.m-enter-left &middot; .m-exit-left</p>
+        <div class="mo-mx-spec"><div class="mo-push" id="mo-push"><span>Inbox</span></div></div>
+        <div class="mo-mx-go"><button class="btn btn-s" type="button" data-mo-act="push">Push a page</button></div></div>
+      <div class="mo-mx-cell"><p class="mo-mx-where">Content</p><p class="mo-mx-cls">.m-morph &middot; MOTION.navigate</p>
+        <div class="mo-mx-spec"><p class="mo-cap">A card becomes the page it opens.</p></div>
+        <div class="mo-mx-go"><a class="btn btn-s btn-secondary" href="#transitions">See it below</a></div></div>
+
+      <div class="mo-mx-rowhead"><b>Structural</b><span>what changed shape</span></div>
+      <div class="mo-mx-cell"><p class="mo-mx-where">Discrete</p><p class="mo-mx-cls">.m-row-in</p>
+        <div class="mo-mx-spec"><ul class="mo-rows" id="mo-rows"><li>aurora.demo &middot; run ended, 7 of 10</li></ul></div>
+        <div class="mo-mx-go"><button class="btn btn-s" type="button" data-mo-act="row">Add a row</button></div></div>
+      <div class="mo-mx-cell is-empty"></div>
+      <div class="mo-mx-cell"><p class="mo-mx-where">Transition</p><p class="mo-mx-cls">.m-collapse[data-open]</p>
+        <div class="mo-mx-spec"><div><button class="mo-disc" type="button" aria-expanded="false" aria-controls="mo-coll">Details <i data-sym="chevron-down"></i></button>
+          <div class="m-collapse mo-coll" id="mo-coll" data-open="false"><p>The height springs open on --sp-toggle; there is no max-height guess.</p></div></div></div>
+        <div class="mo-mx-go"></div></div>
+      <div class="mo-mx-cell"><p class="mo-mx-where">Content</p><p class="mo-mx-cls">SYM.replace</p>
+        <div class="mo-mx-spec"><span class="mo-glyph" id="mo-glyph"><i data-sym="play"></i></span></div>
+        <div class="mo-mx-go"><button class="btn btn-s" type="button" data-mo-act="glyph">Swap the symbol</button></div></div>
+
+      <div class="mo-mx-rowhead"><b>Feedback</b><span>you did that</span></div>
+      <div class="mo-mx-cell"><p class="mo-mx-where">Discrete</p><p class="mo-mx-cls">.m-pop</p>
+        <div class="mo-mx-spec"><span class="mo-pop" id="mo-pop"><i data-sym="checkmark"></i></span></div>
+        <div class="mo-mx-go"><button class="btn btn-s" type="button" data-mo-act="pop">Save</button></div></div>
+      <div class="mo-mx-cell is-empty"></div>
+      <div class="mo-mx-cell"><p class="mo-mx-where">Transition</p><p class="mo-mx-cls">.m-press</p>
+        <div class="mo-mx-spec"><button class="mo-press m-press" type="button">Press and hold</button></div>
+        <div class="mo-mx-go"></div></div>
+      <div class="mo-mx-cell is-empty"></div>
+
+      <div class="mo-mx-rowhead"><b>Attention</b><span>look here</span></div>
+      <div class="mo-mx-cell"><p class="mo-mx-where">Discrete</p><p class="mo-mx-cls">.m-shake &middot; .m-nudge &middot; .m-flash</p>
+        <div class="mo-mx-spec"><span class="mo-field" id="mo-field" aria-label="Password field">&bull;&bull;&bull;&bull;&bull;&bull;</span></div>
+        <div class="mo-mx-go"><button class="btn btn-s" type="button" data-mo-act="shake">Wrong</button><button class="btn btn-s" type="button" data-mo-act="nudge">Not that way</button><button class="btn btn-s" type="button" data-mo-act="flash">Changed</button></div></div>
+      <div class="mo-mx-cell"><p class="mo-mx-where">Indefinite</p><p class="mo-mx-cls">.m-pulse &middot; .m-breathe</p>
+        <div class="mo-mx-spec"><span class="mo-live"><i class="m-pulse"></i>Live</span><span class="mo-live"><i class="m-breathe is-accent"></i>Listening</span></div>
+        <div class="mo-mx-go"></div></div>
+      <div class="mo-mx-cell is-empty"></div>
+      <div class="mo-mx-cell is-empty"></div>
+
+      <div class="mo-mx-rowhead"><b>Progress</b><span>how far along</span></div>
+      <div class="mo-mx-cell is-empty"></div>
+      <div class="mo-mx-cell"><p class="mo-mx-where">Indefinite</p><p class="mo-mx-cls">.m-spin &middot; .m-bar.m-unknown</p>
+        <div class="mo-mx-spec"><span class="mo-spin m-spin"><i data-sym="arrow-clockwise"></i></span><div class="m-bar m-unknown mo-bar"><i></i></div></div>
+        <div class="mo-mx-go"></div></div>
+      <div class="mo-mx-cell"><p class="mo-mx-where">Transition</p><p class="mo-mx-cls">.m-bar &middot; .m-working</p>
+        <div class="mo-mx-spec"><span class="mo-cap" id="mo-bar-label">40% &middot; still working</span><div class="m-bar m-working mo-bar" id="mo-bar" style="--m-value: 40%"><i></i></div></div>
+        <div class="mo-mx-go"><button class="btn btn-s" type="button" data-mo-act="bar">Advance</button></div></div>
+      <div class="mo-mx-cell"><p class="mo-mx-where">Content</p><p class="mo-mx-cls">.m-swap &middot; MOTION.swap</p>
+        <div class="mo-mx-spec"><span class="m-swap mo-count" id="mo-swap"><span>1,222</span></span><span class="mo-count-cap" id="mo-swap-cap">done today</span></div>
+        <div class="mo-mx-go"><button class="btn btn-s" type="button" data-mo-act="swap" id="mo-swap-go">Show queued</button></div></div>
+
+      <div class="mo-mx-rowhead"><b>Ambient</b><span>decoration</span></div>
+      <div class="mo-mx-cell is-empty"></div>
+      <div class="mo-mx-cell"><p class="mo-mx-where">Indefinite</p><p class="mo-mx-cls">.m-sheen &middot; .m-drift</p>
+        <div class="mo-mx-spec"><div class="mo-sheen-tile m-sheen"><canvas data-art="ember" data-art-seed="5" aria-hidden="true"></canvas></div><i class="mo-drift-dot m-drift" aria-hidden="true"></i></div>
+        <div class="mo-mx-go"></div></div>
+      <div class="mo-mx-cell is-empty"></div>
+      <div class="mo-mx-cell is-empty"></div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ 6 · REDUCED MOTION ═══════════════════════════════════════════════ -->
+<section class="band" data-band="utility" id="reduced" aria-labelledby="mo-rm-h">
+  <div class="viewport-content">
+    <div class="mo-head">
+      <h2 class="t-section" id="mo-rm-h">Less motion. Never less information.</h2>
+      <p class="t-lede">Reduced motion removes <strong>displacement</strong>, never state. Things that report something keep moving, slower; things that travel become a short fade; decoration stops. The numbers under each specimen are read from the browser as you toggle.</p>
+    </div>
+    <div class="mo-rm-bar mo-after">
+      <label class="choice"><input class="switch" type="checkbox" role="switch" id="mo-rm-switch"> Preview reduced motion</label>
+      <p class="mo-out" id="mo-rm-system">Your system setting: checking&hellip;</p>
+    </div>
+    <div class="mo-rm-grid" id="mo-rm">
+      <article class="mo-rm"><h3>Transition</h3><p class="mo-rm-rule">Travel becomes a 140 ms fade.</p>
+        <div class="mo-rm-spec"><span class="mo-rm-tile" data-mo-meas="anim" id="mo-rm-enter"></span></div>
+        <p class="mo-rm-meas" data-mo-for="mo-rm-enter">&nbsp;</p><button class="btn btn-s" type="button" data-mo-rm="enter">Replay</button></article>
+      <article class="mo-rm"><h3>Discrete</h3><p class="mo-rm-rule">A shake becomes a flash of colour.</p>
+        <div class="mo-rm-spec"><span class="mo-field" style="width:150px" id="mo-rm-shake" data-mo-meas="anim">&bull;&bull;&bull;&bull;&bull;&bull;</span></div>
+        <p class="mo-rm-meas" data-mo-for="mo-rm-shake">&nbsp;</p><button class="btn btn-s" type="button" data-mo-rm="shake">Replay</button></article>
+      <article class="mo-rm"><h3>Indefinite</h3><p class="mo-rm-rule">Kept, and slowed: it says something is true.</p>
+        <div class="mo-rm-spec"><span class="mo-spin m-spin" id="mo-rm-spin" data-mo-meas="anim"><i data-sym="arrow-clockwise"></i></span></div>
+        <p class="mo-rm-meas" data-mo-for="mo-rm-spin">&nbsp;</p><span></span></article>
+      <article class="mo-rm"><h3>Progress</h3><p class="mo-rm-rule">Kept: &ldquo;working&rdquo; must never look &ldquo;hung&rdquo;.</p>
+        <div class="mo-rm-spec"><div class="m-bar m-working" style="--m-value: 64%; width: 150px"><i id="mo-rm-work" data-mo-meas="after"></i></div></div>
+        <p class="mo-rm-meas" data-mo-for="mo-rm-work">&nbsp;</p><span></span></article>
+      <article class="mo-rm"><h3>Ambient</h3><p class="mo-rm-rule">Removed. Nothing was being said.</p>
+        <div class="mo-rm-spec"><div class="mo-sheen-tile m-sheen" style="width:150px" id="mo-rm-sheen" data-mo-meas="after"><canvas data-art="dawn" data-art-seed="3" aria-hidden="true"></canvas></div></div>
+        <p class="mo-rm-meas" data-mo-for="mo-rm-sheen">&nbsp;</p><span></span></article>
+      <article class="mo-rm"><h3>Feedback</h3><p class="mo-rm-rule">A press fills instead of shrinking.</p>
+        <div class="mo-rm-spec"><button class="mo-press m-press" type="button" id="mo-rm-press">Press and hold</button></div>
+        <p class="mo-rm-meas">scale .965 on press &rarr; a fill, no scale</p><span></span></article>
+      <article class="mo-rm"><h3>Morph</h3><p class="mo-rm-rule"><code>MOTION.progress</code> jumps to its end.</p>
+        <div class="mo-rm-spec"><span class="mo-rm-morph" id="mo-rm-morph"></span></div>
+        <p class="mo-rm-meas" data-mo-for="mo-rm-morph">&nbsp;</p><button class="btn btn-s" type="button" data-mo-rm="morph">Replay</button></article>
+      <article class="mo-rm"><h3>Scroll scenes</h3><p class="mo-rm-rule">The gate demotes the page; scenes sit finished.</p>
+        <div class="mo-rm-spec"><span class="mo-rm-scene" id="mo-rm-scene"><i></i></span></div>
+        <p class="mo-rm-meas" data-mo-for="mo-rm-scene">&nbsp;</p><button class="btn btn-s" type="button" data-mo-rm="scene">Replay</button></article>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ 7 · MORPHS (stage) ═══════════════════════════════════════════════ -->
+<section class="band" data-band="stage" id="morphs" aria-labelledby="mo-mg-h">
+  <div class="viewport-content">
+    <div class="mo-head">
+      <h2 class="t-section" id="mo-mg-h">One number. Four shapes.</h2>
+      <p class="t-lede"><code>MOTION.progress</code> drives a single custom property on a spring and CSS derives width, height, radius, padding, type size and glass density from it with <code>calc()</code>. Interrupt any of them: the number turns around <strong>with its velocity</strong>, so the shape does too.</p>
+    </div>
+    <div class="mo-mg mo-after">
+      <article class="mo-mt" data-mo-morph="pill">
+        <div class="mo-mt-art">
+          <canvas data-art="twilight" data-art-seed="21" data-art-contrast="1.2" aria-hidden="true"></canvas>
+          <div class="mo-pp" id="mo-pp" data-lg3 data-lg3-priority="5">
+            <div class="mo-pp-bar"><b class="mo-pp-title">Motion</b><button class="mo-pp-btn" type="button" aria-expanded="false" data-mo-toggle>Explore</button></div>
+            <ul class="mo-pp-list"><li>Springs</li><li>Curves</li><li>Morphs</li><li>Scroll</li></ul>
+          </div>
+        </div>
+        <div class="mo-mt-foot">
+          <div><h3>Pill &rarr; panel</h3><code class="mo-code-line">MOTION.progress(el, 1, { spring: 'nav-in' })</code></div>
+          <div class="mo-gauge" aria-hidden="true"><span class="mo-gauge-var">--progress</span><output class="mo-gauge-val">0.000</output><span class="mo-gauge-bar"><i></i></span><svg class="mo-gauge-trace" viewBox="0 0 132 28" preserveAspectRatio="none"><line x1="0" x2="132" y1="7.6" y2="7.6"/><path d=""/></svg></div>
+          <div class="mo-row"><button class="btn btn-m" type="button" data-mo-toggle>Open</button><button class="btn btn-m btn-secondary" type="button" data-mo-interrupt>Open, then close at 120 ms</button></div>
+        </div>
+      </article>
+      <article class="mo-mt" data-mo-morph="chip">
+        <div class="mo-mt-art">
+          <canvas data-art="aurora" data-art-seed="14" data-art-contrast="1.2" aria-hidden="true"></canvas>
+          <div class="mo-cc" id="mo-cc" data-lg3 data-lg3-priority="2">
+            <button class="mo-cc-chip" type="button" aria-expanded="false" data-mo-toggle><span class="mo-cc-icon"><i data-sym="plus"></i></span><span>Foldable design</span></button>
+            <p class="mo-cc-body">The chip grows into the card it names. The <b>+</b> turns into a close button on the same number.</p>
+          </div>
+        </div>
+        <div class="mo-mt-foot">
+          <div><h3>Chip &rarr; card</h3><code class="mo-code-line">MOTION.progress(el, 1, { spring: 'tour' })</code></div>
+          <div class="mo-gauge" aria-hidden="true"><span class="mo-gauge-var">--progress</span><output class="mo-gauge-val">0.000</output><span class="mo-gauge-bar"><i></i></span><svg class="mo-gauge-trace" viewBox="0 0 132 28" preserveAspectRatio="none"><line x1="0" x2="132" y1="7.6" y2="7.6"/><path d=""/></svg></div>
+          <div class="mo-row"><button class="btn btn-m" type="button" data-mo-toggle>Open</button><button class="btn btn-m btn-secondary" type="button" data-mo-interrupt>Open, then close at 120 ms</button></div>
+        </div>
+      </article>
+      <article class="mo-mt" data-mo-morph="tabbar">
+        <div class="mo-mt-art">
+          <canvas data-art="ember" data-art-seed="4" data-art-contrast="1.2" aria-hidden="true"></canvas>
+          <div class="mo-tb-screen">
+            <div class="mo-tb-scroll" id="mo-tb-scroll">
+              <div class="mo-tb-feed">
+                <p>Today</p>
+                <div class="mo-tb-card"><canvas data-art="deep" data-art-seed="31" aria-hidden="true"></canvas></div>
+                <div class="mo-tb-card"><canvas data-art="aurora" data-art-seed="32" aria-hidden="true"></canvas></div>
+                <div class="mo-tb-card"><canvas data-art="twilight" data-art-seed="33" aria-hidden="true"></canvas></div>
+                <div class="mo-tb-card"><canvas data-art="steel" data-art-seed="34" aria-hidden="true"></canvas></div>
+              </div>
+            </div>
+            <nav class="tabbar" id="mo-tb" data-tabbar-position="absolute" data-tabbar-scroll="#mo-tb-scroll" aria-label="Demo tabs">
+              <div class="tabbar__row">
+                <div class="tabbar__bar" data-lg3 data-lg3-recipe="pill" data-lg3-priority="1" data-lg3-interactive>
+                  <div class="tabbar__tabs">
+                    <button class="tab" type="button" aria-selected="true"><i data-sym="house"></i><span class="tab__label">Today</span></button>
+                    <button class="tab" type="button"><i data-sym="person"></i><span class="tab__label">Projects</span></button>
+                    <button class="tab" type="button"><i data-sym="bubble"></i><span class="tab__label">Inbox</span></button>
+                  </div>
+                </div>
+                <button class="tab-prominent" type="button" data-lg3 data-lg3-interactive aria-label="Search"><i data-sym="magnifier"></i></button>
+              </div>
+            </nav>
+          </div>
+        </div>
+        <div class="mo-mt-foot">
+          <div><h3>Tab bar minimise</h3><code class="mo-code-line">CHROME.tabbar.minimize(el, true)  // --tb-min</code></div>
+          <div class="mo-gauge" aria-hidden="true"><span class="mo-gauge-var">--tb-min</span><output class="mo-gauge-val">0.000</output><span class="mo-gauge-bar"><i></i></span><svg class="mo-gauge-trace" viewBox="0 0 132 28" preserveAspectRatio="none"><line x1="0" x2="132" y1="7.6" y2="7.6"/><path d=""/></svg></div>
+          <div class="mo-row"><button class="btn btn-m" type="button" data-mo-toggle>Scroll the feed</button><span class="mo-cap">or scroll it yourself</span></div>
+        </div>
+      </article>
+      <article class="mo-mt" data-mo-morph="live">
+        <div class="mo-mt-art">
+          <canvas data-art="deep" data-art-seed="8" data-art-contrast="1.2" aria-hidden="true"></canvas>
+          <div class="mo-lc-host">
+            <div class="live-capsule" id="mo-lc" data-anchor="center" data-kind="burst" data-elapsed="42" style="--lc-hue: var(--series-1)">
+              <div class="live-capsule__glass" data-lg3 data-lg3-interactive>
+                <button class="live-capsule__face" type="button" aria-label="Now: Review, 4 of 10 tasks. Show details">
+                  <span class="live-capsule__lead"><i data-sym="heart"></i></span>
+                  <span class="live-capsule__summary">Review</span>
+                  <span class="live-capsule__trail">4/10</span>
+                </button>
+                <div class="live-capsule__detail">
+                  <div class="live-capsule__row">
+                    <span class="live-capsule__glyph"><i data-sym="heart"></i></span>
+                    <span><b class="live-capsule__account">aurora.demo</b><span class="live-capsule__line">Review &larr; tasks of @sample.trailrunners</span></span>
+                    <span class="live-capsule__elapsed">0:42</span>
+                  </div>
+                  <div class="live-capsule__meter" role="progressbar" aria-label="Tasks" aria-valuemin="0" aria-valuemax="10" aria-valuenow="4" style="--lc-meter:.4"><span></span></div>
+                  <div class="live-capsule__foot"><span class="live-capsule__count">4 of 10</span><button class="live-capsule__stop" type="button" data-live-collapse><i data-sym="xmark"></i>Close</button></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="mo-mt-foot">
+          <div><h3>Live capsule</h3><code class="mo-code-line">CHROME.live.expand(el, true)  // --lc-p</code></div>
+          <div class="mo-gauge" aria-hidden="true"><span class="mo-gauge-var">--lc-p</span><output class="mo-gauge-val">0.000</output><span class="mo-gauge-bar"><i></i></span><svg class="mo-gauge-trace" viewBox="0 0 132 28" preserveAspectRatio="none"><line x1="0" x2="132" y1="7.6" y2="7.6"/><path d=""/></svg></div>
+          <div class="mo-row"><button class="btn btn-m" type="button" data-mo-toggle>Expand</button><span class="mo-cap">bouncy out, smooth back</span></div>
+        </div>
+      </article>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ 8 · GESTURES ═════════════════════════════════════════════════════ -->
+<section class="band" data-band="story" id="gestures" aria-labelledby="mo-gs-h">
+  <div class="viewport-content">
+    <div class="mo-head">
+      <h2 class="t-section" id="mo-gs-h">Grab it. Throw it. It lands.</h2>
+      <p class="t-lede">A drag follows the finger one-to-one from where it was grabbed. Past an end it stretches like rubber. On release the landing is chosen from where a flick <strong>would have carried it</strong>, then the nearest detent &mdash; the way a native scroll view decelerates.</p>
+    </div>
+    <div class="mo-gs-grid mo-after">
+      <div class="card mo-gs">
+        <h3 class="mo-h3">Drag with projection</h3>
+        <p class="t-caption">Drag the sheet or flick it; arrow keys step between detents.</p>
+        <div class="mo-drag" id="mo-drag">
+          <span class="mo-drag-rail" style="--y: 24px"><span>Large</span></span>
+          <span class="mo-drag-rail" style="--y: 154px"><span>Medium</span></span>
+          <span class="mo-drag-rail" style="--y: 264px"><span>Small</span></span>
+          <div class="mo-sheet" id="mo-sheet" tabindex="0" role="slider" aria-label="Sheet height" aria-valuemin="0" aria-valuemax="2" aria-valuenow="2" aria-valuetext="Large">
+            <span class="mo-sheet-grab" aria-hidden="true"></span><b>Drag me, or flick</b><span>projection &times; .998, then the nearest detent</span>
+          </div>
+        </div>
+        <p class="mo-out" id="mo-drag-out" role="status">Released at &mdash; &middot; would have travelled &mdash; &middot; landed on Large</p>
+      </div>
+      <div class="card mo-gs">
+        <h3 class="mo-h3">Magnetic detents</h3>
+        <p class="t-caption">Magnets at closed, landing (&#8531;) and open. Pull past one and the thumb widens and squashes instead of hitting a wall.</p>
+        <div class="mo-duo-wrap">
+          <div class="device" data-device="duo" data-fold="0.3333" id="mo-duo">
+            <div class="device__screen" data-screen="inner" data-screen-width="760">
+              <div class="mo-duo-app" data-tone="light"><div><small>Springs</small><h4>Named</h4><ul><li><span>smooth</span><span>674 ms</span></li><li><span>snappy</span><span>642 ms</span></li><li><span>bouncy</span><span>730 ms</span></li><li><span>morph</span><span>758 ms</span></li></ul></div><div><small>Selected</small><h4>drop</h4><ul><li><span>stiffness</span><span>100</span></li><li><span>damping</span><span>8</span></li><li><span>peak</span><span>1.254</span></li><li><span>settles</span><span>1,498 ms</span></li></ul></div></div>
+            </div>
+            <div class="device__screen" data-screen="outer" data-screen-width="362">
+              <div class="mo-duo-outer" data-tone="light"><small class="mo-cap">14:30</small><b>758</b><span class="mo-cap">ms &middot; morph</span></div>
+            </div>
+          </div>
+        </div>
+        <div class="detent"><p class="detent-caption" id="mo-fold-cap">Drag below to open and close</p><div class="device-fold-slider" data-for="mo-duo" aria-labelledby="mo-fold-cap"></div></div>
+        <dl class="mo-kv" aria-live="polite">
+          <div><dt>Value</dt><dd id="mo-det-v">0.333</dd></div>
+          <div><dt>Hinge</dt><dd id="mo-det-a">120&deg;</dd></div>
+          <div><dt>Stretch</dt><dd id="mo-det-s">0 px</dd></div>
+          <div><dt>Squash</dt><dd id="mo-det-q">1.000</dd></div>
+        </dl>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ 9 · VIEW TRANSITIONS ═════════════════════════════════════════════ -->
+<section class="band" data-band="utility" id="transitions" aria-labelledby="mo-vt-h">
+  <div class="viewport-content">
+    <header class="section-header">
+      <h2 class="section-header-headline" id="mo-vt-h">Open it where it is.</h2>
+    </header>
+    <p class="t-lede"><code>MOTION.navigate(update, { types: ['morph'] })</code> wraps a DOM change in a typed view transition. The card and the page it opens share one name, so the browser morphs one into the other inside a <strong>clipped, rounded group</strong> while the rest of the page stays put.</p>
+    <div class="mo-vt mo-after" id="mo-vt">
+      <div class="mo-vt-grid" id="mo-vt-grid">
+        <button class="mo-vt-card" type="button" data-i="0"><span class="mo-vt-media"><canvas data-art="aurora" data-art-seed="41" aria-hidden="true"></canvas></span><span class="mo-vt-cap"><b>Aurora</b><span>aurora.demo &middot; 312 likes today</span></span></button>
+        <button class="mo-vt-card" type="button" data-i="1"><span class="mo-vt-media"><canvas data-art="ember" data-art-seed="42" aria-hidden="true"></canvas></span><span class="mo-vt-cap"><b>Basil</b><span>basil.demo &middot; 41 tasks today</span></span></button>
+        <button class="mo-vt-card" type="button" data-i="2"><span class="mo-vt-media"><canvas data-art="dawn" data-art-seed="43" aria-hidden="true"></canvas></span><span class="mo-vt-cap"><b>Cobalt</b><span>cobalt.demo &middot; paused 17 h</span></span></button>
+      </div>
+      <div class="mo-vt-detail" id="mo-vt-detail" hidden>
+        <span class="mo-vt-media" id="mo-vt-detail-media"></span>
+        <div class="mo-vt-detail-copy"><p class="mo-kicker">Project</p><h3 id="mo-vt-detail-title">Aurora</h3><p id="mo-vt-detail-text">The card you pressed is this page&rsquo;s header now; nothing faded to white in between.</p><div><button class="btn btn-l" type="button" id="mo-vt-back"><i data-sym="chevron-left"></i> Back</button></div></div>
+      </div>
+    </div>
+    <pre class="doc-code mo-after" data-lang="js"><code>card.style.viewTransitionName = 'mo-vt-media';
+MOTION.navigate(function () {
+  card.style.viewTransitionName = 'none';
+  detailMedia.style.viewTransitionName = 'mo-vt-media';
+  grid.hidden = true; detail.hidden = false;
+}, { types: ['morph'] });</code></pre>
+  </div>
+</section>
+
+<!-- ═══ 10 · THE SCROLL SYSTEM ═══════════════════════════════════════════ -->
+<section class="band" data-band="story" id="scroll" data-anim-scroll-group="Scroll" aria-labelledby="mo-scroll-h">
+  <div class="viewport-content">
+    <div class="lockup">
+      <p class="lockup-eyebrow">The scroll system</p>
+      <h2 class="lockup-headline headline-sweep" data-sweep id="mo-scroll-h">Scroll is the timeline.</h2>
+      <p class="lockup-copy">Choreography is described in markup: a JSON keyframe on an element, a start and an end written as scroll positions. <strong>Fluid Design Open reads that markup verbatim.</strong> Every linear range compiles to the browser&rsquo;s own scroll timeline; whatever CSS cannot express runs in one JavaScript loop.</p>
+    </div>
+
+    <div class="mo-format" style="margin-top: var(--s-12)">
+      <div class="stack-4">
+        <h3 class="mo-h3">The markup format</h3>
+        <dl class="doc-kv">
+          <dt><code>data-anim-keyframe</code></dt><dd>a tween, class or event, as JSON (<code>-0</code> to <code>-10</code> for more)</dd>
+          <dt><code>data-anim-scroll-group</code></dt><dd>the scope anchors are looked up in</dd>
+          <dt><code>start</code> <code>end</code></dt><dd>scroll positions, written as expressions</dd>
+          <dt><code>anchors</code></dt><dd>other elements the expressions may measure</dd>
+          <dt><code>easeFunction</code></dt><dd>a named easing, <code>bezier()</code> or <code>spring()</code></dd>
+          <dt><code>ease</code></dt><dd>lerp smoothing per frame (1 = none)</dd>
+          <dt><code>disabledWhen</code></dt><dd>classes on <code>html</code> that switch it off</dd>
+          <dt><code>cssClass</code> <code>event</code></dt><dd>toggle a class or fire an event at a position</dd>
+          <dt>properties</dt><dd><code>opacity x y scale rotation clip --any</code></dd>
+        </dl>
+      </div>
+      <pre class="doc-code" data-lang="html"><code>&lt;section data-anim-scroll-group="Cameras"&gt;
+  &lt;h2 data-anim-keyframe='{
+    "start": "t - 100vh",
+    "end": "t - 40vh",
+    "opacity": [0, 1],
+    "y": [60, 0],
+    "easeFunction": "easeOutCubic"
+  }'&gt;Hands down.&lt;/h2&gt;
+&lt;/section&gt;</code></pre>
+    </div>
+
+    <!-- a · the same keyframe on both paths -->
+    <div class="mo-ex" style="margin-top: var(--s-12)">
+      <div class="mo-ex-copy">
+        <h3>One keyframe, two paths.</h3>
+        <p>Both tiles carry the keyframe above. The left one compiles to <code>animation-timeline: view()</code> and never touches JavaScript while you scroll. The right one adds <code>"ease": 0.1</code> &mdash; lerp smoothing, which <strong>only the JavaScript loop can do</strong>, so the whole element moves there.</p>
+        <pre class="doc-code" data-lang="html"><code>&lt;div data-anim-keyframe='{"start": "t - 100vh",
+  "end": "t - 40vh", "opacity": [0, 1], "y": [60, 0],
+  "easeFunction": "easeOutCubic", "ease": 0.1}'&gt;</code></pre>
+      </div>
+      <div class="mo-ex-stage">
+        <div class="mo-raw">
+          <div id="mo-raw-css" data-anim-keyframe='{"start": "t - 100vh", "end": "t - 40vh", "opacity": [0, 1], "y": [60, 0], "easeFunction": "easeOutCubic"}'><b>Compiled</b><span class="mo-path" data-mo-path="#mo-raw-css"><i></i>checking&hellip;</span></div>
+          <div id="mo-raw-js" data-anim-keyframe='{"start": "t - 100vh", "end": "t - 40vh", "opacity": [0, 1], "y": [60, 0], "easeFunction": "easeOutCubic", "ease": 0.1}'><b>Lerped</b><span class="mo-path" data-mo-path="#mo-raw-js"><i></i>checking&hellip;</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- b · StaggeredFadeIn -->
+    <div class="mo-ex">
+      <div class="mo-ex-copy">
+        <h3>Staggered fade-in.</h3>
+        <p>The most used scroll effect, 82 times across three product pages: at <code>t &minus; 85vh</code> items rise 30 px over .7 s and fade in over .9 s, easeInOutQuad, <strong>.15 s apart</strong>. The trigger is a class keyframe; the motion is a CSS transition.</p>
+        <span class="mo-path" data-mo-path="#mo-stag"><i></i>checking&hellip;</span>
+        <pre class="doc-code" data-lang="html"><code>&lt;div data-reveal="stagger"&gt;
+  &lt;div data-staggered-item&gt;&hellip;&lt;/div&gt;
+  &lt;div data-staggered-item&gt;&hellip;&lt;/div&gt;
+&lt;/div&gt;</code></pre>
+      </div>
+      <div class="mo-ex-stage">
+        <div class="mo-stag" id="mo-stag" data-reveal="stagger">
+          <div data-staggered-item><b>30 px</b><span>rise over .7 s</span></div>
+          <div data-staggered-item><b>.9 s</b><span>fade, easeInOutQuad</span></div>
+          <div data-staggered-item><b>.15 s</b><span>between items</span></div>
+          <div data-staggered-item data-staggered-item-no-translate><b>t &minus; 85vh</b><span>the trigger, no rise</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- c · count-up -->
+    <div class="mo-ex">
+      <div class="mo-ex-copy">
+        <h3>Numbers that count.</h3>
+        <p>The authored text is the truth &mdash; no JavaScript, reduced motion and screen readers all get <strong>1,222</strong>. With the gate open the digits roll up on a spring the first time they arrive.</p>
+        <span class="mo-path" data-mo-path="#mo-count-a"><i></i>checking&hellip;</span>
+        <pre class="doc-code" data-lang="html"><code>&lt;p data-count&gt;1,222&lt;/p&gt;
+&lt;p data-count data-count-from="140"&gt;42.7 s&lt;/p&gt;</code></pre>
+      </div>
+      <div class="mo-ex-stage">
+        <div class="stat-grid" data-cols="3">
+          <div class="stat-cell"><p class="stat-lead">Done</p><p class="stat-value" id="mo-count-a" data-count>1,222</p><p class="stat-caption">tasks today</p></div>
+          <div class="stat-cell"><p class="stat-lead">Down to</p><p class="stat-value" data-count data-count-from="140">42.7 s</p><p class="stat-caption">per finished task, whole run &middot; 12.6 s inside runs</p></div>
+          <div class="stat-cell"><p class="stat-lead">Up to</p><p class="stat-value" data-count>12</p><p class="stat-caption">tasks off one start</p></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- d · sweep -->
+    <div class="mo-ex">
+      <div class="mo-ex-copy">
+        <h3>A headline that sweeps.</h3>
+        <p>The heading at the top of this section. At <code>t &minus; 80vh</code> a three-stop gradient slides across the letters over 3.5 s and <strong>lands on solid ink</strong> &mdash; which is also what the base experience shows.</p>
+        <span class="mo-path" data-mo-path="#mo-scroll-h"><i></i>checking&hellip;</span>
+      </div>
+      <div class="mo-ex-stage">
+        <pre class="doc-code" data-lang="html"><code>&lt;h2 class="headline-sweep" data-sweep&gt;
+  Scroll is the timeline.
+&lt;/h2&gt;</code></pre>
+      </div>
+    </div>
+
+    <!-- e · parallax -->
+    <div class="mo-ex">
+      <div class="mo-ex-copy">
+        <h3>Parallax, from one rate.</h3>
+        <p><code>data-parallax="rate"</code> moves an element &plusmn;rate &times; 50vh while it crosses the viewport. The back layer drifts at .12, the card in front at &minus;.06 &mdash; small numbers read as depth, large ones as a glitch.</p>
+        <span class="mo-path" data-mo-path="#mo-par-back"><i></i>checking&hellip;</span>
+        <pre class="doc-code" data-lang="html"><code>&lt;div data-parallax="0.12"&gt;&hellip;&lt;/div&gt;
+&lt;div data-parallax="-0.06"&gt;&hellip;&lt;/div&gt;</code></pre>
+      </div>
+      <div class="mo-ex-stage">
+        <div class="mo-par">
+          <div class="mo-par-back" id="mo-par-back" data-parallax="0.12"><canvas data-art="aurora" data-art-seed="51" aria-hidden="true"></canvas></div>
+          <div class="mo-par-front" data-parallax="-0.06"><canvas data-art="ember" data-art-seed="52" aria-hidden="true"></canvas></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- f · clip-expand: a card that becomes the whole width (direct child of the band) -->
+  <div class="viewport-content">
+    <div class="mo-ex" style="padding-bottom: var(--s-9)">
+      <div class="mo-ex-copy">
+        <h3>A card that becomes the page.</h3>
+        <p>One variable, <code>--clip-path-progress</code>, runs from 1 to 0 over <code>t &minus; 70vh &rarr; t</code> with lerp .3. The clip starts as an inset card with a 28 px corner and opens to full bleed as it arrives.</p>
+        <span class="mo-path" data-mo-path="#mo-clip"><i></i>checking&hellip;</span>
+      </div>
+      <div class="mo-ex-stage"><pre class="doc-code" data-lang="html"><code>&lt;div class="clip-expand" data-clip-expand&gt;
+  &lt;canvas data-art="twilight"&gt;&lt;/canvas&gt;
+&lt;/div&gt;</code></pre></div>
+    </div>
+  </div>
+  <div class="clip-expand mo-clip" id="mo-clip" data-clip-expand data-tone="dark">
+    <canvas data-art="twilight" data-art-seed="61" data-art-contrast="1.2" aria-hidden="true"></canvas>
+    <span class="mo-clip-scrim" aria-hidden="true"></span>
+    <div class="mo-clip-copy"><p class="t-subtitle" style="color: var(--on-art-1)">Full bleed, on entry.</p><p class="t-body" style="color: var(--on-art-2)">The corner and the inset are the same number.</p></div>
+  </div>
+</section>
+
+<!-- g · the sticky frame-down scene (text over media) -->
+<section class="scene" id="mo-scene" data-tone="dark" style="--scene-scrim-max: .38" aria-labelledby="mo-scene-h">
+  <div class="scene-sticky">
+    <div class="scene-media">
+      <div class="scene-visual">
+        <canvas data-art="deep" data-art-seed="71" data-art-contrast="1.2" aria-hidden="true"></canvas>
+      </div>
+    </div>
+    <svg class="mo-scene-ring" viewBox="0 0 100 100" aria-hidden="true"><circle class="mo-ring-track" cx="50" cy="50" r="45"/><circle class="mo-ring-fill" cx="50" cy="50" r="45" transform="rotate(-90 50 50)"/></svg>
+  </div>
+  <div class="scene-copy">
+    <h2 id="mo-scene-h">Pinned, then framed down.</h2>
+    <p>The media holds still while you read over it. As the scene leaves it scales to .9 and clips to the column with a 40 px corner &mdash; text over media, compiled to scroll timelines.</p>
+  </div>
+</section>
+
+<section class="band" data-band="story" data-band-seam="keep" aria-labelledby="mo-expr-h">
+  <div class="viewport-content">
+    <div class="mo-ex" style="border-top: 0; padding-top: 0">
+      <div class="mo-ex-copy">
+        <h3>The scene&rsquo;s markup.</h3>
+        <p>A <code>.scene</code> is 170vh tall; its media is pinned for the middle, and SHOW writes the keyframes onto the parts. The pinned phase exposes <code>--progress</code> 0&rarr;1, which the ring above reads with one <code>calc()</code>.</p>
+        <span class="mo-path" data-mo-path="#mo-scene"><i></i>checking&hellip;</span>
+      </div>
+      <div class="mo-ex-stage"><pre class="doc-code" data-lang="html"><code>&lt;section class="scene" data-tone="dark"&gt;
+  &lt;div class="scene-sticky"&gt;
+    &lt;div class="scene-media"&gt;
+      &lt;div class="scene-visual"&gt;&lt;canvas data-art="deep"&gt;&lt;/canvas&gt;&lt;/div&gt;
+    &lt;/div&gt;
+  &lt;/div&gt;
+  &lt;div class="scene-copy"&gt;&lt;h2&gt;Pinned, then framed down.&lt;/h2&gt;&lt;/div&gt;
+&lt;/section&gt;</code></pre></div>
+    </div>
+
+    <h3 class="mo-h3" id="mo-expr-h" style="margin-top: var(--s-6)">The expression language</h3>
+    <p class="mo-cap" style="margin-top: var(--s-2)">Every <code>start</code> and <code>end</code> evaluates to a document scroll position in pixels. Frequencies are from 1,135 expressions on three product pages.</p>
+    <div class="doc-table" style="margin-top: var(--s-5)">
+      <table class="table">
+        <thead><tr><th scope="col">Token</th><th scope="col">Means</th><th scope="col">Example</th><th scope="col" class="num">Seen</th></tr></thead>
+        <tbody>
+          <tr><td><code>t</code> <code>b</code></td><td>the element&rsquo;s top and bottom, as scroll positions</td><td><code>t - 85vh</code></td><td class="num">337</td></tr>
+          <tr><td><code>h</code> <code>w</code></td><td>its height and width; a bare unit is 100 %, <code>50h</code> is half</td><td><code>t - 50vh + 50h</code></td><td class="num">116</td></tr>
+          <tr><td><code>a0t</code> <code>a0b</code> <code>60a0h</code></td><td>the same metrics on anchor N from <code>anchors</code></td><td><code>a0t - 100vh + 60a0h</code></td><td class="num">1,000</td></tr>
+          <tr><td><code>vh</code> <code>vw</code></td><td>percent of the viewport</td><td><code>b - 100vh</code></td><td class="num">847</td></tr>
+          <tr><td><code>px</code></td><td>literal pixels</td><td><code>a0t - 100px - 75vh</code></td><td class="num">28</td></tr>
+          <tr><td><code>css(--x, aN)</code></td><td>reads a custom property and evaluates it as an expression, so a breakpoint can move a trigger</td><td><code>css(--reveal-start)</code></td><td class="num">33</td></tr>
+          <tr><td><code>max()</code> <code>min()</code> <code>?:</code></td><td>functions, comparisons and ternaries</td><td><code>max(a0t - (50vh - 50a0h), a0b - 100vh + h)</code></td><td class="num">57</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="mo-format" style="margin-top: var(--s-12)">
+      <div class="stack-4">
+        <h3 class="mo-h3">Which path each example took</h3>
+        <p class="mo-cap">Read from <code>ANIM.inspect(el)</code> on this page, now. A range that is linear in scroll &mdash; <code>T + c&middot;H + K</code> &mdash; becomes <code>animation-range: exit-crossing calc(c&middot;100% + K)</code>. Lerp, <code>css()</code> values, classes and events stay in the loop.</p>
+        <p class="mo-stats-line mo-out" id="mo-anim-stats">ANIM has not mounted yet.</p>
+        <div class="mo-gate">
+          <div class="stack-2"><label class="choice"><input class="switch" type="checkbox" role="switch" id="mo-gate" checked> Enhanced experience</label>
+            <p class="mo-out" id="mo-gate-out">Reading the gate&hellip;</p></div>
+          <code class="mo-code-line">?no-fd-enhanced</code>
+        </div>
+        <p class="mo-cap">Switch it off and every example above shows its finished state, exactly as a reader with reduced motion, a short window or enlarged text gets it.</p>
+      </div>
+      <div class="doc-table">
+        <table class="table">
+          <thead><tr><th scope="col">Example</th><th scope="col">Keyframe</th><th scope="col">Path</th></tr></thead>
+          <tbody id="mo-path-rows"><tr><td colspan="3">Runs when the page&rsquo;s scripts have loaded.</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ 11 · THE LIQUID-DROP CONTROL BAR ═════════════════════════════════ -->
+<section class="band" data-band="utility" data-band-bar id="bar" aria-labelledby="mo-bar-h">
+  <div class="viewport-content">
+    <header class="section-header">
+      <h2 class="section-header-headline" id="mo-bar-h">A drop becomes the controls.</h2>
+      <button class="section-header-link" type="button" id="mo-bar-replay">Replay the intro <i data-sym="arrow-clockwise"></i></button>
+    </header>
+  </div>
+  <div class="gallery" aria-label="Motion highlights">
+    <div class="gallery-rail" tabindex="-1">
+      <ul class="gallery-list">
+        <li class="gallery-item" data-label="Springs">
+          <div class="gallery-card" data-tone="dark">
+            <p class="gallery-caption">Drop, then bubbles.<br>Three springs, one entrance.</p>
+            <div class="gallery-media"><canvas data-art="twilight" data-art-seed="81" aria-hidden="true"></canvas></div>
+          </div>
+        </li>
+        <li class="gallery-item" data-label="Progress">
+          <div class="gallery-card" data-tone="dark">
+            <p class="gallery-caption">The current dot grows into a pill that fills over 6.15 s.</p>
+            <div class="gallery-media"><canvas data-art="aurora" data-art-seed="82" aria-hidden="true"></canvas></div>
+          </div>
+        </li>
+        <li class="gallery-item" data-label="Density">
+          <div class="gallery-card" data-tone="dark">
+            <p class="gallery-caption">The glass is denser while it moves and relaxes at rest.</p>
+            <div class="gallery-media"><canvas data-art="ember" data-art-seed="83" aria-hidden="true"></canvas></div>
+          </div>
+        </li>
+        <li class="gallery-item" data-label="Reduced">
+          <div class="gallery-card" data-tone="dark">
+            <p class="gallery-caption">Reduced motion: it simply appears, paused.</p>
+            <div class="gallery-media"><canvas data-art="deep" data-art-seed="84" aria-hidden="true"></canvas></div>
+          </div>
+        </li>
+      </ul>
+    </div>
+    <div class="mo-cb-hold">
+    <div class="control-bar" id="mo-cb" data-autoplay data-duration="6.15" aria-label="Motion highlights">
+      <div class="control-bar__dots">
+        <button class="control-bar__dot" type="button" aria-label="Springs" aria-current="true"></button>
+        <button class="control-bar__dot" type="button" aria-label="Progress"></button>
+        <button class="control-bar__dot" type="button" aria-label="Density"></button>
+        <button class="control-bar__dot" type="button" aria-label="Reduced motion"></button>
+      </div>
+      <button class="control-bar__play" type="button" aria-label="Pause"></button>
+    </div>
+    </div>
+  </div>
+</section>
+
+<script>
+/* \u2550\u2550\u2550 motion.html \u2014 the page's own wiring. Everything below runs after
+   FG3.boot() has mounted every module (document 'fg3:ready'). Each part is
+   isolated: one failing never stops the others. Non-ASCII in strings is
+   escaped (\u00b7 = middle dot) because publishing may drop the charset. */
+(function () {
+  'use strict';
+  var doc = document, html = doc.documentElement;
+  var RM = matchMedia('(prefers-reduced-motion: reduce)');
+  function $(s, r) { return (r || doc).querySelector(s); }
+  function $$(s, r) { return [].slice.call((r || doc).querySelectorAll(s)); }
+  function fix(n, d) { return (+n).toFixed(d); }
+  function group(n) { return Math.round(n).toLocaleString('en'); }
+  var DOT = ' \u00b7 ';
+  var NS = 'http://www.w3.org/2000/svg';
+  function svgEl(name, attrs) { var e = doc.createElementNS(NS, name); for (var k in attrs) e.setAttribute(k, attrs[k]); return e; }
+  function frames(n) { return new Promise(function (r) { (function f() { if (n-- <= 0) r(); else requestAnimationFrame(f); })(); }); }
+  function sleep(ms) { return new Promise(function (r) { setTimeout(r, ms); }); }
+  function specOf(name) {
+    var s = SPRING.Spring(name), n = SPRING.NAMED[name] || {};
+    if (n.mkc) return name + DOT + 'spring(' + n.mkc.slice(0, 3).join(', ') + ')' + DOT + n.ms + ' ms, fixed';
+    if (n.stiffness != null) return name + DOT + 'stiffness ' + n.stiffness + ', damping ' + n.damping + DOT + 'settles in ' + group(s.ms()) + ' ms';
+    return name + DOT + 'duration ' + fix(s.duration, 2) + ' s, bounce ' + fix(s.bounce, 2) + DOT + 'settles in ' + group(s.ms()) + ' ms';
+  }
+
+  /* \u2500\u2500 1 \u00b7 hero: materialize, then the drop spring opens the capsule \u2500\u2500\u2500\u2500\u2500 */
+  function hero() {
+    var drop = $('#mo-drop'), note = $('#mo-drop-note'), btns = $$('button', drop);
+    function select(b) { btns.forEach(function (x) { x.setAttribute('aria-checked', x === b ? 'true' : 'false'); }); }
+    var wave = $('#mo-wave'), wpath = wave.querySelector('path');
+    function drawWave(name, animate) {
+      var s = SPRING.Spring(name), T = s.settlingDuration, d = '';
+      for (var i = 0; i <= 200; i++) { var t = 1.6 * i / 200, v = t >= T ? 1 : s.at(t); d += (i ? 'L' : 'M') + fix(1000 * i / 200, 1) + ' ' + fix(290 - 230 * v, 2); }
+      wpath.setAttribute('d', d);
+      if (!animate || RM.matches) { wave.classList.remove('is-reset'); return; }
+      /* draw on over the same 1.6 s the curve spans, so the pen reaches the
+         glass as the capsule settles */
+      wave.style.setProperty('--mo-wave-ms', '1600ms');
+      wave.classList.add('is-reset'); void wave.getBoundingClientRect();
+      requestAnimationFrame(function () { wave.classList.remove('is-reset'); });
+    }
+    function play(name) {
+      note.textContent = specOf(name);
+      drawWave(name, true);
+      if (RM.matches) { drop.style.setProperty('--progress', 1); return; }
+      /* squeeze on a quick spring, then hand the SAME number to the chosen
+         spring 140 ms in: the velocity carries over, nothing restarts */
+      MOTION.progress(drop, 0.42, { spring: 'snap' });
+      setTimeout(function () { MOTION.progress(drop, 1, { spring: name }); }, 140);
+    }
+    btns.forEach(function (b, i) {
+      b.addEventListener('click', function () { select(b); play(b.dataset.spring); });
+      b.addEventListener('keydown', function (e) {
+        var k = e.key, j = k === 'ArrowRight' || k === 'ArrowDown' ? i + 1 : k === 'ArrowLeft' || k === 'ArrowUp' ? i - 1 : null;
+        if (j == null) return;
+        e.preventDefault(); var nb = btns[(j + btns.length) % btns.length]; nb.focus(); nb.click();
+      });
+      b.tabIndex = b.getAttribute('aria-checked') === 'true' ? 0 : -1;
+    });
+    drop.addEventListener('focusin', function (e) { btns.forEach(function (x) { x.tabIndex = x === e.target ? 0 : -1; }); });
+    note.textContent = specOf('drop');
+    drawWave('drop', false);
+    if (html.classList.contains('mo-intro')) wave.classList.add('is-reset');
+    if (!html.classList.contains('mo-intro')) { drop.style.setProperty('--progress', 1); return; }
+    drop.style.setProperty('--progress', 0);
+    var go = function () {
+      html.classList.remove('mo-intro');
+      drawWave('drop', true);
+      if (window.LG3 && LG3.materialize) LG3.materialize(drop, { spring: 'smooth' });
+      MOTION.progress(drop, 1, { spring: 'drop', from: 0 });
+    };
+    setTimeout(go, 450);
+  }
+
+  /* \u2500\u2500 2 \u00b7 springs: the sticky stage plays the generated CSS tokens \u2500\u2500\u2500\u2500\u2500\u2500 */
+  function linearAt(str, q) {
+    var pts = str.slice(7, -1).split(',').map(function (s) { var a = s.trim().split(/\s+/); return [parseFloat(a[1]) / 100, +a[0]]; });
+    for (var i = 1; i < pts.length; i++) if (q <= pts[i][0]) { var a = pts[i - 1], b = pts[i]; return b[0] === a[0] ? b[1] : a[1] + (b[1] - a[1]) * (q - a[0]) / (b[0] - a[0]); }
+    return pts[pts.length - 1][1];
+  }
+  var USE = {};
+  function springs() {
+    var list = $('#mo-sl-list'), cards = $$('.mo-sp', list), rider = $('#mo-sl-rider'), plot = $('#mo-sl-plot');
+    var playBtn = $('#mo-sl-play'), allBtn = $('#mo-sl-all'), side = 0, cur = 'bouncy', head = null, raf = 0, allRun = 0;
+    cards.forEach(function (c) { USE[c.dataset.spring] = c.querySelector('.mo-sp-use').textContent; });
+    var TMAX = 1.6;
+    function draw(name) {
+      var s = SPRING.Spring(name), T = s.settlingDuration, css = s.linear();
+      var W = Math.max(240, Math.round(plot.getBoundingClientRect().width)), H = 200, L = 34, R = 10;
+      var x = function (t) { return L + (W - L - R) * t / TMAX; }, y = function (v) { return 172 - 128 * v; };
+      plot.setAttribute('viewBox', '0 0 ' + W + ' ' + H);
+      while (plot.lastChild && plot.lastChild.nodeName !== 'title') plot.removeChild(plot.lastChild);
+      var g = svgEl('g', {});
+      g.appendChild(svgEl('line', { class: 'mo-plot-axis', x1: L, x2: W - R, y1: y(0), y2: y(0) }));
+      g.appendChild(svgEl('line', { class: 'mo-plot-one', x1: L, x2: W - R, y1: y(1), y2: y(1) }));
+      [0, 1].forEach(function (v) { var tx = svgEl('text', { class: 'mo-plot-text', x: L - 8, y: y(v) + 4, 'text-anchor': 'end' }); tx.textContent = v; g.appendChild(tx); });
+      [0, 0.4, 0.8, 1.2, 1.6].forEach(function (t) { var tx = svgEl('text', { class: 'mo-plot-text', x: x(t), y: H - 6, 'text-anchor': t === 0 ? 'start' : t === 1.6 ? 'end' : 'middle' }); tx.textContent = t === 0 ? '0 s' : fix(t, 1); g.appendChild(tx); });
+      var d = '', dc = '';
+      for (var i = 0; i <= 160; i++) {
+        var t = TMAX * i / 160, v = t >= T ? 1 : s.at(t), vc = linearAt(css, Math.min(1, t / T));
+        d += (i ? 'L' : 'M') + fix(x(t), 1) + ' ' + fix(y(v), 2);
+        dc += (i ? 'L' : 'M') + fix(x(t), 1) + ' ' + fix(y(vc), 2);
+      }
+      var sx = x(Math.min(T, TMAX));
+      g.appendChild(svgEl('line', { class: 'mo-plot-settle', x1: sx, x2: sx, y1: y(0) + 4, y2: 28 }));
+      var st = svgEl('text', { class: 'mo-plot-text', x: Math.min(sx + 6, W - 96), y: 22 }); st.textContent = 'settles ' + group(s.ms()) + ' ms'; g.appendChild(st);
+      g.appendChild(svgEl('path', { class: 'mo-plot-css', d: dc }));
+      g.appendChild(svgEl('path', { class: 'mo-plot-curve', d: d }));
+      if (s.peak > 1.0005) {
+        var tp = 0, best = 0; for (var j = 0; j <= 400; j++) { var tt = T * j / 400, vv = s.at(tt); if (vv > best) { best = vv; tp = tt; } }
+        g.appendChild(svgEl('circle', { class: 'mo-plot-peak', cx: x(tp), cy: y(best), r: 3.5 }));
+      }
+      head = svgEl('circle', { class: 'mo-plot-head', cx: x(0), cy: y(0), r: 6, opacity: 0 });
+      g.appendChild(head);
+      plot.appendChild(g);
+      plot.__x = x; plot.__y = y;
+    }
+    function describe(name) {
+      var s = SPRING.Spring(name), n = SPRING.NAMED[name] || {};
+      $('#mo-sl-name').textContent = name;
+      $('#mo-sl-settle').textContent = group(s.ms()) + ' ms';
+      $('#mo-sl-tag').textContent = name + DOT + group(s.ms()) + ' ms';
+      $('#mo-sl-use').textContent = USE[name] || '';
+      $('#mo-sl-code').textContent = 'transition: translate var(--sp-' + name + '-ms) var(--sp-' + name + ');';
+      $('#mo-sl-d').textContent = n.mkc ? n.ms + ' ms' : fix(s.duration, 2) + ' s';
+      $('#mo-sl-b').textContent = n.mkc ? 'fixed' : fix(s.bounce, 2);
+      $('#mo-sl-z').textContent = fix(s.trueZeta != null ? s.trueZeta : s.zeta, 2);
+      $('#mo-sl-p').textContent = s.peak > 1.0005 ? fix(s.peak, 3) : 'none';
+      playBtn.textContent = 'Play ' + name;
+      $('#mo-sl-plot-t').textContent = name + ' step response: settles in ' + group(s.ms()) + ' ms' + (s.peak > 1.0005 ? ', peaks at ' + fix(s.peak, 3) : ', no overshoot');
+    }
+    function select(name) {
+      cur = name;
+      cards.forEach(function (c) { c.setAttribute('aria-pressed', c.dataset.spring === name ? 'true' : 'false'); });
+      describe(name); draw(name);
+    }
+    function play(name) {
+      rider.style.setProperty('--mo-ms', 'var(--sp-' + name + '-ms)');
+      rider.style.setProperty('--mo-ease', 'var(--sp-' + name + ')');
+      side = side ? 0 : 1;
+      rider.style.setProperty('--x', side);
+      cancelAnimationFrame(raf);
+      if (RM.matches || !head) return;
+      var s = SPRING.Spring(name), T = s.settlingDuration, t0 = performance.now();
+      head.setAttribute('opacity', 1);
+      (function step(now) {
+        var t = (now - t0) / 1000, v = t >= T ? 1 : s.at(t);
+        head.setAttribute('cx', plot.__x(Math.min(t, TMAX))); head.setAttribute('cy', plot.__y(v));
+        if (t < Math.min(T, TMAX) + 0.05) raf = requestAnimationFrame(step);
+      })(t0);
+    }
+    cards.forEach(function (c) { c.addEventListener('click', function () { allRun++; select(c.dataset.spring); play(c.dataset.spring); }); });
+    playBtn.addEventListener('click', function () { allRun++; play(cur); });
+    allBtn.addEventListener('click', function () {
+      var run = ++allRun, i = 0;
+      (function next() {
+        if (run !== allRun || i >= cards.length) return;
+        var c = cards[i++]; select(c.dataset.spring); play(c.dataset.spring);
+        var ms = SPRING.Spring(c.dataset.spring).ms();
+        setTimeout(next, Math.max(700, ms + 250));
+      })();
+    });
+    select(cur);
+    var rt = 0; addEventListener('resize', function () { clearTimeout(rt); rt = setTimeout(function () { draw(cur); }, 150); });
+  }
+
+  /* \u2500\u2500 3 \u00b7 interrupt: three lanes, one trace \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 */
+  function interrupt() {
+    var P = { js: $('#mo-pk-js'), glide: $('#mo-pk-glide'), css: $('#mo-pk-css') }, plot = $('#mo-rt-plot');
+    var target = 0, rec = null, stopAt = 0;
+    function span() { return P.js.parentNode.clientWidth - 48; }
+    function xOf(el) {
+      var cs = getComputedStyle(el), m = new DOMMatrixReadOnly(cs.transform === 'none' ? undefined : cs.transform);
+      var tr = cs.translate, tx = tr && tr !== 'none' ? parseFloat(tr) : 0;
+      return m.m41 + tx;
+    }
+    MOTION.spring(P.js, 'x', 0, {});
+    function send(reaimAt) {
+      target = target ? 0 : 1;
+      var X = target * span(), now = performance.now();
+      MOTION.spring(P.js, 'x', X, { spring: 'snappy' });
+      MOTION.glide(P.glide, 'x', X, { spring: 'snappy' });
+      P.css.style.transform = 'translateX(' + X + 'px)';
+      stopAt = now + 1100;                     /* before the first sample reads it */
+      if (!rec) { rec = { t0: now, log: { js: [], glide: [], css: [] }, marks: [], S: span(), reaimAt: reaimAt || 0 }; sample(); }
+      else rec.marks.push(now - rec.t0);
+    }
+    function sample() {
+      var now = performance.now(), t = now - rec.t0;
+      for (var k in P) rec.log[k].push([t, xOf(P[k])]);
+      /* the measured test re-aims from inside the sampling frame, as the
+         lab does: a timer could land late on a busy page */
+      if (rec.reaimAt && t >= rec.reaimAt) { rec.reaimAt = 0; send(); }
+      if (now < stopAt) requestAnimationFrame(sample); else finish();
+    }
+    function finish() {
+      var r = rec; rec = null;
+      drawPlot(r);
+      var rows = { js: 'MOTION.spring', glide: 'MOTION.glide', css: 'CSS transition' }, h = '';
+      if (!r.marks.length) {
+        $('#mo-rt-out').innerHTML = 'One move, no interruption. Press <b>Send</b> twice within half a second to catch it mid-flight.';
+        return;
+      }
+      var tr = r.marks[0];
+      function vel(a, lo, hi) { var p = a.filter(function (s) { return s[0] >= lo && s[0] <= hi; }); if (p.length < 2) return NaN; var f = p[0], l = p[p.length - 1]; return (l[1] - f[1]) / ((l[0] - f[0]) / 1000); }
+      function xAt(a, t) { var p = a.filter(function (s) { return s[0] <= t; }).pop(); return p ? p[1] : 0; }
+      Object.keys(rows).forEach(function (k) {
+        var a = r.log[k], x0 = xAt(a, tr), after = a.filter(function (s) { return s[0] > tr && s[0] <= tr + 160; });
+        var dir = target ? -1 : 1;            /* the direction it was travelling before the re-aim */
+        var ext = after.length ? (dir > 0 ? Math.max.apply(null, after.map(function (s) { return s[1]; })) - x0 : x0 - Math.min.apply(null, after.map(function (s) { return s[1]; }))) : 0;
+        var vb = vel(a, tr - 40, tr), va = vel(a, tr, tr + 40);
+        h += '<tr><td>' + rows[k] + '</td><td class="num">' + (isNaN(vb) ? '\u2014' : group(vb)) + '</td><td class="num">' + (isNaN(va) ? '\u2014' : group(va)) +
+             '</td><td class="num">' + Math.max(0, Math.round(ext)) + ' px</td></tr>';
+      });
+      $('#mo-rt-rows').innerHTML = h;
+      $('#mo-rt-out').textContent = 'Re-aimed ' + Math.round(tr) + ' ms into the move. Velocities are finite differences over 40 ms either side, sampled every frame on this page.';
+    }
+    function drawPlot(r) {
+      /* the time axis reaches the last sample: it is read on the frame AFTER
+         stopAt, one slow frame past it on a busy page */
+      var last = r.log.js.length ? r.log.js[r.log.js.length - 1][0] : 0;
+      var W = Math.max(300, Math.round(plot.getBoundingClientRect().width)), H = Math.round(plot.getBoundingClientRect().height) || 220, T = Math.max(1200, stopAt - r.t0, last);
+      plot.setAttribute('viewBox', '0 0 ' + W + ' ' + H);
+      while (plot.lastChild && plot.lastChild.nodeName !== 'title') plot.removeChild(plot.lastChild);
+      var x = function (t) { return 12 + (W - 24) * t / T; }, y = function (v) { return H - 18 - (H - 40) * v / r.S; };
+      plot.appendChild(svgEl('line', { class: 'mo-plot-axis', x1: 12, x2: W - 12, y1: y(0), y2: y(0) }));
+      plot.appendChild(svgEl('line', { class: 'mo-plot-one', x1: 12, x2: W - 12, y1: y(r.S), y2: y(r.S) }));
+      r.marks.forEach(function (m) { plot.appendChild(svgEl('line', { x1: x(m), x2: x(m), y1: 8, y2: H - 8, stroke: 'var(--label-4)', 'stroke-dasharray': '4 4', 'vector-effect': 'non-scaling-stroke' })); });
+      if (!r.log.js.length) {
+        var e = svgEl('text', { class: 'mo-plot-text', x: W / 2, y: H / 2 + 4, 'text-anchor': 'middle' });
+        e.textContent = 'Press Send twice, quickly: each puck draws its path here.'; plot.appendChild(e);
+      }
+      var st = { js: ['var(--series-1)', 5, 'none'], glide: ['var(--series-2)', 2, 'none'], css: ['var(--label-3)', 2, '6 5'] };
+      ['css', 'js', 'glide'].forEach(function (k) {
+        plot.appendChild(svgEl('path', { fill: 'none', stroke: st[k][0], 'stroke-width': st[k][1], 'stroke-dasharray': st[k][2], 'stroke-linejoin': 'round',
+          d: r.log[k].map(function (s, i) { return (i ? 'L' : 'M') + fix(x(s[0]), 1) + ' ' + fix(y(s[1]), 1); }).join('') }));
+      });
+      $('#mo-rt-plot-t').textContent = 'Position of each puck over ' + Math.round(T) + ' ms, re-aimed ' + r.marks.length + ' time(s)';
+    }
+    $('#mo-rt-send').addEventListener('click', function () { send(); });
+    function test() {
+      if (rec) return;
+      if (target) { target = 0; MOTION.spring(P.js, 'x', 0, {}); MOTION.glide(P.glide, 'x', 0, { from: 0 }); P.css.style.transition = 'none'; P.css.style.transform = 'translateX(0px)'; void P.css.offsetWidth; P.css.style.transition = ''; }
+      frames(3).then(function () { send(160); });
+    }
+    $('#mo-rt-test').addEventListener('click', test);
+    /* an empty chart says nothing: draw the axes now, and run the measured
+       test once, the first time the card is on screen */
+    drawPlot({ t0: 0, log: { js: [], glide: [], css: [] }, marks: [], S: span() || 1 });
+    if (!RM.matches && window.FG3 && FG3.whenSeen) FG3.whenSeen($('.mo-rt'), function () { setTimeout(test, 400); });
+  }
+
+  /* \u2500\u2500 4 \u00b7 curves: one second each, side by side \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 */
+  function curves() {
+    var grid = $('#mo-cv-grid');
+    $('#mo-cv-play').addEventListener('click', function () { grid.classList.toggle('is-on'); });
+  }
+
+  /* \u2500\u2500 5 \u00b7 the thirteen tiers \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 */
+  function tiers() {
+    var pages = ['Inbox', 'Thread', 'Details'], pi = 0, asked = false, bar = 40, glyphOn = false, rows = 0;
+    var ROWS = ['basil.demo \u00b7 assigned @person.k2209', 'cobalt.demo \u00b7 unassigned @member.51x', 'basil.demo \u00b7 replied to @lead_40213', 'aurora.demo \u00b7 approved @user.a8431'];
+    function act(kind) {
+      if (kind === 'push') {
+        var host = $('#mo-push'), old = host.lastElementChild, nu = doc.createElement('span');
+        pi = (pi + 1) % pages.length; nu.textContent = pages[pi]; nu.className = 'm-enter-left';
+        old.className = 'm-exit-left'; host.appendChild(nu);
+        setTimeout(function () { if (old.isConnected) old.remove(); }, 600);
+      } else if (kind === 'row') {
+        var ul = $('#mo-rows'), li = doc.createElement('li');
+        li.textContent = ROWS[rows++ % ROWS.length]; li.className = 'm-row-in';
+        ul.insertBefore(li, ul.firstChild);
+        while (ul.children.length > 3) ul.lastElementChild.remove();
+      } else if (kind === 'pop') MOTION.attention($('#mo-pop'), 'pop');
+      else if (kind === 'shake' || kind === 'nudge' || kind === 'flash') MOTION.attention($('#mo-field'), kind);
+      else if (kind === 'bar') {
+        bar = bar >= 100 ? 0 : bar + 20;
+        var b = $('#mo-bar'); b.style.setProperty('--m-value', bar + '%');
+        b.classList.toggle('m-done', bar >= 100);
+        $('#mo-bar-label').textContent = bar >= 100 ? '100% \u00b7 done' : bar + '% \u00b7 still working';
+      } else if (kind === 'swap') {
+        /* the day's two figures, swapped in place: 1,222 done of 1,904 queued */
+        asked = !asked; var n = doc.createElement('span'); n.textContent = asked ? '1,904' : '1,222';
+        MOTION.swap($('#mo-swap'), n);
+        $('#mo-swap-cap').textContent = asked ? 'queued today' : 'done today';
+        $('#mo-swap-go').textContent = asked ? 'Show done' : 'Show queued';
+      } else if (kind === 'glyph') {
+        glyphOn = !glyphOn;
+        if (window.SYM && SYM.replace) SYM.replace($('#mo-glyph'), glyphOn ? 'pause' : 'play');
+      }
+    }
+    $$('[data-mo-act]').forEach(function (b) { b.addEventListener('click', function () { act(b.dataset.moAct); }); });
+    var disc = $('.mo-disc'), coll = $('#mo-coll');
+    disc.addEventListener('click', function () {
+      var open = disc.getAttribute('aria-expanded') !== 'true';
+      disc.setAttribute('aria-expanded', open ? 'true' : 'false'); coll.setAttribute('data-open', open ? 'true' : 'false');
+    });
+  }
+
+  /* \u2500\u2500 6 \u00b7 reduced motion: preview twins + what the browser computed \u2500\u2500\u2500\u2500 */
+  function reduced() {
+    var grid = $('#mo-rm'), sw = $('#mo-rm-switch'), sys = $('#mo-rm-system');
+    function secs(v) { return v.split(',').map(function (x) { var n = parseFloat(x); return /ms$/.test(x.trim()) ? n : n * 1000; }); }
+    function anim(el, pseudo) {
+      var c = getComputedStyle(el, pseudo || null);
+      var name = c.animationName.split(',')[0].trim(), d = secs(c.animationDuration)[0], n = c.animationIterationCount.split(',')[0].trim();
+      return name === 'none' ? 'animation: none' : 'animation: <b>' + name + '</b> ' + group(d) + ' ms' + (n === 'infinite' ? ', infinite' : '');
+    }
+    function measure() {
+      $$('[data-mo-for]').forEach(function (p) {
+        var el = doc.getElementById(p.dataset.moFor); if (!el) return;
+        if (el.id === 'mo-rm-morph') { p.innerHTML = el.dataset.moMorph || '&nbsp;'; return; }
+        if (el.id === 'mo-rm-scene') { p.innerHTML = '--progress: <b>' + fix(parseFloat(getComputedStyle(el).getPropertyValue('--progress')) || 0, 2) + '</b>'; return; }
+        var m = el.dataset.moMeas;
+        p.innerHTML = m === 'after' ? anim(el, '::after') : anim(el);
+      });
+    }
+    function replay(kind) {
+      if (kind === 'enter') { var t = $('#mo-rm-enter'); t.classList.remove('m-enter-up'); void t.offsetWidth; t.classList.add('m-enter-up'); }
+      else if (kind === 'shake') MOTION.attention($('#mo-rm-shake'), 'shake');
+      else if (kind === 'morph') {
+        var m = $('#mo-rm-morph'), on = m.style.getPropertyValue('--mo-p') !== '1', off = grid.hasAttribute('data-mo-reduce') || RM.matches;
+        m.style.setProperty('--mo-p', on ? 1 : 0);
+        m.dataset.moMorph = off ? 'width: jumps to <b>' + (on ? '164' : '44') + ' px</b>' : 'width: springs to <b>' + (on ? '164' : '44') + ' px</b>, --sp-morph';
+      } else if (kind === 'scene') {
+        var s = $('#mo-rm-scene');
+        if (grid.hasAttribute('data-mo-reduce') || RM.matches) { s.style.setProperty('--progress', 1); }
+        else { s.style.setProperty('--progress', 0); MOTION.progress(s, 1, { spring: 'settle', from: 0, onFrame: measure, onDone: measure }); }
+      }
+      setTimeout(measure, 40);
+    }
+    $$('[data-mo-rm]').forEach(function (b) { b.addEventListener('click', function () { replay(b.dataset.moRm); }); });
+    function setPreview(on) { grid.toggleAttribute('data-mo-reduce', on); setTimeout(measure, 30); }
+    sw.addEventListener('change', function () { setPreview(sw.checked); });
+    function sysText() {
+      sys.innerHTML = 'Your system setting: <b>' + (RM.matches ? 'reduce motion is on' : 'reduce motion is off') + '</b>';
+      if (RM.matches) { sw.checked = true; sw.disabled = true; setPreview(true); } else sw.disabled = false;
+    }
+    if (RM.addEventListener) RM.addEventListener('change', sysText);
+    sysText();
+    $('#mo-rm-enter').classList.add('m-enter-up');
+    $('#mo-rm-morph').dataset.moMorph = 'width: <b>44 px</b> at rest';
+    $('#mo-rm-scene').style.setProperty('--progress', 1);
+    measure();
+  }
+
+  /* \u2500\u2500 7 \u00b7 morphs: four real components, one gauge each \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 */
+  function morphs() {
+    $$('.mo-mt').forEach(function (tile) {
+      var kind = tile.dataset.moMorph, gauge = tile.querySelector('.mo-gauge'), out = gauge.querySelector('.mo-gauge-val'),
+          barEl = gauge.querySelector('.mo-gauge-bar'), trace = gauge.querySelector('.mo-gauge-trace path');
+      var el, varName, open = false, raf = 0, log = [], t0 = 0, quietSince = 0;
+      if (kind === 'pill') { el = $('#mo-pp'); varName = '--progress'; }
+      else if (kind === 'chip') { el = $('#mo-cc'); varName = '--progress'; }
+      else if (kind === 'tabbar') { el = $('#mo-tb'); varName = '--tb-min'; }
+      else { el = $('#mo-lc'); varName = '--lc-p'; }
+      function read() { var v = parseFloat(el.style.getPropertyValue(varName)); if (isNaN(v)) v = parseFloat(getComputedStyle(el).getPropertyValue(varName)); return isNaN(v) ? 0 : v; }
+      function paint(v) {
+        out.textContent = fix(v, 3); barEl.style.setProperty('--g', v);
+        if (log.length > 1) {
+          var T = Math.max(900, log[log.length - 1][0]);
+          trace.setAttribute('d', log.map(function (s, i) { return (i ? 'L' : 'M') + fix(132 * s[0] / T, 1) + ' ' + fix(26 - 18.4 * s[1], 1); }).join(''));
+        }
+      }
+      function watch() {
+        cancelAnimationFrame(raf); log = []; t0 = performance.now(); quietSince = 0;
+        (function step(now) {
+          var v = read(); log.push([now - t0, v]); paint(v);
+          var moving = el.hasAttribute('data-m-moving');
+          if (!moving) { if (!quietSince) quietSince = now; } else quietSince = 0;
+          if (!quietSince || now - quietSince < 250) raf = requestAnimationFrame(step);
+        })(t0);
+        setTimeout(function () { paint(read()); }, 1800);            /* hidden page: land the number anyway */
+      }
+      var btns = $$('[data-mo-toggle]', tile);
+      function label() {
+        btns.forEach(function (b) {
+          if (b.closest('.mo-mt-foot')) b.textContent = kind === 'tabbar' ? (open ? 'Back to the top' : 'Scroll the feed') : kind === 'live' ? (open ? 'Collapse' : 'Expand') : (open ? 'Close' : 'Open');
+          else { b.setAttribute('aria-expanded', open ? 'true' : 'false'); if (kind === 'pill') b.textContent = open ? 'Close' : 'Explore'; }
+        });
+      }
+      function set(on, springName) {
+        open = on;
+        if (kind === 'pill') MOTION.progress(el, on ? 1 : 0, { spring: springName || (on ? 'nav-in' : 'nav-out') });
+        else if (kind === 'chip') MOTION.progress(el, on ? 1 : 0, { spring: springName || (on ? 'tour' : 'smooth') });
+        else if (kind === 'tabbar') { var sc = $('#mo-tb-scroll'); sc.scrollTo({ top: on ? 380 : 0, behavior: RM.matches ? 'auto' : 'smooth' }); }
+        else if (window.CHROME) CHROME.live.expand(el, on);
+        label(); watch();
+      }
+      btns.forEach(function (b) { b.addEventListener('click', function () { set(!open); }); });
+      var intr = tile.querySelector('[data-mo-interrupt]');
+      if (intr) intr.addEventListener('click', function () { set(false); setTimeout(function () { set(true); setTimeout(function () { set(false); }, 120); }, 420); });
+      if (kind === 'tabbar') {
+        $('#mo-tb-scroll').addEventListener('scroll', function () { if (!raf || !el.hasAttribute('data-m-moving')) watch(); open = $('#mo-tb-scroll').scrollTop > 60; label(); }, { passive: true });
+      }
+      if (kind === 'live') {
+        el.addEventListener('chrome:live', function (e) { open = !!e.detail.expanded; label(); watch(); });
+      }
+      if (kind === 'pill' || kind === 'chip') el.style.setProperty('--progress', 0);
+      paint(read()); label();
+    });
+  }
+
+  /* \u2500\u2500 8 \u00b7 gestures \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 */
+  function gestures() {
+    var sheet = $('#mo-sheet'), box = $('#mo-drag'), SN = [0, 130, 240], NAMES = ['Large', 'Medium', 'Small'], idx = 0;
+    function bounds() { return { min: 0, max: 240, size: box.clientHeight }; }
+    function landedAt(y) { var i = SN.indexOf(y); return i < 0 ? 0 : i; }
+    function aria(i) { sheet.setAttribute('aria-valuenow', 2 - i); sheet.setAttribute('aria-valuetext', NAMES[i]); }
+    var h = MOTION.draggable(sheet, { axis: 'y', snap: SN, bounds: bounds,
+      onEnd: function (y, v) {
+        idx = landedAt(y); aria(idx);
+        $('#mo-drag-out').innerHTML = 'Released at <b>' + group(v) + ' px/s</b>' + DOT + 'would have travelled <b>' + group(SPRING.project(v)) + ' px</b>' + DOT + 'landed on <b>' + NAMES[idx] + '</b>';
+      } });
+    sheet.addEventListener('keydown', function (e) {
+      var d = e.key === 'ArrowDown' || e.key === 'ArrowLeft' ? 1 : e.key === 'ArrowUp' || e.key === 'ArrowRight' ? -1 : 0;
+      if (!d) return; e.preventDefault();
+      idx = Math.max(0, Math.min(2, idx + d)); h.to(SN[idx]); aria(idx);
+      $('#mo-drag-out').innerHTML = 'Keyboard' + DOT + 'landed on <b>' + NAMES[idx] + '</b>';
+    });
+    var duo = $('#mo-duo');
+    function rail() { return doc.querySelector('.device-fold-slider__rail'); }
+    function upd(d) {
+      if (d) { $('#mo-det-v').textContent = fix(d.value, 3); $('#mo-det-a').textContent = Math.round(d.angle) + '\u00b0'; }
+      var r = rail(); if (!r) return;
+      var s = parseFloat(r.style.getPropertyValue('--detent-stretch')) || 0, q = parseFloat(r.style.getPropertyValue('--detent-squash'));
+      $('#mo-det-s').textContent = fix(s, 1) + ' px'; $('#mo-det-q').textContent = fix(isNaN(q) ? 1 : q, 3);
+    }
+    duo.addEventListener('device:fold', function (e) { upd(e.detail); });
+    var rr = rail(); if (rr && window.MutationObserver) new MutationObserver(function () { upd(null); }).observe(rr, { attributes: true, attributeFilter: ['style'] });
+    if (window.DEVICE && DEVICE.value) upd({ value: DEVICE.value(duo), angle: DEVICE.angle(DEVICE.value(duo)) });
+  }
+
+  /* \u2500\u2500 9 \u00b7 view transitions with a shared element \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 */
+  function transitions() {
+    var grid = $('#mo-vt-grid'), det = $('#mo-vt-detail'), dm = $('#mo-vt-detail-media'), src = null, moved = null;
+    var TEXT = ['aurora.demo approved 312 tasks today and finished its reviews at 70 of 70.', 'basil.demo assigned 41 tasks today; its reassignments finished early.', 'cobalt.demo is paused after a refused review, 17 hours to go; approvals carry on.'];
+    function open(card) {
+      src = card; var media = card.querySelector('.mo-vt-media');
+      media.style.viewTransitionName = 'mo-vt-media';
+      MOTION.navigate(function () {
+        media.style.viewTransitionName = 'none';
+        moved = media.firstElementChild; dm.appendChild(moved);           /* the painted canvas travels with it */
+        dm.style.viewTransitionName = 'mo-vt-media';
+        $('#mo-vt-detail-title').textContent = card.querySelector('b').textContent;
+        $('#mo-vt-detail-text').textContent = TEXT[+card.dataset.i] || '';
+        grid.hidden = true; det.hidden = false;
+      }, { types: ['morph'] }).then(function () { dm.style.viewTransitionName = ''; $('#mo-vt-back').focus({ preventScroll: true }); });
+    }
+    function back() {
+      if (!src) return;
+      var media = src.querySelector('.mo-vt-media');
+      dm.style.viewTransitionName = 'mo-vt-media';
+      MOTION.navigate(function () {
+        dm.style.viewTransitionName = 'none';
+        if (moved) media.appendChild(moved);
+        media.style.viewTransitionName = 'mo-vt-media';
+        det.hidden = true; grid.hidden = false;
+      }, { types: ['morph'], direction: 'back' }).then(function () { media.style.viewTransitionName = ''; src.focus({ preventScroll: true }); });
+    }
+    $$('.mo-vt-card', grid).forEach(function (c) { c.addEventListener('click', function () { open(c); }); });
+    $('#mo-vt-back').addEventListener('click', back);
+  }
+
+  /* \u2500\u2500 10 \u00b7 scroll: paths from ANIM itself, and the gate \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 */
+  function scroll() {
+    var EX = [
+      ['#mo-raw-css', 'One keyframe, compiled'], ['#mo-raw-js', 'The same, lerped'], ['#mo-stag', 'Staggered fade-in'],
+      ['#mo-count-a', 'Count-up'], ['#mo-scroll-h', 'Sweep'], ['#mo-par-back', 'Parallax'], ['#mo-clip', 'Clip-expand'],
+      ['#mo-scene', 'Scene: --progress'], ['#mo-scene .scene-media', 'Scene: frame-down']
+    ];
+    function recs(sel) { var el = doc.querySelector(sel); return el && window.ANIM ? ANIM.inspect(el) : []; }
+    function word(r) {
+      var k = r.kind === 'tween' ? (r.preset || 'tween') : r.kind;
+      return k + (r.range ? ' \u00b7 ' + r.range[0] + ' \u2192 ' + r.range[1] : '');
+    }
+    function pathOf(list) {
+      if (!list.length) return { p: 'none', text: 'no keyframe' };
+      var tw = list.filter(function (r) { return r.kind === 'tween'; });
+      if (tw.length && tw.every(function (r) { return r.path === 'css'; })) return { p: 'css', text: 'CSS \u00b7 animation-timeline: view()' };
+      if (tw.length) return { p: 'js', text: 'JavaScript \u00b7 ' + (tw.some(function (r) { return r.lerp && r.lerp < 1; }) ? 'lerp smoothing' : 'one rAF loop') };
+      var pre = list[0].preset;
+      return { p: 'js', text: 'JavaScript trigger \u00b7 ' + (pre === 'count' ? 'the digits roll on a spring' : pre === 'sweep' ? 'then a CSS animation' : pre === 'reveal' ? 'then CSS transitions' : 'a ' + list[0].kind + ' keyframe') };
+    }
+    function render() {
+      var rows = '';
+      EX.forEach(function (x) {
+        var list = recs(x[0]), pp = pathOf(list), on = list.some(function (r) { return r.enabled; });
+        $$('[data-mo-path="' + x[0] + '"]').forEach(function (b) {
+          b.setAttribute('data-path', on ? pp.p : 'off');
+          b.lastChild.textContent = on ? pp.text : 'off \u00b7 the finished state is showing';
+        });
+        if (!list.length) return;
+        var names = [], paths = [];
+        list.forEach(function (r) {
+          (r.kind === 'tween' ? (r.props || []).map(function (p) { return p.name; }) : [r.preset ? r.preset + ' class' : r.kind]).forEach(function (n) { if (names.indexOf(n) < 0) names.push(n); });
+          var w = !r.enabled ? 'off' : r.kind !== 'tween' ? 'JS trigger' : r.path === 'css' ? 'CSS timeline' : 'JS loop';
+          if (paths.indexOf(w) < 0) paths.push(w);
+        });
+        rows += '<tr><td>' + x[1] + '</td><td>' + names.map(function (n) { return '<code>' + n + '</code>'; }).join(' ') + '</td><td>' + paths.join(', ') + '</td></tr>';
+      });
+      $('#mo-path-rows').innerHTML = rows || '<tr><td colspan="3">No keyframes found.</td></tr>';
+      var s = window.ANIM ? ANIM.stats() : null;
+      if (s) $('#mo-anim-stats').innerHTML = '<span><b>' + s.css + '</b> on CSS timelines</span><span><b>' + s.js + '</b> in the JS loop</span><span><b>' + s.classes + '</b> class keyframes</span><span><b>' + s.events + '</b> events</span><span>engine path <b>' + s.path + '</b></span>';
+      var en = html.classList.contains('fd-enhanced');
+      $('#mo-gate').checked = en;
+      $('#mo-gate-out').innerHTML = '<code>html.' + (en ? 'fd-enhanced' : 'no-fd-enhanced') + '</code>' + DOT + 'cause: <b>' + (html.dataset.fdCause || 'none') + '</b>';
+    }
+    $('#mo-gate').addEventListener('change', function (e) {
+      var on = e.target.checked;
+      html.classList.toggle('fd-enhanced', on); html.classList.toggle('no-fd-enhanced', !on);
+      if (on) html.removeAttribute('data-fd-cause'); else html.setAttribute('data-fd-cause', 'override');
+      setTimeout(render, 80);
+    });
+    doc.addEventListener('fg3:capability', function () { setTimeout(render, 80); });
+    render();
+    setTimeout(render, 600);
+  }
+
+  /* \u2500\u2500 11 \u00b7 the control bar's intro, on demand \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 */
+  function controlbar() {
+    $('#mo-bar-replay').addEventListener('click', function () { if (window.CHROME) CHROME.controlBar.intro($('#mo-cb')); });
+  }
+
+  function init() {
+    [hero, springs, interrupt, curves, tiers, reduced, morphs, gestures, transitions, scroll, controlbar].forEach(function (f) {
+      try { f(); } catch (e) { if (window.console) console.error('motion.html: ' + (f.name || 'part') + ' failed', e); }
+    });
+  }
+  if (html.getAttribute('data-fg3') === 'ready') init();
+  else doc.addEventListener('fg3:ready', init, { once: true });
+})();
+</script>
+</main>
+
+<!-- ═══ FOOTER (shared — copy verbatim) ═══ -->
+<footer class="band" data-band="utility" data-band-seam="keep">
+  <div class="viewport-content stack-4">
+    <p class="t-caption" style="color: var(--label-2)">Fluid Design Open 1.0 &middot; A glass-and-spring design language with Fluid&rsquo;s colour. Type uses the system UI font where available and Inter elsewhere. Device art is original.</p>
+    <p class="t-caption"><a href="index.html">Overview</a> &middot; <a href="start.html">Start</a> &middot; <a href="docs.html">Docs</a> &middot; <a href="components.html">Components</a> &middot; <a href="selftest.html">Self-test</a> &middot; <a href="audit.html">Audit</a></p>
+  </div>
+</footer>
+
+<script src="assets/geom.js"></script>
+<script src="assets/spring.js"></script>
+<script src="assets/palette.js"></script>
+<script src="assets/art3.js"></script>
+<script src="assets/lg3-core.js"></script>
+<script src="assets/fg3.js"></script>
+<script src="assets/symbols.js"></script>
+<script src="assets/chart.js"></script>
+<script src="assets/motion.js"></script>
+<script src="assets/anim.js"></script>
+<script src="assets/device.js"></script>
+<script src="assets/ui.js"></script>
+<script src="assets/chrome.js"></script>
+<script src="assets/showcase.js"></script>
+<script src="assets/docs.js"></script>   <!-- documentation pages only -->
+<script>FG3.boot(); if (window.DOCS) DOCS.mount();</script>
+</body>
+</html>

@@ -1,0 +1,1202 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Fluid Design Open</title>
+<!--
+  The Fluid Design Open page template. Every page of the site copies this skeleton VERBATIM
+  (head, site nav, footer, scripts) and replaces only: the <title>, the
+  aria-current link in the nav, the local-nav capsule's title/jump links, and
+  <main>. 
+
+  Do NOT put data-tone on <html> unless the page must be pinned: an author
+  tone beats the reader's appearance toggle (FG3 precedence).
+-->
+<script>
+/* Tone without a flash (fg3.js header): reader's choice › author › host › system. */
+try{var d=document.documentElement,t=localStorage.getItem('fg3-tone');
+if(!d.hasAttribute('data-tone')){d.setAttribute('data-tone',t||d.getAttribute(
+'data-theme')||(matchMedia('(prefers-color-scheme: dark)').matches?'dark':
+'light'));d.setAttribute('data-tone-auto','')}}catch(e){}
+</script>
+<link rel="stylesheet" href="assets/fg3-tokens.css">
+<link rel="stylesheet" href="assets/fg3-color.css">
+<link rel="stylesheet" href="assets/fg3-springs.css">
+<link rel="stylesheet" href="assets/fg3.css">
+<link rel="stylesheet" href="assets/lg3.css">
+<link rel="stylesheet" href="assets/fg3-motion.css">
+<link rel="stylesheet" href="assets/fg3-components.css">
+<link rel="stylesheet" href="assets/fg3-chrome.css">
+<link rel="stylesheet" href="assets/fg3-showcase.css">
+<link rel="stylesheet" href="assets/fg3-symbols.css">
+<link rel="stylesheet" href="assets/fg3-chart.css">
+<link rel="stylesheet" href="assets/fg3-device.css">
+<link rel="stylesheet" href="assets/fg3-docs.css">    <!-- documentation pages only -->
+<style>
+/* Page layout only: roles and tokens, never a colour value (SPEC §2).
+   Page-local classes are prefixed with the page's own short name (e.g. mo- on
+   motion.html) so they can never collide with a system class. */
+
+/* index.html = ov- (overview). Everything below is layout, the mock app UI
+   drawn inside device screens (logical px, roles only), and specimens. */
+
+/* ═══ 1 · DEVICE SCREENS — the Orbit console, drawn in Fluid Design Open ═══ */
+.ov-app{position:absolute;inset:0;display:grid;grid-template-columns:184px minmax(0,1fr);overflow:hidden;
+  background:var(--bg-1);color:var(--label);font-family:var(--font-text);text-align:start}   /* an app, not the marquee it sits in */
+.ov-app *,.ov-outer *,.ov-phone *{box-sizing:border-box}
+.ov-app p,.ov-app h3,.ov-app h4,.ov-outer p,.ov-outer h3,.ov-phone p,.ov-phone h3{margin:0}
+.ov-side{display:flex;flex-direction:column;gap:2px;padding:40px 10px 16px;background:var(--bg-2)}
+.ov-brand{display:flex;align-items:center;gap:8px;margin-bottom:14px !important;padding:0 10px}
+.ov-brand .sym{width:20px;height:20px;color:var(--accent)}
+.ov-nav{display:flex;align-items:center;gap:10px;padding:6px 10px;border-radius:9px;color:var(--label-2)}
+.ov-nav .sym{width:17px;height:17px;flex:none}
+.ov-nav.is-on{background:var(--fill-2);color:var(--label)}
+.ov-main{display:flex;flex-direction:column;gap:12px;min-width:0;padding:34px 22px 18px}
+.ov-head{display:flex;align-items:flex-end;justify-content:space-between;gap:12px}
+.ov-date{color:var(--label)}   /* small text in a SCALED screen: label-2 measured 2.6-3.8:1 in the pixels */
+.ov-kpis{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.ov-kpi{padding:10px 12px;border-radius:14px;background:var(--bg-2)}
+.ov-kpi b{display:block;font-size:22px;line-height:26px;font-weight:600;letter-spacing:-.01em;font-variant-numeric:tabular-nums}
+.ov-kpi span{display:block;color:var(--label-2)}
+.ov-cards{flex:1;min-height:0;display:grid;grid-template-columns:196px minmax(0,1fr);gap:10px}
+.ov-card{min-width:0;padding:11px 12px;border-radius:14px;background:var(--bg-2)}
+.ov-cards > .ov-card{display:flex;flex-direction:column}
+.ov-cards .ov-strip{flex:1;height:auto;min-height:110px}
+.ov-card h4{margin:0 0 4px}
+.ov-acct{display:flex;align-items:center;gap:10px;padding:6px 0}
+.ov-acct [data-chart]{flex:none;width:36px;height:36px}
+.ov-acct b{display:block;font-weight:600}
+.ov-acct span{display:block;color:var(--label-2)}
+.ov-strip{height:120px;margin-top:6px}
+.ov-legend{display:flex;gap:14px;margin-top:8px;color:var(--label-2)}
+.ov-legend i{display:inline-block;width:8px;height:8px;margin-right:5px;border-radius:50%;background:var(--c)}
+.ov-now{display:flex;align-items:center;gap:8px;padding:10px 12px;border-radius:14px;background:var(--bg-2)}
+.ov-now .sym{flex:none;color:var(--series-1)}
+.ov-now > span:last-child{margin-left:auto;color:var(--label-2);font-variant-numeric:tabular-nums;white-space:nowrap}
+.ov-app--wide{grid-template-columns:220px minmax(0,1fr)}
+.ov-app--wide .ov-main{padding:44px 40px 28px;gap:18px}
+.ov-app--wide .ov-kpis{grid-template-columns:repeat(4,minmax(0,1fr));gap:14px}
+.ov-app--wide .ov-kpi{padding:16px 18px;border-radius:18px}
+.ov-app--wide .ov-kpi b{font-size:32px;line-height:38px}
+.ov-app--wide .ov-cards{grid-template-columns:260px minmax(0,1fr);gap:14px}
+.ov-app--wide .ov-card{padding:16px 18px;border-radius:18px}
+.ov-app--wide .ov-strip{height:200px}
+/* the duo's inner screen: one pane per leaf, so nothing crosses the hinge.
+   At rest (a ⅓ landing pose) the left leaf is folded and foreshortened,
+   so it carries the sidebar and the projects; the day's numbers, the batch
+   strip and the live row sit on the flat right half. */
+.ov-app--duo{grid-template-columns:repeat(2,minmax(0,1fr))}
+.ov-leaf{display:grid;grid-template-columns:164px minmax(0,1fr);min-width:0;min-height:0}
+.ov-leaf > .ov-card{margin:34px 11px 18px 12px}
+.ov-app--duo .ov-main{padding-left:11px}
+.ov-app--duo .ov-kpis{grid-template-columns:repeat(2,minmax(0,1fr))}
+.ov-app--duo .ov-cards{grid-template-columns:minmax(0,1fr)}
+.ov-sub{margin-bottom:2px;color:var(--label-2)}
+.ov-legend{flex-wrap:wrap;row-gap:2px}
+.ov-now > span:not(:last-child){min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+/* the outer (cover) screen: the one glance that matters */
+.ov-outer{position:absolute;inset:0;display:flex;flex-direction:column;gap:12px;padding:52px 18px 20px;
+  background:var(--bg-2);color:var(--label);font-family:var(--font-text)}
+.ov-outer [data-chart="rings"]{width:196px;height:196px;margin:2px auto 4px}
+.ov-outer .ov-now{background:var(--bg-1);align-items:flex-start}
+.ov-stop{margin-top:auto;height:48px;display:grid;place-items:center;border-radius:var(--r-pill);
+  background:var(--bad);color:var(--bad-ink);font-weight:600}
+/* the phone app (island capsule card) */
+.ov-phone{position:absolute;inset:0;display:flex;flex-direction:column;gap:12px;padding:66px 18px 0;
+  background:var(--bg-2);color:var(--label);font-family:var(--font-text)}
+.ov-phone .ov-card{background:var(--bg-1);border-radius:20px;padding:14px 16px}
+.ov-big{display:flex;align-items:baseline;gap:8px}
+.ov-big b{font-size:40px;line-height:44px;font-weight:600;letter-spacing:-.01em;font-variant-numeric:tabular-nums}
+.ov-big span{color:var(--label-2)}
+.ov-phone .ov-bars{height:84px;margin-top:10px}
+.ov-rowline{display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-top:1px solid var(--separator)}
+.ov-rowline:first-child{border-top:0}
+.ov-rowline span:last-child{color:var(--label-2);font-variant-numeric:tabular-nums}
+.ov-tabs{position:absolute;left:18px;right:18px;bottom:30px;height:62px;display:grid;grid-template-columns:repeat(4,1fr);
+  align-items:center;text-align:center;border-radius:var(--r-pill);background:var(--bg-1);box-shadow:var(--shadow-hairline);
+  color:var(--label-2);font-size:10px;line-height:12px;font-weight:600}
+.ov-tabs span{display:grid;justify-items:center;gap:3px}
+.ov-tabs .sym{width:22px;height:22px}
+.ov-tabs .is-on{color:var(--accent)}
+
+/* the price platter keeps a 572px capsule on desktop */
+@media (min-width:1069px){ #hero .hero-platter{min-width:572px} }
+
+/* ═══ 2 · HIGHLIGHTS — media inside the gallery cards ═════════════════════ */
+.ov-gdemo{position:relative;z-index:1;align-self:center;margin-top:96px;display:flex;align-items:center;gap:16px}
+.ov-gdemo .segmented{min-width:0}
+@media (max-width:734px){ .ov-gdemo{margin-top:110px;flex-direction:column;gap:14px}
+  #ov-seg{--seg-track:var(--h-l);--seg-pi:13px;--seg-fs:var(--t-14);--seg-lh:var(--t-14-lh);--seg-ls:var(--t-14-ls)} }
+/* springs: the solver's own curves, and four dots gliding on the tokens */
+.ov-springs{position:relative;width:min(760px,84%);margin-top:172px;align-self:start;display:grid;gap:22px}
+.ov-springs svg,.ov-mini-plot svg{display:block;width:100%;height:auto;overflow:visible}
+.ov-plot-base{stroke:var(--separator);stroke-width:1}
+.ov-plot-target{stroke:var(--separator);stroke-width:1;stroke-dasharray:4 6}
+.ov-plot-curve{fill:none;stroke-width:3;stroke-linecap:round;stroke-linejoin:round;vector-effect:non-scaling-stroke}
+.ov-lanes{display:grid;gap:10px;margin:0;padding:0;list-style:none}
+.ov-lane{display:grid;grid-template-columns:132px minmax(0,1fr);align-items:center;gap:14px}
+.ov-lane__name{color:var(--label-2);white-space:nowrap}
+.ov-lane__name b{color:var(--label);font-weight:600}
+.ov-lane__name i{display:inline-block;width:9px;height:9px;margin-right:8px;border-radius:50%;background:var(--c)}
+.ov-lane__track{position:relative;height:20px;border-radius:var(--r-pill);background:var(--fill-3);container-type:inline-size}
+.ov-lane__dot{position:absolute;top:2px;left:2px;width:16px;height:16px;border-radius:50%;background:var(--c);
+  translate:calc((100cqw - 20px) * var(--on,0)) 0;transition:translate var(--ms) var(--ease)}
+.ov-lanes.is-on .ov-lane__dot{--on:1}
+@media (prefers-reduced-motion:reduce){ .ov-lane__dot{transition:none} }
+@media (max-width:734px){ .ov-springs{width:86%;margin-top:112px;gap:16px} .ov-lane{grid-template-columns:96px minmax(0,1fr);gap:10px} }
+/* type & colour: one phrase down the type ramp, the roles beside it */
+.ov-typo{position:relative;width:min(1100px,88%);margin-top:168px;align-self:start;display:grid;
+  grid-template-columns:minmax(0,1fr) 300px;gap:56px;align-items:center;text-align:start}
+.ov-fall{margin:0;padding:0;list-style:none;display:grid;gap:4px}
+.ov-fall li{display:grid;grid-template-columns:44px minmax(0,1fr);align-items:baseline;gap:16px;white-space:nowrap}
+.ov-fall small{color:var(--label-2);font-family:var(--font-mono);font-size:var(--t-12);line-height:var(--t-12-lh);font-variant-numeric:tabular-nums;text-align:end}
+.ov-fall b{overflow:hidden;text-overflow:clip;font-family:var(--font-display);font-size:var(--fs);line-height:var(--lh);letter-spacing:var(--ls);font-weight:var(--w,600)}
+.ov-roles{margin:0;padding:0;list-style:none;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px 18px}
+.ov-roles li{display:flex;align-items:center;gap:10px;min-width:0;color:var(--label-2);font-family:var(--font-mono);font-size:var(--t-12);line-height:var(--t-12-lh)}
+.ov-roles i{flex:none;width:28px;height:28px;border-radius:50%;background:var(--c);box-shadow:inset 0 0 0 1px var(--separator)}
+@media (max-width:1068px){ .ov-typo{gap:32px;grid-template-columns:minmax(0,1fr) 180px} .ov-fall li.ov-xl{display:none}
+  .ov-roles{grid-template-columns:repeat(4,28px);gap:12px} .ov-roles span{display:none} }
+@media (max-width:734px){
+  .ov-typo{grid-template-columns:minmax(0,1fr);margin-top:124px;gap:28px;width:86%}
+  .ov-fall li:is(.ov-l,.ov-m){display:none}
+  .ov-fall li{grid-template-columns:28px minmax(0,1fr);gap:10px}
+  .ov-roles{grid-template-columns:repeat(5,28px);justify-content:start;gap:10px}
+  .ov-roles span{display:none}
+}
+
+/* ═══ 3 · MEASURED — three sources and the stat panel ═════════════════════ */
+.ov-sources{margin-top:var(--s-12)}
+.ov-source{display:flex;flex-direction:column;gap:10px;padding-inline-end:24px}
+.ov-source .sym{width:40px;height:40px;margin-bottom:8px;color:var(--label)}
+.ov-source h3{font-family:var(--t-callout-ff);font-size:var(--t-21);line-height:var(--t-21-lh);letter-spacing:var(--t-21-ls);font-weight:600}
+.ov-source p{color:var(--label-2)}
+.ov-source p b{color:var(--label);font-weight:inherit}
+@media (max-width:734px){ .ov-sources{row-gap:40px} .ov-source{padding-inline-end:0} }
+.ov-panel{margin-top:var(--s-13);padding:72px 64px 76px;border-radius:var(--r-lg);corner-shape:superellipse(var(--k-continuous));
+  background:var(--bg-2)}
+.ov-panel .stat-grid{gap:56px 40px;align-items:start}
+.ov-panel .stat-caption{max-width:24ch;color:var(--label-2)}
+.ov-panel .stat-lead{color:var(--label-2)}
+@media (max-width:1068px){ .ov-panel{padding:56px 44px} }
+@media (max-width:734px){ .ov-panel{padding:40px 24px 44px} .ov-panel .stat-grid{gap:36px 20px} .ov-panel .stat-cell:last-child:nth-child(odd){grid-column:1 / -1} }
+#st-count{font-variant-numeric:normal}   /* Inter's tabular figures widen the hyphen */
+.ov-live{margin:var(--s-8) auto 0;max-width:var(--w-prose);text-align:center;color:var(--label-2)}
+.ov-live b{color:var(--label);font-weight:600;font-variant-numeric:tabular-nums}
+
+/* ═══ 4 · THE SCENE — glass chrome morphs on scroll, then frames down ══════
+   One number, --progress (ANIM data-scene), drives the pill → panel (--m),
+   the captions and the frame-down (--f). Base experience: the final state. */
+.band.ov-scene{--band-pt:0px;--band-pb:0px}
+.ov-scene [data-scene]{--scene-length:320vh}
+.ov-stage{position:relative;height:clamp(640px,100vh,1000px);overflow:clip;
+  --ov-card-x:max(6.25vw,(100vw - var(--w-content)) / 2)}   /* the framed-down card's side inset */
+html.fd-enhanced .ov-scene [data-scene-sticky]{height:calc(max(100vh,680px) + 1px)}
+html.fd-enhanced .ov-stage{height:100%}
+.ov-frame{position:absolute;inset:0;overflow:clip;isolation:isolate;
+  --f:clamp(0,(var(--progress,1) - .8) * 5,1);
+  clip-path:inset(calc(var(--f) * 56px) calc(var(--f) * var(--ov-card-x)) round calc(var(--f) * var(--frame-radius,40px)))}
+.ov-frame > canvas{position:absolute;inset:0;width:100%;height:100%;scale:calc(1 + .06 * (1 - var(--f)))}
+/* directional scrims only (never a flat wash over the art) */
+.ov-frame::after{content:"";position:absolute;inset:0;pointer-events:none;z-index:0;
+  background:linear-gradient(180deg,color-mix(in srgb,var(--band-stage-bg) 74%,transparent),color-mix(in srgb,var(--band-stage-bg) 62%,transparent) 24%,
+    transparent 48%,transparent 68%,color-mix(in srgb,var(--band-stage-bg) 60%,transparent))}
+.ov-scene-copy{position:absolute;z-index:2;inset:9vh 6.25vw auto;text-align:center;color:var(--on-art-1);
+  opacity:clamp(0,1 - (var(--progress,1) - .16) * 5,1)}
+.ov-scene-copy h2{font-family:var(--t-headline-ff);font-size:var(--t-headline-fs);line-height:var(--t-headline-lh);
+  letter-spacing:var(--t-headline-ls);font-weight:600;text-wrap:balance}
+.ov-scene-copy p{max-width:620px;margin:16px auto 0;color:var(--on-art-2);font-family:var(--t-lede-ff);font-size:var(--t-lede-fs);
+  line-height:var(--t-lede-lh);letter-spacing:var(--t-lede-ls);text-wrap:pretty}
+/* the glass: a 56px pill that becomes a panel. Width, height and radius all
+   derive from --m; the corner stays circular (the local nav does the same:
+   interpolating a superellipse k per frame would re-bake the lens). */
+.ov-morph{--m:clamp(0,(var(--progress,1) - .18) / .42,1);--pill-w:min(300px,calc(100vw - 64px));
+  --panel-w:min(780px,calc(100vw - 32px));--panel-h:318px;
+  position:absolute;z-index:1;left:50%;top:50%;translate:-50% -50%;overflow:clip;
+  width:calc(var(--pill-w) + (var(--panel-w) - var(--pill-w)) * var(--m));
+  height:calc(56px + (var(--panel-h) - 56px) * var(--m));
+  border-radius:calc(28px + 6px * var(--m));corner-shape:round}
+@media (max-width:734px){ .ov-morph{--panel-h:300px;--panel-w:calc(100vw - 64px);--pill-w:calc(100vw - 88px)} }
+/* a large panel is "more opaque" (the rule for large glass): an elevated
+   wash that thickens as the pill becomes a panel, under the highlight and
+   rim layers (LG3 paints those at z 6 / 7), so the labels hold 4.5:1 */
+.ov-wash{position:absolute;inset:0;z-index:0;pointer-events:none;border-radius:inherit;
+  background:color-mix(in srgb,var(--bg-elevated) calc(38% + 34% * var(--m)),transparent)}
+.ov-pill,.ov-panel-in{z-index:1}
+.ov-pill{position:absolute;inset:0 0 auto;height:56px;display:flex;align-items:center;justify-content:center;gap:10px;
+  font-size:var(--t-17);line-height:var(--t-17-lh);letter-spacing:var(--t-17-ls);font-weight:600;
+  /* gone by m .29 while the panel arrives from .26: the glass is never an
+     empty growing box (a 40% gap left it blank mid-morph) */
+  opacity:clamp(0,1 - var(--m) * 3.4,1)}
+.ov-pill .sym{width:20px;height:20px}
+.ov-panel-in{position:absolute;top:0;left:0;width:var(--panel-w);padding:30px 36px 32px;
+  opacity:clamp(0,(var(--m) - .26) * 2.6,1);translate:0 calc((1 - clamp(0,(var(--m) - .26) * 2.6,1)) * 10px)}
+.ov-panel-in h3{font-size:var(--t-21);line-height:var(--t-21-lh);letter-spacing:var(--t-21-ls);font-weight:600}
+.ov-panel-in > p{margin-top:4px;color:var(--label-2-on-fill)}
+.ov-ptiles{margin:22px 0 0;padding:0;list-style:none;display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:12px}
+.ov-ptiles li{display:grid;justify-items:center;gap:10px;text-align:center;font-size:var(--t-14);line-height:var(--t-14-lh);letter-spacing:var(--t-14-ls)}
+.ov-ptiles span{width:64px;height:64px;display:grid;place-items:center;border-radius:calc(14px * var(--r-scale));
+  corner-shape:superellipse(var(--k-continuous));background:var(--fill-2);color:var(--tile-hue,var(--label))}
+.ov-ptiles .sym{width:30px;height:30px}
+.ov-prule{height:1px;margin:24px 0 18px;background:var(--separator)}
+.ov-pjump{margin:0;padding:0;list-style:none;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px 20px;
+  font-size:var(--t-14);line-height:var(--t-14-lh);letter-spacing:var(--t-14-ls)}
+@media (max-width:734px){
+  .ov-ptiles{grid-template-columns:repeat(3,minmax(0,1fr));gap:14px 10px}
+  .ov-ptiles span{width:52px;height:52px}
+  .ov-panel-in{padding:24px 20px}
+  .ov-pjump,.ov-prule{display:none}
+}
+/* captions: three beats on the one number */
+.ov-caps{position:absolute;z-index:2;left:6.25vw;right:6.25vw;bottom:8vh;margin:0;padding:0;list-style:none;display:grid;
+  text-align:center;color:var(--on-art-2);font-family:var(--t-callout-ff);font-size:var(--t-21);
+  line-height:var(--t-21-lh);letter-spacing:var(--t-21-ls);font-weight:600;text-wrap:balance}
+.ov-caps li{grid-area:1 / 1;max-width:760px;margin-inline:auto}
+.ov-caps b{color:var(--on-art-1);font-weight:inherit}
+.ov-caps li:nth-child(1){opacity:clamp(0,(.2 - var(--progress,1)) * 10,1)}
+.ov-caps li:nth-child(2){opacity:clamp(0,min((var(--progress,1) - .24) * 10,(.6 - var(--progress,1)) * 10),1)}
+/* the last beat holds to the end: it stays over the art while it frames down */
+.ov-caps li:nth-child(3){opacity:clamp(0,(var(--progress,1) - .64) * 10,1)}
+/* base experience (reduced motion, no JS, small viewports): everything at
+   once, in flow — the panel, the copy and all three captions */
+html:not(.fd-enhanced) .ov-stage{height:auto;padding:88px 0;display:flex;flex-direction:column;align-items:center;gap:40px}
+html:not(.fd-enhanced) .ov-frame{position:absolute}
+/* the copy sits inside the framed card: its inset plus the small-card
+   padding (24px), so no line runs to the rounded edge */
+html:not(.fd-enhanced) :is(.ov-scene-copy,.ov-caps){position:relative;inset:auto;opacity:1;padding-inline:calc(var(--ov-card-x) + 24px)}
+html:not(.fd-enhanced) .ov-caps{left:auto;right:auto;bottom:auto;display:block}
+html:not(.fd-enhanced) .ov-caps li{opacity:1;font-size:var(--t-19);line-height:var(--t-19-lh-loose);font-weight:400;color:var(--on-art-2)}
+html:not(.fd-enhanced) .ov-caps li b{color:var(--on-art-1);font-weight:600}
+html:not(.fd-enhanced) .ov-morph{position:relative;left:auto;top:auto;translate:none;flex:none;height:auto}
+html:not(.fd-enhanced) .ov-panel-in{position:relative;opacity:1;translate:none}
+html:not(.fd-enhanced) .ov-pill{display:none}
+
+/* ═══ 6 · EVERY PAGE — the hub bento, a live specimen in each tile ═════════ */
+.ov-hub{--bento-h:304px}
+@media (max-width:1068px){ .ov-hub{--bento-h:288px} }
+@media (max-width:734px){ .ov-hub{--bento-h:272px} }
+a.bento-tile{color:var(--label);text-decoration:none;transition:scale .3s var(--ease-card)}
+@media (hover:hover) and (pointer:fine){ a.bento-tile:hover{scale:1.012} }
+@media (prefers-reduced-motion:reduce){ a.bento-tile{transition:none} a.bento-tile:hover{scale:none} }
+.ov-hub .bento-copy{padding:28px 28px 0}
+.ov-hub .bento-copy > h3{font-size:var(--t-24);line-height:var(--t-24-lh);letter-spacing:var(--t-24-ls)}
+.ov-hub .bento-media{padding:16px 28px 28px}
+/* phones: the media keeps clear of the corner badge (bottom 18 + 32 px);
+   after the base rule, or its shorthand wins */
+@media (max-width:734px){ .ov-hub .bento-media{padding-bottom:56px} }
+.ov-go{position:absolute;z-index:2;right:18px;bottom:18px;width:32px;height:32px;display:grid;place-items:center;border-radius:50%;
+  background:var(--mat-control-bg);color:var(--mat-control-ink);transition:background-color 100ms linear}
+.ov-go .sym{width:16px;height:16px;stroke-width:2.6}
+a.bento-tile:hover .ov-go{background:var(--mat-control-bg-hover)}
+.ov-hub [data-tone="dark"] .bento-copy > p:first-child{color:var(--on-art-1)}
+.ov-hub [data-tone="dark"] .bento-copy > h3{color:var(--on-art-1)}
+/* specimens (non-interactive: a tile is one link) */
+.ov-code{width:100%;max-width:560px;margin:0;padding:16px 18px;border-radius:var(--r-sm);corner-shape:superellipse(var(--k-continuous));
+  background:var(--bg-1);color:var(--label);font-family:var(--font-mono);font-size:var(--t-14);line-height:1.6;white-space:pre;overflow:hidden;text-overflow:ellipsis}
+.ov-code .c{color:var(--label-2)}
+.ov-code .k{color:var(--accent)}
+.ov-toc{width:100%;margin:0;padding:0;list-style:none;display:grid;gap:2px;font-size:var(--t-14);line-height:var(--t-14-lh)}
+.ov-toc li{padding:5px 12px;border-radius:8px;color:var(--label-2)}
+.ov-toc li.is-on{background:var(--bg-1);color:var(--label);font-weight:600}
+.ov-discs{display:flex;flex-wrap:wrap;gap:10px;justify-content:center;max-width:240px}
+.ov-discs i{width:30px;height:30px;border-radius:50%;background:var(--c);box-shadow:inset 0 0 0 1px var(--separator)}
+.ov-aa{display:flex;align-items:baseline;gap:16px}
+.ov-aa b{font-family:var(--font-display);font-size:var(--t-80);line-height:1;letter-spacing:var(--t-80-ls);font-weight:600}
+.ov-aa span{color:var(--label-2);font-family:var(--font-mono);font-size:var(--t-12);line-height:1.7}
+.ov-cols{width:100%;height:96px;display:grid;grid-template-columns:repeat(12,1fr);gap:6px}
+.ov-cols i{border-radius:4px;background:var(--fill-2)}
+.ov-cols i:nth-child(-n+4){background:color-mix(in srgb,var(--accent) 22%,transparent)}
+.ov-glass-chip{display:flex;align-items:center;gap:10px;height:52px;padding:0 22px;border-radius:var(--r-pill);
+  font-weight:600;font-size:var(--t-17);line-height:var(--t-17-lh)}
+.ov-mini-plot{width:100%;max-width:300px}
+.ov-faux-row{display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:12px}
+.ov-faux-switch{position:relative;width:51px;height:31px;border-radius:var(--r-pill);background:var(--sys-green)}
+.ov-faux-switch::after{content:"";position:absolute;top:2px;right:2px;width:27px;height:27px;border-radius:50%;background:var(--bg-1);box-shadow:var(--shadow-knob)}
+.ov-faux-tabs{display:grid;grid-template-columns:repeat(4,44px);gap:4px;padding:5px;border-radius:var(--r-pill);background:var(--fill-1)}
+.ov-faux-tabs span{height:44px;display:grid;place-items:center;border-radius:var(--r-pill);color:var(--label-2)}
+.ov-faux-tabs span.is-on{background:var(--bg-1);color:var(--accent);box-shadow:var(--shadow-hairline)}
+.ov-faux-tabs .sym{width:20px;height:20px}
+.ov-faux-bar{display:flex;align-items:center;gap:10px}
+.ov-faux-bar > span:first-child{display:flex;align-items:center;gap:10px;height:44px;padding:0 18px;border-radius:var(--r-pill);background:var(--fill-1)}
+.ov-faux-bar i{width:7px;height:7px;border-radius:50%;background:var(--label-3)}
+.ov-faux-bar i:first-child{width:30px;border-radius:4px;background:var(--label)}
+.ov-faux-bar > span:last-child{width:44px;height:44px;display:grid;place-items:center;border-radius:50%;background:var(--fill-1)}
+.ov-faux-form{width:100%;max-width:280px;display:grid;gap:10px}
+.ov-faux-field{height:40px;display:flex;align-items:center;padding:0 14px;border-radius:12px;box-shadow:inset 0 0 0 1px var(--label-3);
+  color:var(--label-2);background:var(--bg-1);font-size:var(--t-14)}
+.ov-faux-check{display:flex;align-items:center;gap:10px;font-size:var(--t-14);color:var(--label)}
+.ov-faux-check i{width:20px;height:20px;display:grid;place-items:center;border-radius:6px;background:var(--accent-solid);color:var(--accent-ink)}
+.ov-faux-check i .sym{width:14px;height:14px;stroke-width:3}
+.ov-glyphs{display:grid;grid-template-columns:repeat(6,1fr);gap:14px 18px;color:var(--label)}
+.ov-glyphs .sym{width:26px;height:26px}
+.ov-data{width:100%;display:grid;grid-template-columns:120px minmax(0,1fr);gap:24px;align-items:center}
+.ov-data [data-chart="rings"]{width:120px;height:120px}
+.ov-data [data-chart="strip"]{height:96px}
+.ov-wordmark{display:flex;align-items:center;gap:12px;color:var(--on-art-1);font-family:var(--font-display);font-size:var(--t-40);
+  line-height:1;letter-spacing:var(--t-40-ls);font-weight:600}
+.ov-wordmark .sym{width:40px;height:40px}
+.ov-mini-console{width:100%;max-width:340px;height:132px;display:grid;grid-template-columns:78px 1fr;gap:8px;padding:8px;border-radius:14px;background:var(--bg-1);box-shadow:var(--shadow-hairline)}
+.ov-mini-console > span:first-child{border-radius:8px;background:var(--bg-2);display:grid;align-content:start;gap:5px;padding:8px}
+.ov-mini-console > span:first-child i{height:8px;border-radius:3px;background:var(--fill-1)}
+.ov-mini-console > span:first-child i:first-child{background:var(--accent-solid);opacity:.9}
+.ov-mini-console > span:last-child{display:grid;grid-template-columns:repeat(3,1fr);grid-template-rows:38px 1fr;gap:6px}
+.ov-mini-console b{border-radius:8px;background:var(--bg-2);display:grid;place-items:center;font-size:var(--t-14);font-weight:600;font-variant-numeric:tabular-nums}
+.ov-mini-console em{grid-column:1 / -1;border-radius:8px;background:var(--bg-2);display:flex;align-items:flex-end;gap:5px;padding:8px}
+.ov-mini-console em i{flex:1;height:var(--h);border-radius:3px 3px 1px 1px;background:var(--series-1)}
+.ov-checks{margin:0;padding:0;list-style:none;display:grid;gap:8px;font-size:var(--t-14);line-height:var(--t-14-lh)}
+.ov-checks li{display:flex;align-items:center;gap:10px}
+.ov-checks .sym{flex:none;width:18px;height:18px;color:var(--ok)}
+.ov-ratio{display:flex;align-items:center;gap:22px}
+.ov-ratio b{font-family:var(--font-display);font-size:var(--t-64);line-height:1;letter-spacing:var(--t-64-ls);font-weight:600;font-variant-numeric:tabular-nums}
+.ov-ratio span{display:grid;gap:6px}
+.ov-ratio i{display:block;padding:6px 12px;border-radius:8px;font-style:normal;font-size:var(--t-14);font-weight:600}
+.ov-ratio i:first-child{background:var(--bg-1);color:var(--label)}
+.ov-ratio i:last-child{background:var(--label);color:var(--label-inv)}
+.ov-hub-phone{--device-width:118px;margin-bottom:-120px;align-self:start}
+
+/* ═══ 7 · COMPONENTS — scroller specimens ═════════════════════════════════ */
+/* each specimen sits in an inset tray, the card's own image well */
+.ov-spec{position:relative;align-self:stretch;justify-self:stretch;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;
+  margin:0 var(--scroller-pad,32px) var(--scroller-pad,32px);padding:24px;border-radius:var(--r-md);corner-shape:superellipse(var(--k-continuous));
+  background:var(--bg-2)}
+.ov-spec .row-title{text-align:start}
+.ov-spec .list{width:100%}
+.ov-spec-row{display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:12px}
+.ov-spec [data-chart="rings"]{width:132px;height:132px}
+.ov-spec [data-chart="sparkline"]{width:100%;max-width:240px;height:44px}
+.ov-spec .slider{width:min(240px,100%)}
+
+/* ═══ 8 · START — the adoption snippet ════════════════════════════════════ */
+.ov-start{align-items:start}
+.ov-start-copy{position:sticky;top:120px;display:grid;gap:18px;padding-inline-end:24px}
+.ov-start-copy .t-lede{margin-top:6px}
+.ov-start-copy .lockup-ctas{flex-direction:column;align-items:flex-start;gap:10px;margin-top:10px}
+.ov-start .doc-code{white-space:pre;overflow:auto}
+@media (max-width:1068px){ .ov-start-copy{position:static;padding-inline-end:0} .ov-start{row-gap:48px} }
+@media (max-width:734px){ .ov-start .doc-code{font-size:var(--t-12);padding:18px 16px} }
+.band.ov-notes{--band-pt:var(--s-12);--band-pb:0px}
+</style>
+</head>
+<body>
+
+<!-- ═══ SITE NAV (shared — copy verbatim; set aria-current on this page's link) ═══ -->
+<nav class="globalnav" aria-label="Fluid Design">
+  <div class="globalnav__bar">
+    <a class="globalnav__brand" href="index.html" aria-label="Fluid Design Open home"><i data-sym="sparkles"></i></a>
+    <ul class="globalnav__list">
+      <li class="globalnav__item"><a class="globalnav__link" href="index.html" aria-current="page">Overview</a></li>
+      <li class="globalnav__item"><a class="globalnav__link" href="start.html">Start</a></li>
+      <li class="globalnav__item"><a class="globalnav__link" href="docs.html">Docs</a></li>
+      <li class="globalnav__item" data-flyout="gn-foundations"><a class="globalnav__link" href="color.html">Foundations</a><button class="globalnav__trigger" type="button"><span class="sr-only">Foundations menu</span></button></li>
+      <li class="globalnav__item" data-flyout="gn-components"><a class="globalnav__link" href="components.html">Components</a><button class="globalnav__trigger" type="button"><span class="sr-only">Components menu</span></button></li>
+      <li class="globalnav__item" data-flyout="gn-instruments"><a class="globalnav__link" href="selftest.html">Instruments</a><button class="globalnav__trigger" type="button"><span class="sr-only">Instruments menu</span></button></li>
+    </ul>
+    <div class="globalnav__tools">
+      <button class="globalnav__icon" type="button" data-tone-toggle aria-label="Switch appearance"><i data-sym="circle-half"></i></button>
+      <button class="globalnav__menu" type="button" aria-label="Menu" aria-expanded="false"><i data-sym="lines"></i></button>
+    </div>
+  </div>
+  <div class="globalnav__flyout" id="gn-foundations" hidden>
+    <div class="globalnav__flyout-content">
+      <div class="globalnav__group" data-elevated>
+        <h2 class="globalnav__group-title">Foundations</h2>
+        <ul><li><a class="globalnav__flyout-link" href="color.html">Colour</a></li><li><a class="globalnav__flyout-link" href="type.html">Type</a></li><li><a class="globalnav__flyout-link" href="layout.html">Layout</a></li><li><a class="globalnav__flyout-link" href="materials.html">Materials</a></li><li><a class="globalnav__flyout-link" href="motion.html">Motion</a></li></ul>
+      </div>
+      <div class="globalnav__group">
+        <h2 class="globalnav__group-title">Content</h2>
+        <ul><li><a class="globalnav__flyout-link" href="symbols.html">Symbols</a></li><li><a class="globalnav__flyout-link" href="data.html">Data</a></li></ul>
+      </div>
+    </div>
+  </div>
+  <div class="globalnav__flyout" id="gn-components" hidden>
+    <div class="globalnav__flyout-content">
+      <div class="globalnav__group" data-elevated>
+        <h2 class="globalnav__group-title">Components</h2>
+        <ul><li><a class="globalnav__flyout-link" href="components.html">Controls</a></li><li><a class="globalnav__flyout-link" href="chrome.html">Chrome</a></li><li><a class="globalnav__flyout-link" href="showcase.html">Product pages</a></li><li><a class="globalnav__flyout-link" href="patterns.html">Patterns</a></li></ul>
+      </div>
+    </div>
+  </div>
+  <div class="globalnav__flyout" id="gn-instruments" hidden>
+    <div class="globalnav__flyout-content">
+      <div class="globalnav__group" data-elevated>
+        <h2 class="globalnav__group-title">Instruments</h2>
+        <ul><li><a class="globalnav__flyout-link" href="selftest.html">Self-test</a></li><li><a class="globalnav__flyout-link" href="audit.html">Audit</a></li></ul>
+      </div>
+    </div>
+  </div>
+</nav>
+
+<!-- ═══ LOCAL NAV (per page: title, one CTA, jump links to this page's sections) ═══ -->
+<div class="localnav" data-localnav-reveal="#hero">
+  <div class="localnav__capsule" data-lg3 data-lg3-priority="3">
+    <a class="localnav__title" href="#top">Fluid Design Open</a>
+    <button class="localnav__explore" type="button"><span class="localnav__explore-label">Explore</span></button>
+    <a class="localnav__cta" href="start.html">Adopt</a>
+    <div class="localnav__panel" aria-label="Explore Fluid Design">
+      <ul class="localnav__tiles">
+        <li><a class="localnav__tile" href="materials.html" style="--tile-hue: var(--series-1)"><span class="localnav__thumb"><i data-sym="sparkles"></i></span>Materials</a></li>
+        <li><a class="localnav__tile" href="motion.html" style="--tile-hue: var(--series-2)"><span class="localnav__thumb"><i data-sym="waveform"></i></span>Motion</a></li>
+        <li><a class="localnav__tile" href="chrome.html" style="--tile-hue: var(--series-3)"><span class="localnav__thumb"><i data-sym="sidebar"></i></span>Chrome</a></li>
+        <li><a class="localnav__tile" href="components.html" style="--tile-hue: var(--series-4)"><span class="localnav__thumb"><i data-sym="sliders"></i></span>Controls</a></li>
+        <li><a class="localnav__tile" href="showcase.html" style="--tile-hue: var(--series-5)"><span class="localnav__thumb"><i data-sym="grid"></i></span>Product pages</a></li>
+      </ul>
+      <hr class="localnav__rule">
+      <nav class="localnav__jump" aria-label="On this page">
+        <p class="localnav__jump-label">On this page <i data-sym="chevron-down"></i></p>
+        <ul class="localnav__jump-grid">
+          <li class="localnav__jump-item"><a href="#highlights">Highlights</a></li>
+          <li class="localnav__jump-item"><a href="#measured">Measured</a></li>
+          <li class="localnav__jump-item"><a href="#chrome">Chrome that morphs</a></li>
+          <li class="localnav__jump-item"><a href="#explore">Every page</a></li>
+          <li class="localnav__jump-item"><a href="#components">Components</a></li>
+          <li class="localnav__jump-item"><a href="#start">Start</a></li>
+        </ul>
+      </nav>
+    </div>
+  </div>
+</div>
+
+<main id="top">
+
+<!-- ═══ 1 · HERO · stage band: art, the duo that opens as you arrive, the glass platter ═══ -->
+<section class="band hero" data-band="stage" id="hero" aria-labelledby="hero-h">
+  <canvas class="hero-art" data-art="twilight" data-art-seed="7" data-art-contrast="1.22" data-art-vignette=".4" aria-hidden="true"></canvas>
+  <div class="hero-marquee viewport-content">
+    <p class="hero-eyebrow">Fluid Design Open</p>
+    <h1 class="hero-headline" id="hero-h">Liquid, measured.</h1>
+    <p class="hero-sub">A measured design language<br>Fluid&rsquo;s colour, on springs and glass</p>
+    <div class="hero-media" aria-label="Drag to open and close the device">
+      <div class="device" data-device="duo" data-fold="1" id="hero-duo">
+        <div class="device__screen" data-screen="inner" data-screen-width="760">
+          <div class="ov-app ov-app--duo ov-follow" data-tone="light">
+            <div class="ov-leaf">
+              <div class="ov-side">
+                <p class="ov-brand ui-headline"><i data-sym="waveform"></i>Orbit</p>
+                <span class="ov-nav is-on ui-subhead"><i data-sym="target"></i>Today</span>
+                <span class="ov-nav ui-subhead"><i data-sym="phone"></i>Runners</span>
+                <span class="ov-nav ui-subhead"><i data-sym="person"></i>Projects</span>
+                <span class="ov-nav ui-subhead"><i data-sym="map"></i>Queues</span>
+                <span class="ov-nav ui-subhead"><i data-sym="sliders"></i>Templates</span>
+                <span class="ov-nav ui-subhead"><i data-sym="bubble"></i>Threads</span>
+              </div>
+              <div class="ov-card">
+                <h4 class="ui-footnote ui-emphasized">Projects</h4>
+                <div class="ov-acct"><div data-chart="rings" data-values='[{"label":"Build","value":312,"max":400,"color":"series-1"},{"label":"Test","value":70,"max":70,"color":"series-2"},{"label":"Deploy","value":58,"max":70,"color":"series-3"}]'></div><div class="ui-caption1"><b>aurora</b><span>312 builds &middot; 70 tests</span></div></div>
+                <div class="ov-acct"><div data-chart="rings" data-values='[{"label":"Build","value":188,"max":400,"color":"series-1"},{"label":"Test","value":41,"max":70,"color":"series-2"},{"label":"Deploy","value":70,"max":70,"color":"series-3"}]'></div><div class="ui-caption1"><b>basil</b><span>188 builds &middot; 41 tests</span></div></div>
+                <div class="ov-acct"><div data-chart="rings" data-values='[{"label":"Build","value":244,"max":400,"color":"series-1"},{"label":"Test","value":52,"max":70,"color":"series-2"},{"label":"Deploy","value":39,"max":70,"color":"series-3"}]'></div><div class="ui-caption1"><b>cobalt</b><span>blocked &middot; 17h 12m</span></div></div>
+                <div class="ov-acct"><div data-chart="rings" data-values='[{"label":"Build","value":96,"max":400,"color":"series-1"},{"label":"Test","value":23,"max":70,"color":"series-2"},{"label":"Deploy","value":29,"max":70,"color":"series-3"}]'></div><div class="ui-caption1"><b>dune</b><span>Notify paused</span></div></div>
+              </div>
+            </div>
+            <div class="ov-main">
+              <div class="ov-head">
+                <div><p class="ov-date ui-footnote">Saturday 26 September</p><h3 class="ui-title1 ui-emphasized">Today</h3></div>
+                <span class="pill-status" data-state="live">Live</span>
+              </div>
+              <div class="ov-kpis">
+                <div class="ov-kpi"><b>1,222</b><span class="ui-caption1">completed &middot; cap 2,160</span></div>
+                <div class="ov-kpi"><b>12.6 s</b><span class="ui-caption1">a run, inside batches</span></div>
+              </div>
+              <div class="ov-cards">
+                <div class="ov-card">
+                  <h4 class="ui-footnote ui-emphasized">The last 38 batches</h4>
+                  <p class="ov-sub ui-caption1">14 came back empty, 1 timed out</p>
+                  <div class="ov-strip" data-chart="strip" aria-label="The last 38 batches: 14 came back empty, 1 timed out" data-label="The last 38 batches, 11:41 to 14:17: 224 of 348 tasks reached; 14 came back empty, 1 timed out" data-values='[{"at":"11:41","asked":10,"landed":18,"people":9},{"at":"11:45","asked":6,"landed":0,"empty":true},{"at":"11:49","asked":9,"landed":9,"people":9},{"at":"11:54","asked":11,"landed":30,"people":10},{"at":"11:58","asked":7,"landed":0,"empty":true},{"at":"12:02","asked":10,"landed":18,"people":9},{"at":"12:06","asked":9,"landed":8,"people":8},{"at":"12:11","asked":8,"landed":0,"empty":true},{"at":"12:15","asked":12,"landed":20,"people":10},{"at":"12:19","asked":6,"landed":0,"empty":true},{"at":"12:23","asked":10,"landed":10,"people":10},{"at":"12:27","asked":10,"landed":18,"people":9},{"at":"12:32","asked":9,"landed":0,"empty":true},{"at":"12:36","asked":9,"landed":27,"people":9},{"at":"12:40","asked":11,"landed":20,"people":10},{"at":"12:44","asked":7,"landed":0,"empty":true},{"at":"12:48","asked":10,"landed":10,"people":10},{"at":"12:53","asked":12,"landed":22,"people":11},{"at":"12:57","asked":6,"landed":0,"empty":true},{"at":"13:01","asked":10,"landed":9,"people":9},{"at":"13:05","asked":8,"landed":0,"empty":true},{"at":"13:10","asked":9,"landed":18,"people":9},{"at":"13:14","asked":12,"landed":22,"people":11},{"at":"13:18","asked":7,"landed":0,"empty":true},{"at":"13:22","asked":11,"landed":11,"people":11},{"at":"13:26","asked":10,"landed":27,"people":9},{"at":"13:31","asked":6,"landed":0,"empty":true},{"at":"13:35","asked":12,"landed":22,"people":11},{"at":"13:39","asked":9,"landed":9,"people":9},{"at":"13:43","asked":9,"landed":0,"empty":true},{"at":"13:47","asked":11,"landed":20,"people":10},{"at":"13:52","asked":7,"landed":0,"empty":true},{"at":"13:56","asked":10,"landed":10,"people":10},{"at":"14:00","asked":6,"landed":0,"empty":true},{"at":"14:04","asked":12,"landed":22,"people":11},{"at":"14:09","asked":8,"landed":0,"empty":true},{"at":"14:13","asked":11,"landed":20,"people":10},{"at":"14:17","asked":8,"landed":0,"empty":true,"arrived":false}]'></div>
+                  <p class="ov-legend ui-caption2"><span><i style="--c:var(--series-1)"></i>completed</span><span><i style="--c:var(--fill-1)"></i>asked</span><span>outline: came back empty</span></p>
+                </div>
+              </div>
+              <div class="ov-now ui-footnote"><i data-sym="heart"></i><b>Now</b><span>Build &larr; the design queue</span><span>4 of 10 &middot; <span data-ov-tick="42">0:42</span></span></div>
+            </div>
+          </div>
+        </div>
+        <div class="device__screen" data-screen="outer" data-screen-width="362">
+          <div class="ov-outer ov-follow" data-tone="light">
+            <p class="ov-date ui-footnote">14:30 &middot; 4 projects</p>
+            <h3 class="ui-title1 ui-emphasized">Today</h3>
+            <div data-chart="rings" data-center="57%" data-values='[{"label":"Completed","value":1222,"max":2160,"color":"series-1"},{"label":"Test","value":186,"max":280,"color":"series-2"},{"label":"Deploy","value":196,"max":280,"color":"series-3"}]'></div>
+            <div class="ov-now ui-footnote"><i data-sym="heart"></i><span><b>Now</b> &middot; Build &larr; the design queue<br>4 of 10 tasks</span></div>
+            <div class="ov-stop ui-body">Stop</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="hero-platter" data-lg3 data-lg3-recipe="pill" data-lg3-tone="light" data-lg3-priority="5" data-lg3-interactive>
+      <p class="hero-price"><span>Free and open source (MIT).<sup class="fn"><a href="#fn-1" aria-label="Footnote 1">1</a></sup></span><span>One boot call. No build step.</span></p>
+      <a class="btn btn-primary btn-l hero-cta" href="start.html">Get started</a>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ 2 · HIGHLIGHTS · utility band, gallery + the floating control bar ═══ -->
+<section class="band" data-band="utility" data-band-bar id="highlights" aria-labelledby="hl-h">
+  <div class="viewport-content">
+    <header class="section-header">
+      <h2 class="section-header-headline" id="hl-h">Get the highlights.</h2>
+      <a class="section-header-link" href="#chrome">Watch the glass morph <i data-sym="play"></i></a>
+    </header>
+  </div>
+  <div class="gallery" aria-label="Highlights">
+    <div class="gallery-rail" tabindex="-1">
+      <ul class="gallery-list">
+        <li class="gallery-item" data-label="The glass material">
+          <div class="gallery-card" data-tone="dark">
+            <p class="gallery-caption">The glass material that bends<br>the light at its rim.</p>
+            <div class="gallery-media">
+              <canvas data-art="twilight" data-art-seed="12" data-art-contrast="1.2" aria-hidden="true"></canvas>
+              <div class="ov-gdemo">
+                <div class="segmented segmented-glass segmented-l" role="tablist" aria-label="Batch shape" id="ov-seg" data-lg3 data-lg3-adaptive data-lg3-priority="4">
+                  <span class="segmented-track" data-lg3-shape></span><span class="segmented-indicator" data-lg3-shape></span>
+                  <button role="tab" aria-selected="true">Batch</button><button role="tab">Steady</button><button role="tab">Careful</button><button role="tab">Night</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </li>
+        <li class="gallery-item" data-label="Springs">
+          <div class="gallery-card">
+            <p class="gallery-caption">Every motion is a spring.<br>Scroll is the timeline.</p>
+            <div class="gallery-media">
+              <div class="ov-springs">
+                <svg class="ov-plot" viewBox="0 0 760 230" data-springs="smooth,snappy,bouncy,tour" data-seconds=".8" role="img" aria-label="Step responses of four named springs over one second, drawn from the spring solver"></svg>
+                <ul class="ov-lanes" aria-hidden="true">
+                  <li class="ov-lane" style="--c:var(--series-1);--ms:var(--sp-smooth-ms);--ease:var(--sp-smooth)"><span class="ov-lane__name t-caption"><i></i><b>smooth</b> .5 / 0</span><span class="ov-lane__track"><span class="ov-lane__dot"></span></span></li>
+                  <li class="ov-lane" style="--c:var(--series-2);--ms:var(--sp-snappy-ms);--ease:var(--sp-snappy)"><span class="ov-lane__name t-caption"><i></i><b>snappy</b> .5 / .15</span><span class="ov-lane__track"><span class="ov-lane__dot"></span></span></li>
+                  <li class="ov-lane" style="--c:var(--series-3);--ms:var(--sp-bouncy-ms);--ease:var(--sp-bouncy)"><span class="ov-lane__name t-caption"><i></i><b>bouncy</b> .5 / .3</span><span class="ov-lane__track"><span class="ov-lane__dot"></span></span></li>
+                  <li class="ov-lane" style="--c:var(--series-4);--ms:var(--sp-tour-ms);--ease:var(--sp-tour)"><span class="ov-lane__name t-caption"><i></i><b>tour</b> .5 / .42</span><span class="ov-lane__track"><span class="ov-lane__dot"></span></span></li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </li>
+        <li class="gallery-item" data-label="Type and colour">
+          <div class="gallery-card">
+            <p class="gallery-caption">Type and colour,<br>measured and tokenised.</p>
+            <div class="gallery-media">
+              <div class="ov-typo">
+                <ol class="ov-fall" aria-label="The web type ramp">
+                  <li class="ov-xl ov-l" style="--fs:var(--t-80);--lh:var(--t-80-lh);--ls:var(--t-80-ls)"><small>80</small><b>Liquid, measured.</b></li>
+                  <li class="ov-l" style="--fs:var(--t-56);--lh:var(--t-56-lh);--ls:var(--t-56-ls)"><small>56</small><b>Liquid, measured.</b></li>
+                  <li class="ov-m" style="--fs:var(--t-40);--lh:var(--t-40-lh);--ls:var(--t-40-ls)"><small>40</small><b>Liquid, measured.</b></li>
+                  <li style="--fs:var(--t-28);--lh:var(--t-28-lh);--ls:var(--t-28-ls)"><small>28</small><b>Liquid, measured.</b></li>
+                  <li style="--fs:var(--t-21);--lh:var(--t-21-lh);--ls:var(--t-21-ls);--w:400"><small>21</small><b>Liquid, measured.</b></li>
+                  <li style="--fs:var(--t-17);--lh:var(--t-17-lh);--ls:var(--t-17-ls);--w:400"><small>17</small><b>Liquid, measured.</b></li>
+                  <li style="--fs:var(--t-14);--lh:var(--t-14-lh);--ls:var(--t-14-ls);--w:400"><small>14</small><b>Liquid, measured.</b></li>
+                  <li style="--fs:var(--t-12);--lh:var(--t-12-lh);--ls:var(--t-12-ls);--w:400"><small>12</small><b>Liquid, measured.</b></li>
+                </ol>
+                <ul class="ov-roles" aria-label="Colour roles">
+                  <li style="--c:var(--accent-solid)"><i></i><span>--accent-solid</span></li>
+                  <li style="--c:var(--label)"><i></i><span>--label</span></li>
+                  <li style="--c:var(--label-2)"><i></i><span>--label-2</span></li>
+                  <li style="--c:var(--bg-2)"><i></i><span>--bg-2</span></li>
+                  <li style="--c:var(--fill-1)"><i></i><span>--fill-1</span></li>
+                  <li style="--c:var(--series-1)"><i></i><span>--series-1</span></li>
+                  <li style="--c:var(--series-2)"><i></i><span>--series-2</span></li>
+                  <li style="--c:var(--series-3)"><i></i><span>--series-3</span></li>
+                  <li style="--c:var(--series-4)"><i></i><span>--series-4</span></li>
+                  <li style="--c:var(--series-6)"><i></i><span>--series-6</span></li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </li>
+        <li class="gallery-item" data-label="Live capsule">
+          <div class="gallery-card" data-tone="dark">
+            <p class="gallery-caption">A live capsule that grows<br>out of the island.</p>
+            <div class="gallery-media">
+              <canvas data-art="aurora" data-art-seed="5" aria-hidden="true"></canvas>
+              <div class="device" data-device="phone" style="--device-width:min(300px,66%);align-self:start;margin-top:150px">
+                <div class="device__screen" data-screen-width="402">
+                  <div class="ov-phone ov-follow" data-tone="light">
+                    <div class="device__island">
+                      <div class="live-capsule" data-anchor="center" data-kind="batch" data-elapsed="42" style="--lc-hue: var(--series-1)" id="ov-cap">
+                        <div class="live-capsule__glass">
+                          <button class="live-capsule__face" type="button" aria-label="Now: Build, 4 of 10. Show details">
+                            <span class="live-capsule__lead"><i data-sym="heart"></i></span>
+                            <span class="live-capsule__summary">Build</span>
+                            <span class="live-capsule__trail">4/10</span>
+                          </button>
+                          <div class="live-capsule__detail">
+                            <div class="live-capsule__row">
+                              <span class="live-capsule__glyph"><i data-sym="heart"></i></span>
+                              <span><b class="live-capsule__account">aurora</b><span class="live-capsule__line">Build &larr; the design queue</span></span>
+                              <span class="live-capsule__elapsed">0:42</span>
+                            </div>
+                            <div class="live-capsule__meter" role="progressbar" aria-label="People" aria-valuemin="0" aria-valuemax="10" aria-valuenow="4" style="--lc-meter:.4"><span></span></div>
+                            <div class="live-capsule__foot"><span class="live-capsule__count">4 of 10</span><button class="live-capsule__stop" type="button">Stop</button></div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    <p class="ov-date ui-footnote">Saturday 26 September</p>
+                    <h3 class="ui-large-title">Today</h3>
+                    <div class="ov-card"><div class="ov-big"><b>12.6</b><span class="ui-subhead">s a run, inside batches</span></div><div class="ov-bars ch-series-1" data-chart="bars" data-values="9,11,0,8,12,7,0,10,6,11,9,0,12,8"></div></div>
+                    <div class="ov-card ui-subhead">
+                      <div class="ov-rowline"><span>aurora</span><span>312 / 400</span></div>
+                      <div class="ov-rowline"><span>basil</span><span>188 / 400</span></div>
+                      <div class="ov-rowline"><span>cobalt</span><span>244 / 400</span></div>
+                    </div>
+                    <div class="ov-tabs"><span class="is-on"><i data-sym="target"></i>Today</span><span><i data-sym="person"></i>Projects</span><span><i data-sym="bubble"></i>Inbox</span><span><i data-sym="gear"></i>Settings</span></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </li>
+        <li class="gallery-item" data-label="Orbit">
+          <div class="gallery-card">
+            <p class="gallery-caption">Orbit, built on Fluid Design Open.<br>A sample product.</p>
+            <div class="gallery-media">
+              <canvas data-art="steel" data-art-seed="9" aria-hidden="true"></canvas>
+              <div class="device" data-device="laptop" style="--device-width:min(860px,82%);align-self:start;margin-top:152px">
+                <div class="device__screen" data-screen-width="1280">
+                  <div class="ov-app ov-app--wide ov-follow" data-tone="light">
+                    <div class="ov-side">
+                      <p class="ov-brand ui-headline"><i data-sym="waveform"></i>Orbit</p>
+                      <span class="ov-nav is-on ui-subhead"><i data-sym="target"></i>Today</span>
+                      <span class="ov-nav ui-subhead"><i data-sym="phone"></i>Runners</span>
+                      <span class="ov-nav ui-subhead"><i data-sym="person"></i>Projects</span>
+                      <span class="ov-nav ui-subhead"><i data-sym="map"></i>Queues</span>
+                      <span class="ov-nav ui-subhead"><i data-sym="sliders"></i>Templates</span>
+                      <span class="ov-nav ui-subhead"><i data-sym="bubble"></i>Threads</span>
+                    </div>
+                    <div class="ov-main">
+                      <div class="ov-head"><div><p class="ov-date ui-footnote">Saturday 26 September</p><h3 class="ui-large-title">Today</h3></div><span class="pill-status" data-state="live">Live</span></div>
+                      <div class="ov-kpis">
+                        <div class="ov-kpi"><b>1,222</b><span class="ui-footnote">completed &middot; cap 2,160</span></div>
+                        <div class="ov-kpi"><b>42.7 s</b><span class="ui-footnote">a run, whole day</span></div>
+                        <div class="ov-kpi"><b>12.6 s</b><span class="ui-footnote">a run, inside batches</span></div>
+                        <div class="ov-kpi"><b>224</b><span class="ui-footnote">of 348 tasks, last 38 batches</span></div>
+                      </div>
+                      <div class="ov-cards">
+                        <div class="ov-card"><h4 class="ui-subhead ui-emphasized">Today&rsquo;s limits</h4><div data-chart="rings" data-center="57%" style="width:190px;height:190px;margin:14px auto 0" data-values='[{"label":"Completed","value":1222,"max":2160,"color":"series-1"},{"label":"Test","value":186,"max":280,"color":"series-2"},{"label":"Deploy","value":196,"max":280,"color":"series-3"}]'></div></div>
+                        <div class="ov-card"><h4 class="ui-subhead ui-emphasized">The last 38 batches, oldest first</h4><p class="ov-sub ui-footnote">14 came back empty, 1 timed out</p><div class="ov-strip" data-chart="strip" aria-label="The last 38 batches: 14 came back empty, 1 timed out" data-label="The last 38 batches, 11:41 to 14:17: 224 of 348 tasks reached; 14 came back empty, 1 timed out" data-values='[{"at":"11:41","asked":10,"landed":18,"people":9},{"at":"11:45","asked":6,"landed":0,"empty":true},{"at":"11:49","asked":9,"landed":9,"people":9},{"at":"11:54","asked":11,"landed":30,"people":10},{"at":"11:58","asked":7,"landed":0,"empty":true},{"at":"12:02","asked":10,"landed":18,"people":9},{"at":"12:06","asked":9,"landed":8,"people":8},{"at":"12:11","asked":8,"landed":0,"empty":true},{"at":"12:15","asked":12,"landed":20,"people":10},{"at":"12:19","asked":6,"landed":0,"empty":true},{"at":"12:23","asked":10,"landed":10,"people":10},{"at":"12:27","asked":10,"landed":18,"people":9},{"at":"12:32","asked":9,"landed":0,"empty":true},{"at":"12:36","asked":9,"landed":27,"people":9},{"at":"12:40","asked":11,"landed":20,"people":10},{"at":"12:44","asked":7,"landed":0,"empty":true},{"at":"12:48","asked":10,"landed":10,"people":10},{"at":"12:53","asked":12,"landed":22,"people":11},{"at":"12:57","asked":6,"landed":0,"empty":true},{"at":"13:01","asked":10,"landed":9,"people":9},{"at":"13:05","asked":8,"landed":0,"empty":true},{"at":"13:10","asked":9,"landed":18,"people":9},{"at":"13:14","asked":12,"landed":22,"people":11},{"at":"13:18","asked":7,"landed":0,"empty":true},{"at":"13:22","asked":11,"landed":11,"people":11},{"at":"13:26","asked":10,"landed":27,"people":9},{"at":"13:31","asked":6,"landed":0,"empty":true},{"at":"13:35","asked":12,"landed":22,"people":11},{"at":"13:39","asked":9,"landed":9,"people":9},{"at":"13:43","asked":9,"landed":0,"empty":true},{"at":"13:47","asked":11,"landed":20,"people":10},{"at":"13:52","asked":7,"landed":0,"empty":true},{"at":"13:56","asked":10,"landed":10,"people":10},{"at":"14:00","asked":6,"landed":0,"empty":true},{"at":"14:04","asked":12,"landed":22,"people":11},{"at":"14:09","asked":8,"landed":0,"empty":true},{"at":"14:13","asked":11,"landed":20,"people":10},{"at":"14:17","asked":8,"landed":0,"empty":true,"arrived":false}]'></div></div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </li>
+      </ul>
+    </div>
+    <!-- the floating media bar; the gallery drives it -->
+    <div class="control-bar" data-autoplay data-duration="6.15" aria-label="Highlights">
+      <div class="control-bar__dots">
+        <button class="control-bar__dot" type="button" aria-label="The glass material" aria-current="true"></button>
+        <button class="control-bar__dot" type="button" aria-label="Springs"></button>
+        <button class="control-bar__dot" type="button" aria-label="Type and colour"></button>
+        <button class="control-bar__dot" type="button" aria-label="Live capsule"></button>
+        <button class="control-bar__dot" type="button" aria-label="Orbit"></button>
+      </div>
+      <button class="control-bar__play" type="button" aria-label="Pause"></button>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ 3 · MEASURED · story band: three sources, then the numbers ═══ -->
+<section class="band" data-band="story" id="measured" aria-labelledby="measured-h">
+  <div class="viewport-content">
+    <div class="lockup">
+      <p class="lockup-eyebrow">Three sources, one system</p>
+      <h2 class="lockup-headline headline-sweep" data-sweep id="measured-h">Measured, not asserted.</h2>
+      <p class="lockup-copy">Fluid Design Open takes <strong>a measured set of web tokens</strong>, <strong>the glass material</strong> as a stack of measured layers, and <strong>a saturated, art-led look</strong> built on one set of engines. Every number on this page was read from a rendered page, not typed from memory.</p>
+    </div>
+    <div class="grid-12 ov-sources" data-reveal="stagger">
+      <div class="ov-source span-4" data-staggered-item>
+        <i data-sym="target"></i>
+        <h3>Measured tokens</h3>
+        <p class="t-body">The type ramp, band rhythm, radii, springs and scroll keyframes, read from computed styles at 1440 and 402&nbsp;px.</p>
+      </div>
+      <div class="ov-source span-4" data-staggered-item>
+        <i data-sym="sparkles"></i>
+        <h3>The glass material</h3>
+        <p class="t-body">The material as a stack: <b>a lensed rim</b>, a colour transform, a top highlight, a dark edge and an adaptive shadow. Shapes morph by identity.</p>
+      </div>
+      <div class="ov-source span-4" data-staggered-item>
+        <i data-sym="bolt"></i>
+        <h3>One look, one set of engines</h3>
+        <p class="t-body"><b>Saturated art</b>, dusty primary and strong lens, running on superellipse geometry, a spring solver and an OKLCH palette engine.</p>
+      </div>
+    </div>
+    <div class="ov-panel" data-reveal="up">
+      <div class="stat-grid" data-cols="4">
+        <div class="stat-cell"><p class="stat-lead">All</p><p class="stat-value" data-count>9/9</p><p class="stat-caption">type roles equal their reference computed styles at 1440&nbsp;px<sup class="fn"><a href="#fn-2" aria-label="Footnote 2">2</a></sup></p></div>
+        <div class="stat-cell"><p class="stat-lead">Within</p><p class="stat-value" data-count data-count-from="12.7">0.03 px</p><p class="stat-caption">of the continuous corner, r12 to r44<sup class="fn"><a href="#fn-3" aria-label="Footnote 3">3</a></sup></p></div>
+        <div class="stat-cell"><p class="stat-lead">Up to</p><p class="stat-value" data-count data-count-from="1.3">9.1 px</p><p class="stat-caption">of refraction at the rim of a 50&nbsp;px bar<sup class="fn"><a href="#fn-4" aria-label="Footnote 4">4</a></sup></p></div>
+        <div class="stat-cell"><p class="stat-lead">Mean</p><p class="stat-value" data-count data-count-from="0.3">2.9 px</p><p class="stat-caption">displacement across the same lens</p></div>
+        <div class="stat-cell"><p class="stat-lead">All</p><p class="stat-value" data-count>24</p><p class="stat-caption">named springs, emitted as CSS within .003 of the solver<sup class="fn"><a href="#fn-5" aria-label="Footnote 5">5</a></sup></p></div>
+        <div class="stat-cell"><p class="stat-lead">A set of</p><p class="stat-value" data-count>76</p><p class="stat-caption">symbols, drawn as type from one sprite</p></div>
+        <div class="stat-cell"><p class="stat-lead">Under</p><p class="stat-value" data-count data-count-from="17.4">1 ms</p><p class="stat-caption">of script per frame to morph glass from a pill into a panel<sup class="fn"><a href="#fn-6" aria-label="Footnote 6">6</a></sup></p></div>
+        <div class="stat-cell"><p class="stat-lead">Every engine claim</p><p class="stat-value" id="st-count">64</p><p class="stat-caption">self-test assertions, each seen failing before it was kept</p></div>
+      </div>
+    </div>
+    <p class="ov-live t-caption" hidden>Measured on this page just now: hero art chroma <b data-live="art-c"></b>, <b data-live="art-vivid"></b> vivid; the lens of the hero&rsquo;s price platter, a capsule <span data-live="lens-h">64</span>&nbsp;px tall rather than the 50&nbsp;px bar above, <b data-live="lens"></b> (<span data-live="lens-path"></span>); <b data-live="sym"></b> symbols and <b data-live="springs"></b> springs loaded.</p>
+  </div>
+</section>
+
+<!-- ═══ 4 · SCENE · glass chrome floats over art and morphs as you scroll, then frames down ═══ -->
+<section class="band ov-scene" data-band="story" id="chrome" aria-labelledby="chrome-h">
+  <div data-scene>
+    <div data-scene-sticky>
+      <div class="ov-stage" data-tone="dark">
+        <div class="ov-frame"><canvas data-art="deep" data-art-seed="21" data-art-contrast="1.25" data-art-vignette=".42" aria-hidden="true"></canvas></div>
+        <div class="ov-scene-copy">
+          <h2 id="chrome-h">Chrome that changes shape.</h2>
+          <p>The same glass grows from a pill into a panel, denser while it moves and calm at rest.</p>
+        </div>
+        <div class="ov-morph" data-lg3 data-lg3-tone="dark" data-lg3-size="large" data-lg3-priority="4" aria-hidden="true">
+          <span class="ov-wash"></span>
+          <div class="ov-pill"><i data-sym="sparkles"></i><span>Explore Fluid Design</span><i data-sym="chevron-down"></i></div>
+          <div class="ov-panel-in">
+            <h3>Explore Fluid Design Open</h3>
+            <p class="t-caption">The local nav&rsquo;s panel, grown from its own pill.</p>
+            <ul class="ov-ptiles">
+              <li style="--tile-hue:var(--series-1)"><span><i data-sym="sparkles"></i></span>Materials</li>
+              <li style="--tile-hue:var(--series-2)"><span><i data-sym="waveform"></i></span>Motion</li>
+              <li style="--tile-hue:var(--series-3)"><span><i data-sym="sidebar"></i></span>Chrome</li>
+              <li style="--tile-hue:var(--series-4)"><span><i data-sym="sliders"></i></span>Controls</li>
+              <li style="--tile-hue:var(--series-5)"><span><i data-sym="grid"></i></span>Product pages</li>
+              <li style="--tile-hue:var(--series-6)"><span><i data-sym="chart-bar"></i></span>Data</li>
+            </ul>
+            <div class="ov-prule"></div>
+            <ul class="ov-pjump"><li>Highlights</li><li>Measured</li><li>Chrome that morphs</li><li>Every page</li><li>Start</li></ul>
+          </div>
+        </div>
+        <ol class="ov-caps">
+          <li><b>A pill, 56&nbsp;px tall.</b> Glass is chrome: it floats over the art, never over a card.</li>
+          <li><b>One number grows it into a panel.</b> Width, height and radius all follow your scroll.</li>
+          <li><b>Denser in motion, calm at rest.</b> The lens redraws every frame without a smear.</li>
+        </ol>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ 6 · EVERY PAGE · story band: the hub bento, one live specimen per tile ═══ -->
+<section class="band" data-band="story" id="explore" aria-labelledby="explore-h">
+  <div class="viewport-content">
+    <header class="section-header">
+      <h2 class="section-header-headline" id="explore-h">Every page of the system.</h2>
+      <a class="section-header-link" href="docs.html">Read the docs <i data-sym="chevron-right"></i></a>
+    </header>
+    <div class="bento ov-hub" data-reveal="stagger" style="--reveal-stagger:.08s">
+      <a class="bento-tile span-8 span-md-12" href="start.html" data-staggered-item>
+        <div class="bento-copy"><p>Start</p><h3>Adopt Fluid Design Open in one call.</h3></div>
+        <div class="bento-media"><div class="ov-code" aria-hidden="true"><span class="c">&lt;!-- 12 stylesheets, in order --&gt;</span>
+&lt;link rel="stylesheet" href="assets/fg3-tokens.css"&gt;
+<span class="c">&lt;!-- 14 scripts, then one call --&gt;</span>
+&lt;script&gt;<span class="k">FG3.boot()</span>;&lt;/script&gt;</div></div>
+        <span class="ov-go" aria-hidden="true"><i data-sym="chevron-right"></i></span>
+      </a>
+      <a class="bento-tile span-4 span-md-6" href="docs.html" data-staggered-item>
+        <div class="bento-copy"><p>Docs</p><h3>The written system.</h3></div>
+        <div class="bento-media"><ol class="ov-toc" aria-hidden="true"><li>Principles</li><li class="is-on">Glass is chrome</li><li>Colour is a role</li><li>Motion is a spring</li></ol></div>
+        <span class="ov-go" aria-hidden="true"><i data-sym="chevron-right"></i></span>
+      </a>
+      <a class="bento-tile span-4 span-md-6" href="color.html" data-staggered-item>
+        <div class="bento-copy"><p>Colour</p><h3>A role, never a value.</h3></div>
+        <div class="bento-media"><div class="ov-discs" aria-hidden="true"><i style="--c:var(--accent-solid)"></i><i style="--c:var(--label)"></i><i style="--c:var(--label-2)"></i><i style="--c:var(--fill-1)"></i><i style="--c:var(--series-1)"></i><i style="--c:var(--series-2)"></i><i style="--c:var(--series-3)"></i><i style="--c:var(--series-4)"></i><i style="--c:var(--series-5)"></i><i style="--c:var(--series-6)"></i></div></div>
+        <span class="ov-go" aria-hidden="true"><i data-sym="chevron-right"></i></span>
+      </a>
+      <a class="bento-tile span-4 span-md-6" href="type.html" data-staggered-item>
+        <div class="bento-copy"><p>Type</p><h3>A 14-step type ramp.</h3></div>
+        <div class="bento-media"><div class="ov-aa" aria-hidden="true"><b>Aa</b><span>80 &middot; 56 &middot; 48<br>40 &middot; 28 &middot; 21<br>17 &middot; 14 &middot; 12</span></div></div>
+        <span class="ov-go" aria-hidden="true"><i data-sym="chevron-right"></i></span>
+      </a>
+      <a class="bento-tile span-4 span-md-6" href="layout.html" data-staggered-item>
+        <div class="bento-copy"><p>Layout</p><h3>Twelve columns, three bands.</h3></div>
+        <div class="bento-media"><div class="ov-cols" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div></div>
+        <span class="ov-go" aria-hidden="true"><i data-sym="chevron-right"></i></span>
+      </a>
+      <a class="bento-tile span-7 span-md-12" href="materials.html" data-tone="dark" data-staggered-item>
+        <div class="bento-copy"><p>Materials</p><h3>Glass that bends the art behind it.</h3></div>
+        <canvas data-art="twilight" data-art-seed="31" aria-hidden="true"></canvas>
+        <div class="bento-media"><span class="ov-glass-chip" data-lg3 data-lg3-tone="dark" aria-hidden="true"><i data-sym="sparkles"></i>The glass material</span></div>
+        <span class="ov-go" aria-hidden="true"><i data-sym="chevron-right"></i></span>
+      </a>
+      <a class="bento-tile span-5 span-md-12" href="motion.html" data-staggered-item>
+        <div class="bento-copy"><p>Motion</p><h3>Springs, not durations.</h3></div>
+        <div class="bento-media"><div class="ov-mini-plot"><svg class="ov-plot" viewBox="0 0 300 120" data-springs="smooth,bouncy,tour" data-seconds="1" aria-hidden="true"></svg></div></div>
+        <span class="ov-go" aria-hidden="true"><i data-sym="chevron-right"></i></span>
+      </a>
+      <a class="bento-tile span-3 span-md-6" href="components.html" data-staggered-item>
+        <div class="bento-copy"><p>Controls</p><h3>Controls to the pixel.</h3></div>
+        <div class="bento-media"><div class="ov-faux-row" aria-hidden="true"><span class="btn btn-secondary btn-m">Learn more</span><span class="ov-faux-switch"></span></div></div>
+        <span class="ov-go" aria-hidden="true"><i data-sym="chevron-right"></i></span>
+      </a>
+      <a class="bento-tile span-3 span-md-6" href="chrome.html" data-staggered-item>
+        <div class="bento-copy"><p>Chrome</p><h3>Bars that float and morph.</h3></div>
+        <div class="bento-media"><div class="ov-faux-tabs" aria-hidden="true"><span class="is-on"><i data-sym="house"></i></span><span><i data-sym="person"></i></span><span><i data-sym="bubble"></i></span><span><i data-sym="magnifier"></i></span></div></div>
+        <span class="ov-go" aria-hidden="true"><i data-sym="chevron-right"></i></span>
+      </a>
+      <a class="bento-tile span-3 span-md-6" href="showcase.html" data-staggered-item>
+        <div class="bento-copy"><p>Product pages</p><h3>A section kit.</h3></div>
+        <div class="bento-media"><div class="ov-faux-bar" aria-hidden="true"><span><i></i><i></i><i></i><i></i></span><span><i data-sym="pause"></i></span></div></div>
+        <span class="ov-go" aria-hidden="true"><i data-sym="chevron-right"></i></span>
+      </a>
+      <a class="bento-tile span-3 span-md-6" href="patterns.html" data-staggered-item>
+        <div class="bento-copy"><p>Patterns</p><h3>Forms, sheets and states.</h3></div>
+        <div class="bento-media"><div class="ov-faux-form" aria-hidden="true"><span class="ov-faux-field">aurora</span><span class="ov-faux-check"><i><i data-sym="checkmark"></i></i>Count only what landed</span></div></div>
+        <span class="ov-go" aria-hidden="true"><i data-sym="chevron-right"></i></span>
+      </a>
+      <a class="bento-tile span-5 span-md-6" href="symbols.html" data-staggered-item>
+        <div class="bento-copy"><p>Symbols</p><h3><span data-live="sym">76</span> symbols, drawn as type.</h3></div>
+        <div class="bento-media"><div class="ov-glyphs" aria-hidden="true"><i data-sym="phone-fold"></i><i data-sym="bolt"></i><i data-sym="heart"></i><i data-sym="person-add"></i><i data-sym="bubble"></i><i data-sym="paperplane"></i><i data-sym="target"></i><i data-sym="waveform"></i><i data-sym="shield"></i><i data-sym="calendar"></i><i data-sym="chart-bar"></i><i data-sym="sparkles"></i></div></div>
+        <span class="ov-go" aria-hidden="true"><i data-sym="chevron-right"></i></span>
+      </a>
+      <a class="bento-tile span-7 span-md-6" href="data.html" data-staggered-item>
+        <div class="bento-copy"><p>Data</p><h3>Charts are content, never glass.</h3></div>
+        <div class="bento-media"><div class="ov-data" aria-hidden="true"><div data-chart="rings" data-values='[{"label":"Build","value":312,"max":400,"color":"series-1"},{"label":"Test","value":70,"max":70,"color":"series-2"},{"label":"Deploy","value":58,"max":70,"color":"series-3"}]'></div><div data-chart="strip" data-values='[{"at":"06:03","asked":8,"landed":9,"people":7},{"at":"06:40","asked":7,"landed":0,"empty":true},{"at":"07:06","asked":10,"landed":6,"people":6},{"at":"07:52","asked":9,"landed":0,"empty":true},{"at":"08:24","asked":6,"landed":6,"people":6},{"at":"09:10","asked":11,"landed":13,"people":9},{"at":"11:00","asked":12,"landed":10,"people":10},{"at":"12:18","asked":7,"landed":8,"people":6},{"at":"13:06","asked":9,"landed":7,"people":7}]'></div></div></div>
+        <span class="ov-go" aria-hidden="true"><i data-sym="chevron-right"></i></span>
+      </a>
+      <a class="bento-tile span-6 span-md-6" href="selftest.html" data-staggered-item>
+        <div class="bento-copy"><p>Self-test</p><h3>Every claim, seen failing first.</h3></div>
+        <div class="bento-media"><ul class="ov-checks" aria-hidden="true"><li><i data-sym="checkmark-circle"></i>Refraction &ge; 8&nbsp;px max on a 50&nbsp;px bar</li><li><i data-sym="checkmark-circle"></i>Reduced motion keeps every state</li><li><i data-sym="checkmark-circle"></i>Every spring&rsquo;s CSS matches its solver</li></ul></div>
+        <span class="ov-go" aria-hidden="true"><i data-sym="chevron-right"></i></span>
+      </a>
+      <a class="bento-tile span-6 span-md-6" href="audit.html" data-staggered-item>
+        <div class="bento-copy"><p>Audit</p><h3>Contrast on the rendered page.</h3></div>
+        <div class="bento-media"><div class="ov-ratio" aria-hidden="true"><b>4.5:1</b><span><i>Text on its ground</i><i>Text on art, rasterised</i></span></div></div>
+        <span class="ov-go" aria-hidden="true"><i data-sym="chevron-right"></i></span>
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ 7 · COMPONENTS · utility band: card scroller with paddles ═══ -->
+<section class="band" data-band="utility" id="components" aria-labelledby="components-h">
+  <div class="viewport-content">
+    <header class="section-header">
+      <h2 class="section-header-headline" id="components-h">Components, ready to use.</h2>
+      <a class="section-header-link" href="components.html">All components <i data-sym="chevron-right"></i></a>
+    </header>
+  </div>
+  <div class="scroller" aria-label="Components">
+    <div class="scroller-rail">
+      <ul class="scroller-list" data-reveal="stagger">
+        <li class="scroller-item" data-staggered-item>
+          <div class="scroller-card">
+            <p class="scroller-eyebrow">Buttons</p>
+            <h3 class="scroller-headline">Four sizes, to the pixel.</h3>
+            <p class="scroller-body">24, 36, 44 and 56&nbsp;px tall, with their own paddings.</p>
+            <div class="scroller-media"><div class="ov-spec">
+              <div class="ov-spec-row"><button class="btn btn-secondary btn-s" type="button">Buy</button><button class="btn btn-tinted btn-m" type="button">Learn more</button></div>
+              <div class="ov-spec-row"><button class="btn btn-l" type="button">Explore</button><a class="btn btn-plain btn-l" href="components.html">Details</a></div>
+            </div></div>
+          </div>
+        </li>
+        <li class="scroller-item" data-staggered-item>
+          <div class="scroller-card">
+            <p class="scroller-eyebrow">Segmented</p>
+            <h3 class="scroller-headline">An indicator that travels on a spring.</h3>
+            <p class="scroller-body">Labels flip only after the pill arrives.</p>
+            <div class="scroller-media"><div class="ov-spec">
+              <div class="segmented segmented-l" role="tablist" aria-label="Range"><button role="tab" aria-selected="true">Day</button><button role="tab">Week</button><button role="tab">Month</button></div>
+            </div></div>
+          </div>
+        </li>
+        <li class="scroller-item" data-staggered-item>
+          <div class="scroller-card">
+            <p class="scroller-eyebrow">Switches and sliders</p>
+            <h3 class="scroller-headline">Toggles that stretch as you hold them.</h3>
+            <p class="scroller-body">The knob grows under your finger, then settles.</p>
+            <div class="scroller-media"><div class="ov-spec">
+              <div class="ov-spec-row"><label class="choice"><input class="switch" type="checkbox" role="switch" checked> Batches</label></div>
+              <input class="slider" type="range" min="0" max="100" value="62" aria-label="Pace">
+            </div></div>
+          </div>
+        </li>
+        <li class="scroller-item" data-staggered-item>
+          <div class="scroller-card">
+            <p class="scroller-eyebrow">Steppers and progress</p>
+            <h3 class="scroller-headline">Numbers you can nudge.</h3>
+            <p class="scroller-body">A stepper, a progress ring and an activity indicator.</p>
+            <div class="scroller-media"><div class="ov-spec">
+              <div class="stepper" data-min="1" data-max="12" data-value="8" aria-label="Leads per batch"><button></button><output>8</output><button></button></div>
+              <div class="ov-spec-row"><span class="progress-ring progress-ring-l" data-value=".72" aria-label="Daily limit used">72</span><span class="spinner spinner-l" role="status" aria-label="Loading"></span></div>
+            </div></div>
+          </div>
+        </li>
+        <li class="scroller-item" data-staggered-item>
+          <div class="scroller-card">
+            <p class="scroller-eyebrow">Status</p>
+            <h3 class="scroller-headline">States that report, not decorate.</h3>
+            <p class="scroller-body">The live dot keeps pulsing under reduced motion, slower.</p>
+            <div class="scroller-media"><div class="ov-spec">
+              <div class="ov-spec-row"><span class="pill-status" data-state="live">Live</span><span class="pill-status" data-state="ok">Healthy</span><span class="pill-status" data-state="warn">Cooling</span></div>
+              <div class="ov-spec-row"><span class="badge badge-ok">Landed</span><span class="badge badge-bad">Timed out</span><span class="chip" aria-pressed="true">Today</span></div>
+            </div></div>
+          </div>
+        </li>
+        <li class="scroller-item" data-staggered-item>
+          <div class="scroller-card">
+            <p class="scroller-eyebrow">Lists</p>
+            <h3 class="scroller-headline">Grouped rows.</h3>
+            <p class="scroller-body">Insets that follow the icon, 44&nbsp;px rows.</p>
+            <div class="scroller-media"><div class="ov-spec">
+              <ul class="list list-inset">
+                <li><label class="row"><span class="row-title">Batches</span><input class="switch" type="checkbox" role="switch" checked></label></li>
+                <li><a class="row" href="patterns.html"><span class="row-title">Night shift</span><span class="row-detail">22:00</span></a></li>
+              </ul>
+            </div></div>
+          </div>
+        </li>
+        <li class="scroller-item" data-staggered-item>
+          <div class="scroller-card">
+            <p class="scroller-eyebrow">Charts</p>
+            <h3 class="scroller-headline">Rings, dials and strips.</h3>
+            <p class="scroller-body">Opaque and readable, with a zero baseline.</p>
+            <div class="scroller-media"><div class="ov-spec">
+              <div data-chart="rings" data-center="Today" aria-label="Today's rings" data-values='[{"label":"Build","value":312,"max":400,"color":"series-1"},{"label":"Test","value":70,"max":70,"color":"series-2"},{"label":"Deploy","value":58,"max":70,"color":"series-3"}]'></div>
+              <div data-chart="sparkline" aria-label="Landed actions by hour" data-values="0,0,0,0,0,0,61,114,154,141,167,156,180,150,99"></div>
+            </div></div>
+          </div>
+        </li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ 8 · START · story band: the real adoption snippet ═══ -->
+<section class="band" data-band="story" id="start" aria-labelledby="start-h">
+  <div class="viewport-content">
+    <div class="grid-12 ov-start">
+      <div class="span-5 span-md-12 ov-start-copy">
+        <p class="t-eyebrow">Adopt</p>
+        <h2 class="t-section" id="start-h">Start with one call.</h2>
+        <p class="t-lede">Link the stylesheets in this order, load the scripts, then call <strong>FG3.boot()</strong>. Glass, art, springs, charts and chrome all mount from there, and <strong>nothing reaches the network</strong>.</p>
+        <div class="lockup-ctas">
+          <a class="lockup-cta" href="start.html">Read the adoption guide <i data-sym="chevron-right"></i></a>
+          <a class="lockup-cta" href="docs.html">Browse the docs <i data-sym="chevron-right"></i></a>
+        </div>
+      </div>
+      <div class="span-7 span-md-12">
+<pre class="doc-code" data-lang="html"><code>&lt;!-- in &lt;head&gt;, in this order --&gt;
+&lt;link rel="stylesheet" href="assets/fg3-tokens.css"&gt;
+&lt;link rel="stylesheet" href="assets/fg3-color.css"&gt;
+&lt;link rel="stylesheet" href="assets/fg3-springs.css"&gt;
+&lt;link rel="stylesheet" href="assets/fg3.css"&gt;
+&lt;link rel="stylesheet" href="assets/lg3.css"&gt;
+&lt;link rel="stylesheet" href="assets/fg3-motion.css"&gt;
+&lt;link rel="stylesheet" href="assets/fg3-components.css"&gt;
+&lt;link rel="stylesheet" href="assets/fg3-chrome.css"&gt;
+&lt;link rel="stylesheet" href="assets/fg3-showcase.css"&gt;
+&lt;link rel="stylesheet" href="assets/fg3-symbols.css"&gt;
+&lt;link rel="stylesheet" href="assets/fg3-chart.css"&gt;
+&lt;link rel="stylesheet" href="assets/fg3-device.css"&gt;
+
+&lt;!-- at the end of &lt;body&gt; --&gt;
+&lt;script src="assets/geom.js"&gt;&lt;/script&gt;
+&lt;script src="assets/spring.js"&gt;&lt;/script&gt;
+&lt;script src="assets/palette.js"&gt;&lt;/script&gt;
+&lt;script src="assets/art3.js"&gt;&lt;/script&gt;
+&lt;script src="assets/lg3-core.js"&gt;&lt;/script&gt;
+&lt;script src="assets/fg3.js"&gt;&lt;/script&gt;
+&lt;script src="assets/symbols.js"&gt;&lt;/script&gt;
+&lt;script src="assets/chart.js"&gt;&lt;/script&gt;
+&lt;script src="assets/motion.js"&gt;&lt;/script&gt;
+&lt;script src="assets/anim.js"&gt;&lt;/script&gt;
+&lt;script src="assets/device.js"&gt;&lt;/script&gt;
+&lt;script src="assets/ui.js"&gt;&lt;/script&gt;
+&lt;script src="assets/chrome.js"&gt;&lt;/script&gt;
+&lt;script src="assets/showcase.js"&gt;&lt;/script&gt;
+&lt;script&gt;FG3.boot();&lt;/script&gt;
+
+&lt;!-- then any surface is markup --&gt;
+&lt;button type="button" class="btn btn-glass btn-l" data-lg3 data-lg3-interactive&gt;Explore&lt;/button&gt;</code></pre>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ FOOTNOTES · utility band ═══ -->
+<section class="band ov-notes" data-band="utility" aria-label="Footnotes">
+  <div class="viewport-content">
+    <div class="footnotes">
+      <ol>
+        <li id="fn-1">Fluid Design Open is an open design system. It loads no font, script or image from another origin; Inter and Geist Mono are bundled, and the system font is used where it is present.</li>
+        <li id="fn-2">Computed styles of nine roles (hero, section, lede, eyebrow, subtitle, body, micro, stat and stat caption) compared with their reference values at 1440&nbsp;px in Edge 153: size, line height and tracking all equal. At 402&nbsp;px the hero follows the lockup step, 40/44, where a single marquee headline is 48/52; the hero on this page uses 48.</li>
+        <li id="fn-3">Diagonal inset of the fitted corner (superellipse k 1.71, radius &times; 1.53) against a reconstruction of the continuous corner, solved analytically for r12, r18, r28 and r44. Rendered in Edge 153 the insets land within 0.5&nbsp;px. Where a browser has no corner-shape, FG3 draws the exact clip or a circle of equal mass.</li>
+        <li id="fn-4">Displacement map from the engine&rsquo;s own builder: a 720&nbsp;&times;&nbsp;50 capsule, bezel 17, the default configuration. Refraction runs in Chromium on a hardware GPU; other browsers draw the same glass as frost.</li>
+        <li id="fn-5">Largest gap, as a share of travel, between each emitted CSS linear() easing and the analytic spring it came from, across all 24 named springs.</li>
+        <li id="fn-6">Mean main-thread time per frame of a pill-to-panel morph in headless Edge with a GPU, 0.52 to 0.97&nbsp;ms; frames that bake a new corner tile take 5 to 11&nbsp;ms. Before the tile cache it was 17.4&nbsp;ms.</li>
+        <li id="fn-7">OKLCH mean chroma of the raw hero canvas; vivid means chroma &ge; .08. The gate is checked on the rendered hero crop.</li>
+      </ol>
+      <p>All names shown are fictional. Device art is drawn by the Fluid design system and does not depict any manufacturer&rsquo;s product. Orbit figures are illustrative.</p>
+    </div>
+  </div>
+</section>
+</main>
+
+<!-- ═══ FOOTER (shared — copy verbatim) ═══ -->
+<footer class="band" data-band="utility" data-band-seam="keep">
+  <div class="viewport-content stack-4">
+    <p class="t-caption" style="color: var(--label-2)">Fluid Design Open 1.0 &middot; An original design language with Fluid&rsquo;s colour. Type follows the system font, with Inter as the fallback. Device art is original.</p>
+    <p class="t-caption"><a href="index.html">Overview</a> &middot; <a href="start.html">Start</a> &middot; <a href="docs.html">Docs</a> &middot; <a href="components.html">Components</a> &middot; <a href="selftest.html">Self-test</a> &middot; <a href="audit.html">Audit</a></p>
+  </div>
+</footer>
+
+<script src="assets/geom.js"></script>
+<script src="assets/spring.js"></script>
+<script src="assets/palette.js"></script>
+<script src="assets/art3.js"></script>
+<script src="assets/lg3-core.js"></script>
+<script src="assets/fg3.js"></script>
+<script src="assets/symbols.js"></script>
+<script src="assets/chart.js"></script>
+<script src="assets/motion.js"></script>
+<script src="assets/anim.js"></script>
+<script src="assets/device.js"></script>
+<script src="assets/ui.js"></script>
+<script src="assets/chrome.js"></script>
+<script src="assets/showcase.js"></script>
+<script src="assets/docs.js"></script>   <!-- documentation pages only -->
+<script>FG3.boot(); if (window.DOCS) DOCS.mount();</script>
+<script>
+/* index.html's own behaviour. Each piece drives a system API; none replaces one.
+   1 device screens follow the reader's tone (fg3:tone)
+   2 spring plots drawn from SPRING's solver; lanes glide on the --sp-* tokens
+   3 gallery demos while their card is current: the glass lens travels
+     (UI.segmented) and the island capsule morphs (CHROME.live.expand)
+   4 live readouts from ART3.stats, LG3.stats, SYM.count and SPRING.NAMED
+   5 the console's "now" clock */
+(function () {
+  'use strict';
+  var d = document, html = d.documentElement;
+  var RM = window.matchMedia ? matchMedia('(prefers-reduced-motion: reduce)') : { matches: false };
+  function reduced() { return RM.matches || html.classList.contains('fd-reduced-motion'); }
+  function $(s, r) { return (r || d).querySelector(s); }
+  function $$(s, r) { return [].slice.call((r || d).querySelectorAll(s)); }
+  function whenVisible(el, on, off) {
+    if (!('IntersectionObserver' in window)) { on(); return; }
+    new IntersectionObserver(function (es) {
+      es.forEach(function (e) { if (e.isIntersecting) on(); else if (off) off(); });
+    }, { threshold: 0.25 }).observe(el);
+  }
+
+  /* 0 · a hub tile is ONE link: CHART makes a chart with a readout focusable,
+     which would nest a tab stop inside the link (and inside aria-hidden) */
+  $$('a.bento-tile [tabindex], [aria-hidden="true"] [data-chart][tabindex]').forEach(function (el) { el.setAttribute('tabindex', '-1'); });
+
+  /* 1 */
+  function tone() {
+    var t = (window.FG3 && FG3.getTone) ? FG3.getTone().tone : html.getAttribute('data-tone');
+    $$('.ov-follow').forEach(function (el) { el.setAttribute('data-tone', t === 'dark' ? 'dark' : 'light'); });
+  }
+  tone();
+  d.addEventListener('fg3:tone', tone);
+
+  /* 2 */
+  var NS = 'http://www.w3.org/2000/svg';
+  function line(svg, x1, y1, x2, y2, cls) {
+    var l = d.createElementNS(NS, 'line');
+    l.setAttribute('x1', x1); l.setAttribute('y1', y1); l.setAttribute('x2', x2); l.setAttribute('y2', y2);
+    l.setAttribute('class', cls); svg.appendChild(l);
+  }
+  function plot(svg) {
+    if (!window.SPRING || !SPRING.Spring) return;
+    var vb = svg.viewBox.baseVal, W = vb.width, H = vb.height, T = +svg.getAttribute('data-seconds') || 1;
+    var names = svg.getAttribute('data-springs').split(','), peak = 1;
+    var springs = names.map(function (n) { var s = SPRING.Spring(n); if (typeof s.peak === 'number' && s.peak > peak) peak = s.peak; return s; });
+    var top = 8, base = H - 8, L = 2, R = W - 2;
+    function y(v) { return base - (base - top) * v / peak; }
+    line(svg, L, base, R, base, 'ov-plot-base');
+    line(svg, L, y(1), R, y(1), 'ov-plot-target');
+    springs.forEach(function (s, i) {
+      var pts = [];
+      for (var k = 0; k <= 120; k++) pts.push((L + (R - L) * k / 120).toFixed(1) + ',' + y(s.at(T * k / 120)).toFixed(1));
+      var p = d.createElementNS(NS, 'polyline');
+      p.setAttribute('points', pts.join(' '));
+      p.setAttribute('class', 'ov-plot-curve');
+      p.style.stroke = 'var(--series-' + (names.length === 3 ? [1, 3, 4][i] : i + 1) + ')';
+      svg.appendChild(p);
+    });
+  }
+  $$('svg.ov-plot').forEach(plot);
+  $$('.ov-lanes').forEach(function (host) {
+    if (reduced()) { host.classList.add('is-on'); return; }
+    var on = false, timer = 0;
+    function tick() { on = !on; host.classList.toggle('is-on', on); timer = setTimeout(tick, on ? 1500 : 1200); }
+    whenVisible(host, function () { clearTimeout(timer); timer = setTimeout(tick, 350); }, function () { clearTimeout(timer); });
+  });
+
+  /* 3 */
+  var gal = $('#highlights .gallery'), seg = $('#ov-seg'), cap = $('#ov-cap');
+  var current = 0, segTimer = 0, capTimer = 0, segTaken = false, capTaken = false;
+  function demo() {
+    clearTimeout(segTimer); clearTimeout(capTimer);
+    if (reduced()) return;
+    if (current === 0 && seg && !segTaken && window.UI && UI.segmented) {
+      var api = UI.segmented(seg), i = 0;
+      (function next() {
+        segTimer = setTimeout(function () { i = (api.index + 1) % api.items.length; api.select(i, { silent: true }); next(); }, 1500);
+      })();
+    }
+    if (current === 3 && cap && !capTaken && window.CHROME && CHROME.live) {
+      var open = false;
+      (function flip() {
+        capTimer = setTimeout(function () { open = !open; CHROME.live.expand(cap, open); flip(); }, open ? 2600 : 1400);
+      })();
+    }
+  }
+  if (seg) seg.addEventListener('pointerdown', function () { segTaken = true; clearTimeout(segTimer); });
+  if (seg) seg.addEventListener('keydown', function () { segTaken = true; clearTimeout(segTimer); });
+  if (cap) cap.addEventListener('pointerdown', function () { capTaken = true; clearTimeout(capTimer); });
+  if (gal) {
+    gal.addEventListener('show:gallery', function (e) { current = e.detail ? e.detail.index : 0; demo(); });
+    whenVisible(gal, demo, function () { clearTimeout(segTimer); clearTimeout(capTimer); if (cap && window.CHROME && !capTaken) CHROME.live.expand(cap, false); });
+  }
+
+  /* 4 */
+  function put(k, v) { $$('[data-live="' + k + '"]').forEach(function (el) { el.textContent = v; }); }
+  /* ART3.stats (~33 ms) and LG3.stats (~13 ms, a full map build) are main-
+     thread work: each runs in its own idle slot, and only once the Measured
+     section is near — never during the hero's entrance or a scroll batch. */
+  var idle = window.requestIdleCallback ? function (f) { return requestIdleCallback(f, { timeout: 2000 }); } : function (f) { return setTimeout(f, 300); };
+  function measure() {
+    var shown = false;
+    idle(function () {
+      try {
+        var c = $('#hero .hero-art');
+        if (window.ART3 && ART3.stats && c && c.width) { var s = ART3.stats(c); put('art-c', 'C ' + s.C.toFixed(3)); put('art-vivid', Math.round(s.vivid) + '%'); shown = true; }
+      } catch (e) {}
+      idle(function () {
+        try {
+          var p = $('#hero .hero-platter'), st = window.LG3 && LG3.stats && LG3.stats(p);
+          if (st) {
+            put('lens', st.max.toFixed(1) + ' px max, ' + st.mean.toFixed(1) + ' px mean');
+            if (p.offsetHeight) put('lens-h', String(p.offsetHeight));
+            /* the host's own path depends on the budget (off-screen hosts give
+               their slot away); the engine says what this browser can do */
+            put('lens-path', LG3.engine === 'refraction' ? 'this browser refracts' : 'this browser draws it as frost');
+          } else { put('lens', 'not built'); put('lens-path', 'no glass engine here'); }
+        } catch (e) {}
+        if (shown) $('.ov-live').hidden = false;
+      });
+    });
+  }
+  function live() {
+    if (window.SYM && SYM.count) put('sym', String(SYM.count()));
+    if (window.SPRING && SPRING.NAMED) put('springs', String(Object.keys(SPRING.NAMED).length));
+    var sec = $('#measured');
+    if (!sec || !('IntersectionObserver' in window)) { measure(); return; }
+    var io = new IntersectionObserver(function (es) {
+      if (es.some(function (e) { return e.isIntersecting; })) { io.disconnect(); measure(); }
+    }, { rootMargin: '600px 0px' });
+    io.observe(sec);
+  }
+  if (html.getAttribute('data-fg3') === 'ready') live(); else d.addEventListener('fg3:ready', live, { once: true });
+
+  /* 5 */
+  var ticks = $$('[data-ov-tick]'), t0 = Date.now();
+  if (ticks.length) setInterval(function () {
+    if (d.hidden) return;
+    ticks.forEach(function (el) {
+      var s = (+el.getAttribute('data-ov-tick') || 0) + Math.floor((Date.now() - t0) / 1000);
+      el.textContent = Math.floor(s / 60) + ':' + ('0' + (s % 60)).slice(-2);
+    });
+  }, 1000);
+})();
+</script>
+</body>
+</html>

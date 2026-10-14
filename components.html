@@ -1,0 +1,1819 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Components &middot; Fluid Design Open</title>
+<!--
+  The Fluid Design Open page template. Every page of the site copies this skeleton VERBATIM
+  (head, site nav, footer, scripts) and replaces only: the <title>, the
+  aria-current link in the nav, the local-nav capsule's title/jump links, and
+  <main>.
+
+  Do NOT put data-tone on <html> unless the page must be pinned: an author
+  tone beats the reader's appearance toggle (FG3 precedence).
+-->
+<script>
+/* Tone without a flash (fg3.js header): reader's choice › author › host › system. */
+try{var d=document.documentElement,t=localStorage.getItem('fg3-tone');
+if(!d.hasAttribute('data-tone')){d.setAttribute('data-tone',t||d.getAttribute(
+'data-theme')||(matchMedia('(prefers-color-scheme: dark)').matches?'dark':
+'light'));d.setAttribute('data-tone-auto','')}}catch(e){}
+</script>
+<link rel="stylesheet" href="assets/fg3-tokens.css">
+<link rel="stylesheet" href="assets/fg3-color.css">
+<link rel="stylesheet" href="assets/fg3-springs.css">
+<link rel="stylesheet" href="assets/fg3.css">
+<link rel="stylesheet" href="assets/lg3.css">
+<link rel="stylesheet" href="assets/fg3-motion.css">
+<link rel="stylesheet" href="assets/fg3-components.css">
+<link rel="stylesheet" href="assets/fg3-chrome.css">
+<link rel="stylesheet" href="assets/fg3-showcase.css">
+<link rel="stylesheet" href="assets/fg3-symbols.css">
+<link rel="stylesheet" href="assets/fg3-chart.css">
+<link rel="stylesheet" href="assets/fg3-device.css">
+<link rel="stylesheet" href="assets/fg3-docs.css">    <!-- documentation pages only -->
+<style>
+/* Page layout only: roles and tokens, never a colour value (SPEC §2).
+   Page-local classes are prefixed with the page's own short name (e.g. mo- on
+   motion.html) so they can never collide with a system class. */
+
+/* ── hero: the lockup, then the family photo on art ─────────────────────── */
+.cp-lockup .lockup-ctas{justify-content:center}   /* the showcase module's inherit resolves to normal: CTAs start-align when they wrap */
+.cp-stage{position:relative;margin-top:var(--s-12);overflow:hidden;
+  border-radius:var(--r-lg);corner-shape:superellipse(var(--k-continuous))}
+.cp-stage-art{position:absolute;inset:0;width:100%;height:100%}
+.cp-comp{position:relative;display:grid;min-height:640px;
+  grid-template-columns:minmax(0,1fr) minmax(0,380px) minmax(0,1fr);grid-template-rows:auto 1fr auto;
+  align-items:center;gap:var(--s-8) var(--s-9);padding:var(--s-10) var(--s-10) var(--s-9)}
+.cp-comp-seg{grid-column:1/-1;justify-self:center}
+.cp-comp .card{--c-surface:var(--bg-elevated);--card-pad:22px;box-shadow:var(--shadow-lift)}
+.cp-comp-left{justify-self:end;width:min(290px,100%);display:grid;gap:var(--s-4)}
+.cp-comp-right{justify-self:start;width:min(250px,100%);display:grid;gap:var(--s-4)}
+.cp-comp-main{padding:var(--s-2) 0 var(--s-1)}
+.cp-comp-main .cp-comp-head{display:flex;align-items:center;justify-content:space-between;gap:var(--s-3);padding:var(--s-4) var(--s-4) var(--s-2)}
+.cp-comp-main .list>li:first-child::before{display:none}
+.cp-comp-bar{grid-column:1/-1;justify-self:center;display:flex;flex-wrap:wrap;justify-content:center;gap:var(--s-3)}
+.cp-kicker{margin:0;font-size:var(--t-12);line-height:var(--t-12-lh);font-weight:600;letter-spacing:.02em;color:var(--label-2)}
+.cp-row{display:flex;flex-wrap:wrap;align-items:center;gap:var(--s-3) var(--s-4)}
+.cp-row-tight{gap:var(--s-2)}
+.cp-ring-row{display:flex;align-items:center;gap:var(--s-4)}
+@media (max-width:1068px){
+  /* two cards, sized to themselves and centred on the art (a 1fr column pushed them 72px right) */
+  .cp-comp{grid-template-columns:minmax(0,290px) minmax(0,360px);justify-content:center;padding:var(--s-9) var(--s-8)}
+  .cp-comp-right{display:none}
+}
+@media (max-width:734px){
+  .cp-stage{margin-top:var(--s-10)}
+  .cp-comp{grid-template-columns:minmax(0,1fr);min-height:0;gap:var(--s-6);padding:var(--s-8) var(--s-4)}
+  .cp-comp-left{display:none}
+  .cp-comp-bar .btn-glass:first-child{display:none}
+}
+
+/* ── index: one tile per family ─────────────────────────────────────────── */
+.cp-index{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:var(--grid-gap)}
+@media (max-width:1068px){ .cp-index{grid-template-columns:repeat(3,minmax(0,1fr))} }
+@media (max-width:734px){ .cp-index{grid-template-columns:repeat(2,minmax(0,1fr));gap:12px} }
+.cp-index>li{display:flex}
+.cp-tile{--card-pad:24px;display:flex;flex-direction:column;gap:2px;width:100%;padding-top:0}
+.cp-tile-art{display:grid;place-items:center;height:136px;margin-inline:calc(-1 * var(--card-pad));margin-bottom:var(--s-3);overflow:hidden;pointer-events:none}
+.cp-tile-mini{display:grid;place-items:center;gap:10px}
+.cp-tile-name{font-size:var(--t-17);line-height:var(--t-17-lh);letter-spacing:var(--t-17-ls);font-weight:600;color:var(--label)}
+.cp-tile-meta{font-size:var(--t-14);line-height:var(--t-14-lh);letter-spacing:var(--t-14-ls);color:var(--label-2)}
+@media (max-width:734px){
+  .cp-tile{--card-pad:16px}
+  .cp-tile-art{height:92px;margin-bottom:var(--s-2)}
+  .cp-tile-mini{zoom:.7}
+  .cp-tile-meta{font-size:var(--t-12);line-height:var(--t-12-lh)}
+}
+/* index minis drawn from roles (a card, lines, a table) */
+.cp-m-card{display:grid;gap:7px;width:120px;padding:14px;border-radius:calc(14px * var(--r-scale));corner-shape:superellipse(var(--k-continuous));background:var(--c-surface)}
+.band[data-band="utility"] .cp-m-card{background:var(--bg-2)}
+.cp-m-card>i{display:block;height:7px;border-radius:4px;background:var(--fill-1)}
+.cp-m-card>i:first-child{width:60%;background:var(--label)}
+.cp-m-card>i:last-child{width:80%}
+.cp-m-lines{display:grid;gap:10px;width:130px}
+.cp-m-lines>i{display:block;height:6px;border-radius:3px;background:var(--fill-1)}
+.cp-m-lines>hr{margin:2px 0}
+.cp-m-art{position:relative;display:grid;place-items:center;width:150px;height:96px;overflow:hidden;border-radius:calc(16px * var(--r-scale));corner-shape:superellipse(var(--k-continuous))}
+.cp-m-art>canvas{position:absolute;inset:0;width:100%;height:100%}
+.cp-m-art .btn-glass{--btn-ink:var(--label)}
+.cp-m-code{font:500 var(--t-14)/1.4 var(--font-mono);color:var(--label)}
+
+/* ── bands and families ─────────────────────────────────────────────────── */
+.cp-group-head{display:grid;gap:var(--s-5);margin-bottom:var(--s-4)}
+.cp-group-head .t-lede{max-width:760px}
+.cp-family{display:grid;gap:var(--s-7);margin-top:var(--s-12)}
+.cp-fhead{display:grid;justify-items:start;gap:var(--s-3)}
+.cp-fname{margin:0}
+ul.cp-fclasses{display:flex;flex-wrap:wrap;gap:6px;margin:var(--s-1) 0 0;padding:0;list-style:none;order:3}
+.cp-fclasses code{display:inline-block;padding:3px 8px;border-radius:6px;background:var(--fill-2);color:var(--label-2-on-fill);font-size:var(--t-12);line-height:var(--t-12-lh)}
+.cp-flede{max-width:720px;margin:0;color:var(--label-2)}
+.cp-flede strong{color:var(--label);font-weight:inherit}
+/* prose code on a grey paragraph: the docs sheet lets it inherit the grey (4.1:1 on its fill); give it the ink */
+.cp-flede code,.cp-group-head code{color:var(--label)}
+/* a ring paints its number in its arc colour; the number takes the ink instead */
+.cp-ring-num{color:var(--label)}
+
+/* the specimen pair: the same markup in light and in dark, side by side */
+.cp-pair{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:var(--grid-gap)}
+.cp-pair[data-stack]{grid-template-columns:minmax(0,1fr)}
+@media (max-width:1068px){ .cp-pair{grid-template-columns:minmax(0,1fr)} }
+/* phones: the twin is a swipe away (a rail, the dark half peeking), not a second screen of scroll */
+@media (max-width:734px){
+  .cp-pair:not([data-cp-norail]){--cp-gut:max(6.25vw,calc((100vw - var(--w-content)) / 2));
+    grid-template-columns:none;grid-auto-flow:column;grid-auto-columns:calc(100vw - 2 * var(--cp-gut) - 24px);gap:12px;
+    overflow-x:auto;scroll-snap-type:x mandatory;overscroll-behavior-x:contain;scrollbar-width:none;
+    margin-inline:calc(-1 * var(--cp-gut));padding-inline:var(--cp-gut);scroll-padding-inline:var(--cp-gut)}
+  .cp-pair::-webkit-scrollbar{display:none}
+  .cp-pair>.cp-spec{scroll-snap-align:start}
+}
+.cp-swipe{display:none;margin-inline-start:6px;font-weight:400}
+@media (max-width:734px){ .cp-pair:not([data-cp-norail]) .cp-swipe{display:inline} }
+.cp-spec{--cp-ground:var(--bg-1);--avatar-ring:var(--cp-ground);--detent-ring:var(--cp-ground)}
+.band .cp-spec.doc-specimen{background:var(--cp-ground);min-height:240px;padding:64px 40px 44px;align-content:center}
+.band[data-band="story"] .cp-spec{--cp-ground:var(--bg-2);--c-surface:var(--bg-1)}
+.band[data-band="story"] .cp-spec .segmented:not(.segmented-glass){--seg-platter:var(--mat-control-fill-solid)}
+.cp-spec[data-tone="dark"]{--c-card-shadow:none}
+@media (max-width:734px){ .band .cp-spec.doc-specimen{padding:56px 20px 32px} }
+.cp-tonetag{position:absolute;top:20px;inset-inline-start:24px;margin:0;font-size:var(--t-12);line-height:var(--t-12-lh);font-weight:600;letter-spacing:.02em;color:var(--label-2)}
+.cp-w{width:100%}
+.cp-cols{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:var(--s-7) var(--s-8);width:100%;align-items:start}
+.cp-cols3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:var(--grid-gap);width:100%;align-items:stretch}
+@media (max-width:734px){ .cp-cols,.cp-cols3{grid-template-columns:minmax(0,1fr)} }
+.cp-stack{display:grid;gap:var(--s-5);width:100%}
+.cp-cap{margin:0;font-size:var(--t-12);line-height:var(--t-12-lh);color:var(--label-2)}
+
+/* the button matrix: variants × states, real rules forced (see script) */
+.cp-matrix-wrap{width:calc(100% + 16px);margin:-8px;padding:8px;overflow-x:auto;scrollbar-width:thin}
+/* columns are as wide as their widest pill, so the matrix fits its frame down
+   to about 1000px; narrower it scrolls under the 22px edge fade the segmented
+   control uses on overflow (data-overflow, set by the page script) */
+.cp-matrix{display:grid;grid-template-columns:minmax(max-content,120px) repeat(6,minmax(max-content,1fr));gap:var(--s-5) var(--s-3);align-items:center}
+.cp-matrix-wrap[data-overflow="end"]{-webkit-mask:linear-gradient(to right,#000 calc(100% - 22px),transparent);mask:linear-gradient(to right,#000 calc(100% - 22px),transparent)}
+.cp-matrix-wrap[data-overflow="start"]{-webkit-mask:linear-gradient(to left,#000 calc(100% - 22px),transparent);mask:linear-gradient(to left,#000 calc(100% - 22px),transparent)}
+.cp-matrix-wrap[data-overflow="both"]{-webkit-mask:linear-gradient(to right,transparent,#000 22px calc(100% - 22px),transparent);mask:linear-gradient(to right,transparent,#000 22px calc(100% - 22px),transparent)}
+.cp-matrix>.cp-mk{font:500 var(--t-12)/var(--t-12-lh) var(--font-mono);color:var(--label-2)}
+.cp-matrix>.cp-mc{font-size:var(--t-12);line-height:var(--t-12-lh);color:var(--label-2);text-align:center}
+.cp-matrix>div{display:flex;justify-content:center}
+.cp-sizes{display:flex;flex-wrap:wrap;align-items:flex-end;gap:var(--s-5) var(--s-6);width:100%;padding-top:var(--s-7);margin-top:var(--s-3);border-top:1px solid var(--separator)}
+.cp-sizes figure{display:grid;justify-items:center;gap:8px}
+.cp-sizes figcaption{font:500 var(--t-12)/var(--t-12-lh) var(--font-mono);color:var(--label-2)}
+.cp-block{display:grid;gap:10px;width:min(300px,100%)}
+
+/* detail row: anatomy (measured) beside markup */
+.cp-detail{display:grid;grid-template-columns:minmax(0,5fr) minmax(0,7fr);gap:var(--s-7) var(--s-10);align-items:start}
+@media (max-width:1068px){ .cp-detail{grid-template-columns:minmax(0,1fr)} }
+.cp-sub{margin:0 0 var(--s-4);font-size:var(--t-17);line-height:var(--t-17-lh);letter-spacing:var(--t-17-ls);font-weight:600}
+.cp-anatomy .doc-kv{gap:10px 24px}
+.cp-anatomy .doc-kv dt{white-space:nowrap}
+.cp-src{display:block;margin-top:1px;font-size:var(--t-12);line-height:var(--t-12-lh);color:var(--label-2)}
+.cp-anatomy .doc-note{margin-top:var(--s-5);font-size:var(--t-14);line-height:var(--t-14-lh-loose)}
+.cp-markup .doc-code{max-height:440px}
+.cp-markup .doc-code+.doc-code{margin-top:12px}
+.cp-api{margin-top:var(--s-2)}
+.cp-api .table-scroll>.table{min-width:0}
+.cp-api .table td{vertical-align:baseline}
+.cp-api .table td:nth-child(2) code{white-space:normal}   /* a long return shape wraps at its commas; unwrapped it pushed the table past its frame below 1000px */
+/* at ≤ 734 the API table stacks (.table-stack): call, then Returns, then what it does */
+@media (max-width:734px){ .cp-anatomy .doc-kv{grid-template-columns:minmax(0,1fr);gap:2px} .cp-anatomy .doc-kv dd{margin-bottom:10px} }
+
+/* do / don't: small live specimens in the page tone */
+.cp-dodont>div{grid-template-rows:1fr auto}
+.cp-dodont .doc-specimen{min-height:150px;padding:32px 24px}
+.band[data-band="story"] .cp-dodont .doc-specimen{--c-surface:var(--bg-1)}
+.band[data-band="story"] .cp-dodont .segmented:not(.segmented-glass){--seg-platter:var(--mat-control-fill-solid)}
+
+/* static replicas of overlays (the anatomy of what opens) */
+.cp-static.menu,.cp-static.popover{position:relative;inset:auto;display:block;z-index:auto}
+.cp-static.alert{position:relative;inset:auto;margin:0;display:block;z-index:auto;max-width:100%}
+.cp-static.toast{display:inline-flex}
+.cp-overlay-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:var(--s-7);align-items:start;width:100%}
+@media (max-width:734px){ .cp-overlay-grid{grid-template-columns:minmax(0,1fr);justify-items:center} }
+.cp-detent-labels{position:relative;max-width:367px;height:16px;margin-top:8px;font-size:var(--t-12);line-height:var(--t-12-lh);color:var(--label-2)}
+.cp-detent-labels>span{position:absolute;top:0;left:calc(var(--at) * (100% - 60px) + 30px);translate:-50% 0;white-space:nowrap}
+.cp-detent-labels>span:first-child{translate:-30px 0}
+.cp-detent-labels>span:last-child{translate:calc(-100% + 30px) 0}
+.cp-feedback{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:var(--s-8);width:100%;align-items:start}
+@media (max-width:734px){ .cp-feedback{grid-template-columns:minmax(0,1fr)} }
+.cp-demo-card{min-height:360px}
+@media (max-width:734px){ .cp-demo-card{min-height:0} .cp-demo-card .card-action{position:static;margin-top:var(--s-5);align-self:flex-end} }
+.cp-avatar-art{overflow:hidden}
+.cp-avatar-art>canvas{width:100%;height:100%;border-radius:50%}
+.cp-tablewrap{width:100%}
+.cp-stats{display:flex;flex-wrap:wrap;gap:var(--s-7) var(--s-9);width:100%;justify-content:center}
+.cp-kbds{display:grid;gap:var(--s-3);width:min(360px,100%)}
+.cp-kbds>div{display:flex;align-items:center;justify-content:space-between;gap:var(--s-4);font-size:var(--t-14);line-height:var(--t-14-lh);color:var(--label)}
+.cp-kbds>div>span:last-child{display:inline-flex;gap:4px}
+.cp-prose{max-width:460px;width:100%}
+.cp-prose p{font-size:var(--t-17);line-height:var(--t-17-lh-loose)}
+.cp-prose p+p{margin-top:var(--s-3)}
+
+/* glass on art: two grounds, dark and light */
+.cp-art{position:relative;overflow:hidden;min-height:360px;padding:var(--s-10) var(--s-9);
+  border-radius:var(--r-lg);corner-shape:superellipse(var(--k-continuous))}
+.cp-art>canvas{position:absolute;inset:0;width:100%;height:100%}
+.cp-art-over{position:relative;display:grid;gap:var(--s-7);align-content:center;min-height:280px}
+.cp-artfig{margin:0;min-width:0}
+@media (max-width:734px){ .cp-art{padding:var(--s-8) var(--s-4)} }
+.cp-glass-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:var(--grid-gap);margin-top:var(--s-9)}
+@media (max-width:1068px){ .cp-glass-grid{grid-template-columns:minmax(0,1fr)} }
+ul.cp-rules{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:var(--grid-gap);margin:var(--s-9) 0 0;padding:0;list-style:none}
+@media (max-width:1068px){ ul.cp-rules{grid-template-columns:minmax(0,1fr)} }
+.cp-rules>li{padding:var(--s-6);border-radius:var(--r-md);corner-shape:superellipse(var(--k-continuous));background:var(--bg-2)}
+.cp-rules b{display:block;margin-bottom:6px;font-size:var(--t-17);line-height:var(--t-17-lh);color:var(--label)}
+.cp-rules p{font-size:var(--t-14);line-height:var(--t-14-lh-loose);color:var(--label-2)}
+.cp-glass-detail{margin-top:var(--s-9)}
+</style>
+</head>
+<body>
+
+<!-- ═══ SITE NAV (shared — copy verbatim; set aria-current on this page's link) ═══ -->
+<nav class="globalnav" aria-label="Fluid Design">
+  <div class="globalnav__bar">
+    <a class="globalnav__brand" href="index.html" aria-label="Fluid Design Open home"><i data-sym="sparkles"></i></a>
+    <ul class="globalnav__list">
+      <li class="globalnav__item"><a class="globalnav__link" href="index.html">Overview</a></li>
+      <li class="globalnav__item"><a class="globalnav__link" href="start.html">Start</a></li>
+      <li class="globalnav__item"><a class="globalnav__link" href="docs.html">Docs</a></li>
+      <li class="globalnav__item" data-flyout="gn-foundations"><a class="globalnav__link" href="color.html">Foundations</a><button class="globalnav__trigger" type="button"><span class="sr-only">Foundations menu</span></button></li>
+      <li class="globalnav__item" data-flyout="gn-components"><a class="globalnav__link" href="components.html" aria-current="page">Components</a><button class="globalnav__trigger" type="button"><span class="sr-only">Components menu</span></button></li>
+      <li class="globalnav__item" data-flyout="gn-instruments"><a class="globalnav__link" href="selftest.html">Instruments</a><button class="globalnav__trigger" type="button"><span class="sr-only">Instruments menu</span></button></li>
+    </ul>
+    <div class="globalnav__tools">
+      <button class="globalnav__icon" type="button" data-tone-toggle aria-label="Switch appearance"><i data-sym="circle-half"></i></button>
+      <button class="globalnav__menu" type="button" aria-label="Menu" aria-expanded="false"><i data-sym="lines"></i></button>
+    </div>
+  </div>
+  <div class="globalnav__flyout" id="gn-foundations" hidden>
+    <div class="globalnav__flyout-content">
+      <div class="globalnav__group" data-elevated>
+        <h2 class="globalnav__group-title">Foundations</h2>
+        <ul><li><a class="globalnav__flyout-link" href="color.html">Colour</a></li><li><a class="globalnav__flyout-link" href="type.html">Type</a></li><li><a class="globalnav__flyout-link" href="layout.html">Layout</a></li><li><a class="globalnav__flyout-link" href="materials.html">Materials</a></li><li><a class="globalnav__flyout-link" href="motion.html">Motion</a></li></ul>
+      </div>
+      <div class="globalnav__group">
+        <h2 class="globalnav__group-title">Content</h2>
+        <ul><li><a class="globalnav__flyout-link" href="symbols.html">Symbols</a></li><li><a class="globalnav__flyout-link" href="data.html">Data</a></li></ul>
+      </div>
+    </div>
+  </div>
+  <div class="globalnav__flyout" id="gn-components" hidden>
+    <div class="globalnav__flyout-content">
+      <div class="globalnav__group" data-elevated>
+        <h2 class="globalnav__group-title">Components</h2>
+        <ul><li><a class="globalnav__flyout-link" href="components.html">Controls</a></li><li><a class="globalnav__flyout-link" href="chrome.html">Chrome</a></li><li><a class="globalnav__flyout-link" href="showcase.html">Product pages</a></li><li><a class="globalnav__flyout-link" href="patterns.html">Patterns</a></li></ul>
+      </div>
+    </div>
+  </div>
+  <div class="globalnav__flyout" id="gn-instruments" hidden>
+    <div class="globalnav__flyout-content">
+      <div class="globalnav__group" data-elevated>
+        <h2 class="globalnav__group-title">Instruments</h2>
+        <ul><li><a class="globalnav__flyout-link" href="selftest.html">Self-test</a></li><li><a class="globalnav__flyout-link" href="audit.html">Audit</a></li></ul>
+      </div>
+    </div>
+  </div>
+</nav>
+
+<!-- ═══ LOCAL NAV (per page: title, one CTA, jump links to this page's sections) ═══ -->
+<div class="localnav" data-localnav-reveal="#hero">
+  <div class="localnav__capsule" data-lg3 data-lg3-priority="3">
+    <a class="localnav__title" href="#top">Components</a>
+    <button class="localnav__explore" type="button"><span class="localnav__explore-label">Explore</span></button>
+    <a class="localnav__cta" href="start.html">Adopt</a>
+    <div class="localnav__panel" aria-label="Explore Fluid Design">
+      <ul class="localnav__tiles">
+        <li><a class="localnav__tile" href="materials.html" style="--tile-hue: var(--series-1)"><span class="localnav__thumb"><i data-sym="sparkles"></i></span>Materials</a></li>
+        <li><a class="localnav__tile" href="motion.html" style="--tile-hue: var(--series-2)"><span class="localnav__thumb"><i data-sym="waveform"></i></span>Motion</a></li>
+        <li><a class="localnav__tile" href="chrome.html" style="--tile-hue: var(--series-3)"><span class="localnav__thumb"><i data-sym="sidebar"></i></span>Chrome</a></li>
+        <li><a class="localnav__tile" href="components.html" style="--tile-hue: var(--series-4)"><span class="localnav__thumb"><i data-sym="sliders"></i></span>Controls</a></li>
+        <li><a class="localnav__tile" href="showcase.html" style="--tile-hue: var(--series-5)"><span class="localnav__thumb"><i data-sym="grid"></i></span>Product pages</a></li>
+      </ul>
+      <hr class="localnav__rule">
+      <nav class="localnav__jump" aria-label="On this page">
+        <p class="localnav__jump-label">On this page <i data-sym="chevron-down"></i></p>
+        <ul class="localnav__jump-grid">
+          <li class="localnav__jump-item"><a href="#index">All families</a></li>
+          <li class="localnav__jump-item"><a href="#actions">Actions</a></li>
+          <li class="localnav__jump-item"><a href="#input">Input</a></li>
+          <li class="localnav__jump-item"><a href="#status">Status</a></li>
+          <li class="localnav__jump-item"><a href="#surfaces">Surfaces</a></li>
+          <li class="localnav__jump-item"><a href="#overlays">Overlays</a></li>
+          <li class="localnav__jump-item"><a href="#glass">Glass</a></li>
+          <li class="localnav__jump-item"><a href="#api">The UI script</a></li>
+        </ul>
+      </nav>
+    </div>
+  </div>
+</div>
+
+<main id="top">
+
+<!-- ═══════════════ HERO ═══════════════ -->
+<section class="band" data-band="story" id="hero">
+  <div class="viewport-content">
+    <div class="lockup cp-lockup">
+      <p class="lockup-eyebrow">Components</p>
+      <h1 class="lockup-headline">Every control, measured.</h1>
+      <p class="lockup-copy">Buttons, fields, toggles, lists and overlays at <strong>compact, considered sizes</strong>, with fluid behaviour: knobs that lift into glass, menus that grow out of their button, springs you can interrupt. <strong>Every family below in light and dark</strong>, with its numbers and its markup.</p>
+      <div class="lockup-ctas">
+        <a class="lockup-cta" href="#index">Browse the families <i data-sym="chevron-right"></i></a>
+        <a class="lockup-cta" href="patterns.html">See them in patterns <i data-sym="chevron-right"></i></a>
+      </div>
+    </div>
+
+    <div class="cp-stage">
+      <canvas class="cp-stage-art" data-art="twilight" data-art-seed="7" data-art-contrast="1.1" aria-hidden="true"></canvas>
+      <div class="cp-comp">
+        <div class="segmented segmented-glass cp-comp-seg" role="tablist" aria-label="Range" data-lg3 data-lg3-adaptive data-lg3-priority="2">
+          <span class="segmented-track" data-lg3-shape></span><span class="segmented-indicator" data-lg3-shape></span>
+          <button role="tab" aria-selected="true">Today</button><button role="tab">Week</button><button role="tab">Month</button><button role="tab">Year</button>
+        </div>
+
+        <div class="cp-comp-left card">
+          <p class="cp-kicker">Project</p>
+          <div class="cp-row cp-row-tight">
+            <button class="chip chip-s" aria-pressed="true">Reviewers</button>
+            <button class="chip chip-s" aria-pressed="false">Likers</button>
+            <button class="chip chip-s" aria-pressed="false">Hashtag</button>
+          </div>
+          <div class="cp-row cp-row-tight">
+            <span class="badge badge-ok">Done 7</span><span class="badge badge-warn">Cooling</span><span class="badge">Draft</span>
+          </div>
+          <div class="cp-row" style="justify-content:space-between">
+            <span class="avatar-stack"><span class="avatar avatar-s">A</span><span class="avatar avatar-s">B</span><span class="avatar avatar-s">C</span><span class="avatar avatar-s">+5</span></span>
+            <span class="pill-status" data-state="live">Live</span>
+          </div>
+        </div>
+
+        <div class="cp-comp-main card">
+          <div class="cp-comp-head"><span class="ui-headline">aurora.demo</span><span class="badge badge-accent">Run</span></div>
+          <ul class="list">
+            <li><label class="row"><span class="row-icon" style="--row-icon-bg:var(--sys-green);--row-icon-ink:var(--c-knob)"><i data-sym="bolt"></i></span><span class="row-title">Runs</span><input class="switch" type="checkbox" role="switch" checked></label></li>
+            <li><div class="row"><span class="row-icon" style="--row-icon-bg:var(--sys-orange);--row-icon-ink:var(--c-knob)"><i data-sym="target"></i></span><span class="row-title">Per run</span><div class="stepper" data-min="1" data-max="12" data-value="8" aria-label="Leads per run"><button></button><output>8</output><button></button></div></div></li>
+            <li><a class="row" href="#lists"><span class="row-icon" style="--row-icon-bg:var(--sys-indigo);--row-icon-ink:var(--c-knob)"><i data-sym="shield"></i></span><span class="row-title">Refusals</span><span class="row-detail">Retry once</span></a></li>
+          </ul>
+        </div>
+
+        <div class="cp-comp-right card">
+          <div class="stat"><span class="stat-caption">Inside runs</span><span class="stat-value">12.6 s</span><span class="stat-caption">per finished task</span></div>
+          <div class="cp-ring-row"><span class="progress-ring progress-ring-l" data-value=".57" aria-label="Daily limit used: 1,222 of 2,160"><span class="cp-ring-num">57</span></span><span class="t-caption" style="color:var(--label-2)">of today&rsquo;s cap, counted on log rows</span></div>
+          <progress class="progress" max="1" value=".58" aria-label="Warm-up"></progress>
+        </div>
+
+        <div class="cp-comp-bar">
+          <button class="btn btn-glass btn-l" data-lg3 data-lg3-interactive data-lg3-adaptive type="button">Explore</button>
+          <button class="btn btn-glass btn-primary btn-l" data-lg3 data-lg3-interactive data-lg3-adaptive data-lg3-priority="1" type="button">Start a run</button>
+          <button class="btn btn-glass btn-icon btn-l" data-lg3 data-lg3-interactive data-lg3-adaptive data-lg3-id="hero-more" data-menu="hero-menu" aria-label="More actions" type="button"><i data-sym="ellipsis"></i></button>
+        </div>
+      </div>
+      <div class="menu" id="hero-menu" data-lg3 data-lg3-id="hero-more" data-lg3-size="large" data-align="end">
+        <button class="menu-item"><i data-sym="paperplane"></i><span>Share run</span></button>
+        <button class="menu-item"><i data-sym="arrow-down-tray"></i><span>Export CSV</span></button>
+        <hr class="menu-separator">
+        <button class="menu-item menu-item-destructive"><i data-sym="trash"></i><span>Stop all runs</span></button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════ INDEX ═══════════════ -->
+<section class="band" data-band="utility" id="index">
+  <div class="viewport-content">
+    <div class="section-header">
+      <h2 class="section-header-headline" data-reveal="up">Nineteen families. One&nbsp;grammar.</h2>
+      <a class="section-header-link" href="#api">The UI script <i data-sym="chevron-right"></i></a>
+    </div>
+    <ul class="cp-index" data-reveal="stagger">
+      <li data-staggered-item><a class="card card-hover cp-tile" href="#buttons"><span class="cp-tile-art" inert aria-hidden="true"><span class="cp-tile-mini"><span class="cp-row cp-row-tight"><span class="btn btn-primary">Start a run</span><span class="btn btn-secondary">Learn more</span></span></span></span><span class="cp-tile-name">Buttons</span><span class="cp-tile-meta">6 variants &middot; 4 sizes</span></a></li>
+      <li data-staggered-item><a class="card card-hover cp-tile" href="#links"><span class="cp-tile-art" inert aria-hidden="true"><span class="cp-tile-mini"><span class="link-chevron t-lede">Learn more</span></span></span><span class="cp-tile-name">Links</span><span class="cp-tile-meta">Prose, chevron, plain</span></a></li>
+      <li data-staggered-item><a class="card card-hover cp-tile" href="#fields"><span class="cp-tile-art" inert aria-hidden="true"><span class="cp-tile-mini"><span class="search" style="width:214px"><input type="search" placeholder="Search projects" tabindex="-1"></span></span></span><span class="cp-tile-name">Fields</span><span class="cp-tile-meta">Field, search, select, text</span></a></li>
+      <li data-staggered-item><a class="card card-hover cp-tile" href="#toggles"><span class="cp-tile-art" inert aria-hidden="true"><span class="cp-tile-mini"><span class="cp-row"><input class="switch" type="checkbox" role="switch" checked tabindex="-1"><input class="check" type="checkbox" checked tabindex="-1"><input class="radio" type="radio" checked tabindex="-1"></span></span></span><span class="cp-tile-name">Toggles</span><span class="cp-tile-meta">Switch, check, radio</span></a></li>
+      <li data-staggered-item><a class="card card-hover cp-tile" href="#sliders"><span class="cp-tile-art" inert aria-hidden="true"><span class="cp-tile-mini"><input class="slider" type="range" min="0" max="100" value="64" style="width:180px" tabindex="-1"></span></span><span class="cp-tile-name">Sliders</span><span class="cp-tile-meta">Slider, detent, stepper</span></a></li>
+      <li data-staggered-item><a class="card card-hover cp-tile" href="#segmented"><span class="cp-tile-art" inert aria-hidden="true"><span class="cp-tile-mini"><span class="segmented" aria-hidden="true"><button tabindex="-1" aria-pressed="true">Day</button><button tabindex="-1">Week</button><button tabindex="-1">Month</button></span></span></span><span class="cp-tile-name">Segmented</span><span class="cp-tile-meta">Solid and glass</span></a></li>
+      <li data-staggered-item><a class="card card-hover cp-tile" href="#chips"><span class="cp-tile-art" inert aria-hidden="true"><span class="cp-tile-mini"><span class="cp-row cp-row-tight" style="justify-content:center"><span class="chip" aria-pressed="true">Overview</span><span class="badge badge-ok">Done</span><span class="pill-status" data-state="live">Live</span></span></span></span><span class="cp-tile-name">Chips &amp; badges</span><span class="cp-tile-meta">Chip, token, badge, status</span></a></li>
+      <li data-staggered-item><a class="card card-hover cp-tile" href="#avatars"><span class="cp-tile-art" inert aria-hidden="true"><span class="cp-tile-mini"><span class="avatar-stack"><span class="avatar avatar-l">A</span><span class="avatar avatar-l">B</span><span class="avatar avatar-l">C</span><span class="avatar avatar-l">+4</span></span></span></span><span class="cp-tile-name">Avatars</span><span class="cp-tile-meta">4 sizes &middot; status &middot; stack</span></a></li>
+      <li data-staggered-item><a class="card card-hover cp-tile" href="#cards"><span class="cp-tile-art" inert aria-hidden="true"><span class="cp-tile-mini"><span class="cp-m-card"><i></i><i></i><i></i></span></span></span><span class="cp-tile-name">Cards</span><span class="cp-tile-meta">Card, tile, media</span></a></li>
+      <li data-staggered-item><a class="card card-hover cp-tile" href="#lists"><span class="cp-tile-art" inert aria-hidden="true"><span class="cp-tile-mini"><span class="cp-m-lines"><i></i><hr class="divider" style="margin:0"><i style="width:70%"></i><hr class="divider" style="margin:0"><i style="width:84%"></i></span></span></span><span class="cp-tile-name">Lists</span><span class="cp-tile-meta">Inset grouped rows</span></a></li>
+      <li data-staggered-item><a class="card card-hover cp-tile" href="#table"><span class="cp-tile-art" inert aria-hidden="true"><span class="cp-tile-mini"><span class="cp-m-code">8 &nbsp; 7 &nbsp; 11.2</span><span class="cp-m-code" style="color:var(--label-2)">8 &nbsp; 3 &nbsp; 19.8</span></span></span><span class="cp-tile-name">Table</span><span class="cp-tile-meta">Numbers that line up</span></a></li>
+      <li data-staggered-item><a class="card card-hover cp-tile" href="#stat"><span class="cp-tile-art" inert aria-hidden="true"><span class="cp-tile-mini"><span class="stat" style="text-align:center"><span class="stat-caption">Daily limit</span><span class="stat-value">2,160</span><span class="stat-caption">actions</span></span></span></span><span class="cp-tile-name">Stat</span><span class="cp-tile-meta">Caption, value, caption</span></a></li>
+      <li data-staggered-item><a class="card card-hover cp-tile" href="#progress"><span class="cp-tile-art" inert aria-hidden="true"><span class="cp-tile-mini"><span class="cp-row"><span class="progress-ring progress-ring-l" style="--value:.68"></span><span class="spinner spinner-l"></span></span></span></span><span class="cp-tile-name">Progress</span><span class="cp-tile-meta">Bar, ring, spinner, skeleton</span></a></li>
+      <li data-staggered-item><a class="card card-hover cp-tile" href="#feedback"><span class="cp-tile-art" inert aria-hidden="true"><span class="cp-tile-mini"><span class="toast cp-static" aria-hidden="true"><i data-sym="checkmark-circle"></i><span>Run saved.</span></span></span></span><span class="cp-tile-name">Feedback</span><span class="cp-tile-meta">Toast, banner, alert</span></a></li>
+      <li data-staggered-item><a class="card card-hover cp-tile" href="#menus"><span class="cp-tile-art" inert aria-hidden="true"><span class="cp-tile-mini"><span class="tooltip cp-static" style="position:static">Duplicate run</span><span class="btn btn-icon"><i data-sym="ellipsis"></i></span></span></span><span class="cp-tile-name">Menus</span><span class="cp-tile-meta">Menu, popover, tooltip</span></a></li>
+      <li data-staggered-item><a class="card card-hover cp-tile" href="#empty"><span class="cp-tile-art" inert aria-hidden="true"><span class="cp-tile-mini"><span class="empty-state-glyph" style="margin:0"><i data-sym="target"></i></span></span></span><span class="cp-tile-name">Empty state</span><span class="cp-tile-meta">What goes here, and how</span></a></li>
+      <li data-staggered-item><a class="card card-hover cp-tile" href="#kbd"><span class="cp-tile-art" inert aria-hidden="true"><span class="cp-tile-mini"><span class="cp-row cp-row-tight"><kbd class="kbd">&#8984;</kbd><kbd class="kbd">K</kbd></span></span></span><span class="cp-tile-name">Keys</span><span class="cp-tile-meta">Shortcut caps</span></a></li>
+      <li data-staggered-item><a class="card card-hover cp-tile" href="#divider"><span class="cp-tile-art" inert aria-hidden="true"><span class="cp-tile-mini"><span class="cp-m-lines"><i style="width:56%"></i><hr class="divider" style="margin:4px 0"><i style="width:78%"></i></span></span></span><span class="cp-tile-name">Divider</span><span class="cp-tile-meta">Rule, inset, vertical</span></a></li>
+      <li data-staggered-item><a class="card card-hover cp-tile" href="#glass"><span class="cp-tile-art" inert aria-hidden="true"><span class="cp-tile-mini"><span class="cp-m-art"><canvas data-art="aurora" data-art-seed="3" aria-hidden="true"></canvas><span class="btn btn-glass">Explore</span></span></span></span><span class="cp-tile-name">Glass controls</span><span class="cp-tile-meta">Only over something to bend</span></a></li>
+      <li data-staggered-item><a class="card card-hover cp-tile" href="#api"><span class="cp-tile-art" inert aria-hidden="true"><span class="cp-tile-mini"><span class="cp-m-code">UI.alert({&hellip;})</span><span class="cp-m-code" style="color:var(--label-2)">UI.toast(&lsquo;Saved.&rsquo;)</span></span></span><span class="cp-tile-name">The UI script</span><span class="cp-tile-meta">13 functions, 2 events</span></a></li>
+    </ul>
+  </div>
+</section>
+
+<!-- ═══════════════ ACTIONS ═══════════════ -->
+<section class="band" data-band="story" id="actions">
+  <div class="viewport-content">
+    <div class="cp-group-head">
+      <h2 class="t-section" data-reveal="up">Actions.</h2>
+      <p class="t-lede" data-reveal="up">The button is a 980px pill in four heights. We kept the pill, the heights and the paddings to the pixel, and added what a product needs: <strong>a loading state that keeps its width, a 44px target on every size, and one tinted primary per view.</strong></p>
+    </div>
+
+    <!-- BUTTONS -->
+    <article class="cp-family" id="buttons" aria-labelledby="buttons-h">
+      <header class="cp-fhead">
+        <h3 class="t-subtitle cp-fname" id="buttons-h">Buttons</h3>
+        <ul class="cp-fclasses"><li><code>.btn</code></li><li><code>.btn-primary</code></li><li><code>.btn-secondary</code></li><li><code>.btn-tinted</code></li><li><code>.btn-plain</code></li><li><code>.btn-icon</code></li><li><code>.btn-block</code></li><li><code>.btn-s/-m/-l/-xl</code></li></ul>
+        <p class="cp-flede t-body">Six variants in six states. Hover and pressed below are the <strong>real rules, forced</strong>, not lookalikes. Colours swap instantly; only round media buttons press.</p>
+      </header>
+      <div class="cp-pair" data-cp-twin data-stack data-cp-norail>
+        <div class="doc-specimen cp-spec" data-tone="light">
+          <div class="cp-matrix-wrap">
+            <div class="cp-matrix">
+              <span></span><span class="cp-mc">Rest</span><span class="cp-mc">Hover</span><span class="cp-mc">Pressed</span><span class="cp-mc">Focus</span><span class="cp-mc">Disabled</span><span class="cp-mc">Loading</span>
+              <span class="cp-mk">.btn</span>
+              <div><button class="btn" type="button">Buy</button></div><div><button class="btn" type="button" data-force="hover" tabindex="-1">Buy</button></div><div><button class="btn" type="button" data-force="active" tabindex="-1">Buy</button></div><div><button class="btn" type="button" data-force="focus" tabindex="-1">Buy</button></div><div><button class="btn" type="button" disabled>Buy</button></div><div><button class="btn" type="button" aria-busy="true" tabindex="-1">Buy</button></div>
+              <span class="cp-mk">.btn-primary</span>
+              <div><button class="btn btn-primary" type="button">Start a run</button></div><div><button class="btn btn-primary" type="button" data-force="hover" tabindex="-1">Start a run</button></div><div><button class="btn btn-primary" type="button" data-force="active" tabindex="-1">Start a run</button></div><div><button class="btn btn-primary" type="button" data-force="focus" tabindex="-1">Start a run</button></div><div><button class="btn btn-primary" type="button" disabled>Start a run</button></div><div><button class="btn btn-primary" type="button" aria-busy="true" tabindex="-1">Start a run</button></div>
+              <span class="cp-mk">.btn-secondary</span>
+              <div><button class="btn btn-secondary" type="button">Learn more</button></div><div><button class="btn btn-secondary" type="button" data-force="hover" tabindex="-1">Learn more</button></div><div><button class="btn btn-secondary" type="button" data-force="active" tabindex="-1">Learn more</button></div><div><button class="btn btn-secondary" type="button" data-force="focus" tabindex="-1">Learn more</button></div><div><button class="btn btn-secondary" type="button" disabled>Learn more</button></div><div><button class="btn btn-secondary" type="button" aria-busy="true" tabindex="-1">Learn more</button></div>
+              <span class="cp-mk">.btn-tinted</span>
+              <div><button class="btn btn-tinted" type="button">Add target</button></div><div><button class="btn btn-tinted" type="button" data-force="hover" tabindex="-1">Add target</button></div><div><button class="btn btn-tinted" type="button" data-force="active" tabindex="-1">Add target</button></div><div><button class="btn btn-tinted" type="button" data-force="focus" tabindex="-1">Add target</button></div><div><button class="btn btn-tinted" type="button" disabled>Add target</button></div><div><button class="btn btn-tinted" type="button" aria-busy="true" tabindex="-1">Add target</button></div>
+              <span class="cp-mk">.btn-plain</span>
+              <div><a class="btn btn-plain" href="#buttons">View pricing</a></div><div><a class="btn btn-plain" href="#buttons" data-force="hover" tabindex="-1">View pricing</a></div><div><a class="btn btn-plain" href="#buttons" data-force="active" tabindex="-1">View pricing</a></div><div><a class="btn btn-plain" href="#buttons" data-force="focus" tabindex="-1">View pricing</a></div><div><button class="btn btn-plain" type="button" disabled>View pricing</button></div><div><button class="btn btn-plain" type="button" aria-busy="true" tabindex="-1">View pricing</button></div>
+              <span class="cp-mk">.btn-icon</span>
+              <div><button class="btn btn-icon" type="button" aria-label="Add"><i data-sym="plus"></i></button></div><div><button class="btn btn-icon" type="button" data-force="hover" tabindex="-1" aria-label="Add"><i data-sym="plus"></i></button></div><div><button class="btn btn-icon" type="button" data-force="active" tabindex="-1" aria-label="Add"><i data-sym="plus"></i></button></div><div><button class="btn btn-icon" type="button" data-force="focus" tabindex="-1" aria-label="Add"><i data-sym="plus"></i></button></div><div><button class="btn btn-icon" type="button" disabled aria-label="Add"><i data-sym="plus"></i></button></div><div><button class="btn btn-icon" type="button" aria-busy="true" tabindex="-1" aria-label="Add"><i data-sym="plus"></i></button></div>
+            </div>
+          </div>
+          <div class="cp-sizes">
+            <figure><button class="btn btn-primary btn-s" type="button">Buy</button><figcaption>.btn-s &middot; 24</figcaption></figure>
+            <figure><button class="btn btn-primary btn-m" type="button">Buy</button><figcaption>.btn-m &middot; 36</figcaption></figure>
+            <figure><button class="btn btn-primary btn-l" type="button">View pricing</button><figcaption>.btn-l &middot; 44</figcaption></figure>
+            <figure><button class="btn btn-primary btn-xl" type="button">View pricing</button><figcaption>.btn-xl &middot; 56</figcaption></figure>
+            <figure><span class="cp-row"><button class="btn btn-icon btn-s" type="button" aria-label="Next"><i data-sym="chevron-right"></i></button><button class="btn btn-icon" type="button" aria-label="Next"><i data-sym="chevron-right"></i></button><button class="btn btn-icon btn-l" type="button" aria-label="Next"><i data-sym="chevron-right"></i></button><button class="btn btn-icon btn-xl" type="button" aria-label="Play"><i data-sym="play"></i></button></span><figcaption>.btn-icon &middot; 24 / 36 / 44 / 56</figcaption></figure>
+            <figure style="margin-inline-start:auto"><span class="cp-block"><button class="btn btn-primary btn-l btn-block" type="button">Continue</button><button class="btn btn-tinted btn-l btn-block" type="button">Save for later</button></span><figcaption>.btn-block &middot; stacks</figcaption></figure>
+          </div>
+        </div>
+      </div>
+      <div class="cp-detail">
+        <div class="cp-anatomy">
+          <h4 class="cp-sub">Anatomy</h4>
+          <dl class="doc-kv">
+            <dt>Heights</dt><dd>24 / 36 / 44 / 56 <span class="cp-src">reduced / base / elevated / super</span></dd>
+            <dt>Padding</dt><dd>4&times;11 / 9&times;16 / 12&times;22 / 18&times;31, border included</dd>
+            <dt>Type</dt><dd>12 / 14 / 17 / 17px, weight 400; 600 on glass</dd>
+            <dt>Min width</dt><dd>45 / 60 / 70 / 90</dd>
+            <dt>Shape</dt><dd>Capsule; stacked blocks 5 / 8 / 10 / 12 continuous</dd>
+            <dt>Hover, press</dt><dd>Fixed colours, no transition, no opacity</dd>
+            <dt>Press scale</dt><dd>.95 on round buttons only, on the press spring</dd>
+            <dt>Focus</dt><dd>2px accent ring, 3px off</dd>
+            <dt>Target</dt><dd>&ge; 44px on every size</dd>
+            <dt>Primary glow</dt><dd>0 8px 24px &minus;8px, own tone</dd>
+          </dl>
+          <p class="doc-note" data-kind="measured">A base button is 14&thinsp;&times;&thinsp;1.286 = 18px of line plus 9&thinsp;+&thinsp;9 of padding: exactly 36px, the same diameter as the round icon controls.</p>
+        </div>
+        <div class="cp-markup">
+          <h4 class="cp-sub">Markup</h4>
+<pre class="doc-code" data-lang="html"><code>&lt;button class="btn btn-primary btn-l"&gt;Start a run&lt;/button&gt;
+&lt;button class="btn btn-secondary btn-l"&gt;Learn more&lt;/button&gt;
+&lt;button class="btn btn-tinted"&gt;Add target&lt;/button&gt;
+&lt;button class="btn"&gt;Buy&lt;/button&gt;
+&lt;a class="btn btn-plain" href="#"&gt;View pricing&lt;/a&gt;
+&lt;button class="btn btn-icon" aria-label="Add"&gt;&lt;i data-sym="plus"&gt;&lt;/i&gt;&lt;/button&gt;
+
+&lt;!-- stacked, full width: rounded rectangles, not capsules --&gt;
+&lt;button class="btn btn-primary btn-l btn-block"&gt;Continue&lt;/button&gt;
+
+&lt;!-- states are attributes --&gt;
+&lt;button class="btn btn-primary" aria-busy="true"&gt;Saving&lt;/button&gt;
+&lt;button class="btn" disabled&gt;Buy&lt;/button&gt;</code></pre>
+        </div>
+      </div>
+      <div class="doc-dodont cp-dodont">
+        <div class="doc-do"><div class="doc-specimen"><div class="cp-row"><button class="btn btn-primary btn-l" type="button">Start a run</button><button class="btn btn-secondary btn-l" type="button">Learn more</button></div></div><p class="doc-verdict">One filled primary; the rest step down to outline or plain.</p></div>
+        <div class="doc-dont"><div class="doc-specimen"><div class="cp-row"><button class="btn btn-primary btn-l" type="button">Start a run</button><button class="btn btn-primary btn-l" type="button">Schedule</button></div></div><p class="doc-verdict">Two primaries side by side. The eye has nowhere to land.</p></div>
+      </div>
+    </article>
+
+    <!-- LINKS -->
+    <article class="cp-family" id="links" aria-labelledby="links-h">
+      <header class="cp-fhead">
+        <h3 class="t-subtitle cp-fname" id="links-h">Links</h3>
+        <ul class="cp-fclasses"><li><code>a</code></li><li><code>.link</code></li><li><code>.link-chevron</code></li><li><code>.btn-plain</code></li></ul>
+        <p class="cp-flede t-body">A link goes somewhere; a button does something. <strong>Prose links</strong> take the link ink and underline on hover; <strong>&ldquo;Learn more&rdquo; links</strong> carry a chevron and the size of the text they sit in.</p>
+      </header>
+      <div class="cp-pair" data-cp-twin>
+        <div class="doc-specimen cp-spec" data-tone="light">
+          <div class="cp-prose">
+            <p>Runs pay the start-up once, then act from the row. <a href="#links">How the log counts them</a> is written down.</p>
+            <p class="t-lede" style="font-size:inherit">Eight tasks off one list. <a class="link-chevron" href="#links">Learn more about runs</a></p>
+            <p class="cp-row"><a class="btn btn-plain" href="#links">View pricing</a><a class="btn btn-plain btn-l" href="#links">Compare plans</a><a class="link-chevron" href="#links" data-force="focus" tabindex="-1">Focused</a></p>
+          </div>
+        </div>
+      </div>
+      <div class="cp-detail">
+        <div class="cp-anatomy">
+          <h4 class="cp-sub">Anatomy</h4>
+          <dl class="doc-kv">
+            <dt>Ink</dt><dd><code>--link</code>, 4.5:1 on both grounds <span class="cp-src">role; #0066cc / #2997ff re-toned to the brand</span></dd>
+            <dt>Underline</dt><dd>On hover only, 0.14em offset</dd>
+            <dt>Chevron</dt><dd>0.4em wide, 0.22em gap, mirrors in RTL</dd>
+            <dt>Size</dt><dd>Inherits: 17/21 in body, 21/29 in a lockup</dd>
+            <dt>Focus</dt><dd>2px ring, 1px off (inline)</dd>
+          </dl>
+        </div>
+        <div class="cp-markup">
+          <h4 class="cp-sub">Markup</h4>
+<pre class="doc-code" data-lang="html"><code>&lt;!-- in running text: a bare anchor takes --link --&gt;
+&lt;p&gt;Read &lt;a href="docs.html"&gt;how the log counts&lt;/a&gt;.&lt;/p&gt;
+
+&lt;!-- the "Learn more &rsaquo;": inline, inherits the size around it --&gt;
+&lt;a class="link-chevron" href="#runs"&gt;Learn more about runs&lt;/a&gt;
+
+&lt;!-- as a control in a row of buttons: no inline padding --&gt;
+&lt;a class="btn btn-plain btn-l" href="#"&gt;Compare plans&lt;/a&gt;</code></pre>
+        </div>
+      </div>
+      <div class="doc-dodont cp-dodont">
+        <div class="doc-do"><div class="doc-specimen"><a class="link-chevron t-lede" href="#links" style="font-size:var(--t-17)">Learn more about runs</a></div><p class="doc-verdict">Name the destination in the link itself.</p></div>
+        <div class="doc-dont"><div class="doc-specimen"><span class="t-body">To learn about runs, <a class="link-chevron" href="#links">click here</a></span></div><p class="doc-verdict">&ldquo;Click here&rdquo; says nothing out of context, and screen readers list links out of context.</p></div>
+      </div>
+    </article>
+  </div>
+</section>
+
+<!-- ═══════════════ INPUT ═══════════════ -->
+<section class="band" data-band="utility" id="input">
+  <div class="viewport-content">
+    <div class="cp-group-head">
+      <h2 class="t-section" data-reveal="up">Input.</h2>
+      <p class="t-lede" data-reveal="up">Real form controls, drawn by CSS, so the label, the keyboard and the screen reader come for free. <strong>While you hold a switch or a slider, its knob lifts into a lens</strong> and springs back when you let go.</p>
+    </div>
+
+    <!-- FIELDS -->
+    <article class="cp-family" id="fields" aria-labelledby="fields-h">
+      <header class="cp-fhead">
+        <h3 class="t-subtitle cp-fname" id="fields-h">Fields, search, select, text</h3>
+        <ul class="cp-fclasses"><li><code>.form-field</code></li><li><code>input.field</code></li><li><code>.search</code></li><li><code>select.select</code></li><li><code>textarea.textarea</code></li><li><code>.field-help</code></li><li><code>.field-error</code></li></ul>
+        <p class="cp-flede t-body">The label sits above, help below, and <strong>an error replaces the help</strong> once <code>aria-invalid</code> is set. Search is a capsule; select is a compare dropdown.</p>
+      </header>
+      <div class="cp-pair" data-cp-twin>
+        <div class="doc-specimen cp-spec" data-tone="light">
+          <div class="cp-cols">
+            <div class="cp-stack">
+              <div class="form-field"><label for="f-handle">Project key</label><input class="field" id="f-handle" placeholder="@sample.name" aria-describedby="f-handle-h"><span class="field-help" id="f-handle-h">Letters, numbers, dots and underscores.</span></div>
+              <div class="form-field"><label for="f-cap">Daily task cap</label><input class="field" id="f-cap" value="24" inputmode="numeric" data-force="focus"><span class="field-help">Focused.</span></div>
+              <div class="form-field"><label for="f-proxy">Proxy</label><input class="field" id="f-proxy" value="socks5://10.0.0.8" aria-invalid="true" aria-describedby="f-proxy-e"><span class="field-help">Host and port.</span><span class="field-error" id="f-proxy-e">Add the port, for example :1080.</span></div>
+              <div class="form-field"><label for="f-region">Region</label><input class="field" id="f-region" value="eu-west" disabled></div>
+            </div>
+            <div class="cp-stack">
+              <div class="search"><input type="search" placeholder="Search projects" aria-label="Search projects"></div>
+              <div class="form-field"><label for="f-pace">Pace</label><select class="select" id="f-pace"><option>Calm</option><option selected>Steady</option><option>Brisk</option></select></div>
+              <div class="form-field"><label for="f-note">Note</label><textarea class="textarea" id="f-note" placeholder="Why this project?"></textarea></div>
+              <div class="cp-row"><input class="field field-s" style="width:120px" placeholder="Small 36" aria-label="Small field"><input class="field field-l" style="flex:1;min-width:120px" placeholder="Large 56" aria-label="Large field"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="cp-detail">
+        <div class="cp-anatomy">
+          <h4 class="cp-sub">Anatomy</h4>
+          <dl class="doc-kv">
+            <dt>Heights</dt><dd>36 / 44 / 56 <span class="cp-src">compare dropdown 44; checkout 56</span></dd>
+            <dt>Boundary</dt><dd>1px <code>--label-3</code>, 3:1 for a control edge <span class="cp-src">#86868b</span></dd>
+            <dt>Corner</dt><dd>Continuous 12 (8 at 36); search and select are capsules</dd>
+            <dt>Text</dt><dd>17px; placeholder <code>--label-2</code> at 4.5:1</dd>
+            <dt>Invalid</dt><dd><code>--bad</code> edge, a 5% wash, 12px error text <span class="cp-src">ours</span></dd>
+            <dt>Select</dt><dd>Padding 24 start / 45 end, stroked chevron</dd>
+          </dl>
+          <p class="doc-note" data-kind="chosen">A placeholder of #86868b holds only 3.3:1, so Fluid Design Open uses the secondary label so a hint at 17px stays readable.</p>
+        </div>
+        <div class="cp-markup">
+          <h4 class="cp-sub">Markup</h4>
+<pre class="doc-code" data-lang="html"><code>&lt;div class="form-field"&gt;
+  &lt;label for="proxy"&gt;Proxy&lt;/label&gt;
+  &lt;input class="field" id="proxy"
+         aria-invalid="true" aria-describedby="proxy-err"&gt;
+  &lt;span class="field-help"&gt;Host and port.&lt;/span&gt;
+  &lt;span class="field-error" id="proxy-err"&gt;Add the port, e.g. :1080.&lt;/span&gt;
+&lt;/div&gt;
+
+&lt;div class="search"&gt;
+  &lt;input type="search" placeholder="Search" aria-label="Search projects"&gt;
+&lt;/div&gt;
+&lt;select class="select" aria-label="Pace"&gt;&lt;option&gt;Steady&lt;/option&gt;&lt;/select&gt;
+&lt;textarea class="textarea" aria-label="Note"&gt;&lt;/textarea&gt;
+&lt;input class="field field-s" aria-label="Small"&gt;  &lt;!-- .field-l = 56 --&gt;</code></pre>
+        </div>
+      </div>
+      <div class="doc-dodont cp-dodont">
+        <div class="doc-do"><div class="doc-specimen"><div class="form-field" style="width:min(280px,100%)"><label for="dd-f1">Project key</label><input class="field" id="dd-f1" placeholder="@sample.name"><span class="field-help">Letters, numbers and dots.</span></div></div><p class="doc-verdict">A visible label that stays when the field fills.</p></div>
+        <div class="doc-dont"><div class="doc-specimen"><input class="field" style="width:min(280px,100%)" placeholder="Project key (letters, numbers)" aria-label="Project key"></div><p class="doc-verdict">The placeholder as the only label disappears the moment someone types.</p></div>
+      </div>
+    </article>
+
+    <!-- TOGGLES -->
+    <article class="cp-family" id="toggles" aria-labelledby="toggles-h">
+      <header class="cp-fhead">
+        <h3 class="t-subtitle cp-fname" id="toggles-h">Switch, check, radio</h3>
+        <ul class="cp-fclasses"><li><code>input.switch[role=switch]</code></li><li><code>input.check</code></li><li><code>input.radio</code></li><li><code>label.choice</code></li><li><code>.switch-accent</code></li></ul>
+        <p class="cp-flede t-body">Press and hold a switch: the knob <strong>stretches toward its travel and turns to glass</strong>, then lands on the toggle spring. A tick draws itself, because a tick that draws is an acknowledgement.</p>
+      </header>
+      <div class="cp-pair" data-cp-twin>
+        <div class="doc-specimen cp-spec" data-tone="light">
+          <div class="cp-stack">
+            <div class="cp-row">
+              <label class="choice"><input class="switch" type="checkbox" role="switch"> Off</label>
+              <label class="choice"><input class="switch" type="checkbox" role="switch" checked> On</label>
+              <label class="choice"><input class="switch" type="checkbox" role="switch" data-force="active" tabindex="-1"> Held</label>
+              <label class="choice"><input class="switch" type="checkbox" role="switch" checked disabled> Locked</label>
+              <label class="choice"><input class="switch switch-accent" type="checkbox" role="switch" checked> Accent</label>
+            </div>
+            <hr class="divider" style="margin:4px 0">
+            <div class="cp-row">
+              <label class="choice"><input class="check" type="checkbox"> Empty runs</label>
+              <label class="choice"><input class="check" type="checkbox" checked> Only done</label>
+              <label class="choice"><input class="check" type="checkbox" data-cp-mixed> Some reviewers</label>
+              <label class="choice"><input class="check" type="checkbox" checked disabled> Required</label>
+            </div>
+            <div class="cp-row" role="radiogroup" aria-label="Action">
+              <label class="choice"><input class="radio" type="radio" name="cp-act" checked> Review</label>
+              <label class="choice"><input class="radio" type="radio" name="cp-act"> Like</label>
+              <label class="choice"><input class="radio" type="radio" name="cp-act" disabled> Comment</label>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="cp-detail">
+        <div class="cp-anatomy">
+          <h4 class="cp-sub">Anatomy</h4>
+          <dl class="doc-kv">
+            <dt>Switch</dt><dd>63&times;28 track, 37&times;24 capsule knob, 22px travel <span class="cp-src">geometry as built, not measured</span></dd>
+            <dt>Travel</dt><dd>Toggle spring .32&thinsp;s, bounce .15 <span class="cp-src">ours</span></dd>
+            <dt>Held knob</dt><dd>Stretches to 45, lifts 1.14, clears to glass, on the hold spring</dd>
+            <dt>Track</dt><dd>Two fixed colours: <code>--fill-1</code> off, <code>--sys-green</code> on</dd>
+            <dt>Check, radio</dt><dd>22px; 3:1 ring at rest; accent solid when on; tick draws in 200&thinsp;ms <span class="cp-src">ours</span></dd>
+            <dt>Target</dt><dd><code>label.choice</code> makes a 44px row</dd>
+          </dl>
+          <p class="doc-note" data-kind="chosen">The switch and slider numbers are the geometry as built, not measured from a reference.</p>
+        </div>
+        <div class="cp-markup">
+          <h4 class="cp-sub">Markup</h4>
+<pre class="doc-code" data-lang="html"><code>&lt;label class="choice"&gt;
+  &lt;input class="switch" type="checkbox" role="switch" checked&gt; Runs
+&lt;/label&gt;
+&lt;label class="choice"&gt;
+  &lt;input class="check" type="checkbox"&gt; Only done
+&lt;/label&gt;
+
+&lt;div role="radiogroup" aria-label="Action"&gt;
+  &lt;label class="choice"&gt;
+    &lt;input class="radio" type="radio" name="act" checked&gt; Review&lt;/label&gt;
+  &lt;label class="choice"&gt;
+    &lt;input class="radio" type="radio" name="act"&gt; Like&lt;/label&gt;
+&lt;/div&gt;
+
+&lt;script&gt;checkbox.indeterminate = true; /* the mixed state */&lt;/script&gt;</code></pre>
+        </div>
+      </div>
+      <div class="doc-dodont cp-dodont">
+        <div class="doc-do"><div class="doc-specimen"><ul class="list list-inset" style="width:min(320px,100%)"><li><label class="row"><span class="row-title">Pause at the daily limit</span><input class="switch" type="checkbox" role="switch" checked></label></li></ul></div><p class="doc-verdict">A switch for a setting that takes effect the moment it flips.</p></div>
+        <div class="doc-dont"><div class="doc-specimen"><div class="cp-stack" style="width:min(320px,100%)"><label class="choice"><input class="switch" type="checkbox" role="switch"> Accept the terms</label><button class="btn btn-primary" type="button" style="justify-self:start">Submit</button></div></div><p class="doc-verdict">A switch that does nothing until Submit. That is a checkbox.</p></div>
+      </div>
+    </article>
+
+    <!-- SLIDERS -->
+    <article class="cp-family" id="sliders" aria-labelledby="sliders-h">
+      <header class="cp-fhead">
+        <h3 class="t-subtitle cp-fname" id="sliders-h">Slider, detent, stepper</h3>
+        <ul class="cp-fclasses"><li><code>input.slider</code></li><li><code>.slider-detent</code></li><li><code>.slider-detent-labels</code></li><li><code>.stepper</code></li></ul>
+        <p class="cp-flede t-body">A slider for a feel, a detent slider for a few named places, a stepper for an exact small number. <strong>Drag the detent past a magnet</strong> and the thumb widens, then snaps home.</p>
+      </header>
+      <div class="cp-pair" data-cp-twin>
+        <div class="doc-specimen cp-spec" data-tone="light">
+          <div class="cp-stack">
+            <label class="cp-cap" for="sl-tint">Glass tint</label>
+            <input class="slider" type="range" id="sl-tint" min="0" max="100" value="62">
+            <input class="slider" type="range" min="0" max="100" value="30" aria-label="Held slider" data-force="active" tabindex="-1">
+            <input class="slider" type="range" min="0" max="100" value="80" disabled aria-label="Disabled slider">
+            <p class="cp-cap" id="det-l">Fold &middot; magnets at closed, landing and open</p>
+            <div><div class="slider-detent" aria-labelledby="det-l" data-detents="0,0.3333,1" data-labels="Closed,Landing,Open" data-value="0.3333"><span data-detent-thumb></span></div>
+            <div class="cp-detent-labels" aria-hidden="true"><span style="--at:0">Closed</span><span style="--at:.3333">Landing</span><span style="--at:1">Open</span></div></div>
+            <div class="cp-row">
+              <div class="stepper" data-min="1" data-max="12" data-value="8" aria-label="Leads per run"><button></button><output>8</output><button></button></div>
+              <div class="stepper" data-min="0" data-max="5" data-value="5" aria-label="Runs per hour"><button></button><button></button></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="cp-detail">
+        <div class="cp-anatomy">
+          <h4 class="cp-sub">Anatomy</h4>
+          <dl class="doc-kv">
+            <dt>Slider</dt><dd>6px capsule track, 38&times;24 thumb, lifts 1.22 while held <span class="cp-src">geometry as built, not measured</span></dd>
+            <dt>Detent track</dt><dd>367&times;17, <code>--separator-opaque</code> <span class="cp-src">fold slider</span></dd>
+            <dt>Detent thumb</dt><dd>60&times;40 capsule, 2px ring, 0 2px 7px shadow</dd>
+            <dt>Stretch</dt><dd>Widens by up to 28px, squashes 1&thinsp;&minus;&thinsp;.0025&middot;t</dd>
+            <dt>Magnets</dt><dd>At 0, &#8531;, 1; radius .08, strength .8</dd>
+            <dt>Stepper</dt><dd>36 tall, 48px halves; repeats after 450&thinsp;ms, then every 90 &rarr; 45&thinsp;ms <span class="cp-src">ours</span></dd>
+            <dt>Keys</dt><dd>Arrows step, Home and End jump <span class="cp-src">ARIA</span></dd>
+          </dl>
+        </div>
+        <div class="cp-markup">
+          <h4 class="cp-sub">Markup</h4>
+<pre class="doc-code" data-lang="html"><code>&lt;input class="slider" type="range" min="0" max="100" value="62"
+       aria-label="Tint"&gt;
+
+&lt;div class="slider-detent" aria-label="Fold" data-detents="0,0.3333,1"
+     data-labels="Closed,Landing,Open" data-value="0.3333"&gt;
+  &lt;span data-detent-thumb&gt;&lt;/span&gt;
+&lt;/div&gt;
+
+&lt;div class="stepper" data-min="1" data-max="12" data-value="8"
+     aria-label="Leads per run"&gt;
+  &lt;button&gt;&lt;/button&gt;&lt;output&gt;8&lt;/output&gt;&lt;button&gt;&lt;/button&gt;
+&lt;/div&gt;</code></pre>
+<pre class="doc-code" data-lang="js"><code>stepperEl.addEventListener('change', e =&gt; save(e.detail.value));
+// detail: value, index, label
+detentEl.addEventListener('change', e =&gt; fold(e.detail.label));
+UI.stepper(stepperEl).set(10);</code></pre>
+        </div>
+      </div>
+      <div class="doc-dodont cp-dodont">
+        <div class="doc-do"><div class="doc-specimen"><div class="cp-row"><span class="t-body">Leads per run</span><div class="stepper" data-min="1" data-max="12" data-value="8" aria-label="Leads per run, example"><button></button><output>8</output><button></button></div></div></div><p class="doc-verdict">A stepper when the exact count matters and the range is small.</p></div>
+        <div class="doc-dont"><div class="doc-specimen"><div class="cp-stack" style="width:min(280px,100%)"><span class="t-body">Leads per run</span><input class="slider" type="range" min="1" max="12" value="8" aria-label="Leads per run, slider example"></div></div><p class="doc-verdict">A slider for an exact small integer: nobody can land on 8.</p></div>
+      </div>
+    </article>
+
+    <!-- SEGMENTED -->
+    <article class="cp-family" id="segmented" aria-labelledby="segmented-h">
+      <header class="cp-fhead">
+        <h3 class="t-subtitle cp-fname" id="segmented-h">Segmented control</h3>
+        <ul class="cp-fclasses"><li><code>.segmented[role=tablist|radiogroup]</code></li><li><code>.segmented-l</code></li><li><code>.segmented-glass</code></li><li><code>.segmented-indicator</code></li></ul>
+        <p class="cp-flede t-body">The tab switcher: the ink pill slides first, and <strong>the label inverts only once the pill has arrived</strong>. Arrow keys move the selection; with <code>aria-controls</code> the panels follow. The glass variant is in <a href="#glass">Glass controls</a>.</p>
+      </header>
+      <div class="cp-pair" data-cp-twin>
+        <div class="doc-specimen cp-spec" data-tone="light">
+          <div class="cp-stack" style="justify-items:center;text-align:center">
+            <div class="segmented" role="tablist" aria-label="Camera features">
+              <button role="tab" aria-selected="true" aria-controls="seg-p1">Smart Take</button>
+              <button role="tab" aria-controls="seg-p2">Duo Preview</button>
+              <button role="tab" aria-controls="seg-p3">Kid Cue</button>
+            </div>
+            <p class="t-caption" id="seg-p1" role="tabpanel" style="color:var(--label-2);max-width:360px"><b style="color:var(--label);font-weight:600">Smart Take.</b> Waits until everyone is ready, then takes the picture.</p>
+            <p class="t-caption" id="seg-p2" role="tabpanel" hidden style="color:var(--label-2);max-width:360px"><b style="color:var(--label);font-weight:600">Duo Preview.</b> Subjects see themselves on the outer display.</p>
+            <p class="t-caption" id="seg-p3" role="tabpanel" hidden style="color:var(--label-2);max-width:360px"><b style="color:var(--label);font-weight:600">Kid Cue.</b> A small animation draws young eyes to the lens.</p>
+            <div class="segmented segmented-l" role="radiogroup" aria-label="Range"><button role="radio" aria-checked="true">Day</button><button role="radio">Week</button><button role="radio">Month</button></div>
+            <div class="segmented" aria-label="Density"><button aria-pressed="true">Cosy</button><button>Compact</button></div>
+          </div>
+        </div>
+      </div>
+      <div class="cp-detail">
+        <div class="cp-anatomy">
+          <h4 class="cp-sub">Anatomy</h4>
+          <dl class="doc-kv">
+            <dt>Platter</dt><dd>44 tall, 4px padding (56 / 6 for <code>-l</code>), capsule <span class="cp-src">tab navigation</span></dd>
+            <dt>Pill</dt><dd>36 tall, the ink colour; label inverts</dd>
+            <dt>Slide</dt><dd>320&thinsp;ms ease-out on translate and width <span class="cp-src">left and width</span></dd>
+            <dt>Label flip</dt><dd>After 160&thinsp;ms, over 160&thinsp;ms ease-in</dd>
+            <dt>Rest labels</dt><dd>14/18 at 80% ink, 100% on hover in 100&thinsp;ms</dd>
+            <dt>Glass travel</dt><dd>Selection spring .40&thinsp;s, bounce .15</dd>
+            <dt>Overflow</dt><dd>Scrolls under a 22px edge fade on phones</dd>
+          </dl>
+          <p class="doc-note" data-kind="rule">Before the script measures, the selected item paints the pill itself, so a segmented control never loads with a pill flying in from the left.</p>
+        </div>
+        <div class="cp-markup">
+          <h4 class="cp-sub">Markup</h4>
+<pre class="doc-code" data-lang="html"><code>&lt;div class="segmented" role="tablist" aria-label="Camera features"&gt;
+  &lt;button role="tab" aria-selected="true" aria-controls="p1"&gt;Smart&lt;/button&gt;
+  &lt;button role="tab" aria-controls="p2"&gt;Duo Preview&lt;/button&gt;
+&lt;/div&gt;
+&lt;p id="p1" role="tabpanel"&gt;&hellip;&lt;/p&gt;
+&lt;p id="p2" role="tabpanel" hidden&gt;&hellip;&lt;/p&gt;
+
+&lt;!-- a choice rather than a view: radiogroup + aria-checked --&gt;
+&lt;div class="segmented segmented-l" role="radiogroup" aria-label="Range"&gt;
+  &lt;button role="radio" aria-checked="true"&gt;Day&lt;/button&gt;
+  &lt;button role="radio"&gt;Week&lt;/button&gt;
+&lt;/div&gt;</code></pre>
+<pre class="doc-code" data-lang="js"><code>// FG3.boot() already wired it: listen, or drive it
+el.addEventListener('change', e =&gt; show(e.detail.index));  // {index, value, item}
+UI.segmented(el).select(2, { focus: true });</code></pre>
+        </div>
+      </div>
+      <div class="doc-dodont cp-dodont">
+        <div class="doc-do"><div class="doc-specimen"><div class="segmented" role="radiogroup" aria-label="Range example"><button role="radio" aria-checked="true">Day</button><button role="radio">Week</button><button role="radio">Month</button></div></div><p class="doc-verdict">Two to five short, equal choices of one kind.</p></div>
+        <div class="doc-dont"><div class="doc-specimen"><div class="segmented" aria-label="Actions example"><button aria-pressed="true">Save</button><button>Duplicate</button><button>Delete</button></div></div><p class="doc-verdict">Actions dressed as a choice. A segment stays selected; an action happens once.</p></div>
+      </div>
+    </article>
+  </div>
+</section>
+
+<!-- ═══════════════ STATUS ═══════════════ -->
+<section class="band" data-band="story" id="status">
+  <div class="viewport-content">
+    <div class="cp-group-head">
+      <h2 class="t-section" data-reveal="up">Status.</h2>
+      <p class="t-lede" data-reveal="up">Small things that say what is true right now. <strong>Chips choose, badges state, a status pill reports and pulses while it is live.</strong> Motion that reports state keeps moving under reduced motion, just slower.</p>
+    </div>
+
+    <!-- CHIPS -->
+    <article class="cp-family" id="chips" aria-labelledby="chips-h">
+      <header class="cp-fhead">
+        <h3 class="t-subtitle cp-fname" id="chips-h">Chips, tokens, badges, status pills</h3>
+        <ul class="cp-fclasses"><li><code>.chip</code></li><li><code>.chip-s</code></li><li><code>.token</code></li><li><code>.token-remove</code></li><li><code>.badge</code></li><li><code>.badge-ok/-warn/-bad/-accent</code></li><li><code>.badge-solid</code></li><li><code>.badge-count</code></li><li><code>.badge-new</code></li><li><code>.pill-status[data-state]</code></li></ul>
+        <p class="cp-flede t-body">A chip is a filter you press; the current one becomes the ink pill. A token is a value someone entered. A badge is a word, never a button. <strong>Semantic tints pair the wash with its strong ink</strong>, so every one holds 4.5:1.</p>
+      </header>
+      <div class="cp-pair" data-cp-twin>
+        <div class="doc-specimen cp-spec" data-tone="light">
+          <div class="cp-stack">
+            <div class="cp-row">
+              <button class="chip" aria-pressed="true">Overview</button>
+              <button class="chip" aria-pressed="false">Reviewers</button>
+              <button class="chip" aria-pressed="false" data-force="hover" tabindex="-1">Hover</button>
+              <button class="chip" aria-pressed="false"><i data-sym="sparkles"></i> Suggested</button>
+              <button class="chip chip-s" aria-pressed="false">Small</button>
+            </div>
+            <div class="cp-row">
+              <span class="token">@sample.trail<button class="token-remove" aria-label="Remove @sample.trail"></button></span>
+              <span class="token">#running<button class="token-remove" aria-label="Remove #running"></button></span>
+              <span class="token">Europe</span>
+            </div>
+            <div class="cp-row cp-row-tight">
+              <span class="badge">Draft</span><span class="badge badge-ok">Done</span><span class="badge badge-warn">Cooling</span><span class="badge badge-bad">Blocked</span><span class="badge badge-accent">Beta</span>
+              <span class="badge badge-solid badge-bad">3 errors</span><span class="badge badge-count">12</span><span class="badge badge-new">New</span>
+            </div>
+            <div class="cp-row cp-row-tight">
+              <span class="pill-status" data-state="live">Live</span><span class="pill-status" data-state="ok">Healthy</span><span class="pill-status" data-state="warn">Throttled</span><span class="pill-status" data-state="bad">Stopped</span><span class="pill-status">Idle</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="cp-detail">
+        <div class="cp-anatomy">
+          <h4 class="cp-sub">Anatomy</h4>
+          <dl class="doc-kv">
+            <dt>Chip</dt><dd>36 tall, 15px sides, 1px ring, 14px; current = ink pill</dd>
+            <dt>Token</dt><dd>28 tall, accent wash, 22px remove control <span class="cp-src">ours</span></dd>
+            <dt>Badge</dt><dd>12/16 600, corner 6 continuous, 3&times;9 padding</dd>
+            <dt>Neutral badge</dt><dd><code>--fill-2</code> under <code>--label-2-on-fill</code> <span class="cp-src">rgba(29,29,31,.07) / #424245</span></dd>
+            <dt>Count</dt><dd>20px red capsule, tabular digits</dd>
+            <dt>New</dt><dd>Text only, the warm ink</dd>
+            <dt>Status</dt><dd>28 tall, 8px dot; live pulses every 1.6&thinsp;s <span class="cp-src">ours</span></dd>
+          </dl>
+        </div>
+        <div class="cp-markup">
+          <h4 class="cp-sub">Markup</h4>
+<pre class="doc-code" data-lang="html"><code>&lt;button class="chip" aria-pressed="true"&gt;Overview&lt;/button&gt;
+&lt;button class="chip" aria-pressed="false"&gt;Reviewers&lt;/button&gt;
+
+&lt;span class="token"&gt;@sample.trail
+  &lt;button class="token-remove" aria-label="Remove @sample.trail"&gt;&lt;/button&gt;
+&lt;/span&gt;
+
+&lt;span class="badge badge-ok"&gt;Done&lt;/span&gt;
+&lt;span class="badge badge-solid badge-bad"&gt;3 errors&lt;/span&gt;
+&lt;span class="badge badge-count"&gt;12&lt;/span&gt;
+
+&lt;!-- data-state: live ok warn bad idle --&gt;
+&lt;span class="pill-status" data-state="live"&gt;Live&lt;/span&gt;</code></pre>
+        </div>
+      </div>
+      <div class="doc-dodont cp-dodont">
+        <div class="doc-do"><div class="doc-specimen"><div class="cp-row"><span class="pill-status" data-state="bad">Stopped</span><span class="pill-status" data-state="ok">Healthy</span></div></div><p class="doc-verdict">A dot and a word. The state reads without the colour.</p></div>
+        <div class="doc-dont"><div class="doc-specimen"><div class="cp-row"><span class="badge badge-solid badge-bad" style="min-width:22px">&nbsp;</span><span class="badge badge-solid badge-ok" style="min-width:22px">&nbsp;</span></div></div><p class="doc-verdict">Colour alone. One reader in twelve cannot tell these apart.</p></div>
+      </div>
+    </article>
+
+    <!-- AVATARS -->
+    <article class="cp-family" id="avatars" aria-labelledby="avatars-h">
+      <header class="cp-fhead">
+        <h3 class="t-subtitle cp-fname" id="avatars-h">Avatars</h3>
+        <ul class="cp-fclasses"><li><code>.avatar</code></li><li><code>.avatar-s/-l/-xl</code></li><li><code>[data-status]</code></li><li><code>.avatar-stack</code></li></ul>
+        <p class="cp-flede t-body">Initials on the neutral fill, as in a contacts list, so a stack of people reads as a group and not as confetti. <strong>Status is a dot with a ring cut from the ground.</strong></p>
+      </header>
+      <div class="cp-pair" data-cp-twin>
+        <div class="doc-specimen cp-spec" data-tone="light">
+          <div class="cp-stack" style="justify-items:center">
+            <div class="cp-row" style="align-items:flex-end">
+              <span class="avatar avatar-s">AD</span>
+              <span class="avatar" data-status="online">BD</span>
+              <span class="avatar avatar-l" data-status="away">CD</span>
+              <span class="avatar avatar-xl" data-status="busy">DD</span>
+              <span class="avatar avatar-xl cp-avatar-art" aria-label="Photo"><canvas data-art="ember" data-art-seed="9" aria-hidden="true"></canvas></span>
+            </div>
+            <div class="cp-row">
+              <span class="avatar-stack"><span class="avatar">A</span><span class="avatar">B</span><span class="avatar">C</span><span class="avatar">+4</span></span>
+              <span class="t-caption" style="color:var(--label-2)">aurora, basil, cobalt and four more</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="cp-detail">
+        <div class="cp-anatomy">
+          <h4 class="cp-sub">Anatomy</h4>
+          <dl class="doc-kv">
+            <dt>Sizes</dt><dd>24 / 36 / 44 / 56 <span class="cp-src">the icon-control ramp</span></dd>
+            <dt>Fill</dt><dd>Opaque #e8e8ed / #333336, so a stack can overlap <span class="cp-src">control fill</span></dd>
+            <dt>Initials</dt><dd>40% of the size, 600, on-fill ink <span class="cp-src">ours</span></dd>
+            <dt>Status dot</dt><dd>28% of the size, 2px ring in the ground <span class="cp-src">ours</span></dd>
+            <dt>Stack overlap</dt><dd>28% of the size <span class="cp-src">ours</span></dd>
+          </dl>
+          <p class="doc-note">The photo here is ART3 standing in for a picture: Fluid Design Open ships no photographs of people.</p>
+        </div>
+        <div class="cp-markup">
+          <h4 class="cp-sub">Markup</h4>
+<pre class="doc-code" data-lang="html"><code>&lt;span class="avatar avatar-l" data-status="online"&gt;AD&lt;/span&gt;
+&lt;span class="avatar"&gt;&lt;img src="face.jpg" alt="aurora.demo"&gt;&lt;/span&gt;
+
+&lt;span class="avatar-stack"&gt;
+  &lt;span class="avatar"&gt;A&lt;/span&gt;&lt;span class="avatar"&gt;B&lt;/span&gt;&lt;span class="avatar"&gt;+4&lt;/span&gt;
+&lt;/span&gt;
+&lt;!-- on another ground, match the ring: --&gt;
+&lt;span class="avatar-stack" style="--avatar-ring: var(--bg-2)"&gt;&hellip;&lt;/span&gt;</code></pre>
+        </div>
+      </div>
+      <div class="doc-dodont cp-dodont">
+        <div class="doc-do"><div class="doc-specimen"><span class="avatar-stack"><span class="avatar avatar-l">A</span><span class="avatar avatar-l">B</span><span class="avatar avatar-l">C</span></span></div><p class="doc-verdict">One neutral fill. People are distinguished by their initials.</p></div>
+        <div class="doc-dont"><div class="doc-specimen"><span class="avatar-stack"><span class="avatar avatar-l" style="background:color-mix(in srgb,var(--sys-pink) 30%,var(--c-surface));color:var(--label)">A</span><span class="avatar avatar-l" style="background:color-mix(in srgb,var(--sys-yellow) 40%,var(--c-surface));color:var(--label)">B</span><span class="avatar avatar-l" style="background:color-mix(in srgb,var(--sys-teal) 30%,var(--c-surface));color:var(--label)">C</span></span></div><p class="doc-verdict">A hue per person. Colour stops meaning status, and nobody can learn the key.</p></div>
+      </div>
+    </article>
+
+    <!-- PROGRESS -->
+    <article class="cp-family" id="progress" aria-labelledby="progress-h">
+      <header class="cp-fhead">
+        <h3 class="t-subtitle cp-fname" id="progress-h">Progress, ring, spinner, skeleton</h3>
+        <ul class="cp-fclasses"><li><code>progress.progress</code></li><li><code>.progress-ring</code></li><li><code>.spinner</code></li><li><code>.skeleton</code></li><li><code>UI.progress()</code></li></ul>
+        <p class="cp-flede t-body">Show how far when you know, and only that it is working when you do not. The bar and ring travel on the smooth spring; <strong>press Advance</strong> and watch both land.</p>
+      </header>
+      <div class="cp-pair" data-cp-twin>
+        <div class="doc-specimen cp-spec" data-tone="light">
+          <div class="cp-cols">
+            <div class="cp-stack">
+              <progress class="progress" data-cp-prog max="1" value=".42" aria-label="Upload"></progress>
+              <progress class="progress progress-l" max="1" value=".8" aria-label="Sync"></progress>
+              <progress class="progress" aria-label="Working"></progress>
+              <div class="cp-row">
+                <span class="progress-ring progress-ring-s" data-value=".5" aria-label="Half"></span>
+                <span class="progress-ring" data-cp-prog data-value=".42" aria-label="Daily limit"><span class="cp-ring-num">42</span></span>
+                <span class="progress-ring progress-ring-l" data-cp-prog data-value=".42" aria-label="Warm-up"><span class="cp-ring-num">42</span></span>
+                <span class="progress-ring" data-indeterminate aria-label="Syncing"></span>
+              </div>
+              <div class="cp-row">
+                <span class="spinner" role="status" aria-label="Loading"></span>
+                <span class="spinner spinner-l" role="status" aria-label="Loading"></span>
+                <span class="spinner spinner-12" role="status" aria-label="Loading"></span>
+                <button class="btn btn-secondary btn-s" type="button" data-cp-advance>Advance</button>
+              </div>
+            </div>
+            <div class="card" aria-busy="true" aria-label="Loading a card">
+              <div class="cp-row" style="flex-wrap:nowrap"><span class="skeleton skeleton-circle" style="width:44px"></span><div style="flex:1"><span class="skeleton skeleton-text"></span><span class="skeleton skeleton-text"></span></div></div>
+              <span class="skeleton" style="height:96px;margin-top:16px"></span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="cp-detail">
+        <div class="cp-anatomy">
+          <h4 class="cp-sub">Anatomy</h4>
+          <dl class="doc-kv">
+            <dt>Bar</dt><dd>4px capsule (6 for <code>-l</code>), smooth spring</dd>
+            <dt>Indeterminate</dt><dd>A 40% bar sweeping every 1.4&thinsp;s <span class="cp-src">ours</span></dd>
+            <dt>Ring</dt><dd>24 / 36 / 56 with 3 / 4 / 6 strokes, round cap <span class="cp-src">ours</span></dd>
+            <dt>Spinner</dt><dd>8 capsule spokes, one turn in 800&thinsp;ms in 8 steps</dd>
+            <dt>Skeleton</dt><dd>Shimmer 1.5&thinsp;s; the container carries <code>aria-busy</code> <span class="cp-src">ours</span></dd>
+            <dt>Reduced motion</dt><dd>Spinner 1.6&thinsp;s, shimmer 3&thinsp;s: slower, never stopped <span class="cp-src">SPEC principle 5</span></dd>
+          </dl>
+        </div>
+        <div class="cp-markup">
+          <h4 class="cp-sub">Markup</h4>
+<pre class="doc-code" data-lang="html"><code>&lt;progress class="progress" max="1" value=".42" aria-label="Upload"&gt;&lt;/progress&gt;
+&lt;!-- no value: it sweeps --&gt;
+&lt;progress class="progress" aria-label="Working"&gt;&lt;/progress&gt;
+
+&lt;span class="progress-ring" data-value=".57" aria-label="Daily limit"&gt;57&lt;/span&gt;
+&lt;span class="progress-ring" data-indeterminate aria-label="Syncing"&gt;&lt;/span&gt;
+&lt;span class="spinner" role="status" aria-label="Loading"&gt;&lt;/span&gt;
+
+&lt;div class="card" aria-busy="true"&gt;
+  &lt;span class="skeleton skeleton-text"&gt;&lt;/span&gt;
+  &lt;span class="skeleton skeleton-text"&gt;&lt;/span&gt;
+&lt;/div&gt;</code></pre>
+<pre class="doc-code" data-lang="js"><code>UI.progress(ringEl, 0.8);    // --value + aria-valuenow, on the smooth spring
+UI.progress(barEl, null);    // indeterminate</code></pre>
+        </div>
+      </div>
+      <div class="doc-dodont cp-dodont">
+        <div class="doc-do"><div class="doc-specimen"><div class="cp-stack" style="width:min(280px,100%)"><span class="t-caption" style="color:var(--label-2)">Step 2 of 3 &middot; Checking the proxy</span><progress class="progress" max="3" value="2" aria-label="Setup progress"></progress></div></div><p class="doc-verdict">You know the steps, so show how far along it is.</p></div>
+        <div class="doc-dont"><div class="doc-specimen"><div class="cp-row"><span class="spinner spinner-l" role="status" aria-label="Loading, example"></span><span class="t-caption" style="color:var(--label-2)">Setting up&hellip;</span></div></div><p class="doc-verdict">A spinner for a known three-step job hides the only thing people want to know.</p></div>
+      </div>
+    </article>
+  </div>
+</section>
+
+<!-- ═══════════════ SURFACES ═══════════════ -->
+<section class="band" data-band="utility" id="surfaces">
+  <div class="viewport-content">
+    <div class="cp-group-head">
+      <h2 class="t-section" data-reveal="up">Surfaces.</h2>
+      <p class="t-lede" data-reveal="up">Content is opaque. A card is <strong>the band&rsquo;s other ground</strong> &mdash; white on grey, grey on white, #1d1d1f on black &mdash; with a 28px content corner, drawn continuous.</p>
+    </div>
+
+    <!-- CARDS -->
+    <article class="cp-family" id="cards" aria-labelledby="cards-h">
+      <header class="cp-fhead">
+        <h3 class="t-subtitle cp-fname" id="cards-h">Cards, tiles, media</h3>
+        <ul class="cp-fclasses"><li><code>.card</code></li><li><code>.card-hover</code></li><li><code>.card-action</code></li><li><code>.card-media</code></li><li><code>.tile</code></li></ul>
+        <p class="cp-flede t-body">Hover a card: it grows by <strong>a constant 6px</strong> whatever its width. Media inside clips 1px in from the edge, so an image never meets the anti-aliased seam.</p>
+      </header>
+      <div class="cp-pair" data-cp-twin data-stack>
+        <div class="doc-specimen cp-spec" data-tone="light">
+          <div class="cp-cols3">
+            <a class="card card-hover cp-demo-card" href="#cards" style="display:flex;flex-direction:column">
+              <span class="t-body" style="font-weight:600">Sprint planner</span>
+              <span class="t-subtitle" style="margin-top:8px">Eight tasks off one list.</span>
+              <span class="t-body" style="margin-top:12px;color:var(--label-2)">Opening the list costs 34 seconds; each task after it, six.</span>
+              <span class="card-action btn btn-icon" aria-hidden="true"><i data-sym="plus"></i></span>
+            </a>
+            <div class="card cp-demo-card">
+              <div class="card-media" style="height:200px"><canvas data-art="twilight" data-art-seed="5" aria-hidden="true"></canvas></div>
+              <p class="t-body" style="font-weight:600">Clipped media</p>
+              <p class="t-body" style="color:var(--label-2);margin-top:6px">Inset 1px, round 28: the seam fix.</p>
+            </div>
+            <div class="tile cp-demo-card" style="display:grid;align-content:center">
+              <p class="t-subtitle">A tile is a bento cell.</p>
+              <p class="t-callout" style="margin-top:8px">60px &times; 8.333% padding, centred.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="cp-detail">
+        <div class="cp-anatomy">
+          <h4 class="cp-sub">Anatomy</h4>
+          <dl class="doc-kv">
+            <dt>Corner</dt><dd>28 on the continuous corner</dd>
+            <dt>Padding</dt><dd>32 / 28 / 24 at 1069+ / 735+ / below</dd>
+            <dt>Surface</dt><dd>The band&rsquo;s other ground (<code>--c-surface</code>)</dd>
+            <dt>Hover</dt><dd>scale (w&thinsp;+&thinsp;6)&thinsp;/&thinsp;w, .3&thinsp;s cubic-bezier(0,0,.5,1), pointers only</dd>
+            <dt>Media clip</dt><dd><code>inset(1px round 28px)</code></dd>
+            <dt>Action</dt><dd>36px circle, 16px from the corner</dd>
+            <dt>Tile padding</dt><dd>60px &times; 8.333%</dd>
+            <dt>Shadow</dt><dd>Two soft layers in light, none in dark</dd>
+          </dl>
+          <p class="doc-note" data-kind="measured">The computed radius reads 42.84px, not 28: a continuous corner needs a 1.53&times; larger radius to carry the same visual mass at 45&deg;. Only the number differs; the silhouette matches.</p>
+        </div>
+        <div class="cp-markup">
+          <h4 class="cp-sub">Markup</h4>
+<pre class="doc-code" data-lang="html"><code>&lt;a class="card card-hover" href="#"&gt;
+  &lt;span&gt;Sprint planner&lt;/span&gt;
+  &lt;span class="t-subtitle"&gt;Eight tasks off one list.&lt;/span&gt;
+  &lt;span class="card-action btn btn-icon" aria-hidden="true"&gt;
+    &lt;i data-sym="plus"&gt;&lt;/i&gt;&lt;/span&gt;
+&lt;/a&gt;
+
+&lt;div class="card"&gt;
+  &lt;!-- as the first child it bleeds to the top edge --&gt;
+  &lt;div class="card-media"&gt;&lt;img src="run.jpg" alt=""&gt;&lt;/div&gt;
+  &lt;p&gt;Clipped media&lt;/p&gt;
+&lt;/div&gt;
+
+&lt;div class="tile"&gt;&lt;p class="t-subtitle"&gt;A bento cell.&lt;/p&gt;&lt;/div&gt;</code></pre>
+        </div>
+      </div>
+      <div class="doc-dodont cp-dodont">
+        <div class="doc-do"><div class="doc-specimen"><div class="card" style="width:min(260px,100%)"><p class="t-body" style="font-weight:600">basil.demo</p><p class="t-caption" style="color:var(--label-2);margin-top:4px">Task 41 of 70</p></div></div><p class="doc-verdict">Opaque, on the band&rsquo;s other ground.</p></div>
+        <div class="doc-dont"><div class="doc-specimen"><div class="card" data-lg3 data-lg3-mode="frost" style="width:min(260px,100%)"><p class="t-body" style="font-weight:600">basil.demo</p><p class="t-caption" style="margin-top:4px">Task 41 of 70</p></div></div><p class="doc-verdict">A glass card. Glass is chrome; over a flat ground it is only a grey box.</p></div>
+      </div>
+    </article>
+
+    <!-- LISTS -->
+    <article class="cp-family" id="lists" aria-labelledby="lists-h">
+      <header class="cp-fhead">
+        <h3 class="t-subtitle cp-fname" id="lists-h">Lists and rows</h3>
+        <ul class="cp-fclasses"><li><code>.list</code></li><li><code>.list-inset</code></li><li><code>.row</code></li><li><code>.row-icon</code></li><li><code>.row-title</code></li><li><code>.row-sub</code></li><li><code>.row-detail</code></li><li><code>.list-header</code></li><li><code>.list-footer</code></li></ul>
+        <p class="cp-flede t-body">Inset grouped. Rows are at least 44 tall; <strong>the hairline starts where the text starts</strong>, after the icon or avatar. A link row gets the disclosure chevron by itself.</p>
+      </header>
+      <div class="cp-pair" data-cp-twin>
+        <div class="doc-specimen cp-spec" data-tone="light">
+          <div class="cp-stack" style="max-width:440px">
+            <div>
+              <p class="list-header">Project</p>
+              <ul class="list list-inset">
+                <li><a class="row" href="#lists"><span class="row-icon" style="--row-icon-bg:var(--sys-blue);--row-icon-ink:var(--c-knob)"><i data-sym="person"></i></span><span class="row-title">Profile</span><span class="row-detail">aurora.demo</span></a></li>
+                <li><label class="row"><span class="row-icon" style="--row-icon-bg:var(--sys-green);--row-icon-ink:var(--c-knob)"><i data-sym="bolt"></i></span><span class="row-title">Runs</span><input class="switch" type="checkbox" role="switch" checked></label></li>
+                <li><div class="row"><span class="row-icon" style="--row-icon-bg:var(--sys-orange);--row-icon-ink:var(--c-knob)"><i data-sym="target"></i></span><span class="row-title">Leads per run</span><div class="stepper" data-min="1" data-max="12" data-value="8" aria-label="Leads per run"><button></button><output>8</output><button></button></div></div></li>
+                <li><a class="row" href="#lists"><span class="row-icon" style="--row-icon-bg:var(--sys-indigo);--row-icon-ink:var(--c-knob)"><i data-sym="shield"></i></span><span class="row-body"><span class="row-title">Refusals</span><span class="row-sub">Retry once, then wait for a done action</span></span></a></li>
+              </ul>
+              <p class="list-footer">Separators start at the text, not the icon.</p>
+            </div>
+            <ul class="list list-inset">
+              <li><div class="row"><span class="avatar">AD</span><span class="row-body"><span class="row-title">aurora.demo</span><span class="row-sub">Reviewed &middot; 2 min</span></span><span class="badge badge-ok">Done</span></div></li>
+              <li><div class="row"><span class="avatar">BD</span><span class="row-body"><span class="row-title">basil.demo</span><span class="row-sub">Requested &middot; 9 min</span></span><span class="badge">Pending</span></div></li>
+            </ul>
+          </div>
+        </div>
+      </div>
+      <div class="cp-detail">
+        <div class="cp-anatomy">
+          <h4 class="cp-sub">Anatomy</h4>
+          <dl class="doc-kv">
+            <dt>Row</dt><dd>&ge; 44 tall, 11&times;16 padding, 17/22 body</dd>
+            <dt>Separator</dt><dd>Hairline from 16 / 59 / 66px: plain, after a 29px icon, after a 36px avatar</dd>
+            <dt>Section</dt><dd>The content corner, on the band&rsquo;s other ground</dd>
+            <dt>Header</dt><dd>15/20 600, title case, never all caps</dd>
+            <dt>Footer</dt><dd>13/18 secondary</dd>
+            <dt>Icon</dt><dd>29px, corner 7 continuous, white glyph on a system hue</dd>
+            <dt>Press</dt><dd><code>--fill-2</code> instantly; hover <code>--fill-4</code> <span class="cp-src">ours</span></dd>
+          </dl>
+        </div>
+        <div class="cp-markup">
+          <h4 class="cp-sub">Markup</h4>
+<pre class="doc-code" data-lang="html"><code>&lt;p class="list-header"&gt;Project&lt;/p&gt;
+&lt;ul class="list list-inset"&gt;
+  &lt;li&gt;&lt;a class="row" href="#"&gt;
+    &lt;span class="row-icon" style="--row-icon-bg: var(--sys-blue)"&gt;
+      &lt;i data-sym="person"&gt;&lt;/i&gt;&lt;/span&gt;
+    &lt;span class="row-title"&gt;Profile&lt;/span&gt;
+    &lt;span class="row-detail"&gt;aurora.demo&lt;/span&gt;
+  &lt;/a&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;label class="row"&gt;
+    &lt;span class="row-title"&gt;Runs&lt;/span&gt;
+    &lt;input class="switch" type="checkbox" role="switch" checked&gt;
+  &lt;/label&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p class="list-footer"&gt;Separators start at the text.&lt;/p&gt;</code></pre>
+        </div>
+      </div>
+      <div class="doc-dodont cp-dodont">
+        <div class="doc-do"><div class="doc-specimen"><div style="width:min(300px,100%)"><p class="list-header">Pacing</p><ul class="list list-inset"><li><a class="row" href="#lists"><span class="row-title">Warm-up</span><span class="row-detail">7 days</span></a></li></ul></div></div><p class="doc-verdict">Title-case headers, a chevron only where the row goes somewhere.</p></div>
+        <div class="doc-dont"><div class="doc-specimen"><div style="width:min(300px,100%)"><p class="list-header" style="text-transform:uppercase;letter-spacing:.06em">Pacing</p><ul class="list list-inset"><li><a class="row" href="#lists"><span class="row-title">Pause at cap</span><input class="switch" type="checkbox" role="switch" checked tabindex="-1" aria-label="Pause at cap"></a></li></ul></div></div><p class="doc-verdict">All-caps headers, and a row that is both a link and a switch.</p></div>
+      </div>
+    </article>
+
+    <!-- TABLE -->
+    <article class="cp-family" id="table" aria-labelledby="table-h">
+      <header class="cp-fhead">
+        <h3 class="t-subtitle cp-fname" id="table-h">Table</h3>
+        <ul class="cp-fclasses"><li><code>.table</code></li><li><code>.table-hover</code></li><li><code>.table-sticky</code></li><li><code>.table-scroll</code></li><li><code>.num</code></li></ul>
+        <p class="cp-flede t-body">Numbers are right-aligned in tabular digits, so a column of them reads as a column. On a phone the table scrolls inside its own frame, never the page. <a href="patterns.html#table">The full pattern</a> adds a sticky header and row actions.</p>
+      </header>
+      <div class="cp-pair" data-cp-twin data-stack data-cp-norail>
+        <div class="doc-specimen cp-spec" data-tone="light">
+          <div class="table-scroll cp-tablewrap">
+            <table class="table table-hover">
+              <thead><tr><th scope="col">Project</th><th scope="col">Route</th><th scope="col">State</th><th scope="col" class="num">Queued</th><th scope="col" class="num">Done</th><th scope="col" class="num">s / action</th></tr></thead>
+              <tbody>
+                <tr><td>@sample.runclub</td><td>Reviewers of</td><td><span class="badge badge-ok">Landing</span></td><td class="num">8</td><td class="num">7</td><td class="num">11.2</td></tr>
+                <tr><td>#trailrunning</td><td>Hashtag</td><td><span class="badge badge-warn">Thin</span></td><td class="num">8</td><td class="num">3</td><td class="num">19.8</td></tr>
+                <tr><td>@sample.coach</td><td>Likers of</td><td><span class="badge">Empty</span></td><td class="num">8</td><td class="num">0</td><td class="num">&mdash;</td></tr>
+                <tr><td>@sample.fieldnotes</td><td>Reviewers of</td><td><span class="badge badge-ok">Landing</span></td><td class="num">12</td><td class="num">11</td><td class="num">9.6</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+      <div class="cp-detail">
+        <div class="cp-anatomy">
+          <h4 class="cp-sub">Anatomy</h4>
+          <dl class="doc-kv">
+            <dt>Cells</dt><dd>14/18, 12px vertical padding, 16px gutter <span class="cp-src">on the 14/18 step</span></dd>
+            <dt>Header</dt><dd>12/16 600 secondary, opaque rule <span class="cp-src">ours</span></dd>
+            <dt>Rules</dt><dd><code>--separator</code> between rows, none after the last</dd>
+            <dt>Numbers</dt><dd><code>.num</code>: end-aligned, tabular <span class="cp-src">ours</span></dd>
+            <dt>Hover</dt><dd><code>--fill-4</code> in 100&thinsp;ms, pointers only <span class="cp-src">ours</span></dd>
+          </dl>
+        </div>
+        <div class="cp-markup">
+          <h4 class="cp-sub">Markup</h4>
+<pre class="doc-code" data-lang="html"><code>&lt;div class="table-scroll"&gt;
+  &lt;table class="table table-hover"&gt;
+    &lt;thead&gt;&lt;tr&gt;
+      &lt;th scope="col"&gt;Project&lt;/th&gt;&lt;th scope="col" class="num"&gt;Done&lt;/th&gt;
+    &lt;/tr&gt;&lt;/thead&gt;
+    &lt;tbody&gt;&lt;tr&gt;&lt;td&gt;@sample.runclub&lt;/td&gt;&lt;td class="num"&gt;7&lt;/td&gt;&lt;/tr&gt;&lt;/tbody&gt;
+  &lt;/table&gt;
+&lt;/div&gt;
+&lt;!-- .table-sticky pins the header inside a scrolling frame --&gt;</code></pre>
+        </div>
+      </div>
+      <div class="doc-dodont cp-dodont">
+        <div class="doc-do"><div class="doc-specimen"><table class="table" style="width:auto"><tbody><tr><td>Queued</td><td class="num">1,904</td></tr><tr><td>Done</td><td class="num">1,222</td></tr><tr><td>Not done</td><td class="num">682</td></tr></tbody></table></div><p class="doc-verdict">End-aligned, tabular: the thousands line up.</p></div>
+        <div class="doc-dont"><div class="doc-specimen"><table class="table" style="width:auto;font-variant-numeric:proportional-nums"><tbody><tr><td>Queued</td><td style="text-align:center">1,904</td></tr><tr><td>Done</td><td style="text-align:center">1,222</td></tr><tr><td>Not done</td><td style="text-align:center">682</td></tr></tbody></table></div><p class="doc-verdict">Centred, proportional: magnitudes cannot be compared at a glance.</p></div>
+      </div>
+    </article>
+
+    <!-- STAT -->
+    <article class="cp-family" id="stat" aria-labelledby="stat-h">
+      <header class="cp-fhead">
+        <h3 class="t-subtitle cp-fname" id="stat-h">Stat</h3>
+        <ul class="cp-fclasses"><li><code>.stat</code></li><li><code>.stat-caption</code></li><li><code>.stat-value</code></li><li><code>.stat-delta.up|.down</code></li><li><code>[data-count]</code></li></ul>
+        <p class="cp-flede t-body">The stat grammar: a caption, the value, a caption. <strong>The value counts up once, when it is first seen</strong>; with reduced motion it simply shows.</p>
+      </header>
+      <div class="cp-pair" data-cp-twin>
+        <div class="doc-specimen cp-spec" data-tone="light">
+          <div class="cp-stats">
+            <div class="stat"><span class="stat-caption">Daily limit</span><span class="stat-value" data-count>2,160</span><span class="stat-caption">tasks, four reviewers</span></div>
+            <div class="stat"><span class="stat-caption">Inside runs</span><span class="stat-value" data-count data-count-from="42.7">12.6 s</span><span class="stat-delta up">3.4&times; the whole-run pace</span></div>
+            <div class="stat"><span class="stat-caption">Review rate</span><span class="stat-value" data-count>5%</span><span class="stat-delta down">2 points this week</span></div>
+          </div>
+        </div>
+      </div>
+      <div class="cp-detail">
+        <div class="cp-anatomy">
+          <h4 class="cp-sub">Anatomy</h4>
+          <dl class="doc-kv">
+            <dt>Value</dt><dd>40/40 600 at every width <span class="cp-src">measured at 1440 and 402</span></dd>
+            <dt>Captions</dt><dd>14/18 in the label ink</dd>
+            <dt>Gap</dt><dd>4px <span class="cp-src">ours</span></dd>
+            <dt>Delta</dt><dd>14px 600, <code>--ok</code> up, <code>--bad</code> down, with a chevron <span class="cp-src">ours</span></dd>
+            <dt>Count-up</dt><dd>Digit roll on first sight <span class="cp-src">ours</span></dd>
+          </dl>
+        </div>
+        <div class="cp-markup">
+          <h4 class="cp-sub">Markup</h4>
+<pre class="doc-code" data-lang="html"><code>&lt;div class="stat"&gt;
+  &lt;span class="stat-caption"&gt;Daily limit&lt;/span&gt;
+  &lt;span class="stat-value" data-count&gt;2,160&lt;/span&gt;
+  &lt;span class="stat-caption"&gt;tasks, four reviewers&lt;/span&gt;
+&lt;/div&gt;
+&lt;span class="stat-delta up"&gt;3.4&amp;times; the whole-run pace&lt;/span&gt;   &lt;!-- .down in --bad --&gt;</code></pre>
+        </div>
+      </div>
+      <div class="doc-dodont cp-dodont">
+        <div class="doc-do"><div class="doc-specimen"><div class="stat"><span class="stat-caption">Per finished task</span><span class="stat-value">12.6 s</span><span class="stat-caption">inside runs</span></div></div><p class="doc-verdict">The value with the words that say what it counts.</p></div>
+        <div class="doc-dont"><div class="doc-specimen"><div class="stat"><span class="stat-value">12.6</span></div></div><p class="doc-verdict">A bare number: 12.6 what, measured where?</p></div>
+      </div>
+    </article>
+
+    <!-- DIVIDER + KBD -->
+    <article class="cp-family" id="divider" aria-labelledby="divider-h">
+      <header class="cp-fhead">
+        <h3 class="t-subtitle cp-fname" id="divider-h">Divider</h3>
+        <ul class="cp-fclasses"><li><code>hr.divider</code></li><li><code>.divider-inset</code></li><li><code>.divider-v</code></li></ul>
+        <p class="cp-flede t-body">The accordion rule: one opaque pixel between groups. Lists draw their own separators; a divider is for the page.</p>
+      </header>
+      <div class="cp-pair" data-cp-twin>
+        <div class="doc-specimen cp-spec" data-tone="light">
+          <div class="cp-w" style="max-width:440px">
+            <p class="t-body" style="font-weight:600">Is a run the same as a job?</p>
+            <hr class="divider">
+            <p class="t-body" style="font-weight:600">Where are the limits set?</p>
+            <hr class="divider divider-inset">
+            <div class="cp-row" style="align-items:stretch"><span class="t-caption">Queued 8</span><span class="divider-v"></span><span class="t-caption">Done 7</span><span class="divider-v"></span><span class="t-caption">11.2 s each</span></div>
+          </div>
+        </div>
+      </div>
+      <div class="cp-detail">
+        <div class="cp-anatomy">
+          <h4 class="cp-sub">Anatomy</h4>
+          <dl class="doc-kv">
+            <dt>Rule</dt><dd>1px <code>--separator-opaque</code> (#d2d2d7 / #424245)</dd>
+            <dt>Spacing</dt><dd>32px above and below <span class="cp-src">ours</span></dd>
+            <dt>Inset</dt><dd>16px from each side <span class="cp-src">ours</span></dd>
+          </dl>
+        </div>
+        <div class="cp-markup">
+          <h4 class="cp-sub">Markup</h4>
+<pre class="doc-code" data-lang="html"><code>&lt;hr class="divider"&gt;
+&lt;hr class="divider divider-inset"&gt;
+&lt;span class="divider-v"&gt;&lt;/span&gt;   &lt;!-- between inline items --&gt;</code></pre>
+        </div>
+      </div>
+      <div class="doc-dodont cp-dodont">
+        <div class="doc-do"><div class="doc-specimen"><div class="cp-w" style="max-width:260px"><p class="t-caption">Pacing</p><hr class="divider" style="margin:12px 0"><p class="t-caption">Safety</p></div></div><p class="doc-verdict">Between groups of content.</p></div>
+        <div class="doc-dont"><div class="doc-specimen"><div class="cp-w" style="max-width:260px"><ul class="list list-inset"><li><div class="row"><span class="row-title">Warm-up</span></div><hr class="divider" style="margin:0"></li><li><div class="row"><span class="row-title">Cap</span></div></li></ul></div></div><p class="doc-verdict">A divider inside a list doubles the separator the list already draws.</p></div>
+      </div>
+    </article>
+
+    <article class="cp-family" id="kbd" aria-labelledby="kbd-h">
+      <header class="cp-fhead">
+        <h3 class="t-subtitle cp-fname" id="kbd-h">Keys</h3>
+        <ul class="cp-fclasses"><li><code>kbd.kbd</code></li></ul>
+        <p class="cp-flede t-body">A key cap for a shortcut, in the on-fill ink so it holds 4.5:1 on its own fill. One cap per key, drawn the way the keyboard prints it.</p>
+      </header>
+      <div class="cp-pair" data-cp-twin>
+        <div class="doc-specimen cp-spec" data-tone="light">
+          <div class="cp-kbds">
+            <div><span>Command palette</span><span><kbd class="kbd">&#8984;</kbd><kbd class="kbd">K</kbd></span></div>
+            <div><span>Start the fleet</span><span><kbd class="kbd">&#8679;</kbd><kbd class="kbd">&#8984;</kbd><kbd class="kbd">S</kbd></span></div>
+            <div><span>Close the sheet</span><span><kbd class="kbd">Esc</kbd></span></div>
+            <div><span>Move the selection</span><span><kbd class="kbd">&uarr;</kbd><kbd class="kbd">&darr;</kbd></span></div>
+          </div>
+        </div>
+      </div>
+      <div class="cp-detail">
+        <div class="cp-anatomy">
+          <h4 class="cp-sub">Anatomy</h4>
+          <dl class="doc-kv">
+            <dt>Cap</dt><dd>22 tall, &ge; 22 wide, corner 5 continuous <span class="cp-src">ours</span></dd>
+            <dt>Type</dt><dd>12px 500, <code>--label-2-on-fill</code> <span class="cp-src">ours</span></dd>
+            <dt>Depth</dt><dd>A 1px inner rule at the bottom <span class="cp-src">ours</span></dd>
+          </dl>
+        </div>
+        <div class="cp-markup">
+          <h4 class="cp-sub">Markup</h4>
+<pre class="doc-code" data-lang="html"><code>&lt;kbd class="kbd"&gt;&amp;#8984;&lt;/kbd&gt;&lt;kbd class="kbd"&gt;K&lt;/kbd&gt;
+&lt;kbd class="kbd"&gt;Esc&lt;/kbd&gt;</code></pre>
+        </div>
+      </div>
+      <div class="doc-dodont cp-dodont">
+        <div class="doc-do"><div class="doc-specimen"><span class="cp-row cp-row-tight"><kbd class="kbd">&#8984;</kbd><kbd class="kbd">K</kbd></span></div><p class="doc-verdict">One cap per key, as printed on the keyboard.</p></div>
+        <div class="doc-dont"><div class="doc-specimen"><kbd class="kbd">Cmd + K</kbd></div><p class="doc-verdict">A sentence in a cap. It reads as one enormous key.</p></div>
+      </div>
+    </article>
+  </div>
+</section>
+
+<!-- ═══════════════ OVERLAYS ═══════════════ -->
+<section class="band" data-band="story" id="overlays">
+  <div class="viewport-content">
+    <div class="cp-group-head">
+      <h2 class="t-section" data-reveal="up">Overlays.</h2>
+      <p class="t-lede" data-reveal="up">Built on the platform&rsquo;s top layer, so focus return and Escape come for free. <strong>Everything that opens grows out of the control that opened it</strong> and goes back into it when it closes.</p>
+    </div>
+
+    <!-- FEEDBACK -->
+    <article class="cp-family" id="feedback" aria-labelledby="feedback-h">
+      <header class="cp-fhead">
+        <h3 class="t-subtitle cp-fname" id="feedback-h">Toast, banner, alert</h3>
+        <ul class="cp-fclasses"><li><code>UI.toast()</code></li><li><code>.toast</code></li><li><code>.banner</code></li><li><code>.banner-inset/-ok/-warn/-bad</code></li><li><code>UI.alert()</code></li><li><code>dialog.alert</code></li></ul>
+        <p class="cp-flede t-body">A toast confirms and never asks. A banner stays in the flow for something that stays true. <strong>An alert interrupts, so it is kept for decisions</strong> that cannot be undone. Try each one.</p>
+      </header>
+      <div class="cp-pair" data-cp-twin data-stack>
+        <div class="doc-specimen cp-spec" data-tone="light">
+          <div class="cp-feedback">
+          <div class="cp-stack">
+            <div class="banner banner-inset">Runs pause at the daily limit and resume at midnight. <a class="link-chevron" href="#feedback">Change the limit</a></div>
+            <div class="banner banner-inset banner-ok"><i data-sym="checkmark-circle"></i><span>All 16 projects reached their quota.</span></div>
+            <div class="banner banner-inset banner-warn"><i data-sym="exclamation-triangle"></i><span>Two tasks finished late; the cap counted them.</span></div>
+            <div class="banner banner-inset banner-bad"><i data-sym="xmark-circle"></i><span>The handset stopped answering. Runs are paused.</span></div>
+          </div>
+            <div class="cp-overlay-grid">
+              <div class="cp-stack" style="justify-items:start">
+                <span class="toast cp-static" aria-hidden="true"><i data-sym="checkmark-circle"></i><span>Run saved.</span></span>
+                <span class="toast cp-static" aria-hidden="true"><i data-sym="info"></i><span>Project removed.</span><span class="toast-action" style="cursor:default">Undo</span></span>
+                <div class="cp-row"><button class="btn btn-tinted" type="button" data-cp-toast="ok">Show a toast</button><button class="btn btn-tinted" type="button" data-cp-toast="undo">With undo</button></div>
+                <button class="btn btn-secondary" type="button" data-cp-alert>Delete project&hellip;</button>
+              </div>
+              <div class="alert cp-static" aria-hidden="true" inert>
+                <p class="alert-title">Delete this project?</p>
+                <p class="alert-message">Its log rows stay. Future runs stop reaching it.</p>
+                <div class="alert-actions"><button class="btn" type="button" tabindex="-1">Cancel</button><button class="btn" type="button" data-role="destructive" tabindex="-1">Delete</button></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="cp-detail">
+        <div class="cp-anatomy">
+          <h4 class="cp-sub">Anatomy</h4>
+          <dl class="doc-kv">
+            <dt>Toast</dt><dd>Glass capsule, &ge; 44 tall, 15/20 600, 24px from the bottom <span class="cp-src">ours</span></dd>
+            <dt>Toast life</dt><dd>2.2&thinsp;s + 45&thinsp;ms a character, 8&thinsp;s at most; waits while hovered or focused; an undo waits for you <span class="cp-src">ours</span></dd>
+            <dt>Toast motion</dt><dd>Rises on the snappy spring, dematerializes out</dd>
+            <dt>Banner</dt><dd>14px text, 16px padding, opaque</dd>
+            <dt>Alert</dt><dd>320 wide, corner 32, title 17/22 600 and message 15/20, left-aligned</dd>
+            <dt>Actions</dt><dd>Capsules side by side; stacked from three</dd>
+            <dt>Scrim</dt><dd>Black at .48 in both tones <span class="cp-src">measured</span></dd>
+            <dt>Keys</dt><dd>Esc resolves the cancel value; focus returns to the trigger <span class="cp-src">platform dialog</span></dd>
+          </dl>
+        </div>
+        <div class="cp-markup">
+          <h4 class="cp-sub">Markup</h4>
+<pre class="doc-code" data-lang="js"><code>UI.toast('Run saved.', { kind: 'ok' });
+UI.toast('Project removed.', {
+  action: { label: 'Undo', run: () =&gt; restore() }   // waits for the decision
+});
+
+const ok = await UI.alert({
+  title: 'Delete this project?',
+  message: 'Its log rows stay. Future runs stop reaching it.',
+  from: event.currentTarget,             // grows out of the button
+  actions: [
+    { label: 'Cancel', value: false, role: 'cancel' },
+    { label: 'Delete', value: true, role: 'destructive' }
+  ]
+});</code></pre>
+<pre class="doc-code" data-lang="html"><code>&lt;div class="banner banner-inset banner-warn"&gt;
+  &lt;i data-sym="exclamation-triangle"&gt;&lt;/i&gt;&lt;span&gt;Two tasks finished late.&lt;/span&gt;
+&lt;/div&gt;</code></pre>
+        </div>
+      </div>
+      <div class="doc-dodont cp-dodont">
+        <div class="doc-do"><div class="doc-specimen"><span class="toast cp-static" aria-hidden="true"><i data-sym="info"></i><span>Project removed.</span><span class="toast-action" style="cursor:default">Undo</span></span></div><p class="doc-verdict">Do it, then offer undo. No question needed.</p></div>
+        <div class="doc-dont"><div class="doc-specimen"><span class="toast cp-static" aria-hidden="true"><span>Remove this project?</span><span class="toast-action" style="cursor:default">Yes</span><span class="toast-action" style="cursor:default">No</span></span></div><p class="doc-verdict">A question in a toast. It can vanish before it is answered.</p></div>
+      </div>
+    </article>
+
+    <!-- MENUS -->
+    <article class="cp-family" id="menus" aria-labelledby="menus-h">
+      <header class="cp-fhead">
+        <h3 class="t-subtitle cp-fname" id="menus-h">Menu, popover, tooltip</h3>
+        <ul class="cp-fclasses"><li><code>.menu[data-menu]</code></li><li><code>.menu-item</code></li><li><code>.menu-item-destructive</code></li><li><code>.menu-separator</code></li><li><code>.menu-header</code></li><li><code>.popover[data-popover]</code></li><li><code>[data-tip]</code></li><li><code>UI.menu()</code></li><li><code>UI.anchor()</code></li></ul>
+        <p class="cp-flede t-body">A menu opens 8px under its trigger, focused on the first item; arrows, Home, End and type-ahead move through it. <strong>In content it is opaque and springs from the trigger; as chrome it is glass and the button becomes the menu</strong> (see <a href="#glass">Glass controls</a>).</p>
+      </header>
+      <div class="cp-pair" data-cp-twin>
+        <div class="doc-specimen cp-spec" data-tone="light">
+          <div class="cp-overlay-grid">
+            <div class="cp-stack" style="justify-items:start">
+              <button class="btn btn-l" type="button" data-menu="cp-menu" id="cp-menu-t">Actions</button>
+              <button class="btn btn-secondary btn-l" type="button" data-popover="cp-pop">Run details</button>
+              <button class="btn btn-icon btn-l" type="button" data-tip="Duplicate run" aria-label="Duplicate run"><i data-sym="doc"></i></button>
+              <p class="cp-cap">Hover or focus the round button for its tooltip.</p>
+            </div>
+            <div class="menu cp-static" aria-hidden="true" inert>
+              <p class="menu-header">Run 42</p>
+              <span class="menu-item" tabindex="-1"><i data-sym="pencil"></i><span>Rename</span></span>
+              <span class="menu-item" tabindex="-1"><i data-sym="doc"></i><span>Duplicate</span><kbd class="kbd">&#8984;D</kbd></span>
+              <span class="menu-item" tabindex="-1" aria-checked="true"><i data-sym="bell"></i><span>Notify on finish</span></span>
+              <hr class="menu-separator">
+              <span class="menu-item menu-item-destructive" tabindex="-1"><i data-sym="trash"></i><span>Delete</span></span>
+            </div>
+          </div>
+          <div class="menu" id="cp-menu" popover="manual">
+            <button class="menu-item"><i data-sym="pencil"></i><span>Rename</span></button>
+            <button class="menu-item"><i data-sym="doc"></i><span>Duplicate</span><kbd class="kbd">&#8984;D</kbd></button>
+            <button class="menu-item" role="menuitemcheckbox" aria-checked="true"><i data-sym="bell"></i><span>Notify on finish</span></button>
+            <hr class="menu-separator">
+            <button class="menu-item menu-item-destructive"><i data-sym="trash"></i><span>Delete</span></button>
+          </div>
+          <div class="popover" id="cp-pop" aria-label="Run details" popover="manual">
+            <p class="ui-headline">Run 42</p>
+            <p style="margin-top:6px;color:var(--label-2)">8 queued &middot; 7 done &middot; 11.2&thinsp;s an action. Arrived once, acted from the row.</p>
+            <div class="cp-row" style="margin-top:14px"><a class="btn btn-primary btn-s" href="#menus">Open run</a></div>
+          </div>
+        </div>
+      </div>
+      <div class="cp-detail">
+        <div class="cp-anatomy">
+          <h4 class="cp-sub">Anatomy</h4>
+          <dl class="doc-kv">
+            <dt>Menu</dt><dd>&ge; 220 wide, corner 28, 6px padding</dd>
+            <dt>Items</dt><dd>44 tall, 17px, icons leading, corners concentric (28&thinsp;&minus;&thinsp;6)</dd>
+            <dt>Destructive</dt><dd><code>--bad</code>, last, after a separator</dd>
+            <dt>Placement</dt><dd>8px gap; flips and clamps to an 8px margin <span class="cp-src">ours</span></dd>
+            <dt>Popover</dt><dd>&le; 340 wide, 20px padding, 15/20 <span class="cp-src">ours</span></dd>
+            <dt>Tooltip</dt><dd>12/16 500, inverted ink; in after 420&thinsp;ms, out at once; also on focus <span class="cp-src">ours</span></dd>
+            <dt>Dismiss</dt><dd>Esc, a click outside, Tab away <span class="cp-src">platform popover</span></dd>
+          </dl>
+        </div>
+        <div class="cp-markup">
+          <h4 class="cp-sub">Markup</h4>
+<pre class="doc-code" data-lang="html"><code>&lt;button class="btn" data-menu="run-menu"&gt;Actions&lt;/button&gt;
+&lt;div class="menu" id="run-menu"&gt;
+  &lt;button class="menu-item"&gt;
+    &lt;i data-sym="pencil"&gt;&lt;/i&gt;&lt;span&gt;Rename&lt;/span&gt;&lt;/button&gt;
+  &lt;button class="menu-item" role="menuitemcheckbox" aria-checked="true"&gt;
+    &lt;i data-sym="bell"&gt;&lt;/i&gt;&lt;span&gt;Notify on finish&lt;/span&gt;&lt;/button&gt;
+  &lt;hr class="menu-separator"&gt;
+  &lt;button class="menu-item menu-item-destructive"&gt;
+    &lt;i data-sym="trash"&gt;&lt;/i&gt;&lt;span&gt;Delete&lt;/span&gt;&lt;/button&gt;
+&lt;/div&gt;
+
+&lt;button class="btn btn-secondary" data-popover="details"&gt;Run details&lt;/button&gt;
+&lt;div class="popover" id="details" aria-label="Run details"&gt;&hellip;&lt;/div&gt;
+
+&lt;button class="btn btn-icon" data-tip="Duplicate run"
+        aria-label="Duplicate run"&gt;&hellip;&lt;/button&gt;</code></pre>
+<pre class="doc-code" data-lang="js"><code>menuEl.addEventListener('ui:select', e =&gt; run(e.detail.value));
+
+// wired by hand (no data-menu on the trigger), with options:
+const m = UI.menu(trigger, menuEl, { placement: 'bottom', align: 'end' });
+m.open('first');</code></pre>
+        </div>
+      </div>
+      <div class="doc-dodont cp-dodont">
+        <div class="doc-do"><div class="doc-specimen"><div class="menu cp-static" aria-hidden="true" inert style="min-width:200px"><span class="menu-item" tabindex="-1"><i data-sym="pencil"></i><span>Rename</span></span><span class="menu-item" tabindex="-1"><i data-sym="doc"></i><span>Duplicate</span></span><hr class="menu-separator"><span class="menu-item menu-item-destructive" tabindex="-1"><i data-sym="trash"></i><span>Delete</span></span></div></div><p class="doc-verdict">Every item in a group has an icon; destructive comes last.</p></div>
+        <div class="doc-dont"><div class="doc-specimen"><div class="menu cp-static" aria-hidden="true" inert style="min-width:200px"><span class="menu-item menu-item-destructive" tabindex="-1"><span>Delete</span></span><span class="menu-item" tabindex="-1"><i data-sym="pencil"></i><span>Rename</span></span><span class="menu-item" tabindex="-1"><span>Duplicate</span></span></div></div><p class="doc-verdict">Delete first, icons on some: the most dangerous item is the easiest to hit.</p></div>
+      </div>
+    </article>
+
+    <!-- EMPTY -->
+    <article class="cp-family" id="empty" aria-labelledby="empty-h">
+      <header class="cp-fhead">
+        <h3 class="t-subtitle cp-fname" id="empty-h">Empty state</h3>
+        <ul class="cp-fclasses"><li><code>.empty-state</code></li><li><code>.empty-state-glyph</code></li><li><code>.empty-state-title</code></li><li><code>.empty-state-body</code></li><li><code>.empty-state-actions</code></li></ul>
+        <p class="cp-flede t-body">Say what goes here, and give the way to put it there. <a href="patterns.html#states">The states pattern</a> shows it beside loading, error and success for the same list.</p>
+      </header>
+      <div class="cp-pair" data-cp-twin>
+        <div class="doc-specimen cp-spec" data-tone="light">
+          <div class="empty-state">
+            <span class="empty-state-glyph"><i data-sym="target"></i></span>
+            <h4 class="empty-state-title">No projects yet</h4>
+            <p class="empty-state-body">Add a reviewer who works like you. The first run starts within the hour.</p>
+            <div class="empty-state-actions"><button class="btn btn-primary btn-l" type="button">Add project</button><a class="btn btn-plain btn-l" href="#empty">How runs work</a></div>
+          </div>
+        </div>
+      </div>
+      <div class="cp-detail">
+        <div class="cp-anatomy">
+          <h4 class="cp-sub">Anatomy</h4>
+          <dl class="doc-kv">
+            <dt>Glyph</dt><dd>64px circle on <code>--fill-2</code>, 28px symbol at 3:1 <span class="cp-src">ours</span></dd>
+            <dt>Title</dt><dd>20/25 600</dd>
+            <dt>Body</dt><dd>17px secondary, at most 420 wide <span class="cp-src">ours</span></dd>
+            <dt>Actions</dt><dd>One primary, one plain <span class="cp-src">ours</span></dd>
+          </dl>
+        </div>
+        <div class="cp-markup">
+          <h4 class="cp-sub">Markup</h4>
+<pre class="doc-code" data-lang="html"><code>&lt;div class="empty-state"&gt;
+  &lt;span class="empty-state-glyph"&gt;&lt;i data-sym="target"&gt;&lt;/i&gt;&lt;/span&gt;
+  &lt;h3 class="empty-state-title"&gt;No projects yet&lt;/h3&gt;
+  &lt;p class="empty-state-body"&gt;Add a reviewer like you.&lt;/p&gt;
+  &lt;div class="empty-state-actions"&gt;
+    &lt;button class="btn btn-primary btn-l"&gt;Add project&lt;/button&gt;
+  &lt;/div&gt;
+&lt;/div&gt;</code></pre>
+        </div>
+      </div>
+      <div class="doc-dodont cp-dodont">
+        <div class="doc-do"><div class="doc-specimen"><div class="empty-state" style="padding:0"><h4 class="empty-state-title">No replies yet</h4><p class="empty-state-body" style="font-size:var(--t-14)">Replies land here as people answer. Nothing to do.</p></div></div><p class="doc-verdict">Explain the emptiness; say when nothing is needed.</p></div>
+        <div class="doc-dont"><div class="doc-specimen"><p class="t-body" style="color:var(--label-2)">No data</p></div><p class="doc-verdict">&ldquo;No data&rdquo; is a shrug: is it broken, loading, or simply empty?</p></div>
+      </div>
+    </article>
+  </div>
+</section>
+
+<!-- ═══════════════ GLASS ═══════════════ -->
+<section class="band" data-band="stage" id="glass">
+  <div class="viewport-content">
+    <div class="cp-group-head">
+      <h2 class="t-section" data-reveal="up">Glass controls.</h2>
+      <p class="t-lede" data-reveal="up">Glass is for controls that float over something: art, media, scrolling content. <strong>Press one and it lifts, glows from the touch point and bends what is behind it.</strong> Open the round button: it becomes the menu.</p>
+    </div>
+    <div class="cp-glass-grid">
+      <figure class="cp-artfig"><div class="cp-art">
+        <canvas data-art="twilight" data-art-seed="11" data-art-contrast="1.2" aria-hidden="true"></canvas>
+        <div class="cp-art-over">
+          <div class="cp-row">
+            <button class="btn btn-glass btn-s" type="button" data-lg3 data-lg3-interactive data-lg3-adaptive>Small</button>
+            <button class="btn btn-glass" type="button" data-lg3 data-lg3-interactive data-lg3-adaptive>Explore</button>
+            <button class="btn btn-glass btn-l" type="button" data-lg3 data-lg3-interactive data-lg3-adaptive>Landscape</button>
+            <button class="btn btn-glass btn-icon btn-l" type="button" data-lg3 data-lg3-interactive data-lg3-adaptive aria-label="Play"><i data-sym="play"></i></button>
+            <button class="btn btn-glass btn-icon btn-l" type="button" data-lg3 data-lg3-interactive data-lg3-adaptive data-lg3-id="cp-more" data-menu="cp-gmenu" aria-label="More"><i data-sym="ellipsis"></i></button>
+          </div>
+          <div class="cp-row">
+            <div class="segmented segmented-glass" role="tablist" aria-label="Range on glass" data-lg3 data-lg3-adaptive>
+              <span class="segmented-track" data-lg3-shape></span><span class="segmented-indicator" data-lg3-shape></span>
+              <button role="tab" aria-selected="true">Day</button><button role="tab">Week</button><button role="tab">Month</button><button role="tab">Year</button>
+            </div>
+            <button class="btn btn-glass btn-l" type="button" data-lg3="clear" data-lg3-interactive><i data-sym="speaker"></i> Clear</button>
+          </div>
+        </div>
+      </div><figcaption class="doc-specimen__label"><b>Dark glass on twilight.</b> Regular and clear glass, a merged segmented lens, and a button that becomes its menu.</figcaption></figure>
+      <figure class="cp-artfig"><div class="cp-art" data-tone="light">
+        <canvas data-art="dawn" data-art-seed="4" data-art-contrast="1.1" aria-hidden="true"></canvas>
+        <div class="cp-art-over">
+          <div class="cp-row">
+            <button class="btn btn-glass btn-l" type="button" data-lg3 data-lg3-interactive data-lg3-adaptive>Portrait</button>
+            <button class="btn btn-glass btn-primary btn-l" type="button" data-lg3 data-lg3-interactive data-lg3-adaptive>View pricing</button>
+            <button class="btn btn-glass btn-icon btn-l" type="button" data-lg3 data-lg3-interactive data-lg3-adaptive aria-label="Close"><i data-sym="xmark"></i></button>
+          </div>
+          <div class="cp-row"><div class="segmented segmented-glass" role="radiogroup" aria-label="Pose on glass" data-lg3 data-lg3-adaptive>
+            <span class="segmented-track" data-lg3-shape></span><span class="segmented-indicator" data-lg3-shape></span>
+            <button role="radio" aria-checked="true">Closed</button><button role="radio">Tent</button><button role="radio">Open</button>
+          </div></div>
+        </div>
+      </div><figcaption class="doc-specimen__label"><b>Light glass on dawn.</b> The one tinted primary per view: its body takes the brand, its label stays white.</figcaption></figure>
+    </div>
+    <div class="menu" id="cp-gmenu" data-lg3 data-lg3-id="cp-more" data-lg3-size="large" data-align="end">
+      <button class="menu-item"><i data-sym="paperplane"></i><span>Share run</span></button>
+      <button class="menu-item"><i data-sym="arrow-down-tray"></i><span>Export CSV</span></button>
+      <hr class="menu-separator">
+      <button class="menu-item menu-item-destructive"><i data-sym="trash"></i><span>Stop all runs</span></button>
+    </div>
+
+    <ul class="cp-rules">
+      <li><b>Only over something to bend.</b><p>Glass sits on art, media or scrolling content. On a flat ground it is a bordered grey box; use an opaque control.</p></li>
+      <li><b>One tinted primary per view.</b><p>Tint the glass body, never the label. Every other glass control stays colourless and monochrome.</p></li>
+      <li><b>Never glass on glass.</b><p>A menu that opens from glass replaces it by morphing; it never stacks a second lens on the first.</p></li>
+    </ul>
+
+    <div class="cp-detail cp-glass-detail">
+      <div class="cp-anatomy">
+        <h4 class="cp-sub">Anatomy</h4>
+        <dl class="doc-kv">
+          <dt>Material</dt><dd><code>data-lg3</code>: blur, colour transform, rim, dark edge, shadow</dd>
+          <dt>Clear</dt><dd><code>data-lg3="clear"</code>, with a dim over bright media <span class="cp-src">35% dim</span></dd>
+          <dt>Labels</dt><dd>600, monochrome, flip with the backdrop</dd>
+          <dt>Legibility</dt><dd>Text-bearing glass takes 34&ndash;62% of the opaque fill: &ge; 4.5:1 over mid-tone art <span class="cp-src">ours, measured in the lab</span></dd>
+          <dt>Press</dt><dd>Lift and glow from the touch point on the lift spring</dd>
+          <dt>Segmented</dt><dd>One host; track and indicator are two shapes that fuse <span class="cp-src">merge by spacing</span></dd>
+          <dt>Menu</dt><dd>Shares <code>data-lg3-id</code> with its trigger, so the button becomes the menu <span class="cp-src">morph by identity</span></dd>
+          <dt>Budget</dt><dd>At most 3 refracting hosts on desktop, 1 on phones; the rest frost <span class="cp-src">ours</span></dd>
+        </dl>
+      </div>
+      <div class="cp-markup">
+        <h4 class="cp-sub">Markup</h4>
+<pre class="doc-code" data-lang="html"><code>&lt;button class="btn btn-glass btn-l"
+        data-lg3 data-lg3-interactive data-lg3-adaptive&gt;Explore&lt;/button&gt;
+&lt;!-- the one tinted primary --&gt;
+&lt;button class="btn btn-glass btn-primary btn-l"
+        data-lg3 data-lg3-interactive&gt;View pricing&lt;/button&gt;
+
+&lt;div class="segmented segmented-glass" role="tablist" aria-label="Range"
+     data-lg3 data-lg3-adaptive&gt;
+  &lt;span class="segmented-track" data-lg3-shape&gt;&lt;/span&gt;
+  &lt;span class="segmented-indicator" data-lg3-shape&gt;&lt;/span&gt;
+  &lt;button role="tab" aria-selected="true"&gt;Day&lt;/button&gt;
+  &lt;button role="tab"&gt;Week&lt;/button&gt;
+&lt;/div&gt;
+
+&lt;!-- the button becomes the menu: same data-lg3-id on both --&gt;
+&lt;button class="btn btn-glass btn-icon" aria-label="More"
+        data-lg3 data-lg3-id="more" data-menu="more-menu"&gt;
+  &lt;i data-sym="ellipsis"&gt;&lt;/i&gt;&lt;/button&gt;
+&lt;div class="menu" id="more-menu"
+     data-lg3 data-lg3-id="more" data-lg3-size="large"&gt;&hellip;&lt;/div&gt;</code></pre>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════ API ═══════════════ -->
+<section class="band" data-band="story" id="api">
+  <div class="viewport-content">
+    <div class="cp-group-head">
+      <h2 class="t-section" data-reveal="up">The UI script.</h2>
+      <p class="t-lede" data-reveal="up">Every component above renders from CSS alone. <code>ui.js</code> adds only what the platform does not: anchoring, entrances that grow from their trigger, the sliding indicator, steppers that repeat, toasts and alerts. <strong><code>FG3.boot()</code> mounts it; you never call <code>UI.mount</code> yourself</strong> unless you add markup later.</p>
+    </div>
+    <div class="doc-table cp-api">
+      <div class="table-scroll">
+        <table class="table table-stack">
+          <thead><tr><th scope="col">Call</th><th scope="col">Returns</th><th scope="col">What it does</th></tr></thead>
+          <tbody>
+            <tr><td><code>UI.mount(root)</code></td><td data-label="Returns">number wired</td><td>Wires segmented, steppers, sliders, detents, <code>[data-tip]</code>, <code>[data-menu]</code>, <code>[data-popover]</code>, card hover and rings under <code>root</code>. Idempotent.</td></tr>
+            <tr><td><code>UI.anchor(panel, trigger, opts)</code></td><td data-label="Returns"><code>{placement, path, rect}</code></td><td>CSS anchor positioning where supported, a measured fixed placement elsewhere. <code>placement</code>, <code>align</code>, <code>gap</code>.</td></tr>
+            <tr><td><code>UI.menu(trigger, panel, opts)</code></td><td data-label="Returns"><code>{open, close, toggle, isOpen, destroy}</code></td><td>Glass panel + glass trigger with one <code>data-lg3-id</code> morph; other glass materializes; opaque springs. Emits <code>ui:select</code>.</td></tr>
+            <tr><td><code>UI.popover(trigger, panel, opts)</code></td><td data-label="Returns">same as menu</td><td>Free content anchored to its trigger; focus moves into it.</td></tr>
+            <tr><td><code>UI.toast(message, opts)</code></td><td data-label="Returns"><code>{el, dismiss}</code></td><td><code>kind</code> ok, bad, info; <code>action {label, run}</code>; <code>duration</code>; <code>glass</code>. A polite live region.</td></tr>
+            <tr><td><code>UI.alert(opts)</code></td><td data-label="Returns"><code>Promise&lt;value&gt;</code></td><td><code>title</code>, <code>message</code>, <code>actions [{label, value, role}]</code>, <code>from</code>. Esc resolves the cancel value.</td></tr>
+            <tr><td><code>UI.tooltip(el, text)</code></td><td data-label="Returns"><code>{show, hide}</code></td><td>420&thinsp;ms in, instant out, on focus too.</td></tr>
+            <tr><td><code>UI.tooltips(root)</code></td><td data-label="Returns">number wired</td><td>Wires every <code>[data-tip]</code> under <code>root</code>; <code>UI.mount</code> calls it.</td></tr>
+            <tr><td><code>UI.segmented(host, opts)</code></td><td data-label="Returns"><code>{index, select, place, destroy}</code></td><td>Roving tabindex, arrows, Home, End, drag to scrub. Emits <code>change {index, value, item}</code>.</td></tr>
+            <tr><td><code>UI.stepper(el)</code></td><td data-label="Returns"><code>{value, set}</code></td><td>Repeats while held; arrows, Home, End. Emits <code>change {value}</code>.</td></tr>
+            <tr><td><code>UI.slider(input)</code></td><td data-label="Returns"><code>{paint}</code></td><td>Writes <code>--v</code>, the filled part of the track.</td></tr>
+            <tr><td><code>UI.detent(el, opts)</code></td><td data-label="Returns">detent handle</td><td>Magnets, stretch and keys on <code>MOTION.detent</code>. Emits <code>change {value, index, label}</code>.</td></tr>
+            <tr><td><code>UI.progress(el, value)</code></td><td data-label="Returns">the element</td><td>Sets a ring or bar; <code>null</code> makes it indeterminate.</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <div class="cp-detail" style="margin-top:var(--s-9)">
+      <div class="cp-anatomy">
+        <h4 class="cp-sub">Rules the script keeps</h4>
+        <dl class="doc-kv">
+          <dt>Never self-mounts</dt><dd><code>FG3.boot()</code> calls <code>UI.mount(document)</code></dd>
+          <dt>Degrades</dt><dd>Without LG3, MOTION or SYM every part still works, flatter</dd>
+          <dt>Interruptible</dt><dd>Every entrance is a spring that can be reversed mid-flight</dd>
+          <dt>Reduced motion</dt><dd>Displacement goes; state still lands</dd>
+          <dt>Light dismiss</dt><dd>Menus use <code>popover="manual"</code> so the exit can animate</dd>
+        </dl>
+      </div>
+      <div class="cp-markup">
+        <h4 class="cp-sub">A destructive action, end to end</h4>
+<pre class="doc-code" data-lang="js"><code>document.querySelector('#delete').addEventListener('click', async (e) =&gt; {
+  const ok = await UI.alert({
+    title: 'Delete this project?',
+    message: 'Its log rows stay. Future runs stop reaching it.',
+    from: e.currentTarget,
+    actions: [
+      { label: 'Cancel', value: false, role: 'cancel' },
+      { label: 'Delete', value: true, role: 'destructive' }
+    ]
+  });
+  if (ok) UI.toast('Project deleted.', { kind: 'ok' });
+});
+
+// markup added after boot: wire it
+UI.mount(newPanel);</code></pre>
+      </div>
+    </div>
+  </div>
+</section>
+
+<script>
+/* components.html \u2014 page behaviour (runs during parse, before the modules).
+   1 \u00b7 forced states: every :hover/:active/:focus-visible rule of the system
+       sheets also answers [data-force~=state], so the matrix shows the real
+       rules, not lookalikes.
+   2 \u00b7 twins: each [data-cp-twin] specimen is cloned into a dark twin, ids
+       and references suffixed, so light and dark show the same markup.
+   3 \u00b7 demo wiring by delegation (UI exists by the time anyone clicks). */
+(function () {
+  var doc = document;
+  /* 1 */
+  try {
+    var out = [];
+    var sel = function (s) {
+      return s.replace(/:hover/g, '[data-force~="hover"]').replace(/:active(?![\w-])/g, '[data-force~="active"]').replace(/:focus-visible/g, '[data-force~="focus"]');
+    };
+    var walk = function (rules, wrap) {
+      [].forEach.call(rules, function (r) {
+        if (r.selectorText && /:(hover|active|focus-visible)/.test(r.selectorText)) {
+          var txt = sel(r.selectorText) + r.cssText.slice(r.cssText.indexOf('{'));
+          out.push(wrap ? wrap + '{' + txt + '}' : txt);
+        } else if (r.cssRules && r.media) walk(r.cssRules, '@media ' + r.media.mediaText);
+        else if (r.cssRules && r.conditionText) walk(r.cssRules, '@supports ' + r.conditionText);
+      });
+    };
+    [].forEach.call(doc.styleSheets, function (sh) {
+      if (!/\/(fg3|fg3-components)\.css$/.test(sh.href || '')) return;
+      try { walk(sh.cssRules, ''); } catch (e) {}
+    });
+    var st = doc.createElement('style'); st.id = 'cp-forced-states'; st.textContent = out.join('\n');
+    doc.head.appendChild(st);
+  } catch (e) {}
+
+  /* 2 */
+  var REFS = ['for', 'aria-controls', 'aria-labelledby', 'aria-describedby', 'data-menu', 'data-popover', 'popovertarget', 'list'];
+  function tag(spec, text) {
+    var t = doc.createElement('p'); t.className = 'cp-tonetag'; t.textContent = text;
+    spec.insertBefore(t, spec.firstChild);
+  }
+  [].forEach.call(doc.querySelectorAll('[data-cp-twin]'), function (pair) {
+    var light = pair.querySelector('.cp-spec');
+    if (!light) return;
+    var dark = light.cloneNode(true), ids = {};
+    dark.setAttribute('data-tone', 'dark');
+    [].forEach.call(dark.querySelectorAll('[id]'), function (el) { ids[el.id] = el.id + '-dk'; el.id = ids[el.id]; });
+    [].forEach.call(dark.querySelectorAll('*'), function (el) {
+      REFS.forEach(function (a) {
+        var v = el.getAttribute(a);
+        if (v) el.setAttribute(a, v.split(/\s+/).map(function (x) { return ids[x] || x; }).join(' '));
+      });
+      if (el.type === 'radio' && el.name) el.name = el.name + '-dk';
+      if (el.hasAttribute('aria-label') && el.matches('.segmented,.stepper,input,[role=group],[role=radiogroup],.slider-detent,.progress-ring,.progress,.popover')) {
+        el.setAttribute('aria-label', el.getAttribute('aria-label') + ' (dark)');
+      }
+    });
+    tag(light, 'Light'); tag(dark, 'Dark');
+    var hint = doc.createElement('span'); hint.className = 'cp-swipe'; hint.innerHTML = '&middot; swipe for dark &rsaquo;';
+    light.firstChild.appendChild(hint);
+    pair.appendChild(dark);
+  });
+  [].forEach.call(doc.querySelectorAll('[data-cp-mixed]'), function (c) { c.indeterminate = true; });
+
+  /* the button matrix (and its twin) scrolls where it cannot fit: the edge
+     that hides something fades, as an overflowing segmented control does */
+  [].forEach.call(doc.querySelectorAll('.cp-matrix-wrap'), function (w) {
+    function edge() {
+      var over = w.scrollWidth - w.clientWidth, x = Math.abs(w.scrollLeft);
+      if (over <= 1) w.removeAttribute('data-overflow');
+      else w.setAttribute('data-overflow', x < 1 ? 'end' : x >= over - 1 ? 'start' : 'both');
+    }
+    w.addEventListener('scroll', edge, { passive: true });
+    if (window.ResizeObserver) new ResizeObserver(edge).observe(w); else window.addEventListener('resize', edge);
+    if (doc.fonts && doc.fonts.ready) doc.fonts.ready.then(edge);
+    edge();
+  });
+
+  /* 3 */
+  var pv = .42;
+  doc.addEventListener('click', function (e) {
+    var t = e.target.closest && e.target.closest('[data-cp-toast],[data-cp-alert],[data-cp-advance]');
+    if (!t || !window.UI) return;
+    if (t.hasAttribute('data-cp-toast')) {
+      if (t.getAttribute('data-cp-toast') === 'undo') UI.toast('Project removed.', { kind: 'info', action: { label: 'Undo', run: function () { UI.toast('Project restored.', { kind: 'ok' }); } } });
+      else UI.toast('Run saved.', { kind: 'ok' });
+    } else if (t.hasAttribute('data-cp-alert')) {
+      UI.alert({ title: 'Delete this project?', message: 'Its log rows stay. Future runs stop reaching it.', from: t,
+        actions: [{ label: 'Cancel', value: false, role: 'cancel' }, { label: 'Delete', value: true, role: 'destructive' }] })
+        .then(function (v) { if (v) UI.toast('Project deleted.', { kind: 'ok' }); });
+    } else {
+      pv = pv >= 1 ? .1 : Math.min(1, +(pv + .2).toFixed(2));
+      [].forEach.call(doc.querySelectorAll('[data-cp-prog]'), function (el) {
+        UI.progress(el, pv);
+        var num = el.querySelector('.cp-ring-num'); if (num) num.textContent = Math.round(pv * 100);
+      });
+    }
+  });
+})();
+</script>
+</main>
+
+<!-- ═══ FOOTER (shared — copy verbatim) ═══ -->
+<footer class="band" data-band="utility" data-band-seam="keep">
+  <div class="viewport-content stack-4">
+    <p class="t-caption" style="color: var(--label-2)">Fluid Design Open 1.0 &middot; A glass-and-spring design language with Fluid&rsquo;s colour. Type uses the system UI font where available and Inter elsewhere. Device art is original.</p>
+    <p class="t-caption"><a href="index.html">Overview</a> &middot; <a href="start.html">Start</a> &middot; <a href="docs.html">Docs</a> &middot; <a href="components.html">Components</a> &middot; <a href="selftest.html">Self-test</a> &middot; <a href="audit.html">Audit</a></p>
+  </div>
+</footer>
+
+<script src="assets/geom.js"></script>
+<script src="assets/spring.js"></script>
+<script src="assets/palette.js"></script>
+<script src="assets/art3.js"></script>
+<script src="assets/lg3-core.js"></script>
+<script src="assets/fg3.js"></script>
+<script src="assets/symbols.js"></script>
+<script src="assets/chart.js"></script>
+<script src="assets/motion.js"></script>
+<script src="assets/anim.js"></script>
+<script src="assets/device.js"></script>
+<script src="assets/ui.js"></script>
+<script src="assets/chrome.js"></script>
+<script src="assets/showcase.js"></script>
+<script src="assets/docs.js"></script>   <!-- documentation pages only -->
+<script>FG3.boot(); if (window.DOCS) DOCS.mount();</script>
+</body>
+</html>

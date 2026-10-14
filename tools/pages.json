@@ -1,0 +1,32 @@
+{
+  "_doc": "Read by tools/artifact-build.mjs. entries: one artifact each (scope 'site' publishes every page below plus assets; 'single' publishes its entry plus assets and links into its 'site' artifact by --url). pages: SPEC section 8, in order; 'dir/*.html' globs are allowed; a page that does not exist yet is skipped with a warning. selftest: the count gate (count = regex counted in the self-test page, claim = regex whose group 1 is a quoted count, claimedIn = files that quote it). vars.ignore: names the vars gate treats as declared.",
+  "assets": "assets",
+  "entries": [
+    { "id": "desktop", "src": "index.html", "out": "artifact-desktop.html", "route": "/a/", "scope": "site", "title": "Fluid Design Open" }
+  ],
+  "pages": [
+    "index.html",
+    "start.html",
+    "docs.html",
+    "color.html",
+    "type.html",
+    "layout.html",
+    "materials.html",
+    "motion.html",
+    "components.html",
+    "chrome.html",
+    "showcase.html",
+    "patterns.html",
+    "symbols.html",
+    "data.html",
+    "selftest.html",
+    "audit.html"
+  ],
+  "selftest": {
+    "page": "selftest.html",
+    "count": "^\\s*T\\(",
+    "claim": "(\\d+)\\s+(?:self-test\\s+)?assertions",
+    "claimedIn": ["index.html", "start.html", "docs.html", "README.md"]
+  },
+  "vars": { "ignore": [] }
+}

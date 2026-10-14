@@ -1,0 +1,1251 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Product pages &middot; Fluid Design Open</title>
+<!--
+  The page template. Every page of the site copies this skeleton VERBATIM
+  (head, site nav, footer, scripts) and replaces only: the <title>, the
+  aria-current link in the nav, the local-nav capsule's title/jump links, and
+  <main>. Pages load assets/fg3-color.css.
+
+  Do NOT put data-tone on <html> unless the page must be pinned: an author
+  tone beats the reader's appearance toggle (FG3 precedence).
+-->
+<script>
+/* Tone without a flash (fg3.js header): reader's choice › author › host › system. */
+try{var d=document.documentElement,t=localStorage.getItem('fg3-tone');
+if(!d.hasAttribute('data-tone')){d.setAttribute('data-tone',t||d.getAttribute(
+'data-theme')||(matchMedia('(prefers-color-scheme: dark)').matches?'dark':
+'light'));d.setAttribute('data-tone-auto','')}}catch(e){}
+</script>
+<link rel="stylesheet" href="assets/fg3-tokens.css">
+<link rel="stylesheet" href="assets/fg3-color.css">
+<link rel="stylesheet" href="assets/fg3-springs.css">
+<link rel="stylesheet" href="assets/fg3.css">
+<link rel="stylesheet" href="assets/lg3.css">
+<link rel="stylesheet" href="assets/fg3-motion.css">
+<link rel="stylesheet" href="assets/fg3-components.css">
+<link rel="stylesheet" href="assets/fg3-chrome.css">
+<link rel="stylesheet" href="assets/fg3-showcase.css">
+<link rel="stylesheet" href="assets/fg3-symbols.css">
+<link rel="stylesheet" href="assets/fg3-chart.css">
+<link rel="stylesheet" href="assets/fg3-device.css">
+<link rel="stylesheet" href="assets/fg3-docs.css">    <!-- documentation pages only -->
+<style>
+/* Page layout only: roles and tokens, never a colour value (SPEC §2).
+   Page-local classes are prefixed with the page's own short name (e.g. mo- on
+   motion.html) so they can never collide with a system class. */
+
+/* ── The mock product UI inside device screens (logical px, roles only) ── */
+.sc-ff{position:absolute;inset:0;overflow:hidden;background:var(--bg-2);color:var(--label);
+  font-family:var(--font-text);letter-spacing:-.02em;display:flex;flex-direction:column}
+.sc-ff *{box-sizing:border-box}
+.sc-ff-pad{padding:58px 20px 0}
+.sc-ff-date{font-size:13px;line-height:18px;font-weight:600;color:var(--label)}   /* label-2 measured 3.1:1 in the pixels here */
+.sc-ff-h{font-size:34px;line-height:41px;font-weight:700;letter-spacing:.012em;margin:0 0 14px}
+.sc-ff-h.s{font-size:28px;line-height:34px;margin:4px 0 14px}
+.sc-ff-card{background:var(--bg-1);border-radius:22px;padding:14px 16px}
+.sc-ff-card + .sc-ff-card{margin-top:12px}
+.sc-ff-big{display:flex;align-items:baseline;gap:8px}
+.sc-ff-big b{font-size:40px;line-height:44px;font-weight:600;letter-spacing:-.01em;font-variant-numeric:tabular-nums}
+.sc-ff-big span{font-size:15px;color:var(--label-2)}
+.sc-ff-kv{display:flex;justify-content:space-between;font-size:14px;line-height:19px;padding:9px 0;border-top:1px solid var(--separator)}
+.sc-ff-kv:first-child{border-top:0}
+.sc-ff-kv span:last-child{color:var(--label-2);font-variant-numeric:tabular-nums}
+.sc-ff-bars{height:64px;margin-top:8px}
+.sc-ff-now{font-size:14px;line-height:19px}
+.sc-ff-now b{font-weight:600}
+.sc-ff-stop{margin:14px 0 0;height:50px;border-radius:999px;background:var(--bad);color:var(--bad-ink);font-size:17px;font-weight:600;display:grid;place-items:center}
+.sc-ff-home{position:absolute;left:50%;bottom:8px;width:134px;height:5px;margin-left:-67px;border-radius:3px;background:var(--label);opacity:.8}
+.sc-ff-split{display:grid;grid-template-columns:1fr 1fr;height:100%}
+.sc-ff-split > div{padding:26px 24px}
+.sc-ff-split > div:last-child{background:var(--bg-1)}
+.sc-ff-acct{display:flex;align-items:center;gap:12px;padding:9px 10px;border-radius:16px}
+.sc-ff-acct.on{background:var(--bg-1)}
+.sc-ff-acct [data-chart]{width:40px;height:40px;flex:none}
+.sc-ff-acct .n{font-size:15px;font-weight:600;line-height:19px}
+.sc-ff-acct .d{font-size:12px;line-height:16px;color:var(--label-2)}
+.sc-ff-cap{display:grid;grid-template-columns:78px 1fr 64px;align-items:center;gap:10px;font-size:14px;margin:11px 0}
+.sc-ff-cap .bar{height:8px;border-radius:4px;background:var(--fill-2);overflow:hidden}
+.sc-ff-cap .bar i{display:block;height:100%;border-radius:4px;background:var(--c,var(--series-1))}
+.sc-ff-cap .q{text-align:right;color:var(--label-2);font-variant-numeric:tabular-nums}
+.sc-ff-outer{padding:52px 18px 0;align-items:stretch}
+.sc-ff-ring{width:170px;height:170px;margin:6px auto 12px}
+.sc-ff-msg{max-width:78%;padding:10px 14px;border-radius:20px;font-size:15px;line-height:20px;margin:8px 0}
+.sc-ff-msg.in{background:var(--bg-1);align-self:flex-start;border-bottom-left-radius:6px}
+.sc-ff-msg.out{background:var(--accent-solid);color:var(--accent-ink);align-self:flex-end;border-bottom-right-radius:6px}
+.sc-ff-chat{display:flex;flex-direction:column;padding:0 16px}
+.sc-ff-console{display:grid;grid-template-columns:220px 1fr;height:100%}
+.sc-ff-console .sc-ff-nav{background:var(--bg-2);padding:48px 14px;display:grid;align-content:start;gap:4px;font-size:14px}
+.sc-ff-console .sc-ff-nav span{padding:8px 12px;border-radius:10px;color:var(--label-2)}
+.sc-ff-console .sc-ff-nav span.on{background:var(--fill-2);color:var(--label);font-weight:600}
+.sc-ff-console .sc-ff-main{padding:40px 44px;background:var(--bg-1)}
+.sc-ff-kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
+.sc-ff-kpi{background:var(--bg-2);border-radius:18px;padding:18px}
+.sc-ff-kpi b{display:block;font-size:32px;line-height:38px;font-weight:600;font-variant-numeric:tabular-nums}
+.sc-ff-kpi span{font-size:13px;color:var(--label-2)}
+.sc-ff-wide{height:190px;margin-top:18px;background:var(--bg-2);border-radius:18px;padding:18px}
+
+/* ── Composition helpers for the live blocks ───────────────────────────── */
+.sc-trio{display:flex;justify-content:center;align-items:flex-end;gap:clamp(12px,3vw,48px);margin-top:64px}
+.sc-trio .device:nth-child(2){--device-width:min(300px,34vw)}
+.sc-trio .device:not(:nth-child(2)){--device-width:min(240px,26vw)}
+@media (max-width:734px){ .sc-trio{margin-top:36px} }
+.sc-details{display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:20px;margin-top:96px}
+.sc-details > .t-lede{grid-column:3 / span 4}
+.sc-details > .stat-grid{grid-column:8 / span 4}
+@media (max-width:1068px){ .sc-details > .t-lede{grid-column:1 / span 6} .sc-details > .stat-grid{grid-column:8 / span 5} }
+@media (max-width:734px){ .sc-details > *{grid-column:1 / -1 !important} .sc-details{margin-top:48px;row-gap:40px} }
+.sc-perf{margin:64px 0 96px;padding-inline-start:calc(100% / 12)}
+@media (max-width:734px){ .sc-perf{padding-inline-start:0;margin:40px 0 64px} }
+.sc-mt{margin-top:100px}
+@media (max-width:1068px){ .sc-mt{margin-top:60px} }
+@media (max-width:734px){ .sc-mt{margin-top:50px} }
+.sc-bento-num{font-family:var(--t-hero-ff);font-size:var(--t-80);line-height:1;font-weight:600;letter-spacing:-.015em;font-variant-numeric:tabular-nums}
+.bento-tile .glow-ring.sc-glow{margin-top:32px}
+.sc-glow{border-radius:44px}
+.sc-tabs-phone{--device-width:min(250px,56%)}
+.sc-scene .scene-visual{place-items:start center}
+.sc-scene .scene-visual .device{--device-width:min(320px,70vw);margin-top:max(46vh,300px)}
+@media (max-width:734px){ .gallery-card .glow-ring{margin-top:104px !important} }
+/* WORKAROUND (reported to showcase): the card-overlay focus ring is an outline 3px OUTSIDE
+   the ::after that covers the card, and .scroller-card clips its overflow, so a
+   keyboard reader saw no ring at all. Drawn inside the card edge instead. */
+.scroller-card .card-overlay-toggle:focus-visible::after{outline-offset:calc(-1 * var(--focus-w) - 2px)}
+.sc-overlay-list{list-style:decimal;margin:16px 0 0;padding:0 0 0 1.2em;font-size:var(--t-17);line-height:var(--t-17-lh-loose)}
+.sc-rings-3{width:min(720px,84%);margin-top:40px}
+.sc-rings-3 [data-chart]{width:min(180px,26vw);height:min(180px,26vw);margin:0 auto 20px}
+
+/* ── The spec band after each block: what it is, the numbers, the markup ── */
+.band.sc-spec{--band-pt:var(--band-pad-reduced);--band-pb:var(--band-pad-reduced)}
+.sc-row{display:grid;grid-template-columns:minmax(0,5fr) minmax(0,7fr);gap:40px 64px;align-items:start}
+.sc-row + .sc-row{margin-top:104px;padding-top:88px;border-top:1px solid var(--separator)}
+.sc-facts{display:grid;gap:18px;min-width:0;align-content:start}
+.sc-kicker{display:flex;flex-wrap:wrap;gap:6px;margin:0}
+.sc-kicker code{font-size:var(--t-14);padding:.2em .55em;border-radius:8px;background:var(--fill-2)}
+.sc-name{font-family:var(--t-subtitle-ff);font-size:var(--t-subtitle-fs);line-height:var(--t-subtitle-lh);letter-spacing:var(--t-subtitle-ls);font-weight:600;margin:0}
+.sc-text{margin:0;color:var(--label-2);font-size:var(--t-17);line-height:var(--t-17-lh);letter-spacing:var(--t-17-ls)}
+.sc-text strong{color:var(--label);font-weight:inherit}
+.sc-facts .doc-note{font-size:var(--t-14);line-height:var(--t-14-lh-loose,1.43)}
+.sc-stats{gap:32px 40px;padding-top:6px}
+.sc-stats .stat-value{white-space:nowrap}
+.sc-code{grid-column:1 / -1;position:relative;display:grid;gap:14px;min-width:0}
+.sc-code__tabs{--seg-h:var(--h-m);justify-self:start}
+.sc-code__label{display:flex;align-items:center;height:var(--h-m);margin:0;padding-inline:4px;color:var(--label-2);font:600 var(--t-14)/1 var(--font-text)}
+.sc-code > .doc-code{position:static;max-height:420px;overflow:auto;scrollbar-width:thin}
+@media (max-width:1068px){ .sc-row{grid-template-columns:minmax(0,1fr);gap:32px} .sc-row + .sc-row{margin-top:72px;padding-top:64px} }
+@media (max-width:734px){ .sc-code > .doc-code{max-height:360px;padding:18px} }
+
+/* ── Composition: this page, drawn as its bands ────────────────────────── */
+.sc-comp{display:grid;grid-template-columns:minmax(0,4fr) minmax(0,8fr);gap:48px 80px;align-items:start;margin-top:80px}
+.sc-map{display:grid;gap:3px;padding:18px;border-radius:var(--r-lg);corner-shape:superellipse(var(--k-continuous));background:var(--bg-1);box-shadow:var(--shadow-hairline)}
+.sc-map__band{display:grid;grid-template-columns:52px minmax(0,1fr) auto;align-items:center;gap:12px;min-height:22px;font-size:var(--t-12);line-height:1.2;color:var(--label-2)}
+.sc-map__bar{height:var(--h,12px);min-height:6px;border-radius:5px;box-shadow:inset 0 0 0 1px var(--separator)}
+.sc-map__bar[data-kind="story"]{background:var(--bg-1)}
+.sc-map__bar[data-kind="utility"]{background:var(--fill-2)}
+.sc-map__bar[data-kind="stage"]{background:var(--band-stage-bg);box-shadow:none}
+.sc-map__name{color:var(--label);font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sc-map__pad{font-variant-numeric:tabular-nums;white-space:nowrap}
+.sc-rules{display:grid;gap:20px}
+.sc-rules .doc-note{font-size:var(--t-17);line-height:var(--t-17-lh)}
+@media (max-width:1068px){ .sc-comp{grid-template-columns:minmax(0,1fr)} }
+</style>
+</head>
+<body>
+
+<!-- ═══ SITE NAV (shared — copy verbatim; set aria-current on this page's link) ═══ -->
+<nav class="globalnav" aria-label="Fluid Design">
+  <div class="globalnav__bar">
+    <a class="globalnav__brand" href="index.html" aria-label="Fluid Design Open home"><i data-sym="sparkles"></i></a>
+    <ul class="globalnav__list">
+      <li class="globalnav__item"><a class="globalnav__link" href="index.html">Overview</a></li>
+      <li class="globalnav__item"><a class="globalnav__link" href="start.html">Start</a></li>
+      <li class="globalnav__item"><a class="globalnav__link" href="docs.html">Docs</a></li>
+      <li class="globalnav__item" data-flyout="gn-foundations"><a class="globalnav__link" href="color.html">Foundations</a><button class="globalnav__trigger" type="button"><span class="sr-only">Foundations menu</span></button></li>
+      <li class="globalnav__item" data-flyout="gn-components"><a class="globalnav__link" href="components.html">Components</a><button class="globalnav__trigger" type="button"><span class="sr-only">Components menu</span></button></li>
+      <li class="globalnav__item" data-flyout="gn-instruments"><a class="globalnav__link" href="selftest.html">Instruments</a><button class="globalnav__trigger" type="button"><span class="sr-only">Instruments menu</span></button></li>
+    </ul>
+    <div class="globalnav__tools">
+      <button class="globalnav__icon" type="button" data-tone-toggle aria-label="Switch appearance"><i data-sym="circle-half"></i></button>
+      <button class="globalnav__menu" type="button" aria-label="Menu" aria-expanded="false"><i data-sym="lines"></i></button>
+    </div>
+  </div>
+  <div class="globalnav__flyout" id="gn-foundations" hidden>
+    <div class="globalnav__flyout-content">
+      <div class="globalnav__group" data-elevated>
+        <h2 class="globalnav__group-title">Foundations</h2>
+        <ul><li><a class="globalnav__flyout-link" href="color.html">Colour</a></li><li><a class="globalnav__flyout-link" href="type.html">Type</a></li><li><a class="globalnav__flyout-link" href="layout.html">Layout</a></li><li><a class="globalnav__flyout-link" href="materials.html">Materials</a></li><li><a class="globalnav__flyout-link" href="motion.html">Motion</a></li></ul>
+      </div>
+      <div class="globalnav__group">
+        <h2 class="globalnav__group-title">Content</h2>
+        <ul><li><a class="globalnav__flyout-link" href="symbols.html">Symbols</a></li><li><a class="globalnav__flyout-link" href="data.html">Data</a></li></ul>
+      </div>
+    </div>
+  </div>
+  <div class="globalnav__flyout" id="gn-components" hidden>
+    <div class="globalnav__flyout-content">
+      <div class="globalnav__group" data-elevated>
+        <h2 class="globalnav__group-title">Components</h2>
+        <ul><li><a class="globalnav__flyout-link" href="components.html">Controls</a></li><li><a class="globalnav__flyout-link" href="chrome.html">Chrome</a></li><li><a class="globalnav__flyout-link" href="showcase.html" aria-current="page">Product pages</a></li><li><a class="globalnav__flyout-link" href="patterns.html">Patterns</a></li></ul>
+      </div>
+    </div>
+  </div>
+  <div class="globalnav__flyout" id="gn-instruments" hidden>
+    <div class="globalnav__flyout-content">
+      <div class="globalnav__group" data-elevated>
+        <h2 class="globalnav__group-title">Instruments</h2>
+        <ul><li><a class="globalnav__flyout-link" href="selftest.html">Self-test</a></li><li><a class="globalnav__flyout-link" href="audit.html">Audit</a></li></ul>
+      </div>
+    </div>
+  </div>
+</nav>
+
+<!-- ═══ LOCAL NAV (per page: title, one CTA, jump links to this page's sections) ═══ -->
+<div class="localnav" data-localnav-reveal="#hero">
+  <div class="localnav__capsule" data-lg3 data-lg3-priority="3">
+    <a class="localnav__title" href="#top">Product pages</a>
+    <button class="localnav__explore" type="button"><span class="localnav__explore-label">Explore</span></button>
+    <a class="localnav__cta" href="start.html">Adopt</a>
+    <div class="localnav__panel" aria-label="Explore Fluid Design">
+      <ul class="localnav__tiles">
+        <li><a class="localnav__tile" href="materials.html" style="--tile-hue: var(--series-1)"><span class="localnav__thumb"><i data-sym="sparkles"></i></span>Materials</a></li>
+        <li><a class="localnav__tile" href="motion.html" style="--tile-hue: var(--series-2)"><span class="localnav__thumb"><i data-sym="waveform"></i></span>Motion</a></li>
+        <li><a class="localnav__tile" href="chrome.html" style="--tile-hue: var(--series-3)"><span class="localnav__thumb"><i data-sym="sidebar"></i></span>Chrome</a></li>
+        <li><a class="localnav__tile" href="components.html" style="--tile-hue: var(--series-4)"><span class="localnav__thumb"><i data-sym="sliders"></i></span>Controls</a></li>
+        <li><a class="localnav__tile" href="showcase.html" style="--tile-hue: var(--series-5)"><span class="localnav__thumb"><i data-sym="grid"></i></span>Product pages</a></li>
+      </ul>
+      <hr class="localnav__rule">
+      <nav class="localnav__jump" aria-label="On this page">
+        <p class="localnav__jump-label">On this page <i data-sym="chevron-down"></i></p>
+        <ul class="localnav__jump-grid">
+          <li class="localnav__jump-item"><a href="#hero">Hero</a></li>
+          <li class="localnav__jump-item"><a href="#highlights">Gallery</a></li>
+          <li class="localnav__jump-item"><a href="#design">Lockup</a></li>
+          <li class="localnav__jump-item"><a href="#look">Pose chips</a></li>
+          <li class="localnav__jump-item"><a href="#scene">Scene</a></li>
+          <li class="localnav__jump-item"><a href="#numbers">Stats</a></li>
+          <li class="localnav__jump-item"><a href="#tabs">Feature tabs</a></li>
+          <li class="localnav__jump-item"><a href="#bento">Bento</a></li>
+          <li class="localnav__jump-item"><a href="#compare">Compare</a></li>
+          <li class="localnav__jump-item"><a href="#why">Card scroller</a></li>
+          <li class="localnav__jump-item"><a href="#composition">Composition</a></li>
+        </ul>
+      </nav>
+    </div>
+  </div>
+</div>
+
+<main id="top">
+
+<!-- ═══ HERO · the kit's own hero, live ════════════════════════════════════ -->
+<section class="band hero" data-band="stage" id="hero" aria-labelledby="sc-hero-h">
+  <canvas class="hero-art" data-art="twilight" data-art-seed="23" data-art-contrast="1.22" data-art-vignette=".42" aria-hidden="true"></canvas>
+  <div class="hero-marquee viewport-content">
+    <p class="hero-eyebrow">Product pages</p>
+    <h1 class="hero-headline" id="sc-hero-h">Made to be looked at.</h1>
+    <p class="hero-sub">Eighteen blocks<br>Drawn with Fluid&rsquo;s own devices, art and colour</p>
+    <div class="hero-media" aria-label="Drag to open and close the device">
+      <div class="device" data-device="duo" data-fold="1" id="sc-hero-duo">
+        <div class="device__screen" data-screen="inner" data-screen-width="760">
+          <div class="sc-ff" data-tone="light">
+            <div class="sc-ff-split">
+              <div>
+                <div class="sc-ff-date">Projects</div>
+                <h3 class="sc-ff-h s">Fleet</h3>
+                <div class="sc-ff-acct on"><div data-chart="rings" data-values='[{"label":"Build","value":312,"max":400,"color":"series-1"},{"label":"Test","value":70,"max":70,"color":"series-2"},{"label":"Deploy","value":58,"max":70,"color":"series-3"}]'></div><div><div class="n">Aurora</div><div class="d">312 builds &middot; 70 tests</div></div></div>
+                <div class="sc-ff-acct"><div data-chart="rings" data-values='[{"label":"Build","value":188,"max":400,"color":"series-1"},{"label":"Test","value":41,"max":70,"color":"series-2"},{"label":"Deploy","value":70,"max":70,"color":"series-3"}]'></div><div><div class="n">Basil</div><div class="d">188 builds &middot; 41 tests</div></div></div>
+                <div class="sc-ff-acct"><div data-chart="rings" data-values='[{"label":"Build","value":244,"max":400,"color":"series-1"},{"label":"Test","value":52,"max":70,"color":"series-2"},{"label":"Deploy","value":39,"max":70,"color":"series-3"}]'></div><div><div class="n">Cobalt</div><div class="d">244 builds &middot; Review blocked &middot; 17h 12m</div></div></div>
+              </div>
+              <div>
+                <div class="sc-ff-date">Aurora</div>
+                <h3 class="sc-ff-h s">Today&rsquo;s limits</h3>
+                <div class="sc-ff-cap"><span>Build</span><span class="bar"><i style="width:78%"></i></span><span class="q">312/400</span></div>
+                <div class="sc-ff-cap" style="--c:var(--series-2)"><span>Test</span><span class="bar"><i style="width:100%"></i></span><span class="q">70/70</span></div>
+                <div class="sc-ff-cap" style="--c:var(--series-3)"><span>Deploy</span><span class="bar"><i style="width:83%"></i></span><span class="q">58/70</span></div>
+                <div class="sc-ff-card sc-ff-now" style="margin-top:18px;background:var(--bg-2)"><b>Now</b> &middot; Build &larr; Ana<br>4 of 10 tasks &middot; 42 s</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="device__screen" data-screen="outer" data-screen-width="362">
+          <div class="sc-ff sc-ff-outer" data-tone="light">
+            <div class="sc-ff-date">14:30</div>
+            <h3 class="sc-ff-h s">Today</h3>
+            <div class="sc-ff-ring" data-chart="rings" data-center="57%" data-values='[{"label":"Completed","value":1222,"max":2160,"color":"series-1"},{"label":"Test","value":186,"max":280,"color":"series-2"},{"label":"Deploy","value":196,"max":280,"color":"series-3"}]'></div>
+            <div class="sc-ff-card sc-ff-now"><b>Now</b> &middot; Build &larr; Ana</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="hero-platter" data-lg3 data-lg3-recipe="pill" data-lg3-tone="light" data-lg3-priority="5" data-lg3-interactive>
+      <p class="hero-price"><span>Free and open source (MIT).</span><span>Tokens, engines and blocks in one folder.</span></p>
+      <a class="btn btn-primary btn-l hero-cta" href="start.html">Adopt</a>
+    </div>
+  </div>
+</section>
+
+<!-- spec · hero -->
+<section class="band sc-spec" data-band="story" aria-labelledby="sc-s-hero">
+  <div class="viewport-content">
+    <div class="sc-row">
+      <div class="sc-facts">
+        <p class="sc-kicker"><code>.hero</code><code>.hero-platter</code></p>
+        <h2 class="sc-name" id="sc-s-hero">One viewport, one product, one glass chip.</h2>
+        <p class="sc-text">The hero is a stage band <strong>exactly one viewport tall</strong>. The eyebrow, the headline and a two-line caption sit on black; the art rises behind the device and fades out before it reaches the words. The price platter is the band&rsquo;s only glass, over the device&rsquo;s foot.</p>
+        <p class="doc-note" data-kind="chosen">A hero is often a video. Ours is a DEVICE duo that opens as you arrive, as you scroll the first 60vh, or under your finger &mdash; drag it, or focus it and use the arrow keys.</p>
+      </div>
+      <div class="stat-grid sc-stats" data-cols="2">
+        <div class="stat-cell"><p class="stat-value">100svh</p><p class="stat-caption">hero height, clamped to 745&ndash;1244 px</p></div>
+        <div class="stat-cell"><p class="stat-value">80/84</p><p class="stat-caption">headline; 48/52 on a phone</p></div>
+        <div class="stat-cell"><p class="stat-value">64 px</p><p class="stat-caption">platter, 10 px padding, as wide as its words</p></div>
+        <div class="stat-cell"><p class="stat-value">44 px</p><p class="stat-caption">call to action; 36 below 1069</p></div>
+      </div>
+      <div class="sc-code">
+<div class="segmented sc-code__tabs" role="tablist" aria-label="Code"><button type="button" role="tab" id="sc-code-1-t0" aria-controls="sc-code-1-p0" aria-selected="true">HTML</button><button type="button" role="tab" id="sc-code-1-t1" aria-controls="sc-code-1-p1">ANIM</button><button type="button" role="tab" id="sc-code-1-t2" aria-controls="sc-code-1-p2">JavaScript</button></div>
+<pre class="doc-code" role="tabpanel" id="sc-code-1-p0" aria-labelledby="sc-code-1-t0" tabindex="0"><code>&lt;section class="band hero" data-band="stage" id="hero"&gt;
+  &lt;canvas class="hero-art" data-art="twilight" data-art-seed="23" aria-hidden="true"&gt;&lt;/canvas&gt;
+  &lt;div class="hero-marquee viewport-content"&gt;
+    &lt;p class="hero-eyebrow"&gt;Product pages&lt;/p&gt;
+    &lt;h1 class="hero-headline"&gt;Made to be looked at.&lt;/h1&gt;
+    &lt;p class="hero-sub"&gt;Eighteen blocks&lt;br&gt;Drawn with our own devices&lt;/p&gt;
+    &lt;div class="hero-media" aria-label="Drag to open and close the device"&gt;
+      &lt;div class="device" data-device="duo" data-fold="1"&gt;
+        &lt;div class="device__screen" data-screen="inner" data-screen-width="760"&gt;...&lt;/div&gt;
+        &lt;div class="device__screen" data-screen="outer" data-screen-width="362"&gt;...&lt;/div&gt;
+      &lt;/div&gt;
+    &lt;/div&gt;
+    &lt;div class="hero-platter" data-lg3 data-lg3-recipe="pill" data-lg3-tone="light" data-lg3-priority="5"&gt;
+      &lt;p class="hero-price"&gt;&lt;span&gt;Free and open source (MIT).&lt;/span&gt;&lt;span&gt;Tokens, engines and blocks.&lt;/span&gt;&lt;/p&gt;
+      &lt;a class="btn btn-primary btn-l hero-cta" href="start.html"&gt;Adopt&lt;/a&gt;
+    &lt;/div&gt;
+  &lt;/div&gt;
+&lt;/section&gt;</code></pre>
+<pre class="doc-code" role="tabpanel" id="sc-code-1-p1" aria-labelledby="sc-code-1-t1" tabindex="0" hidden><code>&lt;!-- SHOW writes this on .hero-media when the page is enhanced.
+     Author it yourself and SHOW keeps yours. --&gt;
+&lt;div class="hero-media" data-scrub='{"start":"a0t","end":"a0t + 60vh","anchors":["#hero"]}'&gt;</code></pre>
+<pre class="doc-code" role="tabpanel" id="sc-code-1-p2" aria-labelledby="sc-code-1-t2" tabindex="0" hidden><code>const hero = SHOW.get(document.querySelector('.hero'));
+hero.fold('laptop');   // 'closed' | 'tent' | 'laptop' | 'open', or 0..1
+// the reader owns the hinge from here: scroll no longer drives it
+console.log(hero.owned);</code></pre>
+</div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ HIGHLIGHTS · section header + gallery + the chrome module's control bar ═══════════ -->
+<section class="band" data-band="utility" data-band-bar id="highlights" aria-labelledby="sc-hl-h">
+  <div class="viewport-content">
+    <header class="section-header">
+      <h2 class="section-header-headline" id="sc-hl-h">Get the highlights.</h2>
+      <a class="section-header-link" href="#scene">Watch it work <i data-sym="play"></i></a>
+    </header>
+  </div>
+  <div class="gallery" aria-label="Highlights">
+    <div class="gallery-rail" tabindex="-1">
+      <ul class="gallery-list">
+        <li class="gallery-item" data-label="Arrive once">
+          <div class="gallery-card" data-tone="light">
+            <p class="gallery-caption">Arrive once. Work the whole list.<br>A run is one trip, not eight.</p>
+            <div class="gallery-media">
+              <canvas data-art="twilight" data-art-seed="4" data-art-vignette=".3" aria-hidden="true"></canvas>
+              <div class="device" data-device="phone" style="--device-width:min(260px,62%);align-self:start;margin-top:150px">
+                <div class="device__screen" data-screen-width="402">
+                  <div class="sc-ff sc-ff-pad">
+                    <div class="sc-ff-date">Saturday 26 September</div>
+                    <h3 class="sc-ff-h">Today</h3>
+                    <div class="sc-ff-card"><div class="sc-ff-big"><b>12.6 s</b><span>an action, inside runs</span></div></div>
+                    <div class="sc-ff-card"><div class="sc-ff-date">Last 38 runs &middot; tasks reached</div><div class="sc-ff-bars ch-series-2" data-chart="bars" data-values="9,0,9,10,0,9,8,0,10,0,10,9,0,9,10,0,10,11,0,9,0,9,11,0,11,9,0,11,9,0,10,0,10,0,11,0,10,0"></div></div>
+                    <div class="sc-ff-stop">Stop</div>
+                    <div class="sc-ff-home"></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </li>
+        <li class="gallery-item" data-label="Limits">
+          <div class="gallery-card">
+            <p class="gallery-caption">Every limit, counted where it lands.<br>Aurora, Saturday at 14:30.</p>
+            <div class="gallery-media">
+              <div class="stat-grid stat-grid-center sc-rings-3" data-cols="3">
+                <div class="stat-cell"><div data-chart="rings" data-center="78%" data-values='[{"label":"Build","value":312,"max":400,"color":"series-1"}]'></div><p class="stat-value">400</p><p class="stat-caption">builds a day</p></div>
+                <div class="stat-cell"><div data-chart="rings" data-center="100%" data-values='[{"label":"Test","value":70,"max":70,"color":"series-2"}]'></div><p class="stat-value">70</p><p class="stat-caption">tests a day</p></div>
+                <div class="stat-cell"><div data-chart="rings" data-center="83%" data-values='[{"label":"Deploy","value":58,"max":70,"color":"series-3"}]'></div><p class="stat-value">70</p><p class="stat-caption">deploys a day</p></div>
+              </div>
+            </div>
+          </div>
+        </li>
+        <li class="gallery-item" data-label="Replies">
+          <div class="gallery-card" data-tone="dark">
+            <p class="gallery-caption headline-sweep" data-pin="bottom">Replies in your own voice.</p>
+            <div class="gallery-media">
+              <canvas data-art="aurora" data-art-seed="12" aria-hidden="true"></canvas>
+              <div class="glow-ring sc-glow" style="--glow-size:min(200px,50%);align-self:start;margin-top:48px">
+                <div class="device" data-device="phone">
+                  <div class="device__screen" data-screen-width="402">
+                    <div class="sc-ff sc-ff-pad" style="padding-inline:0">
+                      <div style="padding:0 20px"><div class="sc-ff-date">Basil</div><h3 class="sc-ff-h s">Comments</h3></div>
+                      <div class="sc-ff-chat">
+                        <p class="sc-ff-msg in">Love the trail photos! Where was the second one?</p>
+                        <p class="sc-ff-msg out">Thank you! That one&rsquo;s above the lake, about an hour up.</p>
+                        <p class="sc-ff-msg in">Adding it to the list.</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </li>
+        <li class="gallery-item" data-label="One desk">
+          <div class="gallery-card">
+            <p class="gallery-caption">Every phone on one desk.</p>
+            <div class="gallery-media">
+              <div class="device" data-device="laptop" style="--device-width:min(860px,82%);align-self:start;margin-top:150px">
+                <div class="device__screen" data-screen-width="1280">
+                  <div class="sc-ff sc-ff-console">
+                    <div class="sc-ff-nav"><span class="on">Today</span><span>Runners</span><span>Projects</span><span>Queues</span><span>Shapes</span><span>Comments</span></div>
+                    <div class="sc-ff-main">
+                      <h3 class="sc-ff-h">Today</h3>
+                      <div class="sc-ff-kpis">
+                        <div class="sc-ff-kpi"><b>1,222</b><span>completed &middot; cap 2,160</span></div>
+                        <div class="sc-ff-kpi"><b>42.7 s</b><span>per action, all day</span></div>
+                        <div class="sc-ff-kpi"><b>12.6 s</b><span>an action, inside runs</span></div>
+                        <div class="sc-ff-kpi"><b>224</b><span>of 348 tasks, last 38 runs</span></div>
+                      </div>
+                      <div class="sc-ff-wide"><div data-chart="bars" class="ch-series-2" style="height:150px" data-values="9,0,9,10,0,9,8,0,10,0,10,9,0,9,10,0,10,11,0,9,0,9,11,0,11,9,0,11,9,0,10,0,10,0,11,0,10,0"></div></div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </li>
+      </ul>
+    </div>
+    <div class="control-bar" data-autoplay data-duration="6.15" aria-label="Highlights">
+      <div class="control-bar__dots">
+        <button class="control-bar__dot" type="button" aria-current="true"></button>
+        <button class="control-bar__dot" type="button"></button>
+        <button class="control-bar__dot" type="button"></button>
+        <button class="control-bar__dot" type="button"></button>
+      </div>
+      <button class="control-bar__play" type="button" aria-label="Pause"></button>
+    </div>
+  </div>
+</section>
+
+<!-- spec · section header + gallery -->
+<section class="band sc-spec" data-band="story" aria-labelledby="sc-s-gal">
+  <div class="viewport-content">
+    <div class="sc-row">
+      <div class="sc-facts">
+        <p class="sc-kicker"><code>.section-header</code><code>.gallery</code><code>.control-bar</code></p>
+        <h2 class="sc-name" id="sc-s-gal">Cards that page themselves.</h2>
+        <p class="sc-text">A section header pairs a 48 px headline with one link, <strong>on the same last baseline</strong>. Below it, cards the width of the content column, 20 px apart, the next one peeking in. the chrome module&rsquo;s control bar floats over them and drives the autoplay; the band&rsquo;s 224 px bottom is where it parks.</p>
+        <p class="doc-note" data-kind="measured">One number, <code>--autoplay-progress</code> (the card under the centre), drives the caption parallax at &minus;.45&times; and its cubic fade, as a media card gallery does.</p>
+      </div>
+      <div class="stat-grid sc-stats" data-cols="2">
+        <div class="stat-cell"><p class="stat-value">1260</p><p class="stat-caption">&times; 612 px cards; column &minus; 20 &times; 480 on phones</p></div>
+        <div class="stat-cell"><p class="stat-value">6.15 s</p><p class="stat-caption">a card, then a 1 s easeInOutQuad page move</p></div>
+        <div class="stat-cell"><p class="stat-value">48</p><p class="stat-caption">px caption inset, 584 px wide at most</p></div>
+        <div class="stat-cell"><p class="stat-value">80</p><p class="stat-caption">px between the headline and its link</p></div>
+      </div>
+      <div class="sc-code">
+<div class="segmented sc-code__tabs" role="tablist" aria-label="Code"><button type="button" role="tab" id="sc-code-2-t0" aria-controls="sc-code-2-p0" aria-selected="true">HTML</button><button type="button" role="tab" id="sc-code-2-t1" aria-controls="sc-code-2-p1">JavaScript</button></div>
+<pre class="doc-code" role="tabpanel" id="sc-code-2-p0" aria-labelledby="sc-code-2-t0" tabindex="0"><code>&lt;section class="band" data-band="utility" data-band-bar&gt;
+  &lt;div class="viewport-content"&gt;
+    &lt;header class="section-header"&gt;
+      &lt;h2 class="section-header-headline"&gt;Get the highlights.&lt;/h2&gt;
+      &lt;a class="section-header-link" href="#film"&gt;Watch it work &lt;i data-sym="play"&gt;&lt;/i&gt;&lt;/a&gt;
+    &lt;/header&gt;
+  &lt;/div&gt;
+  &lt;div class="gallery" aria-label="Highlights"&gt;
+    &lt;div class="gallery-rail" tabindex="-1"&gt;
+      &lt;ul class="gallery-list"&gt;
+        &lt;li class="gallery-item" data-label="Arrive once"&gt;
+          &lt;div class="gallery-card"&gt;
+            &lt;p class="gallery-caption"&gt;Arrive once. Work the whole list.&lt;/p&gt;
+            &lt;div class="gallery-media"&gt;...&lt;/div&gt;
+          &lt;/div&gt;
+        &lt;/li&gt;
+      &lt;/ul&gt;
+    &lt;/div&gt;
+    &lt;div class="control-bar" data-autoplay data-duration="6.15" aria-label="Highlights"&gt;
+      &lt;div class="control-bar__dots"&gt;
+        &lt;button class="control-bar__dot" type="button" aria-current="true"&gt;&lt;/button&gt;
+        &lt;button class="control-bar__dot" type="button"&gt;&lt;/button&gt;
+      &lt;/div&gt;
+      &lt;button class="control-bar__play" type="button" aria-label="Pause"&gt;&lt;/button&gt;
+    &lt;/div&gt;
+  &lt;/div&gt;
+&lt;/section&gt;</code></pre>
+<pre class="doc-code" role="tabpanel" id="sc-code-2-p1" aria-labelledby="sc-code-2-t1" tabindex="0" hidden><code>const gallery = SHOW.get(document.querySelector('.gallery'));
+gallery.go(2);
+gallery.pause();
+document.addEventListener('show:gallery', (e) =&gt; console.log(e.detail.index));</code></pre>
+</div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ DESIGN · lockup, three phones, swatches; fades into the grey below ═ -->
+<section class="band" data-band="story" data-band-fade="utility" id="design" aria-labelledby="sc-design-h">
+  <div class="viewport-content">
+    <div class="lockup">
+      <p class="lockup-eyebrow">Run engine</p>
+      <h2 class="lockup-headline" id="sc-design-h">The list comes to you.</h2>
+      <p class="lockup-copy">Orbit picks the project that is furthest behind, <strong>starts up once at a review</strong> and works the tasks it finds there. Then it rests, and rolls again. <strong>Every run writes its own ledger row</strong>, so the daily limits count what the workspace really did.</p>
+    </div>
+    <div class="sc-trio" data-reveal="stagger">
+      <div class="device" data-device="phone" data-finish="light" data-staggered-item><div class="device__screen" data-screen-width="402"><div class="sc-ff sc-ff-pad"><div class="sc-ff-date">Aurora</div><h3 class="sc-ff-h">Limits</h3><div class="sc-ff-card"><div class="sc-ff-kv"><span>Build</span><span>312/400</span></div><div class="sc-ff-kv"><span>Test</span><span>70/70</span></div><div class="sc-ff-kv"><span>Deploy</span><span>58/70</span></div></div><div class="sc-ff-home"></div></div></div></div>
+      <div class="device" data-device="phone" data-finish="dark" id="sc-finish-phone" data-staggered-item><div class="device__screen" data-screen-width="402"><div class="sc-ff sc-ff-pad"><div class="sc-ff-date">Now</div><h3 class="sc-ff-h">Run</h3><div class="sc-ff-card"><div class="sc-ff-big"><b>4/10</b><span>tasks</span></div></div><div class="sc-ff-card sc-ff-now"><b>Build</b> &larr; Ana</div><div class="sc-ff-stop">Stop</div><div class="sc-ff-home"></div></div></div></div>
+      <div class="device" data-device="phone" data-finish="light" data-staggered-item><div class="device__screen" data-screen-width="402"><div class="sc-ff sc-ff-pad"><div class="sc-ff-date">Queues</div><h3 class="sc-ff-h">Reviewers</h3><div class="sc-ff-card"><div class="sc-ff-kv"><span>Ana</span><span>live</span></div><div class="sc-ff-kv"><span>Ben</span><span>live</span></div><div class="sc-ff-kv"><span>Chi</span><span>resting</span></div></div><div class="sc-ff-home"></div></div></div></div>
+    </div>
+    <fieldset class="swatches" data-for="sc-finish-phone">
+      <legend class="sr-only">Device finish</legend>
+      <div class="swatches-list">
+        <label class="swatch" data-finish="dark"><input type="radio" name="sc-finish" value="dark" checked><span class="swatch-disc"></span><span class="sr-only">Graphite</span></label>
+        <label class="swatch" data-finish="light"><input type="radio" name="sc-finish" value="light"><span class="swatch-disc"></span><span class="sr-only">Silver</span></label>
+        <label class="swatch" data-finish="accent"><input type="radio" name="sc-finish" value="accent"><span class="swatch-disc"></span><span class="sr-only">Violet</span></label>
+      </div>
+      <p class="swatches-name" aria-hidden="true">Graphite</p>
+    </fieldset>
+  </div>
+</section>
+
+<!-- ═══ TAKE A CLOSER LOOK · pose chips, fold slider, clip-expand ══════════ -->
+<section class="band" data-band="utility" style="--band-pt:0px;--band-pb:0px" id="look" aria-labelledby="sc-look-h">
+  <div class="viewport-content" style="padding-top:var(--band-pad-reduced)">
+    <header class="section-header"><h2 class="section-header-headline" id="sc-look-h">Take a closer look.</h2></header>
+  </div>
+  <div class="pose-stage clip-expand">
+    <div class="pose-media">
+      <div class="device" data-device="duo" data-fold="0.3333" id="sc-look-duo" style="--device-width:min(620px,100%)">
+        <div class="device__screen" data-screen="inner" data-screen-width="760">
+          <div class="sc-ff" data-tone="light"><div class="sc-ff-split"><div><div class="sc-ff-date">Shapes</div><h3 class="sc-ff-h s">Run</h3><div class="sc-ff-card"><div class="sc-ff-kv"><span>Per run</span><span>6&ndash;12 tasks</span></div><div class="sc-ff-kv"><span>Rest</span><span>30&ndash;120 s</span></div><div class="sc-ff-kv"><span>Plan</span><span>30 s / action</span></div></div></div><div><div class="sc-ff-date">Plan</div><h3 class="sc-ff-h s">Today</h3><div class="sc-ff-bars ch-series-2" style="height:120px" data-chart="bars" data-values="6,9,11,8,12,10,7,11,9,12"></div></div></div></div>
+        </div>
+        <div class="device__screen" data-screen="outer" data-screen-width="362">
+          <div class="sc-ff sc-ff-outer" data-tone="light"><div class="sc-ff-date">14:30</div><h3 class="sc-ff-h s">Run</h3><div class="sc-ff-card"><div class="sc-ff-big"><b>4/10</b><span>tasks</span></div></div></div>
+        </div>
+      </div>
+    </div>
+    <div class="pose" data-for="sc-look-duo">
+      <div class="pose-paddles"></div>
+      <ul class="pose-list" aria-label="Poses">
+        <li class="pose-item" data-pose="0.3333">
+          <button class="pose-chip"><span class="pose-icon"><i data-sym="plus"></i></span><span class="pose-label">Foldable design</span></button>
+          <div class="pose-card"><p><strong>Foldable design.</strong> The console on the big screen, the run on the small one.</p>
+            <div class="detent"><p class="detent-caption" id="sc-fold-cap">Drag below to open and close</p><div class="device-fold-slider" data-for="sc-look-duo" aria-labelledby="sc-fold-cap"></div></div></div>
+        </li>
+        <li class="pose-item" data-pose="open">
+          <button class="pose-chip"><span class="pose-icon"><i data-sym="plus"></i></span><span class="pose-label">Open</span></button>
+          <div class="pose-card"><p><strong>Open.</strong> Projects on the left, today&rsquo;s limits on the right &mdash; one glance at the whole workspace.</p></div>
+        </li>
+        <li class="pose-item" data-pose="laptop">
+          <button class="pose-chip"><span class="pose-icon"><i data-sym="plus"></i></span><span class="pose-label">Half open</span></button>
+          <div class="pose-card"><p><strong>Half open.</strong> Stand it on a desk and watch the runs roll without touching a thing.</p></div>
+        </li>
+        <li class="pose-item" data-pose="tent">
+          <button class="pose-chip"><span class="pose-icon"><i data-sym="plus"></i></span><span class="pose-label">Tent</span></button>
+          <div class="pose-card"><p><strong>Tent.</strong> A bedside clock for the night: the next run and when it starts.</p></div>
+        </li>
+        <li class="pose-item" data-pose="closed">
+          <button class="pose-chip"><span class="pose-icon"><i data-sym="plus"></i></span><span class="pose-label">Closed</span></button>
+          <div class="pose-card"><p><strong>Closed.</strong> The outer screen keeps the one number that matters: what completed today.</p></div>
+        </li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- spec · lockup + swatches · pose chips + fold slider + clip-expand -->
+<section class="band sc-spec" data-band="story" aria-label="Lockup, swatches, pose chips and the fold slider">
+  <div class="viewport-content">
+    <div class="sc-row">
+      <div class="sc-facts">
+        <p class="sc-kicker"><code>.lockup</code><code>.swatches</code><code>data-band-fade</code></p>
+        <h2 class="sc-name">A headline, a paragraph, the colour of the thing.</h2>
+        <p class="sc-text">The lockup centres an eyebrow, a headline at seven of twelve columns and a grey paragraph whose highlights are <strong>ink at the same weight</strong>. The swatches are native radios: arrow keys choose, and the device re-finishes inside a 200 ms cross-fade.</p>
+        <p class="doc-note" data-kind="measured">The band fades into the grey below over its last 128 + 69 px instead of cutting.</p>
+      </div>
+      <div class="stat-grid sc-stats" data-cols="2">
+        <div class="stat-cell"><p class="stat-value">80/84</p><p class="stat-caption">headline, 7 of 12 columns</p></div>
+        <div class="stat-cell"><p class="stat-value">21/29</p><p class="stat-caption">copy, 8 of 12 columns</p></div>
+        <div class="stat-cell"><p class="stat-value">28</p><p class="stat-caption">px disc in a 36 px ring, 44 px target</p></div>
+        <div class="stat-cell"><p class="stat-value">400 ms</p><p class="stat-caption">discs pop in, 50 ms apart</p></div>
+      </div>
+      <div class="sc-code">
+<div class="segmented sc-code__tabs" role="tablist" aria-label="Code"><button type="button" role="tab" id="sc-code-3-t0" aria-controls="sc-code-3-p0" aria-selected="true">HTML</button><button type="button" role="tab" id="sc-code-3-t1" aria-controls="sc-code-3-p1">JavaScript</button></div>
+<pre class="doc-code" role="tabpanel" id="sc-code-3-p0" aria-labelledby="sc-code-3-t0" tabindex="0"><code>&lt;section class="band" data-band="story" data-band-fade="utility"&gt;
+  &lt;div class="viewport-content"&gt;
+    &lt;div class="lockup"&gt;
+      &lt;p class="lockup-eyebrow"&gt;Run engine&lt;/p&gt;
+      &lt;h2 class="lockup-headline"&gt;The list comes to you.&lt;/h2&gt;
+      &lt;p class="lockup-copy"&gt;Orbit &lt;strong&gt;starts up once at a review&lt;/strong&gt; and works the tasks it finds.&lt;/p&gt;
+    &lt;/div&gt;
+    &lt;fieldset class="swatches" data-for="finish-phone"&gt;
+      &lt;legend class="sr-only"&gt;Device finish&lt;/legend&gt;
+      &lt;div class="swatches-list"&gt;
+        &lt;label class="swatch" data-finish="dark"&gt;&lt;input type="radio" name="finish" value="dark" checked&gt;&lt;span class="swatch-disc"&gt;&lt;/span&gt;&lt;span class="sr-only"&gt;Graphite&lt;/span&gt;&lt;/label&gt;
+        &lt;label class="swatch" data-finish="light"&gt;&lt;input type="radio" name="finish" value="light"&gt;&lt;span class="swatch-disc"&gt;&lt;/span&gt;&lt;span class="sr-only"&gt;Silver&lt;/span&gt;&lt;/label&gt;
+      &lt;/div&gt;
+      &lt;p class="swatches-name" aria-hidden="true"&gt;Graphite&lt;/p&gt;
+    &lt;/fieldset&gt;
+  &lt;/div&gt;
+&lt;/section&gt;</code></pre>
+<pre class="doc-code" role="tabpanel" id="sc-code-3-p1" aria-labelledby="sc-code-3-t1" tabindex="0" hidden><code>SHOW.get(document.querySelector('.swatches')).select('light');
+document.addEventListener('show:swatch', (e) =&gt; console.log(e.detail.value, e.detail.finish));</code></pre>
+</div>
+    </div>
+
+    <div class="sc-row">
+      <div class="sc-facts">
+        <p class="sc-kicker"><code>.pose</code><code>.detent</code><code>.clip-expand</code></p>
+        <h2 class="sc-name">Chips that become cards.</h2>
+        <p class="sc-text">Each pose chip is a 56 px platter capsule. Press one and it <strong>morphs, on one spring, into a card</strong> with the content radius, and the device turns to that pose. On a phone the viewer starts as an inset card and un-clips to the screen edges as it arrives.</p>
+        <p class="doc-note" data-kind="measured">One <code>--progress</code> carries width, height, radius and the corner&rsquo;s shape: a true semicircle at 0, the continuous 28 px corner at 1, on the tour spring (.5, bounce .42).</p>
+      </div>
+      <div class="stat-grid sc-stats" data-cols="2">
+        <div class="stat-cell"><p class="stat-value">56 px</p><p class="stat-caption">chip: 14 px pad, 24 px plus, 17/600 label</p></div>
+        <div class="stat-cell"><p class="stat-value">423</p><p class="stat-caption">px card; 374 medium, 400 at most on phones</p></div>
+        <div class="stat-cell"><p class="stat-value">3</p><p class="stat-caption">magnetic detents: closed, a third, open</p></div>
+        <div class="stat-cell"><p class="stat-value">70vh</p><p class="stat-caption">of scroll to un-clip, phones only</p></div>
+      </div>
+      <div class="sc-code">
+<div class="segmented sc-code__tabs" role="tablist" aria-label="Code"><button type="button" role="tab" id="sc-code-4-t0" aria-controls="sc-code-4-p0" aria-selected="true">HTML</button><button type="button" role="tab" id="sc-code-4-t1" aria-controls="sc-code-4-p1">ANIM</button><button type="button" role="tab" id="sc-code-4-t2" aria-controls="sc-code-4-p2">JavaScript</button></div>
+<pre class="doc-code" role="tabpanel" id="sc-code-4-p0" aria-labelledby="sc-code-4-t0" tabindex="0"><code>&lt;div class="pose-stage clip-expand"&gt;
+  &lt;div class="pose-media"&gt;
+    &lt;div class="device" data-device="duo" data-fold="0.3333" id="look-duo"&gt;...&lt;/div&gt;
+  &lt;/div&gt;
+  &lt;div class="pose" data-for="look-duo"&gt;
+    &lt;div class="pose-paddles"&gt;&lt;/div&gt;
+    &lt;ul class="pose-list" aria-label="Poses"&gt;
+      &lt;li class="pose-item" data-pose="0.3333"&gt;
+        &lt;button class="pose-chip"&gt;&lt;span class="pose-icon"&gt;&lt;i data-sym="plus"&gt;&lt;/i&gt;&lt;/span&gt;&lt;span class="pose-label"&gt;Foldable design&lt;/span&gt;&lt;/button&gt;
+        &lt;div class="pose-card"&gt;
+          &lt;p&gt;&lt;strong&gt;Foldable design.&lt;/strong&gt; The console inside, the run outside.&lt;/p&gt;
+          &lt;div class="detent"&gt;
+            &lt;p class="detent-caption" id="fold-cap"&gt;Drag below to open and close&lt;/p&gt;
+            &lt;div class="device-fold-slider" data-for="look-duo" aria-labelledby="fold-cap"&gt;&lt;/div&gt;
+          &lt;/div&gt;
+        &lt;/div&gt;
+      &lt;/li&gt;
+      &lt;li class="pose-item" data-pose="open"&gt;...&lt;/li&gt;
+    &lt;/ul&gt;
+  &lt;/div&gt;
+&lt;/div&gt;</code></pre>
+<pre class="doc-code" role="tabpanel" id="sc-code-4-p1" aria-labelledby="sc-code-4-t1" tabindex="0" hidden><code>&lt;!-- SHOW masks the clip-expand to phones unless you author it --&gt;
+&lt;div class="pose-stage clip-expand" data-clip-expand='{"breakpointMask":["small","xsmall"]}'&gt;</code></pre>
+<pre class="doc-code" role="tabpanel" id="sc-code-4-p2" aria-labelledby="sc-code-4-t2" tabindex="0" hidden><code>const pose = SHOW.get(document.querySelector('.pose'));
+pose.open(1);
+pose.close();
+DEVICE.fold(document.getElementById('look-duo'), 'tent');</code></pre>
+</div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ SCENE · sticky TextOverMedia that frames down as it leaves ════════ -->
+<section class="scene sc-scene" id="scene" data-tone="dark" style="--scene-scrim-max:.32" aria-labelledby="sc-scene-h">
+  <div class="scene-sticky">
+    <div class="scene-media">
+      <div class="scene-visual">
+        <canvas data-art="twilight" data-art-seed="31" data-art-contrast="1.2" aria-hidden="true"></canvas>
+        <div class="device" data-device="phone" data-finish="dark">
+          <div class="device__screen" data-screen-width="402">
+            <div class="sc-ff sc-ff-pad" data-tone="dark">
+              <div class="sc-ff-date">Run &middot; Basil</div>
+              <h3 class="sc-ff-h">Working</h3>
+              <div class="sc-ff-card"><div class="sc-ff-big"><b>7/8</b><span>tasks</span></div></div>
+              <div class="sc-ff-card"><div class="sc-ff-kv"><span>Test</span><span>7</span></div><div class="sc-ff-kv"><span>Arrived</span><span>once</span></div><div class="sc-ff-kv"><span>Elapsed</span><span>1m 24s</span></div></div>
+              <div class="sc-ff-stop">Stop</div>
+              <div class="sc-ff-home"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <p class="scene-note">Eleven seconds an action, in a run of eight.</p>
+  </div>
+  <div class="scene-copy">
+    <h2 id="sc-scene-h">Watch it work.</h2>
+    <p>One start-up at a review list, then action after action off the same rows &mdash; the cost of getting there, paid once.</p>
+  </div>
+</section>
+
+<!-- ═══ NUMBERS · a details row with a stat stack that counts up ═════════ -->
+<section class="band" data-band="story" id="numbers" aria-labelledby="sc-num-h">
+  <div class="viewport-content">
+    <div class="lockup">
+      <p class="lockup-eyebrow">Measured</p>
+      <h2 class="lockup-headline" id="sc-num-h">Numbers, not guesses.</h2>
+    </div>
+    <div class="sc-details">
+      <p class="t-lede" data-reveal="up">Every run reports what it <strong>asked for</strong>, what it <strong>found</strong> and what <strong>completed</strong>. A run that comes back empty writes the queue off; one that timed out changes nothing. The plan keeps thirty seconds an action &mdash; <strong>the guard never does</strong>.</p>
+      <div class="stat-grid stat-grid-stack">
+        <div class="stat-cell"><p class="stat-value" data-count>48 s</p><p class="stat-caption">to arrive at a list and act once<sup class="fn"><a href="#sc-fn-2" aria-label="Footnote 2">2</a></sup></p></div>
+        <div class="stat-cell"><p class="stat-lead">Then</p><p class="stat-value" data-count>6 s</p><p class="stat-caption">for each further action off the same list</p></div>
+        <div class="stat-cell"><p class="stat-lead">So</p><p class="stat-value" data-count data-count-from="48">11 s</p><p class="stat-caption">an action, in a run of eight</p></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- spec · scene · stat grid -->
+<section class="band sc-spec" data-band="utility" aria-label="Scene and stat grid">
+  <div class="viewport-content">
+    <div class="sc-row">
+      <div class="sc-facts">
+        <p class="sc-kicker"><code>.scene</code><code>data-scene</code></p>
+        <h2 class="sc-name">Pinned media that frames down as it leaves.</h2>
+        <p class="sc-text">The scene pins its media while the copy scrolls over it and fades. As the scene leaves, the media <strong>scales to .9 and is clipped to the content column</strong> &mdash; a full-bleed picture becoming a card on the page. A second line lifts in on <code>--progress</code>.</p>
+        <p class="doc-note" data-kind="measured">Text-over-media keyframes: the copy fades over t &minus; 30vh &rarr; t &minus; 10vh, the scrim arrives over a0t &minus; 110vh &rarr; a0t &minus; 90vh, and the frame-down runs over the scene&rsquo;s last 60vh.</p>
+      </div>
+      <div class="stat-grid sc-stats" data-cols="2">
+        <div class="stat-cell"><p class="stat-value">.9</p><p class="stat-caption">media scale at the end</p></div>
+        <div class="stat-cell"><p class="stat-value">40</p><p class="stat-caption">px radius framed; 36 medium, 28 phones</p></div>
+        <div class="stat-cell"><p class="stat-value">6.25%</p><p class="stat-caption">inset, or the column edge</p></div>
+        <div class="stat-cell"><p class="stat-value">.5</p><p class="stat-caption">scrim at most; this page uses .32</p></div>
+      </div>
+      <div class="sc-code">
+<div class="segmented sc-code__tabs" role="tablist" aria-label="Code"><button type="button" role="tab" id="sc-code-5-t0" aria-controls="sc-code-5-p0" aria-selected="true">HTML</button><button type="button" role="tab" id="sc-code-5-t1" aria-controls="sc-code-5-p1">ANIM</button></div>
+<pre class="doc-code" role="tabpanel" id="sc-code-5-p0" aria-labelledby="sc-code-5-t0" tabindex="0"><code>&lt;section class="scene" id="scene" data-tone="dark"&gt;
+  &lt;div class="scene-sticky"&gt;
+    &lt;div class="scene-media"&gt;
+      &lt;div class="scene-visual"&gt;
+        &lt;canvas data-art="twilight" aria-hidden="true"&gt;&lt;/canvas&gt;
+        &lt;div class="device" data-device="phone"&gt;...&lt;/div&gt;
+      &lt;/div&gt;
+    &lt;/div&gt;
+    &lt;p class="scene-note"&gt;Eleven seconds an action, in a run of eight.&lt;/p&gt;
+  &lt;/div&gt;
+  &lt;div class="scene-copy"&gt;
+    &lt;h2&gt;Watch it work.&lt;/h2&gt;
+    &lt;p&gt;One start-up at a review list, then action after action.&lt;/p&gt;
+  &lt;/div&gt;
+&lt;/section&gt;</code></pre>
+<pre class="doc-code" role="tabpanel" id="sc-code-5-p1" aria-labelledby="sc-code-5-t1" tabindex="0" hidden><code>&lt;!-- What SHOW writes (the markup, compiled to scroll timelines by ANIM).
+     Author any of it and SHOW keeps yours. --&gt;
+&lt;section class="scene" id="scene" data-scene&gt;
+  &lt;div class="scene-sticky" data-scene-sticky&gt;
+    &lt;div class="scene-media"
+      data-anim-keyframe='{"start":"a0b - 100vh","end":"a0b - 40vh","--frame":[0,1],"easeFunction":"easeInOutQuad","anchors":["#scene"]}'
+      data-anim-keyframe-0='{"start":"a0t - 110vh","end":"a0t - 90vh","--scene-scrim":[0,1],"easeFunction":"easeInOutQuad","anchors":["#scene"]}'
+      data-anim-keyframe-1='{"start":"a0b - 25vh","end":"a0b - 5vh","--scene-scrim":[1,0],"easeFunction":"easeInOutQuad","anchors":["#scene"]}'&gt;
+      ...
+    &lt;/div&gt;
+  &lt;/div&gt;
+  &lt;div class="scene-copy" data-anim-keyframe='{"start":"t - 30vh","end":"t - 10vh","opacity":[1,0],"easeFunction":"easeInOutQuad"}'&gt;...&lt;/div&gt;
+&lt;/section&gt;</code></pre>
+</div>
+    </div>
+
+    <div class="sc-row">
+      <div class="sc-facts">
+        <p class="sc-kicker"><code>.stat-grid</code><code>data-count</code></p>
+        <h2 class="sc-name">A number with a word above and below.</h2>
+        <p class="sc-text">The stat grammar: an optional lead, the value at 40/40 semibold, a caption beneath. <strong>Values are written final</strong> and roll up as they arrive; reduced motion and the base experience show them finished.</p>
+      </div>
+      <div class="stat-grid sc-stats" data-cols="2">
+        <div class="stat-cell"><p class="stat-value">40/40</p><p class="stat-caption">value, semibold, at every width</p></div>
+        <div class="stat-cell"><p class="stat-value">14/18</p><p class="stat-caption">lead and caption</p></div>
+        <div class="stat-cell"><p class="stat-value">85vh</p><p class="stat-caption">the roll starts at t &minus; 85vh</p></div>
+        <div class="stat-cell"><p class="stat-value">28</p><p class="stat-caption">px between stacked stats</p></div>
+      </div>
+      <div class="sc-code">
+<p class="sc-code__label">HTML</p>
+<pre class="doc-code" id="sc-code-6-p0" tabindex="0" aria-label="HTML example"><code>&lt;div class="stat-grid stat-grid-stack"&gt;
+  &lt;div class="stat-cell"&gt;
+    &lt;p class="stat-value" data-count&gt;48 s&lt;/p&gt;
+    &lt;p class="stat-caption"&gt;to arrive at a list and act once&lt;/p&gt;
+  &lt;/div&gt;
+  &lt;div class="stat-cell"&gt;
+    &lt;p class="stat-lead"&gt;So&lt;/p&gt;
+    &lt;p class="stat-value" data-count data-count-from="48"&gt;11 s&lt;/p&gt;
+    &lt;p class="stat-caption"&gt;an action, in a run of eight&lt;/p&gt;
+  &lt;/div&gt;
+&lt;/div&gt;</code></pre>
+</div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ FEATURE TABS ══════════════════════════════════════════════════════ -->
+<section class="band" data-band="story" id="tabs" aria-labelledby="sc-tabs-h">
+  <div class="viewport-content">
+    <header class="section-header"><h2 class="section-header-headline" id="sc-tabs-h">A whole family of shapes.</h2></header>
+    <div class="feature-tabs">
+      <div class="feature-tabs-media">
+        <div class="feature-tabs-panel" data-active><canvas data-art="dawn" data-art-seed="5" aria-hidden="true"></canvas>
+          <div class="device sc-tabs-phone" data-device="phone"><div class="device__screen" data-screen-width="402"><div class="sc-ff sc-ff-pad"><div class="sc-ff-date">Shape</div><h3 class="sc-ff-h">Careful start</h3><div class="sc-ff-card"><div class="sc-ff-bars ch-series-2" style="height:110px" data-chart="bars" data-values="2,3,3,4,5,5,6,7,8,8"></div></div><div class="sc-ff-home"></div></div></div></div></div>
+        <div class="feature-tabs-panel"><canvas data-art="steel" data-art-seed="9" aria-hidden="true"></canvas>
+          <div class="device sc-tabs-phone" data-device="phone"><div class="device__screen" data-screen-width="402"><div class="sc-ff sc-ff-pad"><div class="sc-ff-date">Shape</div><h3 class="sc-ff-h">Steady</h3><div class="sc-ff-card"><div class="sc-ff-bars ch-series-2" style="height:110px" data-chart="bars" data-values="7,7,8,7,8,7,8,7,8,7"></div></div><div class="sc-ff-home"></div></div></div></div></div>
+        <div class="feature-tabs-panel"><canvas data-art="ember" data-art-seed="17" aria-hidden="true"></canvas>
+          <div class="device sc-tabs-phone" data-device="phone"><div class="device__screen" data-screen-width="402"><div class="sc-ff sc-ff-pad"><div class="sc-ff-date">Shape</div><h3 class="sc-ff-h">Run</h3><div class="sc-ff-card"><div class="sc-ff-bars ch-series-2" style="height:110px" data-chart="bars" data-values="12,0,11,0,0,12,10,0,12,9"></div></div><div class="sc-ff-home"></div></div></div></div></div>
+        <div class="feature-tabs-panel"><canvas data-art="deep" data-art-seed="3" aria-hidden="true"></canvas>
+          <div class="device sc-tabs-phone" data-device="phone" data-finish="dark"><div class="device__screen" data-screen-width="402"><div class="sc-ff sc-ff-pad" data-tone="dark"><div class="sc-ff-date">Shape</div><h3 class="sc-ff-h">Night shift</h3><div class="sc-ff-card"><div class="sc-ff-bars ch-series-2" style="height:110px" data-chart="bars" data-values="1,0,2,0,1,0,0,2,1,0"></div></div><div class="sc-ff-home"></div></div></div></div></div>
+      </div>
+      <div class="feature-tabs-nav">
+        <div class="feature-tabs-list" aria-label="Shapes">
+          <button class="feature-tabs-tab" aria-selected="true">Careful start</button>
+          <button class="feature-tabs-tab">Steady</button>
+          <button class="feature-tabs-tab">Run</button>
+          <button class="feature-tabs-tab">Night shift</button>
+        </div>
+      </div>
+      <div class="feature-tabs-captions">
+        <p class="feature-tabs-caption" data-active><strong>Careful start.</strong> A new project ramps up over a week before it works at full pace.</p>
+        <p class="feature-tabs-caption"><strong>Steady.</strong> The same pace all day, for projects that have earned it.</p>
+        <p class="feature-tabs-caption"><strong>Run.</strong> Arrive once, act several times, rest, repeat &mdash; the fastest shape there is.</p>
+        <p class="feature-tabs-caption"><strong>Night shift.</strong> Almost nothing, on purpose: the runner sleeps when the team does.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ BENTO · a sweeping headline, then tiles, one with a glow ring ═════ -->
+<section class="band" data-band="story" id="bento" aria-labelledby="sc-bento-h">
+  <div class="viewport-content">
+    <div class="lockup">
+      <h2 class="lockup-headline headline-sweep" data-sweep id="sc-bento-h">Reviews that sound like you.</h2>
+      <p class="lockup-copy"><strong>Mira</strong> answers the reviewers a run reaches, in the voice you gave it, and <strong>hands the conversation back</strong> the moment it needs you.</p>
+    </div>
+    <div class="bento sc-mt" data-reveal="stagger">
+      <div class="bento-tile span-6" data-staggered-item>
+        <div class="bento-copy"><p>Rings</p><h3>Build, Test, Deploy. Close all three.</h3></div>
+        <div class="bento-media"><div data-chart="rings" data-center="Today" style="width:220px;height:220px" data-values='[{"label":"Build","value":312,"max":400,"color":"series-1"},{"label":"Test","value":70,"max":70,"color":"series-2"},{"label":"Deploy","value":58,"max":70,"color":"series-3"}]'></div></div>
+      </div>
+      <div class="bento-tile span-6" data-tone="dark" data-staggered-item>
+        <div class="bento-copy"><p>Conversations</p><h3>Glows while it listens.</h3></div>
+        <canvas data-art="twilight" data-art-seed="41" aria-hidden="true"></canvas>
+        <div class="bento-media">
+          <div class="glow-ring sc-glow" style="--glow-size:170px"><div class="device" data-device="phone"><div class="device__screen" data-screen-width="402"><div class="sc-ff sc-ff-pad" data-tone="dark"><div class="sc-ff-date">Basil</div><h3 class="sc-ff-h s">Listening&hellip;</h3><div class="sc-ff-chat"><p class="sc-ff-msg in">Can you review this by Friday?</p></div></div></div></div></div>
+        </div>
+      </div>
+      <div class="bento-tile span-4" data-staggered-item>
+        <div class="bento-copy"><p>Plan</p><h3>One completed action every</h3></div>
+        <div class="bento-media"><p class="sc-bento-num" data-count data-count-from="140">30 s</p></div>
+      </div>
+      <div class="bento-tile span-8" data-staggered-item>
+        <div class="bento-copy"><p>Queues</p><h3>Came back empty? Written off. Timed out? Nothing changes.</h3></div>
+        <div class="bento-media"><div data-chart="bars" class="ch-series-2" style="width:100%;height:150px" data-values="9,11,0,8,12,7,0,10,6,11,9,0,12,8,10,7,0,9"></div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- spec · feature tabs · sweep + bento + glow ring -->
+<section class="band sc-spec" data-band="utility" aria-label="Feature tabs, bento, headline sweep and glow ring">
+  <div class="viewport-content">
+    <div class="sc-row">
+      <div class="sc-facts">
+        <p class="sc-kicker"><code>.feature-tabs</code></p>
+        <h2 class="sc-name">A pill switcher that drives the media.</h2>
+        <p class="sc-text">One media box with the content radius and a 44 px pill platter below it. The dark pill travels to the chosen tab, <strong>the labels invert only once it arrives</strong>, the panels cross-fade and the caption follows.</p>
+        <p class="doc-note" data-kind="chosen">The pill travels on the select spring (.4, bounce .15) instead of a 320 ms ease-out: anything a finger moves is a spring here.</p>
+      </div>
+      <div class="stat-grid sc-stats" data-cols="2">
+        <div class="stat-cell"><p class="stat-value">1260</p><p class="stat-caption">&times; 712 px media; 3:4, full bleed on phones</p></div>
+        <div class="stat-cell"><p class="stat-value">44 px</p><p class="stat-caption">platter, 4 px padding, 36 px pill</p></div>
+        <div class="stat-cell"><p class="stat-value">160 ms</p><p class="stat-caption">labels invert after the pill lands</p></div>
+        <div class="stat-cell"><p class="stat-value">300 ms</p><p class="stat-caption">caption cross-fade, easeOutCubic</p></div>
+      </div>
+      <div class="sc-code">
+<div class="segmented sc-code__tabs" role="tablist" aria-label="Code"><button type="button" role="tab" id="sc-code-7-t0" aria-controls="sc-code-7-p0" aria-selected="true">HTML</button><button type="button" role="tab" id="sc-code-7-t1" aria-controls="sc-code-7-p1">JavaScript</button></div>
+<pre class="doc-code" role="tabpanel" id="sc-code-7-p0" aria-labelledby="sc-code-7-t0" tabindex="0"><code>&lt;div class="feature-tabs"&gt;
+  &lt;div class="feature-tabs-media"&gt;
+    &lt;div class="feature-tabs-panel" data-active&gt;...&lt;/div&gt;
+    &lt;div class="feature-tabs-panel"&gt;...&lt;/div&gt;
+  &lt;/div&gt;
+  &lt;div class="feature-tabs-nav"&gt;
+    &lt;div class="feature-tabs-list" aria-label="Shapes"&gt;
+      &lt;button class="feature-tabs-tab" aria-selected="true"&gt;Careful start&lt;/button&gt;
+      &lt;button class="feature-tabs-tab"&gt;Steady&lt;/button&gt;
+    &lt;/div&gt;
+  &lt;/div&gt;
+  &lt;div class="feature-tabs-captions"&gt;
+    &lt;p class="feature-tabs-caption" data-active&gt;&lt;strong&gt;Careful start.&lt;/strong&gt; A new project ramps for a week.&lt;/p&gt;
+    &lt;p class="feature-tabs-caption"&gt;&lt;strong&gt;Steady.&lt;/strong&gt; The same pace all day.&lt;/p&gt;
+  &lt;/div&gt;
+&lt;/div&gt;</code></pre>
+<pre class="doc-code" role="tabpanel" id="sc-code-7-p1" aria-labelledby="sc-code-7-t1" tabindex="0" hidden><code>SHOW.get(document.querySelector('.feature-tabs')).select(2);
+document.addEventListener('show:tab', (e) =&gt; console.log(e.detail.index));</code></pre>
+</div>
+    </div>
+
+    <div class="sc-row">
+      <div class="sc-facts">
+        <p class="sc-kicker"><code>.headline-sweep</code><code>.bento</code><code>.glow-ring</code></p>
+        <h2 class="sc-name">Tiles, a sweeping headline, a ring of light.</h2>
+        <p class="sc-text">Bento tiles sit on a nested 12-column grid; they are content, so they stay opaque and the art fades out under their words. The headline sweep passes a gradient through the words once and lands solid. The glow ring is a conic ring cut out with <code>mask-composite</code>, with a blurred copy behind it for the bloom.</p>
+        <p class="doc-note" data-kind="rule">Under reduced motion the ring stops turning but stays lit, the sweep shows its final solid ink, and the tiles appear in place: state kept, displacement gone.</p>
+      </div>
+      <div class="stat-grid sc-stats" data-cols="2">
+        <div class="stat-cell"><p class="stat-value">620</p><p class="stat-caption">&times; 506 px half tile; 440 medium, 308 phones</p></div>
+        <div class="stat-cell"><p class="stat-value">20 px</p><p class="stat-caption">gap on 12 columns</p></div>
+        <div class="stat-cell"><p class="stat-value">7 s</p><p class="stat-caption">one turn of the ring</p></div>
+        <div class="stat-cell"><p class="stat-value">80vh</p><p class="stat-caption">the sweep plays at t &minus; 80vh</p></div>
+      </div>
+      <div class="sc-code">
+<p class="sc-code__label">HTML</p>
+<pre class="doc-code" id="sc-code-8-p0" tabindex="0" aria-label="HTML example"><code>&lt;h2 class="lockup-headline headline-sweep" data-sweep&gt;Reviews that sound like you.&lt;/h2&gt;
+
+&lt;div class="bento" data-reveal="stagger"&gt;
+  &lt;div class="bento-tile span-6" data-staggered-item&gt;
+    &lt;div class="bento-copy"&gt;&lt;p&gt;Rings&lt;/p&gt;&lt;h3&gt;Close all three.&lt;/h3&gt;&lt;/div&gt;
+    &lt;div class="bento-media"&gt;...&lt;/div&gt;
+  &lt;/div&gt;
+  &lt;div class="bento-tile span-6" data-tone="dark" data-staggered-item&gt;
+    &lt;div class="bento-copy"&gt;&lt;p&gt;Conversations&lt;/p&gt;&lt;h3&gt;Glows while it listens.&lt;/h3&gt;&lt;/div&gt;
+    &lt;canvas data-art="twilight" aria-hidden="true"&gt;&lt;/canvas&gt;
+    &lt;div class="bento-media"&gt;
+      &lt;div class="glow-ring" style="--glow-size: 170px; border-radius: 44px"&gt;
+        &lt;div class="device" data-device="phone"&gt;...&lt;/div&gt;
+      &lt;/div&gt;
+    &lt;/div&gt;
+  &lt;/div&gt;
+&lt;/div&gt;</code></pre>
+</div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ COMPARE · left lockup, stats, the rolling compare selector ════════ -->
+<section class="band" data-band="story" id="compare" aria-labelledby="sc-perf-h">
+  <div class="viewport-content">
+    <div class="lockup lockup-start">
+      <p class="lockup-eyebrow">Throughput</p>
+      <h2 class="lockup-headline" id="sc-perf-h">The trip is the cost.</h2>
+    </div>
+    <div class="stat-grid sc-perf" data-cols="3" style="--stat-min:200px">
+      <div class="stat-cell"><p class="stat-lead">Down to</p><p class="stat-value" data-count data-count-from="48">11 s</p><p class="stat-caption">an action inside a run of eight</p></div>
+      <div class="stat-cell"><p class="stat-lead">From</p><p class="stat-value">48 s</p><p class="stat-caption">for one action off a fresh start-up</p></div>
+      <div class="stat-cell"><p class="stat-lead">About</p><p class="stat-value">40%</p><p class="stat-caption">of runs find nothing in the queue</p></div>
+    </div>
+    <div class="compare">
+      <label class="compare-label" for="sc-cmp">Compare a run of eight with</label>
+      <div class="compare-select">
+        <select id="sc-cmp">
+          <option>Single visits</option>
+          <option>A run of four</option>
+        </select>
+        <i data-sym="chevron-down"></i>
+      </div>
+      <div class="stat-grid stat-grid-center compare-grid" data-cols="2">
+        <div class="stat-cell" data-compare='[{"lead":"Up to","value":"4.4x faster","caption":"per completed action"},{"lead":"Up to","value":"1.5x faster","caption":"per completed action"}]'><p class="stat-lead">Up to</p><p class="stat-value">4.4x faster</p><p class="stat-caption">per completed action</p></div>
+        <div class="stat-cell" data-compare='[{"lead":"Only","value":"1 start-up","caption":"instead of 8"},{"lead":"Only","value":"1 start-up","caption":"instead of 2"}]'><p class="stat-lead">Only</p><p class="stat-value">1 start-up</p><p class="stat-caption">instead of 8</p></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ WHY · a card scroller whose cards open overlays and sheets ════════ -->
+<section class="band" data-band="utility" id="why" aria-labelledby="sc-why-h">
+  <div class="viewport-content">
+    <header class="section-header">
+      <h2 class="section-header-headline" id="sc-why-h">Why teams run Orbit.</h2>
+    </header>
+  </div>
+  <div class="scroller" aria-label="Reasons">
+    <div class="scroller-rail">
+      <ul class="scroller-list" data-reveal="stagger">
+        <li class="scroller-item" data-staggered-item>
+          <div class="scroller-card card-overlay">
+            <p class="scroller-eyebrow">Local only</p>
+            <h3 class="scroller-headline">Your runners. Your desk.</h3>
+            <p class="scroller-body">It runs on the computer the runners are plugged into.</p>
+            <div class="scroller-media"><canvas data-art="steel" data-art-seed="2" aria-hidden="true"></canvas></div>
+            <button class="card-overlay-toggle" data-sheet="#sc-sheet-local"><span class="sr-only">More about local only</span></button>
+          </div>
+        </li>
+        <li class="scroller-item" data-staggered-item>
+          <div class="scroller-card card-overlay">
+            <p class="scroller-eyebrow">Safety</p>
+            <h3 class="scroller-headline">A refusal gets a retry, not a panic.</h3>
+            <p class="scroller-body">One refusal pauses an action; it never retires a project.</p>
+            <div class="scroller-media"><canvas data-art="aurora" data-art-seed="8" aria-hidden="true"></canvas></div>
+            <button class="card-overlay-toggle"><span class="sr-only">More about safety</span></button>
+            <div class="card-overlay-panel">
+              <p class="scroller-eyebrow">Safety</p>
+              <h3 class="scroller-headline">Three rules, in order.</h3>
+              <ol class="sc-overlay-list"><li>Retry once after a refusal.</li><li>Count only what completed since.</li><li>Stop the action, never the project.</li></ol>
+            </div>
+          </div>
+        </li>
+        <li class="scroller-item" data-staggered-item>
+          <div class="scroller-card card-overlay">
+            <p class="scroller-eyebrow">Recorder</p>
+            <h3 class="scroller-headline">Every incident, phone first.</h3>
+            <p class="scroller-body">An export with every name and message stripped out.</p>
+            <div class="scroller-media"><canvas data-art="ember" data-art-seed="21" aria-hidden="true"></canvas></div>
+            <button class="card-overlay-toggle" data-sheet="#sc-sheet-recorder"><span class="sr-only">More about the recorder</span></button>
+          </div>
+        </li>
+        <li class="scroller-item" data-staggered-item>
+          <div class="scroller-card card-overlay">
+            <p class="scroller-eyebrow">Queues</p>
+            <h3 class="scroller-headline">Written off only when it was really empty.</h3>
+            <p class="scroller-body">A navigation failure is not an empty list.</p>
+            <div class="scroller-media"><canvas data-art="dawn" data-art-seed="14" aria-hidden="true"></canvas></div>
+            <button class="card-overlay-toggle" data-sheet="#sc-sheet-audiences"><span class="sr-only">More about queues</span></button>
+          </div>
+        </li>
+        <li class="scroller-item" data-staggered-item>
+          <div class="scroller-card card-overlay">
+            <p class="scroller-eyebrow">Ledger</p>
+            <h3 class="scroller-headline">One row per action. The limit counts rows.</h3>
+            <p class="scroller-body">What completed, never what was asked.</p>
+            <div class="scroller-media"><canvas data-art="twilight" data-art-seed="27" aria-hidden="true"></canvas></div>
+            <button class="card-overlay-toggle" data-sheet="#sc-sheet-ledger"><span class="sr-only">More about the ledger</span></button>
+          </div>
+        </li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- spec · compare · scroller + overlay · footnotes -->
+<section class="band sc-spec" data-band="story" aria-label="Compare, card scroller, card overlay and footnotes">
+  <div class="viewport-content">
+    <div class="sc-row">
+      <div class="sc-facts">
+        <p class="sc-kicker"><code>.lockup-start</code><code>.compare</code></p>
+        <h2 class="sc-name">A selector that rolls the numbers.</h2>
+        <p class="sc-text">A native select styled as a compare pill sits over a two-up stat grid. Choose another option and <strong>each digit rolls</strong> to its new value while the words cross-fade.</p>
+      </div>
+      <div class="stat-grid sc-stats" data-cols="2">
+        <div class="stat-cell"><p class="stat-value">314</p><p class="stat-caption">&times; 44 px select; 190 &times; 36 on phones</p></div>
+        <div class="stat-cell"><p class="stat-value">10/12</p><p class="stat-caption">columns wide, 48 px padding</p></div>
+        <div class="stat-cell"><p class="stat-value">62</p><p class="stat-caption">px from the selector to the numbers</p></div>
+        <div class="stat-cell"><p class="stat-value">3:1</p><p class="stat-caption">the pill&rsquo;s outline, a control boundary</p></div>
+      </div>
+      <div class="sc-code">
+<div class="segmented sc-code__tabs" role="tablist" aria-label="Code"><button type="button" role="tab" id="sc-code-9-t0" aria-controls="sc-code-9-p0" aria-selected="true">HTML</button><button type="button" role="tab" id="sc-code-9-t1" aria-controls="sc-code-9-p1">JavaScript</button></div>
+<pre class="doc-code" role="tabpanel" id="sc-code-9-p0" aria-labelledby="sc-code-9-t0" tabindex="0"><code>&lt;div class="compare"&gt;
+  &lt;label class="compare-label" for="cmp"&gt;Compare a run of eight with&lt;/label&gt;
+  &lt;div class="compare-select"&gt;
+    &lt;select id="cmp"&gt;&lt;option&gt;Single visits&lt;/option&gt;&lt;option&gt;A run of four&lt;/option&gt;&lt;/select&gt;
+    &lt;i data-sym="chevron-down"&gt;&lt;/i&gt;
+  &lt;/div&gt;
+  &lt;div class="stat-grid stat-grid-center compare-grid" data-cols="2"&gt;
+    &lt;div class="stat-cell" data-compare='[{"lead":"Up to","value":"4.4x faster","caption":"per completed action"},{"lead":"Up to","value":"1.5x faster","caption":"per completed action"}]'&gt;
+      &lt;p class="stat-lead"&gt;Up to&lt;/p&gt;&lt;p class="stat-value"&gt;4.4x faster&lt;/p&gt;&lt;p class="stat-caption"&gt;per completed action&lt;/p&gt;
+    &lt;/div&gt;
+  &lt;/div&gt;
+&lt;/div&gt;</code></pre>
+<pre class="doc-code" role="tabpanel" id="sc-code-9-p1" aria-labelledby="sc-code-9-t1" tabindex="0" hidden><code>SHOW.get(document.querySelector('.compare')).select(1);
+document.addEventListener('show:compare', (e) =&gt; console.log(e.detail.index));</code></pre>
+</div>
+    </div>
+
+    <div class="sc-row">
+      <div class="sc-facts">
+        <p class="sc-kicker"><code>.scroller</code><code>.card-overlay</code></p>
+        <h2 class="sc-name">A rail of cards, each with more behind it.</h2>
+        <p class="sc-text">The rail starts on the content column and runs to the screen edge; two paddles page it. <strong>A whole card is one button</strong>, marked by a plus that turns into a cross: it opens either an overlay inside the card or a modal sheet that rises from the bottom.</p>
+        <p class="doc-note" data-kind="rule">The modal sheet is opaque: a full-height sheet is content. Focus moves to its close button, Escape returns it to the card.</p>
+      </div>
+      <div class="stat-grid sc-stats" data-cols="2">
+        <div class="stat-cell"><p class="stat-value">372</p><p class="stat-caption">&times; 495 px card; 344 medium, 260 &times; 360 phones</p></div>
+        <div class="stat-cell"><p class="stat-value">36 px</p><p class="stat-caption">paddles at the column&rsquo;s right edge</p></div>
+        <div class="stat-cell"><p class="stat-value">816</p><p class="stat-caption">px sheet; 692 medium, 480 phones</p></div>
+        <div class="stat-cell"><p class="stat-value">.8 s</p><p class="stat-caption">the sheet rises over a .48 scrim</p></div>
+      </div>
+      <div class="sc-code">
+<div class="segmented sc-code__tabs" role="tablist" aria-label="Code"><button type="button" role="tab" id="sc-code-10-t0" aria-controls="sc-code-10-p0" aria-selected="true">HTML</button><button type="button" role="tab" id="sc-code-10-t1" aria-controls="sc-code-10-p1">JavaScript</button></div>
+<pre class="doc-code" role="tabpanel" id="sc-code-10-p0" aria-labelledby="sc-code-10-t0" tabindex="0"><code>&lt;div class="scroller" aria-label="Reasons"&gt;
+  &lt;div class="scroller-rail"&gt;
+    &lt;ul class="scroller-list" data-reveal="stagger"&gt;
+      &lt;li class="scroller-item" data-staggered-item&gt;
+        &lt;div class="scroller-card card-overlay"&gt;
+          &lt;p class="scroller-eyebrow"&gt;Local only&lt;/p&gt;
+          &lt;h3 class="scroller-headline"&gt;Your runners. Your desk.&lt;/h3&gt;
+          &lt;div class="scroller-media"&gt;...&lt;/div&gt;
+          &lt;button class="card-overlay-toggle" data-sheet="#sheet-local"&gt;&lt;span class="sr-only"&gt;More about local only&lt;/span&gt;&lt;/button&gt;
+        &lt;/div&gt;
+      &lt;/li&gt;
+    &lt;/ul&gt;
+  &lt;/div&gt;
+&lt;/div&gt;
+
+&lt;dialog class="card-overlay-sheet" id="sheet-local" aria-labelledby="sheet-local-h"&gt;
+  &lt;div class="card-overlay-sheet-body"&gt;
+    &lt;p class="card-overlay-topic"&gt;Local only&lt;/p&gt;
+    &lt;h2 class="card-overlay-title" id="sheet-local-h"&gt;It runs on your desk.&lt;/h2&gt;
+    &lt;p&gt;Orbit runs on the computer your runners are plugged into.&lt;/p&gt;
+  &lt;/div&gt;
+&lt;/dialog&gt;</code></pre>
+<pre class="doc-code" role="tabpanel" id="sc-code-10-p1" aria-labelledby="sc-code-10-t1" tabindex="0" hidden><code>SHOW.get(document.querySelector('.scroller')).page(1);
+const card = SHOW.get(document.querySelector('.card-overlay'));
+card.open();
+document.addEventListener('show:overlay', (e) =&gt; console.log(e.detail.open));</code></pre>
+</div>
+    </div>
+
+    <div class="sc-row">
+      <div class="sc-facts">
+        <p class="sc-kicker"><code>.footnotes</code><code>sup.fn</code></p>
+        <h2 class="sc-name">The small print, linked both ways.</h2>
+        <p class="sc-text">Footnotes close the page on its last grey band. A marker in the copy links down to its note, and the note under the pointer or in the address bar turns to ink.</p>
+      </div>
+      <div class="stat-grid sc-stats" data-cols="2">
+        <div class="stat-cell"><p class="stat-value">12/16</p><p class="stat-caption">grey, in a 980 px measure</p></div>
+        <div class="stat-cell"><p class="stat-value">.6em</p><p class="stat-caption">the marker, with numerator figures</p></div>
+      </div>
+      <div class="sc-code">
+<p class="sc-code__label">HTML</p>
+<pre class="doc-code" id="sc-code-11-p0" tabindex="0" aria-label="HTML example"><code>&lt;p&gt;Eight actions from one start-up.&lt;sup class="fn"&gt;&lt;a href="#fn-2" aria-label="Footnote 2"&gt;2&lt;/a&gt;&lt;/sup&gt;&lt;/p&gt;
+
+&lt;section class="band" data-band="utility" aria-label="Footnotes"&gt;
+  &lt;div class="viewport-content"&gt;
+    &lt;div class="footnotes"&gt;
+      &lt;ol&gt;
+        &lt;li id="fn-2"&gt;Costs measured on one runner.&lt;/li&gt;
+      &lt;/ol&gt;
+    &lt;/div&gt;
+  &lt;/div&gt;
+&lt;/section&gt;</code></pre>
+</div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ COMPOSITION · this page as bands, and the rules ═══════════════════ -->
+<section class="band" data-band="utility" id="composition" aria-labelledby="sc-comp-h">
+  <div class="viewport-content">
+    <div class="lockup">
+      <p class="lockup-eyebrow">Composition</p>
+      <h2 class="lockup-headline" id="sc-comp-h">One idea per viewport.</h2>
+      <p class="lockup-copy">A product page is a column of bands in a steady rhythm: <strong>white for the story, grey for galleries and utilities, black for the stage</strong>. Each band says one thing, with one picture, and the next band starts when that thing is finished.</p>
+    </div>
+    <div class="sc-comp">
+      <div>
+        <div class="sc-map" id="sc-map" aria-label="This page, band by band"
+             data-anim-keyframe='{"start":"t - 100vh","end":"t - 55vh","opacity":[0,1],"y":[40,0],"easeFunction":"easeOutCubic"}'>
+          <p class="sc-map__band"><span class="sc-map__bar" data-kind="story"></span><span class="sc-map__name">This page</span><span class="sc-map__pad">&hellip;</span></p>
+        </div>
+        <p class="doc-specimen__label"><b>This page, band by band,</b> measured live: bar height is the band&rsquo;s height, the figure its top and bottom padding. The map fades up on a keyframe written straight into its markup.</p>
+      </div>
+      <div class="sc-rules">
+        <p class="doc-note" data-kind="rule">Story bands are white with 128 px above and below. Grey bands take 144, and neighbours merge into one sheet; two white bands keep both paddings. A band may fade into the next instead of cutting.</p>
+        <p class="doc-note" data-kind="rule">Pictures come from three places only: ART3 art, DEVICE frames with live screens, and compositions of our own components and charts. Never third-party imagery, product photographs, or trade dress.</p>
+        <p class="doc-note" data-kind="rule">Glass stays chrome here too: the hero platter, the control bar, pose chips and paddles. Cards, tiles, sheets at full height and every number are opaque.</p>
+        <p class="doc-note" data-kind="rule">Motion follows scroll, calmly. Content is written in its final state and the choreography only brings it there; reduced motion and the base experience show everything, in place.</p>
+<pre class="doc-code" data-lang="html"><code>&lt;!-- The keyframe format: ANIM compiles it to a scroll timeline --&gt;
+&lt;div class="sc-map"
+     data-anim-keyframe='{"start":"t - 100vh","end":"t - 55vh","opacity":[0,1],"y":[40,0],"easeFunction":"easeOutCubic"}'&gt;
+  ...
+&lt;/div&gt;</code></pre>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ FOOTNOTES · utility, merges into the grey above ════════════════════ -->
+<section class="band" data-band="utility" aria-label="Footnotes">
+  <div class="viewport-content">
+    <div class="footnotes">
+      <ol>
+        <li id="sc-fn-1">This page is the section kit laid out as a product page; Orbit is its sample content.</li>
+        <li id="sc-fn-2">Costs measured on one runner: about 48 seconds to reach a review list and act once, about 6 seconds for each further action off the same list. Eight actions from one start-up is 48 + 7 &times; 6 seconds, about 11 seconds each.</li>
+      </ol>
+      <p>All names shown are fictional. Device art is drawn by the Fluid design system and does not depict any manufacturer&rsquo;s product.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ SHEETS (modal) opened by the card overlays ═════════════════════════ -->
+<dialog class="card-overlay-sheet" id="sc-sheet-local" aria-labelledby="sc-sheet-local-h">
+  <div class="card-overlay-sheet-body">
+    <p class="card-overlay-topic">Local only</p>
+    <h2 class="card-overlay-title" id="sc-sheet-local-h">It runs on your desk.</h2>
+    <p>Orbit runs on the computer your runners are plugged into, and you watch every run from there. The recorder&rsquo;s export is a zip you choose to send, with every name and message stripped first.</p>
+  </div>
+</dialog>
+<dialog class="card-overlay-sheet" id="sc-sheet-recorder" aria-labelledby="sc-sheet-rec-h">
+  <div class="card-overlay-sheet-body">
+    <p class="card-overlay-topic">Recorder</p>
+    <h2 class="card-overlay-title" id="sc-sheet-rec-h">The phone tells you what happened.</h2>
+    <p>Every run keeps a short flight record: the screens it saw, the steps it took and the rows it wrote. When something goes wrong on a runner you cannot reach, the export carries the evidence, not the people behind it.</p>
+  </div>
+</dialog>
+<dialog class="card-overlay-sheet" id="sc-sheet-audiences" aria-labelledby="sc-sheet-aud-h">
+  <div class="card-overlay-sheet-body">
+    <p class="card-overlay-topic">Queues</p>
+    <h2 class="card-overlay-title" id="sc-sheet-aud-h">Empty, or never there?</h2>
+    <p>A run that reaches a review list and sweeps it without finding anything new writes that queue off. A run that timed out &mdash; the list did not open, or the screen was not the one expected &mdash; changes nothing: the queue is held for fifteen minutes and tried again. Of the last 38 runs, 14 came back empty and 1 timed out.</p>
+  </div>
+</dialog>
+<dialog class="card-overlay-sheet" id="sc-sheet-ledger" aria-labelledby="sc-sheet-ledger-h">
+  <div class="card-overlay-sheet-body">
+    <p class="card-overlay-topic">Ledger</p>
+    <h2 class="card-overlay-title" id="sc-sheet-ledger-h">The limit counts rows.</h2>
+    <p>Every action the runner completes writes its own row: one build, one test, one deploy. A run is sized in tasks, and a build can touch several files per task, so the daily limit of 2,160 counts rows, never tasks and never what was asked. Today that is 1,222 completed of 1,904 asked.</p>
+  </div>
+</dialog>
+
+<script>
+/* Page wiring only: code-card tabs, and the band map drawn from this page's
+   own bands (measured, not typed). Runs once FG3 has booted. */
+document.addEventListener('fg3:ready', function () {
+  document.querySelectorAll('.sc-code').forEach(function (card) {
+    var tabs = card.querySelector('[role="tablist"]'), panels = card.querySelectorAll('[role="tabpanel"]');
+    if (tabs) tabs.addEventListener('change', function (e) {
+      var i = e.detail ? e.detail.index : 0;
+      panels.forEach(function (p, k) { p.hidden = k !== i; });
+    });
+  });
+  var map = document.getElementById('sc-map');
+  function draw() {
+    if (!map) return;
+    var bands = [].slice.call(document.querySelectorAll('main > .band, main > .scene, body > footer.band'));
+    var max = bands.reduce(function (m, b) { return Math.max(m, b.offsetHeight); }, 1);
+    map.textContent = '';
+    bands.forEach(function (b) {
+      var cs = getComputedStyle(b), kind = b.classList.contains('scene') ? 'stage' : (b.getAttribute('data-band') || 'story');
+      var name = b.getAttribute('aria-label') || (b.querySelector('h1, h2') ? b.querySelector('h1, h2').textContent.trim() : 'Footer');
+      var row = document.createElement('p'); row.className = 'sc-map__band';
+      var bar = document.createElement('span'); bar.className = 'sc-map__bar'; bar.setAttribute('data-kind', kind);
+      bar.style.setProperty('--h', Math.max(6, Math.round(44 * b.offsetHeight / max)) + 'px');
+      var n = document.createElement('span'); n.className = 'sc-map__name'; n.textContent = name;
+      var pad = document.createElement('span'); pad.className = 'sc-map__pad';
+      pad.textContent = kind + ' \u00b7 ' + Math.round(parseFloat(cs.paddingTop)) + ' / ' + Math.round(parseFloat(cs.paddingBottom));
+      row.appendChild(bar); row.appendChild(n); row.appendChild(pad); map.appendChild(row);
+    });
+  }
+  draw();
+  var t = 0;
+  addEventListener('resize', function () { clearTimeout(t); t = setTimeout(draw, 200); });
+});
+</script>
+</main>
+
+<!-- ═══ FOOTER (shared — copy verbatim) ═══ -->
+<footer class="band" data-band="utility" data-band-seam="keep">
+  <div class="viewport-content stack-4">
+    <p class="t-caption" style="color: var(--label-2)">Fluid Design Open &middot; Type follows the system face where one exists and Inter elsewhere. Device art is original.</p>
+    <p class="t-caption"><a href="index.html">Overview</a> &middot; <a href="start.html">Start</a> &middot; <a href="docs.html">Docs</a> &middot; <a href="components.html">Components</a> &middot; <a href="selftest.html">Self-test</a> &middot; <a href="audit.html">Audit</a></p>
+  </div>
+</footer>
+
+<script src="assets/geom.js"></script>
+<script src="assets/spring.js"></script>
+<script src="assets/palette.js"></script>
+<script src="assets/art3.js"></script>
+<script src="assets/lg3-core.js"></script>
+<script src="assets/fg3.js"></script>
+<script src="assets/symbols.js"></script>
+<script src="assets/chart.js"></script>
+<script src="assets/motion.js"></script>
+<script src="assets/anim.js"></script>
+<script src="assets/device.js"></script>
+<script src="assets/ui.js"></script>
+<script src="assets/chrome.js"></script>
+<script src="assets/showcase.js"></script>
+<script src="assets/docs.js"></script>   <!-- documentation pages only -->
+<script>FG3.boot(); if (window.DOCS) DOCS.mount();</script>
+</body>
+</html>

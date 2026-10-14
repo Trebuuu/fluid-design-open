@@ -1,0 +1,1093 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Type &middot; Fluid Design Open</title>
+<!--
+  The page template. Every page of the site copies this skeleton VERBATIM
+  (head, site nav, footer, scripts) and replaces only: the <title>, the
+  aria-current link in the nav, the local-nav capsule's title/jump links, and
+  <main>. Pages load assets/fg3-color.css.
+
+  Do NOT put data-tone on <html> unless the page must be pinned: an author
+  tone beats the reader's appearance toggle (FG3 precedence).
+-->
+<script>
+/* Tone without a flash (fg3.js header): reader's choice \u203a author \u203a host \u203a system. */
+try{var d=document.documentElement,t=localStorage.getItem('fg3-tone');
+if(!d.hasAttribute('data-tone')){d.setAttribute('data-tone',t||d.getAttribute(
+'data-theme')||(matchMedia('(prefers-color-scheme: dark)').matches?'dark':
+'light'));d.setAttribute('data-tone-auto','')}}catch(e){}
+</script>
+<link rel="stylesheet" href="assets/fg3-tokens.css">
+<link rel="stylesheet" href="assets/fg3-color.css">
+<link rel="stylesheet" href="assets/fg3-springs.css">
+<link rel="stylesheet" href="assets/fg3.css">
+<link rel="stylesheet" href="assets/lg3.css">
+<link rel="stylesheet" href="assets/fg3-motion.css">
+<link rel="stylesheet" href="assets/fg3-components.css">
+<link rel="stylesheet" href="assets/fg3-chrome.css">
+<link rel="stylesheet" href="assets/fg3-showcase.css">
+<link rel="stylesheet" href="assets/fg3-symbols.css">
+<link rel="stylesheet" href="assets/fg3-chart.css">
+<link rel="stylesheet" href="assets/fg3-device.css">
+<link rel="stylesheet" href="assets/fg3-docs.css">    <!-- documentation pages only -->
+<style>
+/* Page layout only: roles and tokens, never a colour value (SPEC §2).
+   Page-local classes are prefixed ty- (type.html). */
+
+/* ── shared ─────────────────────────────────────────────────────────────── */
+/* inline code sits on --fill-2 (fg3-docs.css), so it takes the on-fill ink:
+   inherited grey prose ink measured 4.15:1 light / 3.08:1 dark on that fill */
+main :not(pre) > code{color:var(--label-2-on-fill)}
+/* a note is itself a fill, so code inside it sits on two: take the full ink */
+main .doc-note code{color:var(--label)}
+.ty-gap-top{margin-top:var(--band-header-gap)}
+.ty-pass,.ty-fail,.ty-chosen{display:inline-flex;align-items:center;gap:4px;white-space:nowrap;font-variant-numeric:tabular-nums}
+.ty-pass{color:var(--ok-strong)} .ty-fail{color:var(--bad-strong)} .ty-chosen{color:var(--warn-strong)}
+.ty-pass .sym,.ty-fail .sym,.ty-chosen .sym{width:1em;height:1em}
+.ty-probe{position:absolute;visibility:hidden;pointer-events:none;white-space:nowrap;inset:auto auto 0 0}
+.ty-mono{font-family:var(--font-mono);letter-spacing:0}
+
+/* ── 0 · hero: the art shows only through the letters (multiply knock-out),
+   and one glass control over their feet bends them ─────────────────────── */
+.ty-hero .hero-media{place-items:stretch;margin-bottom:0}
+.ty-knock{position:relative;isolation:isolate;container-type:size;height:100%;margin-inline:calc(50% - 50vw);overflow:hidden;
+  --ty-fs:min(74cqh,40cqw)}
+/* phones: the stage crops tight to the art, as phone heroes do — the
+   letters fill the width and the band is only as tall as they need, not a
+   whole viewport of black around a small glyph */
+@media (max-width:734px){
+  .ty-hero .hero-marquee{height:auto}
+  .ty-hero .hero-media{flex:none;height:min(100vw,560px)}
+  .ty-knock{--ty-fs:min(70cqh,70cqw)}
+}
+.ty-knock canvas{position:absolute;inset:0;width:100%;height:100%}
+.ty-knock-ink{position:relative;display:grid;place-items:center;width:100%;height:100%;margin:0;
+  background:var(--bg-1);color:var(--label);mix-blend-mode:multiply;
+  font-family:var(--font-display);font-size:var(--ty-fs);line-height:1;letter-spacing:-.02em;font-weight:600;
+  font-variation-settings:"opsz" 32;padding-bottom:.06em;
+  transition:font-weight var(--sp-smooth-ms,500ms) var(--sp-smooth,ease),font-variation-settings var(--sp-smooth-ms,500ms) var(--sp-smooth,ease),letter-spacing var(--sp-smooth-ms,500ms) var(--sp-smooth,ease)}
+.ty-knock-ink[data-face="text"]{font-family:var(--font-text);font-weight:400;font-variation-settings:"opsz" 14;letter-spacing:0}
+.ty-knock-ink[data-face="mono"]{font-family:var(--font-mono);font-weight:500;letter-spacing:-.04em}
+/* the glass sits across the letters' baseline (Inter: baseline ≈ centre + .36em) */
+.ty-knock .ty-face-seg > button{flex:1}
+.ty-knock .ty-face-seg{position:absolute;z-index:1;left:0;right:0;margin-inline:auto;width:min(340px,86%);
+  top:calc(50% + .3 * var(--ty-fs));margin-top:-26px}
+.ty-face{font-weight:600}
+/* forced colours strip the lens and its indicator: keep the choice visible */
+@media (forced-colors:active){
+  .ty-knock .ty-face-seg>button{color:CanvasText}
+  .ty-knock .ty-face-seg>button[aria-checked="true"]{outline:2px solid Highlight;outline-offset:-4px;border-radius:999px}
+}
+
+/* ── 1 · intro ──────────────────────────────────────────────────────────── */
+.ty-stats{margin-top:var(--s-12)}
+.ty-stats .stat-caption{color:var(--label-2)}
+
+/* ── 2 · the web ramp ───────────────────────────────────────────────────── */
+.ty-ramp{border-top:1px solid var(--separator)}
+.ty-step{display:grid;grid-template-columns:56px minmax(0,1fr) 300px;align-items:center;gap:var(--s-5);
+  padding-block:var(--s-4);border-bottom:1px solid var(--separator)}
+@media (max-width:1068px){.ty-step{grid-template-columns:44px minmax(0,1fr) 250px}}
+@media (max-width:734px){.ty-step{grid-template-columns:36px minmax(0,1fr);row-gap:var(--s-2)}.ty-step .ty-meta{grid-column:2}}
+.ty-step-n{font-size:var(--t-14);line-height:1;color:var(--label-2);font-variant-numeric:tabular-nums}
+/* a specimen that cannot show its line wraps on its own leading (the
+   size's measured line-height), never an ellipsis */
+.ty-sample{margin:0;min-width:0;color:var(--label);text-wrap:balance}
+.ty-meta{display:grid;grid-template-columns:auto minmax(0,1fr);gap:2px var(--s-3);margin:0;font-size:var(--t-12);line-height:var(--t-12-lh)}
+.ty-meta dt{color:var(--label-2)}
+.ty-meta dd{margin:0;color:var(--label);font-variant-numeric:tabular-nums}
+.ty-ramp-foot{display:flex;flex-wrap:wrap;justify-content:space-between;gap:var(--s-3);margin-top:var(--s-5);font-size:var(--t-14);color:var(--label-2)}
+
+/* ── 3 · roles table ────────────────────────────────────────────────────── */
+.ty-roles .table td,.ty-roles .table th{vertical-align:middle}
+.ty-roles code{white-space:nowrap}
+.ty-roles .ty-cls{display:inline-block;margin-top:4px;font-size:var(--t-12);color:var(--label-2)}
+@media (max-width:480px){.ty-roles :is(.ty-bps,.ty-bps-h){display:none}}
+.ty-roles tr[data-now] td{background:var(--fill-4)}
+.ty-bps{font-variant-numeric:tabular-nums;white-space:nowrap}
+.ty-bps b{font-weight:600;color:var(--label)}
+.ty-bps span{color:var(--label-2)}
+.ty-foot{margin-top:var(--s-4);font-size:var(--t-14);line-height:var(--t-14-lh-loose);color:var(--label-2);max-width:var(--w-prose)}
+
+/* ── 4 · highlights, balance, pretty ────────────────────────────────────── */
+.ty-lockup-spec{position:relative;padding:var(--s-11) var(--s-7);border-radius:var(--r-lg);corner-shape:superellipse(var(--k-continuous));background:var(--bg-1)}
+/* phones: 40px sides, the gutter the anatomy pins sit in beside each line */
+@media (max-width:734px){.ty-lockup-spec{padding:var(--s-9) var(--s-8)}}
+.ty-anat{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:var(--grid-gap);margin-top:var(--s-7);list-style:none;padding:0}
+@media (max-width:1068px){.ty-anat{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (max-width:480px){.ty-anat{grid-template-columns:minmax(0,1fr)}}
+.ty-anat li{display:grid;grid-template-columns:22px minmax(0,1fr);gap:var(--s-3);align-items:start;font-size:var(--t-14);line-height:var(--t-14-lh-loose);color:var(--label-2)}
+.ty-anat li b{display:block;color:var(--label);font-weight:600}
+.ty-num{display:grid;place-items:center;width:22px;height:22px;border-radius:50%;background:var(--label);color:var(--label-inv);font-size:12px;font-weight:600;line-height:1}
+.ty-wrap-pair{margin-top:var(--s-12)}
+.ty-wrap-spec{display:grid;gap:var(--s-5);padding:var(--s-8) var(--s-7);min-height:0;place-items:stretch;text-align:start}
+.ty-wrap-spec .t-section{max-width:500px}
+.ty-wrap-spec p:not(.t-section){max-width:500px;font-size:var(--t-17);line-height:var(--t-17-lh-loose);color:var(--label-2)}
+.ty-greedy,.ty-greedy *{text-wrap:wrap !important}
+.ty-wrap-spec code{font-size:var(--t-12)}
+
+/* ── 5 · app ramp ───────────────────────────────────────────────────────── */
+.ty-app{display:grid;grid-template-columns:minmax(0,5fr) minmax(0,7fr);gap:var(--s-10);align-items:start}
+@media (max-width:1068px){.ty-app{grid-template-columns:minmax(0,1fr);gap:var(--s-9)}}
+.ty-app-phone{display:grid;justify-items:center;gap:var(--s-5);position:sticky;top:96px}
+@media (max-width:1068px){.ty-app-phone{position:static}}
+.ty-app-phone .device{--device-width:min(340px,80vw)}
+.ty-phoneui{position:absolute;inset:0;overflow:hidden;padding:60px 20px 20px;background:var(--bg-2);color:var(--label);font-family:var(--font-text);text-align:start;--c-surface:var(--bg-1)}
+.ty-phoneui .ui-footnote.ty-dim,.ty-phoneui .ty-dim{color:var(--label-2)}
+.ty-phoneui-card{margin-top:14px;padding:14px 16px;border-radius:calc(20px * var(--r-scale));corner-shape:superellipse(var(--k-continuous));background:var(--bg-1)}
+.ty-phoneui-row{display:flex;justify-content:space-between;align-items:baseline;gap:10px;padding:10px 0;border-top:1px solid var(--separator)}
+.ty-phoneui-row:first-of-type{border-top:0}
+.ty-phoneui-row span:last-child{color:var(--label-2);font-variant-numeric:tabular-nums}
+.ty-phoneui [data-ty-hi]{outline:2px solid var(--accent);outline-offset:2px;border-radius:6px}
+.ty-app-table .table td,.ty-app-table .table th{vertical-align:middle}
+.ty-app-table tr[data-role]{cursor:default}
+.ty-app-table :is(.ty-a,.ty-here){white-space:nowrap}
+.ty-app-w,.ty-app-tk{display:none}
+/* phones: five columns do not fit 352px, and "Here" was the one cut. The
+   weight moves under the style's name, tracking joins the reference size, as
+   "Here" already quotes it, so the measured column is always whole. */
+@media (max-width:734px){
+  .ty-app-table :is(.ty-app-wcol,.ty-t){display:none}
+  .ty-app-table .ty-app-w{display:block;margin-top:2px;font-size:var(--t-12);line-height:var(--t-12-lh);color:var(--label-2)}
+  .ty-app-table .ty-app-tk{display:inline}
+  .ty-app-table .table :is(td,th){padding-inline:10px}
+  .ty-app-table .table :is(td,th):first-child{padding-inline-start:0}
+  .ty-app-table .table :is(td,th):last-child{padding-inline-end:0}
+}
+.ty-app-head{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:var(--s-4);margin-bottom:var(--s-5)}
+.ty-app-head p{font-size:var(--t-14);color:var(--label-2);max-width:34em}
+
+/* ── 6 · System face vs Inter (stage) ────────────────────────────────────────────── */
+.ty-faces{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:var(--grid-gap)}
+@media (max-width:1068px){.ty-faces{grid-template-columns:minmax(0,1fr)}}
+.ty-face-card{display:grid;align-content:start;gap:var(--s-3);padding:var(--s-7);border-radius:var(--r-lg);corner-shape:superellipse(var(--k-continuous));background:var(--bg-2)}
+.ty-face-card h3{font-size:var(--t-14);line-height:var(--t-14-lh);font-weight:600;color:var(--label-2)}
+.ty-face-card .ty-face-spec{color:var(--label);font-size:var(--t-64);line-height:1.05;font-weight:600;letter-spacing:-.01em;white-space:nowrap;overflow:hidden}
+.ty-face-card .ty-face-spec small{display:block;margin-top:var(--s-3);font-size:var(--t-17);line-height:var(--t-17-lh);font-weight:400;letter-spacing:var(--t-17-ls);color:var(--label-2);white-space:normal}
+.ty-face-card p{font-size:var(--t-14);line-height:var(--t-14-lh-loose);color:var(--label-2)}
+.ty-face-card p b{color:var(--label);font-weight:600}
+.ty-face-na{display:grid;place-items:center;min-height:118px;border-radius:var(--r-md);corner-shape:superellipse(var(--k-continuous));
+  box-shadow:inset 0 0 0 1px var(--separator);padding:var(--s-5);text-align:center;font-size:var(--t-14);color:var(--label-2)}
+.ty-who{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:var(--grid-gap);margin-top:var(--s-9)}
+@media (max-width:734px){.ty-who{grid-template-columns:minmax(0,1fr)}}
+.ty-who div{padding-top:var(--s-4);border-top:1px solid var(--separator)}
+.ty-who b{display:block;font-size:var(--t-19);line-height:var(--t-19-lh);font-weight:600}
+.ty-who span{font-size:var(--t-14);color:var(--label-2)}
+
+/* ── 7 · tracking chart ─────────────────────────────────────────────────── */
+.ty-track{display:grid;grid-template-columns:minmax(0,8fr) minmax(0,4fr);gap:var(--s-10);align-items:start}
+@media (max-width:1068px){.ty-track{grid-template-columns:minmax(0,1fr);gap:var(--s-8)}}
+.ty-chart-box{position:relative}
+.ty-chart{display:block;width:100%;height:360px;overflow:visible;touch-action:pan-y}
+@media (max-width:734px){.ty-chart{height:280px}}
+.ty-chart:focus-visible{outline-offset:6px;border-radius:var(--r-sm)}
+.ty-chart .ty-grid line{stroke:var(--separator);stroke-width:1}
+.ty-chart .ty-zero{stroke:var(--label-3);stroke-width:1}
+.ty-chart text{fill:var(--label-2);font-family:var(--font-text);font-size:12px}
+.ty-chart .ty-line{fill:none;stroke:var(--series-1);stroke-width:2;stroke-linejoin:round;stroke-linecap:round}
+.ty-chart .ty-dot{fill:var(--series-2);stroke:var(--bg-1);stroke-width:2}
+.ty-chart .ty-cross{stroke:var(--label-3);stroke-width:1;stroke-dasharray:3 3}
+.ty-chart .ty-lbl{font-weight:600}
+.ty-legend{display:flex;flex-wrap:wrap;gap:var(--s-2) var(--s-6);margin-bottom:var(--s-4);font-size:var(--t-14);color:var(--label)}
+.ty-legend span{display:inline-flex;align-items:center;gap:var(--s-2)}
+.ty-legend i{display:inline-block;width:18px;height:2px;border-radius:1px;background:var(--series-1)}
+.ty-legend i.ty-d{width:10px;height:10px;border-radius:50%;background:var(--series-2)}
+.ty-readout{min-height:1.5em;margin-top:var(--s-3);font-size:var(--t-14);color:var(--label-2);font-variant-numeric:tabular-nums}
+.ty-readout b{color:var(--label);font-weight:600}
+.ty-track-side{display:grid;gap:var(--s-7)}
+.ty-track-spec{display:grid;gap:var(--s-2)}
+.ty-track-spec p:first-child{font-size:var(--t-12);color:var(--label-2)}
+/* the 80px role the labels name, wrapping on its own leading where the
+   column is narrower than the line (a specimen is never cut) */
+.ty-track-spec .ty-big{font-family:var(--font-display);font-size:var(--t-80);line-height:var(--t-80-lh);font-weight:600;text-wrap:balance}
+
+/* ── 8 · numerals ───────────────────────────────────────────────────────── */
+.ty-nums{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:var(--grid-gap)}
+@media (max-width:734px){.ty-nums{grid-template-columns:minmax(0,1fr)}}
+.ty-num-card{display:grid;gap:var(--s-4);align-content:start}
+.ty-num-card h3{font-size:var(--t-21);line-height:var(--t-21-lh);letter-spacing:var(--t-21-ls)}
+.ty-num-card h3 code{font-size:var(--t-14);font-weight:400}
+.ty-col{display:grid;justify-items:end;gap:6px;padding:var(--s-5) var(--s-6);border-radius:var(--r-md);corner-shape:superellipse(var(--k-continuous));background:var(--bg-1);
+  font-family:var(--font-display);font-size:var(--t-32);line-height:1.1;font-weight:600}
+.ty-col[data-nums="tabular"]{font-variant-numeric:tabular-nums}
+.ty-col[data-nums="proportional"]{font-variant-numeric:proportional-nums}
+.ty-count{font-size:var(--t-56);line-height:1}
+.ty-num-card .ty-meas{font-size:var(--t-14);color:var(--label-2)}
+.ty-roll{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:var(--s-5);margin-top:var(--s-9);padding:var(--s-7);
+  border-radius:var(--r-lg);corner-shape:superellipse(var(--k-continuous));background:var(--bg-1)}
+.ty-roll .t-stat{font-size:var(--t-80);line-height:1;font-variant-numeric:tabular-nums}
+@media (max-width:734px){.ty-roll .t-stat{font-size:var(--t-56)}}
+
+/* ── 9 · symbols as type ────────────────────────────────────────────────── */
+.ty-syms{border-top:1px solid var(--separator)}
+.ty-sym-row{display:grid;grid-template-columns:minmax(0,1fr) 220px;align-items:center;gap:var(--s-5);padding-block:var(--s-5);border-bottom:1px solid var(--separator)}
+@media (max-width:734px){.ty-sym-row{grid-template-columns:minmax(0,1fr)}}
+.ty-sym-row > p{margin:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ty-sym-row .ty-sym-m{font-size:var(--t-12);line-height:var(--t-12-lh);color:var(--label-2);font-variant-numeric:tabular-nums}
+.ty-sym-row .ty-sym-m b{color:var(--label);font-weight:600}
+
+/* ── 10 · responsive simulator ──────────────────────────────────────────── */
+.ty-sim-controls{display:grid;grid-template-columns:auto minmax(0,1fr);align-items:center;gap:var(--s-4) var(--s-6)}
+@media (max-width:734px){.ty-sim-controls{grid-template-columns:minmax(0,1fr)}}
+.ty-chips{display:flex;flex-wrap:wrap;gap:var(--s-2)}
+.ty-sim-w{display:flex;align-items:baseline;justify-content:space-between;gap:var(--s-4);margin-top:var(--s-6);font-size:var(--t-14);color:var(--label-2)}
+.ty-sim-w b{font-family:var(--font-display);font-size:var(--t-28);line-height:1;font-weight:600;color:var(--label);font-variant-numeric:tabular-nums}
+.ty-sim-stage{position:relative;margin-top:var(--s-4);width:100%}
+.ty-sim-frame{position:relative;overflow:hidden;border-radius:var(--r-md);corner-shape:superellipse(var(--k-continuous));
+  box-shadow:0 0 0 1px var(--separator),var(--shadow-tile);background:var(--bg-1)}
+.ty-sim-frame iframe{display:block;border:0;transform-origin:0 0;background:var(--bg-1)}
+.ty-grip{position:absolute;top:50%;right:-22px;width:44px;height:88px;translate:0 -50%;display:grid;place-items:center;cursor:ew-resize;touch-action:none;border-radius:var(--r-pill)}
+.ty-grip::before{content:"";width:30px;height:56px;border-radius:var(--r-pill);background:var(--bg-1);box-shadow:0 0 0 1px var(--separator),var(--shadow-tile)}
+.ty-grip::after{content:"";position:absolute;width:14px;height:10px;background:var(--label-2);-webkit-mask:var(--c-chevrons) center/contain no-repeat;mask:var(--c-chevrons) center/contain no-repeat}
+.ty-grip:hover::after,.ty-grip:focus-visible::after{background:var(--label)}
+.ty-sim-read{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:var(--grid-gap);margin-top:var(--s-6)}
+@media (max-width:1068px){.ty-sim-read{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media (max-width:480px){.ty-sim-read{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.ty-sim-read div{padding-top:var(--s-3);border-top:1px solid var(--separator)}
+.ty-sim-read dt{font-size:var(--t-12);color:var(--label-2)}
+.ty-sim-read dd{margin:2px 0 0;font-size:var(--t-17);font-weight:600;font-variant-numeric:tabular-nums}
+.ty-code-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:var(--grid-gap);margin-top:var(--s-10)}
+@media (max-width:1068px){.ty-code-grid{grid-template-columns:minmax(0,1fr)}}
+.ty-code-grid h3{font-size:var(--t-17);line-height:var(--t-17-lh);margin-bottom:var(--s-3)}
+</style>
+</head>
+<body>
+
+<!-- ═══ SITE NAV (shared — copy verbatim; set aria-current on this page's link) ═══ -->
+<nav class="globalnav" aria-label="Fluid Design">
+  <div class="globalnav__bar">
+    <a class="globalnav__brand" href="index.html" aria-label="Fluid Design Open home"><i data-sym="sparkles"></i></a>
+    <ul class="globalnav__list">
+      <li class="globalnav__item"><a class="globalnav__link" href="index.html">Overview</a></li>
+      <li class="globalnav__item"><a class="globalnav__link" href="start.html">Start</a></li>
+      <li class="globalnav__item"><a class="globalnav__link" href="docs.html">Docs</a></li>
+      <li class="globalnav__item" data-flyout="gn-foundations"><a class="globalnav__link" href="color.html" aria-current="true">Foundations</a><button class="globalnav__trigger" type="button"><span class="sr-only">Foundations menu</span></button></li>
+      <li class="globalnav__item" data-flyout="gn-components"><a class="globalnav__link" href="components.html">Components</a><button class="globalnav__trigger" type="button"><span class="sr-only">Components menu</span></button></li>
+      <li class="globalnav__item" data-flyout="gn-instruments"><a class="globalnav__link" href="selftest.html">Instruments</a><button class="globalnav__trigger" type="button"><span class="sr-only">Instruments menu</span></button></li>
+    </ul>
+    <div class="globalnav__tools">
+      <button class="globalnav__icon" type="button" data-tone-toggle aria-label="Switch appearance"><i data-sym="circle-half"></i></button>
+      <button class="globalnav__menu" type="button" aria-label="Menu" aria-expanded="false"><i data-sym="lines"></i></button>
+    </div>
+  </div>
+  <div class="globalnav__flyout" id="gn-foundations" hidden>
+    <div class="globalnav__flyout-content">
+      <div class="globalnav__group" data-elevated>
+        <h2 class="globalnav__group-title">Foundations</h2>
+        <ul><li><a class="globalnav__flyout-link" href="color.html">Colour</a></li><li><a class="globalnav__flyout-link" href="type.html" aria-current="page">Type</a></li><li><a class="globalnav__flyout-link" href="layout.html">Layout</a></li><li><a class="globalnav__flyout-link" href="materials.html">Materials</a></li><li><a class="globalnav__flyout-link" href="motion.html">Motion</a></li></ul>
+      </div>
+      <div class="globalnav__group">
+        <h2 class="globalnav__group-title">Content</h2>
+        <ul><li><a class="globalnav__flyout-link" href="symbols.html">Symbols</a></li><li><a class="globalnav__flyout-link" href="data.html">Data</a></li></ul>
+      </div>
+    </div>
+  </div>
+  <div class="globalnav__flyout" id="gn-components" hidden>
+    <div class="globalnav__flyout-content">
+      <div class="globalnav__group" data-elevated>
+        <h2 class="globalnav__group-title">Components</h2>
+        <ul><li><a class="globalnav__flyout-link" href="components.html">Controls</a></li><li><a class="globalnav__flyout-link" href="chrome.html">Chrome</a></li><li><a class="globalnav__flyout-link" href="showcase.html">Product pages</a></li><li><a class="globalnav__flyout-link" href="patterns.html">Patterns</a></li></ul>
+      </div>
+    </div>
+  </div>
+  <div class="globalnav__flyout" id="gn-instruments" hidden>
+    <div class="globalnav__flyout-content">
+      <div class="globalnav__group" data-elevated>
+        <h2 class="globalnav__group-title">Instruments</h2>
+        <ul><li><a class="globalnav__flyout-link" href="selftest.html">Self-test</a></li><li><a class="globalnav__flyout-link" href="audit.html">Audit</a></li></ul>
+      </div>
+    </div>
+  </div>
+</nav>
+
+<!-- ═══ LOCAL NAV (per page: title, one CTA, jump links to this page's sections) ═══ -->
+<div class="localnav" data-localnav-reveal="#hero">
+  <div class="localnav__capsule" data-lg3 data-lg3-priority="3">
+    <a class="localnav__title" href="#top">Type</a>
+    <button class="localnav__explore" type="button"><span class="localnav__explore-label">Explore</span></button>
+    <a class="localnav__cta" href="start.html">Adopt</a>
+    <div class="localnav__panel" aria-label="Explore Fluid Design">
+      <ul class="localnav__tiles">
+        <li><a class="localnav__tile" href="materials.html" style="--tile-hue: var(--series-1)"><span class="localnav__thumb"><i data-sym="sparkles"></i></span>Materials</a></li>
+        <li><a class="localnav__tile" href="motion.html" style="--tile-hue: var(--series-2)"><span class="localnav__thumb"><i data-sym="waveform"></i></span>Motion</a></li>
+        <li><a class="localnav__tile" href="chrome.html" style="--tile-hue: var(--series-3)"><span class="localnav__thumb"><i data-sym="sidebar"></i></span>Chrome</a></li>
+        <li><a class="localnav__tile" href="components.html" style="--tile-hue: var(--series-4)"><span class="localnav__thumb"><i data-sym="sliders"></i></span>Controls</a></li>
+        <li><a class="localnav__tile" href="showcase.html" style="--tile-hue: var(--series-5)"><span class="localnav__thumb"><i data-sym="grid"></i></span>Product pages</a></li>
+      </ul>
+      <hr class="localnav__rule">
+      <nav class="localnav__jump" aria-label="On this page">
+        <p class="localnav__jump-label">On this page <i data-sym="chevron-down"></i></p>
+        <ul class="localnav__jump-grid">
+          <li class="localnav__jump-item"><a href="#ramp">Web ramp</a></li>
+          <li class="localnav__jump-item"><a href="#roles">Roles</a></li>
+          <li class="localnav__jump-item"><a href="#highlights">Highlights</a></li>
+          <li class="localnav__jump-item"><a href="#app">App ramp</a></li>
+          <li class="localnav__jump-item"><a href="#faces">System face and Inter</a></li>
+          <li class="localnav__jump-item"><a href="#tracking">Tracking</a></li>
+          <li class="localnav__jump-item"><a href="#numerals">Numerals</a></li>
+          <li class="localnav__jump-item"><a href="#symbols">Symbols</a></li>
+          <li class="localnav__jump-item"><a href="#responsive">Responsive</a></li>
+        </ul>
+      </nav>
+    </div>
+  </div>
+</div>
+
+<main id="top">
+
+<!-- ═══ 0 · HERO — stage: the art shows only through the letters; one glass
+     control over their feet bends them and switches the face ═══ -->
+<section class="band hero ty-hero" data-band="stage" id="hero" aria-labelledby="ty-hero-h">
+  <div class="hero-marquee viewport-content">
+    <p class="hero-eyebrow">Type</p>
+    <h1 class="hero-headline" id="ty-hero-h">Set to the pixel.</h1>
+    <p class="hero-sub">Fourteen web sizes and the app text styles<br>On this device you are reading <span class="ty-face" id="ty-face">the system face</span></p>
+    <div class="hero-media">
+      <div class="ty-knock">
+        <canvas data-art="dawn" data-art-seed="4" data-art-contrast="1.3" data-art-vignette=".1" aria-hidden="true"></canvas>
+        <p class="ty-knock-ink" id="ty-glyph" data-face="display" aria-hidden="true">Aa</p>
+        <div class="segmented segmented-glass ty-face-seg" role="radiogroup" aria-label="Face of the specimen" id="ty-faces" data-lg3 data-lg3-adaptive data-lg3-priority="5">
+          <span class="segmented-track" data-lg3-shape></span><span class="segmented-indicator" data-lg3-shape></span>
+          <button role="radio" aria-checked="true" data-value="display">Display</button>
+          <button role="radio" data-value="text">Text</button>
+          <button role="radio" data-value="mono">Mono</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ 1 · INTRO ═══ -->
+<section class="band" data-band="story" id="intro" aria-labelledby="ty-intro-h">
+  <div class="viewport-content">
+    <div class="lockup" data-reveal="up">
+      <p class="lockup-eyebrow">Typography</p>
+      <h2 class="lockup-headline" id="ty-intro-h">Fourteen sizes. Two weights.</h2>
+      <p class="lockup-copy">Product pages are set from <strong>fourteen sizes, each with its own leading and tracking</strong>, in two weights &mdash; 600 for headlines, 400 for everything else. The ramp is written in <code>rem</code>, so a reader&rsquo;s larger default text scales the whole ramp. Apps use <strong>text styles with dynamic type</strong> instead.</p>
+    </div>
+    <div class="stat-grid stat-grid-center ty-stats" data-cols="4">
+      <div class="stat-cell"><p class="stat-value" id="ty-n-steps" data-count>14</p><p class="stat-caption">web sizes</p></div>
+      <div class="stat-cell"><p class="stat-value" id="ty-n-roles" data-count>13</p><p class="stat-caption">web roles</p></div>
+      <div class="stat-cell"><p class="stat-value" id="ty-n-app" data-count>11</p><p class="stat-caption">app text styles</p></div>
+      <div class="stat-cell"><p class="stat-value" id="ty-n-match" data-count>14</p><p class="stat-caption">sizes matching the spec here</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ 2 · THE WEB RAMP ═══ -->
+<section class="band" data-band="utility" id="ramp" aria-labelledby="ty-ramp-h">
+  <div class="viewport-content">
+    <header class="section-header">
+      <h2 class="section-header-headline" id="ty-ramp-h">The web ramp, to the pixel.</h2>
+      <a class="section-header-link" href="#roles">Roles <i data-sym="chevron-right"></i></a>
+    </header>
+    <div class="ty-ramp" id="ty-ramp"></div>
+    <p class="ty-ramp-foot"><span>Spec values are size / leading &middot; tracking in px. &ldquo;Here&rdquo; is <code>getComputedStyle</code> on the line beside it.</span><span id="ty-ramp-sum"></span></p>
+  </div>
+</section>
+
+<!-- ═══ 3 · ROLES ═══ -->
+<section class="band" data-band="story" id="roles" aria-labelledby="ty-roles-h">
+  <div class="viewport-content">
+    <header class="section-header">
+      <h2 class="section-header-headline" id="ty-roles-h">Thirteen roles. One class each.</h2>
+    </header>
+    <div class="doc-table ty-roles">
+      <table class="table">
+        <thead><tr><th>Role, and the class it maps to</th><th class="ty-bps-h">Large &middot; medium &middot; small &middot; x-small</th><th class="num">Here, at <span id="ty-bucket">this width</span></th><th class="num">Spec</th></tr></thead>
+        <tbody id="ty-role-rows"></tbody>
+      </table>
+    </div>
+    <p class="ty-foot" id="ty-role-foot">Breakpoints: large from 1069px, medium to 1068, small to 734, x-small to 480. Nothing grows above 1441. The highlighted row changes with the window.</p>
+    <div class="ty-probes" aria-hidden="true" id="ty-probes"></div>
+  </div>
+</section>
+
+<!-- ═══ 4 · HIGHLIGHTS, BALANCE, PRETTY ═══ -->
+<section class="band" data-band="utility" id="highlights" aria-labelledby="ty-hl-h">
+  <div class="viewport-content">
+    <header class="section-header">
+      <h2 class="section-header-headline" id="ty-hl-h">Grey copy, dark highlights.</h2>
+    </header>
+    <div class="ty-lockup-spec">
+      <div class="lockup">
+        <p class="lockup-eyebrow">Orbit</p>
+        <h3 class="lockup-headline">The list comes to you.</h3>
+        <p class="lockup-copy">Orbit picks the project that is furthest behind, <strong>starts up once at a review</strong> and clears six to twelve tasks in that single visit. <strong>Every run writes its own ledger row</strong>, so the daily limits count exactly what the workspace did.</p>
+      </div>
+    </div>
+    <ol class="ty-anat">
+      <li><span class="ty-num">1</span><span><b>Eyebrow</b><span data-anat="eyebrow">21 on 21, 600</span>, in the headline&rsquo;s ink &mdash; not the accent.</span></li>
+      <li><span class="ty-num">2</span><span><b>Headline</b>The lockup headline: <span data-anat="headline">80 on 84, 600</span> at this width, balanced.</span></li>
+      <li><span class="ty-num">3</span><span><b>Copy</b><span data-anat="copy">21 on 29, 400</span>, in <code>--label-2</code>, at most eight columns.</span></li>
+      <li><span class="ty-num">4</span><span><b>Highlight</b><code>&lt;strong&gt;</code> takes <code>--label</code> at the same weight. Emphasis by colour, not by boldness.</span></li>
+    </ol>
+    <div class="doc-dodont ty-wrap-pair">
+      <div class="doc-do">
+        <div class="doc-specimen ty-wrap-spec">
+          <p class="t-section">Everything you need to run a phone farm.</p>
+          <p>Every batch starts up once at a review queue and works the whole list from that one visit, then writes one ledger row for every action it lands.</p>
+        </div>
+        <p class="doc-verdict"><span><code>text-wrap: balance</code> on headlines and <code>pretty</code> on paragraphs: even lines, no lonely last word.</span></p>
+      </div>
+      <div class="doc-dont">
+        <div class="doc-specimen ty-wrap-spec ty-greedy">
+          <p class="t-section">Everything you need to run a phone farm.</p>
+          <p>Every batch starts up once at a review queue and works the whole list from that one visit, then writes one ledger row for every action it lands.</p>
+        </div>
+        <p class="doc-verdict"><span>Greedy wrapping: a long first line, a stranded last word.</span></p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ 5 · THE APP RAMP ═══ -->
+<section class="band" data-band="story" id="app" aria-labelledby="ty-app-h">
+  <div class="viewport-content">
+    <div class="lockup lockup-start" data-reveal="up">
+      <p class="lockup-eyebrow">Apps</p>
+      <h2 class="lockup-headline" id="ty-app-h">Dynamic type.</h2>
+      <p class="lockup-copy">The console and the phone companion use the app text styles at the default size, <strong>Large</strong>. Dense screens switch to <strong><code>data-density="compact"</code></strong>, which is the next size down &mdash; the whole ramp moves one step, never a single style.</p>
+    </div>
+    <div class="ty-app ty-gap-top">
+      <div class="ty-app-phone">
+        <div class="device" data-device="phone" id="ty-phone">
+          <div class="device__screen" data-screen-width="402">
+            <div class="ty-phoneui" id="ty-phoneui" inert aria-hidden="true">
+              <p class="ui-footnote ty-dim" data-r="ui-footnote">Saturday 26 September</p>
+              <p class="ui-large-title" data-r="ui-large-title">Today</p>
+              <div class="ty-phoneui-card">
+                <p class="ui-title2" data-r="ui-title2">aurora.demo</p>
+                <p class="ui-subhead ty-dim" data-r="ui-subhead">Batching &middot; 4 of 10 tasks</p>
+                <div class="ty-phoneui-row ui-body" data-r="ui-body"><span>Tasks</span><span>312 of 400</span></div>
+                <div class="ty-phoneui-row ui-body"><span>Reviews</span><span>70 of 70</span></div>
+                <div class="ty-phoneui-row ui-callout" data-r="ui-callout"><span>Next run</span><span>in 12 min</span></div>
+              </div>
+              <div class="ty-phoneui-card">
+                <p class="ui-title3" data-r="ui-title3">Comments</p>
+                <p class="ui-headline" data-r="ui-headline">@sample.trailrunners</p>
+                <p class="ui-body">Thanks for the review! Can you also look at the Sunday run?</p>
+                <p class="ui-caption1 ty-dim" data-r="ui-caption1">Answered by Mira &middot; 14:24</p>
+              </div>
+              <p class="ui-title1" data-r="ui-title1" style="margin-top:18px">This week</p>
+              <p class="ui-caption2 ty-dim" data-r="ui-caption2">Counted from the ledger, one row per run.</p>
+              <div class="ty-phoneui-card">
+                <div class="ty-phoneui-row ui-body"><span>Completed</span><span>8,214</span></div>
+                <div class="ty-phoneui-row ui-body"><span>Runs</span><span>266</span></div>
+                <div class="ty-phoneui-row ui-body"><span>Comments</span><span>41</span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="ty-app-table">
+        <div class="ty-app-head">
+          <div class="segmented" role="radiogroup" aria-label="Density" id="ty-density"><button role="radio" aria-checked="true" data-value="large">Large</button><button role="radio" data-value="compact">Compact</button></div>
+          <p id="ty-app-note">Size and leading in points, tracking in thousandths of an em &mdash; the reference table beside what this page computes.</p>
+        </div>
+        <div class="doc-table">
+          <table class="table">
+            <thead><tr><th>Style</th><th class="ty-app-wcol">Weight</th><th class="num">Spec</th><th class="num ty-t">Tracking</th><th class="num">Here</th></tr></thead>
+            <tbody id="ty-app-rows"></tbody>
+          </table>
+        </div>
+        <div class="ty-probes" aria-hidden="true" id="ty-app-probes"></div>
+        <pre class="doc-code ty-gap-top" data-lang="html"><code>&lt;section data-density="compact"&gt; &lt;!-- one step down --&gt;
+  &lt;p class="ui-headline"&gt;aurora.demo&lt;/p&gt;
+  &lt;p class="ui-subhead"&gt;Batching &amp;middot; 4 of 10 tasks&lt;/p&gt;
+&lt;/section&gt;</code></pre>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ 6 · SYSTEM FACE AND INTER — stage ═══ -->
+<section class="band" data-band="stage" id="faces" aria-labelledby="ty-faces-h">
+  <div class="viewport-content">
+    <div class="lockup" data-reveal="up">
+      <p class="lockup-eyebrow">System face and Inter</p>
+      <h2 class="lockup-headline" id="ty-faces-h">The system face where it lives. Inter everywhere else.</h2>
+      <p class="lockup-copy">The system face&rsquo;s licence keeps it on its own platforms, so it is never shipped &mdash; those devices reach it through <code>-apple-system</code>. Everyone else gets <strong>Inter</strong>, bundled in <code>assets/</code>: an open licence, a weight axis from 100 to 900 and <strong>an optical-size axis</strong> that tightens display cuts the way the system face does.</p>
+    </div>
+    <div class="ty-faces ty-gap-top" id="ty-face-cards">
+      <article class="ty-face-card">
+        <h3>The system face</h3>
+        <div id="ty-sf-slot"></div>
+        <p id="ty-sf-note">Checking this device&hellip;</p>
+      </article>
+      <article class="ty-face-card">
+        <h3>Inter, bundled</h3>
+        <p class="ty-face-spec" style="font-family:'Inter'">Rag 1234<small>The quick fold opens on three magnetic detents.</small></p>
+        <p id="ty-inter-note">Measuring&hellip;</p>
+      </article>
+      <article class="ty-face-card">
+        <h3>If nothing loaded</h3>
+        <p class="ty-face-spec" style="font-family:'Helvetica Neue',Arial,sans-serif">Rag 1234<small>The quick fold opens on three magnetic detents.</small></p>
+        <p id="ty-fallback-note">Measuring&hellip;</p>
+      </article>
+    </div>
+    <div class="ty-who">
+      <div><b>Devices with a system face</b><span>The text cut below 19px, the display cut from 19px, by optical size.</span></div>
+      <div><b>Other platforms</b><span>Inter, with <code>font-optical-sizing: auto</code> following the same switch.</span></div>
+      <div><b>This device</b><span id="ty-this-device">Checking&hellip;</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ 7 · TRACKING ═══ -->
+<section class="band" data-band="story" id="tracking" aria-labelledby="ty-track-h">
+  <div class="viewport-content">
+    <header class="section-header">
+      <h2 class="section-header-headline" id="ty-track-h">Tracking bends with size.</h2>
+    </header>
+    <div class="ty-track">
+      <div class="ty-chart-box">
+        <div class="ty-legend" aria-hidden="true"><span><i></i>App table</span><span><i class="ty-d"></i>Web ramp</span></div>
+        <svg class="ty-chart" id="ty-chart" tabindex="0" role="img" aria-labelledby="ty-chart-t"><title id="ty-chart-t">Letter-spacing in thousandths of an em against font size: the app table as a line, the fourteen web steps as dots. Use the arrow keys to read values.</title></svg>
+        <p class="ty-readout" id="ty-readout" aria-live="polite">Point at the chart, or focus it and use the arrow keys.</p>
+        <details class="ty-gap-top"><summary class="link">Show the numbers as a table</summary>
+          <div class="doc-table"><table class="table"><thead><tr><th class="num">Size</th><th class="num">App table</th><th class="num">Web ramp</th></tr></thead><tbody id="ty-track-rows"></tbody></table></div>
+        </details>
+      </div>
+      <div class="ty-track-side">
+        <p class="t-body" style="color:var(--label-2)">Text sizes tighten, small display sizes open up, big headlines close in again. <strong style="color:var(--label);font-weight:inherit">The web ramp runs tighter than the app table at headline sizes</strong> &mdash; 80px is &minus;15 on the web and 0 in apps &mdash; so the system keeps the web numbers for pages and the app numbers for apps.</p>
+        <div class="ty-track-spec"><p><span data-big-px>80</span>px, &minus;0.015em (web)</p><p class="ty-big" style="letter-spacing:-.015em">Every phone.</p></div>
+        <div class="ty-track-spec"><p><span data-big-px>80</span>px, 0 (app at 80pt)</p><p class="ty-big" style="letter-spacing:0">Every phone.</p></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ 8 · NUMERALS ═══ -->
+<section class="band" data-band="utility" id="numerals" aria-labelledby="ty-num-h">
+  <div class="viewport-content">
+    <header class="section-header">
+      <h2 class="section-header-headline" id="ty-num-h">Numbers that hold still.</h2>
+      <button class="btn btn-secondary" type="button" id="ty-count-go">Count to 2,880</button>
+    </header>
+    <div class="ty-nums">
+      <div class="ty-num-card">
+        <h3>Proportional <code>proportional-nums</code></h3>
+        <div class="ty-col" data-nums="proportional"><span class="ty-count" data-count-target>1,111</span><span>1,111</span><span>8,888</span><span>70/70</span><span>12.6 s</span></div>
+        <p class="ty-meas" data-meas="proportional">Measuring&hellip;</p>
+      </div>
+      <div class="ty-num-card">
+        <h3>Tabular <code>tabular-nums</code></h3>
+        <div class="ty-col" data-nums="tabular"><span class="ty-count" data-count-target>1,111</span><span>1,111</span><span>8,888</span><span>70/70</span><span>12.6 s</span></div>
+        <p class="ty-meas" data-meas="tabular">Measuring&hellip;</p>
+      </div>
+    </div>
+    <div class="ty-roll">
+      <div>
+        <p class="t-caption" style="color:var(--label-2)">FG3.rollNumber &mdash; each digit rolls on a spring, the real value is in the DOM for readers</p>
+        <p class="t-stat" id="ty-roll">2,880</p>
+      </div>
+      <button class="btn" type="button" id="ty-roll-go">Roll a new total</button>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ 9 · SYMBOLS AS TYPE ═══ -->
+<section class="band" data-band="story" id="symbols" aria-labelledby="ty-sym-h">
+  <div class="viewport-content">
+    <div class="lockup lockup-start" data-reveal="up">
+      <p class="lockup-eyebrow">Symbols</p>
+      <h2 class="lockup-headline" id="ty-sym-h">A symbol is a letter.</h2>
+      <p class="lockup-copy">Glyphs are sized in <code>em</code> and centred on the cap height, so they move with the text. <strong>The type role sets the stroke</strong>: it grows with the size, only more slowly, the way symbol sets draw a different weight at each optical size.</p>
+    </div>
+    <div class="ty-syms ty-gap-top" id="ty-syms">
+      <div class="ty-sym-row"><p class="t-micro" style="color:var(--label)">Footnote <i data-sym="info"></i> sources and methods</p><span class="ty-sym-m"></span></div>
+      <div class="ty-sym-row"><p class="t-caption">Explore all colours <i data-sym="chevron-right"></i></p><span class="ty-sym-m"></span></div>
+      <div class="ty-sym-row"><p class="t-body"><i data-sym="bolt"></i> Runs start at six every morning</p><span class="ty-sym-m"></span></div>
+      <div class="ty-sym-row"><p class="t-subtitle"><i data-sym="person-add"></i> Assign from the row</p><span class="ty-sym-m"></span></div>
+      <div class="ty-sym-row"><p class="t-section"><i data-sym="sparkles"></i> Every team.</p><span class="ty-sym-m"></span></div>
+      <div class="ty-sym-row"><p class="t-hero"><i data-sym="heart"></i> Fold.</p><span class="ty-sym-m"></span></div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ 10 · RESPONSIVE ═══ -->
+<section class="band" data-band="utility" id="responsive" aria-labelledby="ty-resp-h">
+  <div class="viewport-content">
+    <header class="section-header">
+      <h2 class="section-header-headline" id="ty-resp-h">Four widths, one ramp.</h2>
+    </header>
+    <div class="ty-sim-controls">
+      <div class="ty-chips" role="group" aria-label="Preset widths">
+        <button class="chip" type="button" data-w="1440">1440</button>
+        <button class="chip" type="button" data-w="1068">1068</button>
+        <button class="chip" type="button" data-w="734">734</button>
+        <button class="chip" type="button" data-w="480">480</button>
+        <button class="chip" type="button" data-w="402">402</button>
+        <button class="chip" type="button" data-w="320">320</button>
+      </div>
+      <input class="slider" type="range" min="320" max="1440" step="1" value="1068" id="ty-sim-range" aria-label="Simulated window width in pixels">
+    </div>
+    <p class="ty-sim-w"><span>A real page in a frame of <b id="ty-sim-px">1068</b> px &mdash; its own media queries decide</span><span id="ty-sim-scale"></span></p>
+    <div class="ty-sim-stage" id="ty-sim-stage">
+      <div class="ty-sim-frame" id="ty-sim-frame">
+        <iframe id="ty-sim" title="The type roles at the simulated width" loading="lazy"></iframe>
+      </div>
+      <button class="ty-grip" type="button" id="ty-grip" aria-label="Drag to resize the frame; arrow keys change the width by 10 pixels"></button>
+    </div>
+    <dl class="ty-sim-read" id="ty-sim-read">
+      <div><dt>Hero headline</dt><dd data-k="hero">&mdash;</dd></div>
+      <div><dt>Lockup headline</dt><dd data-k="lockup">&mdash;</dd></div>
+      <div><dt>Section</dt><dd data-k="section">&mdash;</dd></div>
+      <div><dt>Lede</dt><dd data-k="lede">&mdash;</dd></div>
+      <div><dt>Callout</dt><dd data-k="callout">&mdash;</dd></div>
+      <div><dt>Content column</dt><dd data-k="col">&mdash;</dd></div>
+    </dl>
+    <div class="ty-code-grid">
+      <div>
+        <h3>Use a role</h3>
+        <pre class="doc-code" data-lang="html"><code>&lt;p class="t-eyebrow"&gt;Orbit Duo&lt;/p&gt;
+&lt;h2 class="t-section"&gt;Take a closer look.&lt;/h2&gt;
+&lt;p class="t-lede"&gt;A posable design and
+  &lt;strong&gt;totally new experiences&lt;/strong&gt;.&lt;/p&gt;</code></pre>
+      </div>
+      <div>
+        <h3>Reach a role&rsquo;s numbers</h3>
+        <pre class="doc-code" data-lang="css"><code>/* a role's four numbers, re-pointed at
+   1068 / 734 / 480 in one place */
+.price {
+  font-family: var(--t-stat-ff);
+  font-size: var(--t-stat-fs);
+  line-height: var(--t-stat-lh);
+  letter-spacing: var(--t-stat-ls);
+}</code></pre>
+      </div>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<!-- ═══ FOOTER (shared — copy verbatim) ═══ -->
+<footer class="band" data-band="utility" data-band-seam="keep">
+  <div class="viewport-content stack-4">
+    <p class="t-caption" style="color: var(--label-2)">Fluid Design Open &middot; Type follows the system face where one exists and Inter elsewhere. Device art is original.</p>
+    <p class="t-caption"><a href="index.html">Overview</a> &middot; <a href="start.html">Start</a> &middot; <a href="docs.html">Docs</a> &middot; <a href="components.html">Components</a> &middot; <a href="selftest.html">Self-test</a> &middot; <a href="audit.html">Audit</a></p>
+  </div>
+</footer>
+
+<script src="assets/geom.js"></script>
+<script src="assets/spring.js"></script>
+<script src="assets/palette.js"></script>
+<script src="assets/art3.js"></script>
+<script src="assets/lg3-core.js"></script>
+<script src="assets/fg3.js"></script>
+<script src="assets/symbols.js"></script>
+<script src="assets/chart.js"></script>
+<script src="assets/motion.js"></script>
+<script src="assets/anim.js"></script>
+<script src="assets/device.js"></script>
+<script src="assets/ui.js"></script>
+<script src="assets/chrome.js"></script>
+<script src="assets/showcase.js"></script>
+<script src="assets/docs.js"></script>   <!-- documentation pages only -->
+<script>
+/* type.html \u2014 the page's own specimens, built before FG3.boot() so the
+   modules mount them like authored markup. Every "here" value is read with
+   getComputedStyle from an element that carries the real class or token;
+   every "spec" value is a fixed reference number. */
+(function () {
+  'use strict';
+  var doc = document, html = doc.documentElement;
+  var $ = function (s, r) { return (r || doc).querySelector(s); };
+  var $$ = function (s, r) { return [].slice.call((r || doc).querySelectorAll(s)); };
+  function px(v) { return Math.round(v * 100) / 100; }
+  function mark(ok, label, kind) {
+    var cls = ok ? 'ty-pass' : kind === 'chosen' ? 'ty-chosen' : 'ty-fail';
+    var s = ok ? 'checkmark-circle' : kind === 'chosen' ? 'info' : 'xmark-circle';
+    return '<span class="' + cls + '"><i data-sym="' + s + '" data-sym-label="' + (ok ? 'matches' : kind === 'chosen' ? 'chosen' : 'differs') + '"></i>' + label + '</span>';
+  }
+  function sym(root) { if (window.SYM && SYM.mount) SYM.mount(root || doc); }
+  function metrics(el) {
+    var cs = getComputedStyle(el), fs = parseFloat(cs.fontSize), lh = cs.lineHeight;
+    lh = /px$/.test(lh) ? parseFloat(lh) : lh === 'normal' ? NaN : parseFloat(lh) * fs;
+    var ls = cs.letterSpacing === 'normal' ? 0 : parseFloat(cs.letterSpacing);
+    return { fs: fs, lh: lh, ls: ls, fw: +cs.fontWeight };
+  }
+  function bucket() {
+    return matchMedia('(max-width:480px)').matches ? 3 : matchMedia('(max-width:734px)').matches ? 2 : matchMedia('(max-width:1068px)').matches ? 1 : 0;
+  }
+  var BUCKET = ['large (1069 and up)', 'medium (1068 and below)', 'small (734 and below)', 'x-small (480 and below)'];
+
+  /* -- 0 \u00b7 hero: face switch + which face this device renders ------------ */
+  var glyph = $('#ty-glyph');
+  $('#ty-faces').addEventListener('change', function (e) { if (e.detail && e.detail.value) glyph.setAttribute('data-face', e.detail.value); });
+  function faceName() {
+    var c = doc.createElement('canvas').getContext('2d'), s = 'Hamburgefonstiv 0123456789 Rag';
+    var w = function (f) { c.font = '600 48px ' + f; return c.measureText(s).width; };
+    var sys = '-apple-system, BlinkMacSystemFont';
+    var hasSys = Math.abs(w(sys + ', monospace') - w(sys + ', serif')) < 0.5;
+    var hasInter = Math.abs(w('"Inter", monospace') - w('"Inter", serif')) < 0.5;
+    return { sys: hasSys, inter: hasInter, name: hasSys ? 'the system face' : hasInter ? 'Inter, the bundled face' : 'a fallback face' };
+  }
+
+  /* -- 2 \u00b7 the web ramp -------------------------------------------------- */
+  var STEPS = [
+    [96, 100, -0.015, 'Fluid.'], [80, 84, -0.015, 'The glass material.'], [64, 68, -0.009, 'Every team, one hand.'],
+    [56, 60, -0.005, 'Take a closer look.'], [48, 52, -0.003, 'Reviews that sound like you.'], [40, 44, 0, 'Built for runs, not single taps.'],
+    [32, 36, 0.004, 'Every limit, counted where it lands.'], [28, 32, 0.007, 'Arrive once. Clear the whole list.'],
+    [24, 28, 0.009, 'A run is one trip, not twelve, and it writes a row for each task.'],
+    [21, 25, 0.011, 'The lede sits here, grey, with its highlights in the headline ink.'],
+    [19, 23, 0.012, 'Callouts and small display lines: the last size set in the display cut.'],
+    [17, 21, -0.022, 'Body copy is the first Text size. It tracks in, where display sizes open up.'],
+    [14, 18, -0.016, 'Captions, table cells and the line under a figure. Still readable at arm\u2019s length.'],
+    [12, 16, -0.01, 'Footnotes and legal lines. Nothing on the web ramp is smaller, except a badge at 10.']
+  ];
+  var ramp = $('#ty-ramp');
+  ramp.innerHTML = STEPS.map(function (s) {
+    var n = s[0], display = n >= 19;
+    return '<div class="ty-step" data-n="' + n + '"><span class="ty-step-n">' + n + '</span>' +
+      '<p class="ty-sample" style="font-family:var(' + (display ? '--font-display' : '--font-text') + ');font-size:var(--t-' + n + ');line-height:var(--t-' + n + '-lh);letter-spacing:var(--t-' + n + '-ls);font-weight:' + (n >= 21 ? 600 : 400) + '">' + s[3] + '</p>' +
+      '<dl class="ty-meta"><dt>Spec</dt><dd>' + n + ' / ' + s[1] + ' &middot; ' + (s[2] * n).toFixed(2).replace('-', '\u2212') + '</dd><dt>Here</dt><dd class="ty-here"></dd></dl></div>';
+  }).join('');
+  function readRamp() {
+    var ok = 0;
+    $$('.ty-step', ramp).forEach(function (row, i) {
+      var s = STEPS[i], m = metrics(row.querySelector('.ty-sample'));
+      var good = Math.abs(m.fs - s[0]) < 0.05 && Math.abs(m.lh - s[1]) < 0.6 && Math.abs(m.ls - s[2] * s[0]) < 0.02;
+      if (good) ok++;
+      row.querySelector('.ty-here').innerHTML = mark(good, px(m.fs) + ' / ' + px(m.lh) + ' &middot; ' + m.ls.toFixed(2).replace('-', '\u2212'));
+    });
+    $('#ty-ramp-sum').textContent = ok + ' of ' + STEPS.length + ' steps match the spec here';
+    $('#ty-n-match').textContent = ok;
+    sym(ramp);
+    return ok;
+  }
+
+  /* -- 3 \u00b7 roles --------------------------------------------------------- */
+  var ROLES = [
+    ['t-hero', 'marquee-headline (Orbit Duo)', [[80, 84], [64, 68], [48, 52], [48, 52]], [[80, 84], [64, 68], [48, 52], [40, 44]]],
+    ['t-headline', 'modal-header-headline', [[56, 60], [48, 52], [40, 44], [32, 36]]],
+    ['t-section', 'section-header-headline', [[48, 52], [40, 44], [32, 36], [32, 36]]],
+    ['t-title', 'localnav-product-expanded', [[40, 44], [32, 36], [24, 28], [24, 28]]],
+    ['t-subtitle', 'feature-card-headline', [[28, 32], [24, 28], [21, 25], [21, 25]]],
+    ['t-lede', 'ric-type-lockup-xxl-copy', [[21, 29], [21, 29], [19, 27], [19, 27]]],
+    ['t-body', 'body', [[17, 25], [17, 25], [17, 25], [17, 25]]],
+    ['t-callout', 'tile-callout (home)', [[19, 23], [17, 21], [14, 18], [14, 18]]],
+    ['t-caption', 'body-reduced-tight', [[14, 18], [14, 18], [14, 18], [14, 18]]],
+    ['t-micro', 'caption, sosumi', [[12, 16], [12, 16], [12, 16], [12, 16]]],
+    ['t-eyebrow', 'ric-type-lockup-xxl-eyebrow', [[21, 21], [21, 21], [19, 23], [19, 23]]],
+    ['t-stat', 'stat-reduced (Orbit Duo)', [[40, 40], [40, 40], [40, 40], [40, 40]]],
+    ['t-stat-caption', 'stat caption (Orbit Duo)', [[14, 18], [14, 18], [14, 18], [14, 18]]]
+  ];
+  $('#ty-n-roles').textContent = ROLES.length;
+  $('#ty-n-steps').textContent = STEPS.length;
+  $('#ty-probes').innerHTML = ROLES.map(function (r) { return '<span class="ty-probe ' + r[0] + '" data-probe="' + r[0] + '">Ag</span>'; }).join('');
+  $('#ty-role-rows').innerHTML = ROLES.map(function (r) {
+    return '<tr data-role="' + r[0] + '"><td><code>.' + r[0] + '</code><br><span class="ty-cls">' + r[1] + '</span></td><td class="ty-bps"></td><td class="num ty-here"></td><td class="num ty-spec"></td></tr>';
+  }).join('');
+  function readRoles() {
+    var b = bucket(), chosen = false;
+    $('#ty-bucket').textContent = BUCKET[b].split(' ')[0];
+    $$('#ty-role-rows tr').forEach(function (tr, i) {
+      var r = ROLES[i], ours = r[3] || r[2], spec = r[2][b], want = ours[b];
+      var m = metrics($('[data-probe="' + r[0] + '"]'));
+      tr.querySelector('.ty-bps').innerHTML = ours.map(function (v, k) { return k === b ? '<b>' + v[0] + '</b>' : '<span>' + v[0] + '</span>'; }).join(' &middot; ');
+      var good = Math.abs(m.fs - want[0]) < 0.05 && Math.abs(m.lh - want[1]) < 0.6;
+      var same = want[0] === spec[0] && want[1] === spec[1];
+      if (good && !same) chosen = true;
+      tr.querySelector('.ty-here').innerHTML = good && !same ? mark(false, px(m.fs) + ' / ' + px(m.lh), 'chosen') : mark(good, px(m.fs) + ' / ' + px(m.lh));
+      tr.querySelector('.ty-spec').textContent = spec[0] + ' / ' + spec[1];
+    });
+    $('#ty-role-foot').innerHTML = 'Breakpoints: large from 1069px, medium to 1068, small to 734, x-small to 480. Nothing grows above 1441. The bold size is the one this window uses &mdash; resize to watch it move.' +
+      (chosen ? ' <b>At 480 and below, 40/44 is the lockup headline</b>: <code>.t-hero</code> shares that step with <code>.lockup-headline</code>, the size of the lockup headline there. The marquee <code>.hero-headline</code> keeps 48/52, as this page&rsquo;s own headline does.' : '');
+    sym($('#ty-role-rows'));
+  }
+
+  /* -- 4 \u00b7 anatomy pins, placed on the rendered lines -------------------- */
+  /* Every pin sits in the margin beside a LINE, never on the words: 1-3 to
+     the left of their first line, 4 to the right of the line that holds the
+     first <strong> (so it cannot meet pin 3 when both land on one line).
+     A pin is clamped inside the card; the card's phone padding (CSS) leaves
+     room for it. The captions quote the sizes this width renders. */
+  function placePins() {
+    var spec = $('.ty-lockup-spec'); if (!spec) return;
+    var r0 = spec.getBoundingClientRect(), GAP = 22, HALF = 12;
+    $$('.ty-pin', spec).forEach(function (p) { p.parentNode.removeChild(p); });
+    var copy = spec.querySelector('.lockup-copy');
+    function rectsOf(t) { var range = doc.createRange(); range.selectNodeContents(t); return [].slice.call(range.getClientRects()).filter(function (r) { return r.width > 0; }); }
+    [spec.querySelector('.lockup-eyebrow'), spec.querySelector('.lockup-headline'), copy, copy && copy.querySelector('strong')].forEach(function (t, i) {
+      if (!t) return;
+      var r = rectsOf(t)[0]; if (!r) return;
+      var x, cy = r.top + r.height / 2;
+      if (i === 3) {
+        /* the right end of the copy's line that holds the highlight */
+        var end = rectsOf(copy).reduce(function (m, q) { var c = q.top + q.height / 2; return c > r.top && c < r.bottom ? Math.max(m, q.right) : m; }, r.right);
+        x = end + GAP;
+      } else x = r.left - GAP;
+      x = Math.max(r0.left + HALF, Math.min(r0.right - HALF, x));
+      var pin = doc.createElement('span');
+      pin.className = 'doc-pin ty-pin'; pin.setAttribute('data-n', i + 1); pin.setAttribute('aria-hidden', 'true');
+      pin.style.left = x - r0.left + 'px';
+      pin.style.top = cy - r0.top + 'px';
+      spec.appendChild(pin);
+    });
+    [['eyebrow', '.lockup-eyebrow'], ['headline', '.lockup-headline'], ['copy', '.lockup-copy']].forEach(function (a) {
+      var m = metrics(spec.querySelector(a[1])), out = $('[data-anat="' + a[0] + '"]');
+      if (out && m.fs) out.textContent = px(m.fs) + ' on ' + px(m.lh) + ', ' + m.fw;
+    });
+  }
+
+  /* -- 5 \u00b7 the app ramp: Large and compact (M) ----------------------- */
+  var APP = [
+    ['ui-large-title', 'Large Title', 'Bold', [34, 41, 12], [33, 40, 12]],
+    ['ui-title1', 'Title 1', 'Regular', [28, 34, 14], [27, 33, 11]],
+    ['ui-title2', 'Title 2', 'Regular', [22, 28, -12], [21, 26, -18]],
+    ['ui-title3', 'Title 3', 'Regular', [20, 25, -23], [19, 24, -24]],
+    ['ui-headline', 'Headline', 'Semibold', [17, 22, -26], [16, 21, -20]],
+    ['ui-body', 'Body', 'Regular', [17, 22, -26], [16, 21, -20]],
+    ['ui-callout', 'Callout', 'Regular', [16, 21, -20], [15, 20, -16]],
+    ['ui-subhead', 'Subheadline', 'Regular', [15, 20, -16], [14, 19, -11]],
+    ['ui-footnote', 'Footnote', 'Regular', [13, 18, -6], [12, 16, 0]],
+    ['ui-caption1', 'Caption 1', 'Regular', [12, 16, 0], [11, 13, 6]],
+    ['ui-caption2', 'Caption 2', 'Regular', [11, 13, 6], [11, 13, 6]]
+  ];
+  $('#ty-n-app').textContent = APP.length;
+  var appProbes = $('#ty-app-probes');
+  appProbes.innerHTML = APP.map(function (a) { return '<span class="ty-probe ' + a[0] + '" data-probe="' + a[0] + '">Ag</span>'; }).join('');
+  $('#ty-app-rows').innerHTML = APP.map(function (a) {
+    return '<tr data-role="' + a[0] + '" tabindex="0"><td><span class="' + a[0] + '" style="line-height:1.1">' + a[1] + '</span><span class="ty-app-w">' + a[2] + '</span></td><td class="ty-app-wcol">' + a[2] + '</td><td class="num ty-a"></td><td class="num ty-t"></td><td class="num ty-here"></td></tr>';
+  }).join('');
+  var density = 'large';
+  function readApp() {
+    var k = density === 'compact' ? 4 : 3;
+    $$('#ty-app-rows tr').forEach(function (tr, i) {
+      var a = APP[i], want = a[k], m = metrics($('[data-probe="' + a[0] + '"]', appProbes));
+      var tk = (want[2] > 0 ? '+' : want[2] < 0 ? '\u2212' : '') + Math.abs(want[2]);
+      /* on phones the Tracking column folds into the size, as "Here" shows it */
+      tr.querySelector('.ty-a').innerHTML = want[0] + ' / ' + want[1] + '<span class="ty-app-tk"> &middot; ' + tk + '</span>';
+      tr.querySelector('.ty-t').textContent = tk;
+      var t = m.ls / m.fs * 1000;
+      var good = Math.abs(m.fs - want[0]) < 0.05 && Math.abs(m.lh - want[1]) < 0.6 && Math.abs(t - want[2]) < 0.6;
+      tr.querySelector('.ty-here').innerHTML = mark(good, px(m.fs) + ' / ' + px(m.lh) + ' &middot; ' + (t > 0.05 ? '+' : t < -0.05 ? '\u2212' : '') + Math.abs(Math.round(t)));
+    });
+    sym($('#ty-app-rows'));
+  }
+  $('#ty-density').addEventListener('change', function (e) {
+    density = e.detail.value;
+    [$('#ty-phoneui'), appProbes, $('#ty-app-rows')].forEach(function (el) {
+      if (density === 'compact') el.setAttribute('data-density', 'compact'); else el.removeAttribute('data-density');
+    });
+    readApp();
+  });
+  function hiRole(role) { $$('#ty-phoneui [data-r]').forEach(function (el) { el.toggleAttribute('data-ty-hi', !!role && el.getAttribute('data-r') === role); }); }
+  $$('#ty-app-rows tr').forEach(function (tr) {
+    var role = tr.getAttribute('data-role');
+    tr.addEventListener('mouseenter', function () { hiRole(role); });
+    tr.addEventListener('focus', function () { hiRole(role); });
+    tr.addEventListener('mouseleave', function () { hiRole(null); });
+    tr.addEventListener('blur', function () { hiRole(null); });
+  });
+
+  /* -- 6 \u00b7 faces --------------------------------------------------------- */
+  function readFaces() {
+    var f = faceName();
+    $('#ty-face').textContent = f.name;
+    $('#ty-this-device').textContent = f.sys ? 'The system face, from the system. Inter is never downloaded.' : f.inter ? 'Inter from assets/ \u2014 the system face is not installed here.' : 'A fallback: neither the system face nor Inter could be used.';
+    var slot = $('#ty-sf-slot');
+    if (f.sys) {
+      slot.innerHTML = '<p class="ty-face-spec" style="font-family:-apple-system,BlinkMacSystemFont,sans-serif">Rag 1234<small>The quick fold opens on three magnetic detents.</small></p>';
+      $('#ty-sf-note').innerHTML = '<b>Present on this device.</b> The system face switches from its text cut to its display cut at 19px by optical size.';
+    } else {
+      slot.innerHTML = '<div class="ty-face-na">The system face is not on this device, and its licence does not allow shipping it. A device that has it shows it here.</div>';
+      $('#ty-sf-note').innerHTML = '<b>Not present.</b> What renders the page here is the next card.';
+    }
+    /* measured, on this device: x-height over cap height and set width */
+    var c = doc.createElement('canvas').getContext('2d');
+    function m(fam) {
+      c.font = '400 100px ' + fam;
+      var x = c.measureText('x').actualBoundingBoxAscent, H = c.measureText('H').actualBoundingBoxAscent, w = c.measureText('The quick fold opens').width;
+      return { xh: x / H, w: w };
+    }
+    var I = m('"Inter", monospace'), A = m('"Helvetica Neue", Arial, sans-serif');
+    $('#ty-inter-note').innerHTML = 'Measured here: x-height is <b>' + Math.round(I.xh * 100) + '%</b> of the cap height; a line sets <b>' + Math.round(I.w / A.w * 100) + '%</b> as wide as the fallback&rsquo;s.';
+    $('#ty-fallback-note').innerHTML = 'Measured here: x-height <b>' + Math.round(A.xh * 100) + '%</b> of the cap height. Wider and rounder than the system face &mdash; the reason Inter is bundled rather than trusting <code>Arial</code>.';
+  }
+
+  /* -- 7 \u00b7 tracking chart (app table \u00b7 web ramp) -- */
+  var SF = {};
+  '6:41 7:34 8:26 9:19 10:12 11:6 12:0 13:-6 14:-11 15:-16 16:-20 17:-26 18:-25 19:-24 20:-23 21:-18 22:-12 23:-4 24:3 25:6 26:8 27:11 28:14 29:14 30:14 31:13 32:13 33:12 34:12 35:11 36:10 37-40:10 41-43:9 44-48:8 49-51:7 52-56:6 58:5 60-64:4 66:3 68-72:2 76:1 80-96:0'
+    .split(' ').forEach(function (t) {
+      var p = t.split(':'), r = p[0].split('-'), a = +r[0], b = +(r[1] || r[0]);
+      for (var s = a; s <= b; s++) SF[s] = +p[1];
+    });
+  var SFK = Object.keys(SF).map(Number).sort(function (a, b) { return a - b; });
+  var WEB = STEPS.map(function (s) { return [s[0], Math.round(s[2] * 1000)]; });
+  var svg = $('#ty-chart'), NS = 'http://www.w3.org/2000/svg', focusI = SFK.indexOf(17);
+  function el(n, a) { var e = doc.createElementNS(NS, n); Object.keys(a || {}).forEach(function (k) { e.setAttribute(k, a[k]); }); return e; }
+  function drawChart() {
+    var W = svg.clientWidth || 600, H = svg.clientHeight || 360, L = 40, R = 16, T = 12, B = 32;
+    var x = function (s) { return L + (s - 6) / 90 * (W - L - R); }, y = function (v) { return T + (45 - v) / 75 * (H - T - B); };
+    while (svg.lastChild && svg.lastChild.nodeName !== 'title') svg.removeChild(svg.lastChild);
+    svg.setAttribute('viewBox', '0 0 ' + W + ' ' + H);
+    var g = el('g', { class: 'ty-grid' });
+    [-30, -15, 15, 30, 45].forEach(function (v) { g.appendChild(el('line', { x1: L, x2: W - R, y1: y(v), y2: y(v) })); });
+    svg.appendChild(g);
+    svg.appendChild(el('line', { class: 'ty-zero', x1: L, x2: W - R, y1: y(0), y2: y(0) }));
+    [-30, -15, 0, 15, 30, 45].forEach(function (v) { var t = el('text', { x: L - 8, y: y(v) + 4, 'text-anchor': 'end' }); t.textContent = (v > 0 ? '+' : '') + v; svg.appendChild(t); });
+    [6, 12, 17, 24, 32, 48, 64, 80, 96].forEach(function (s) { var t = el('text', { x: x(s), y: H - 10, 'text-anchor': 'middle' }); t.textContent = s; svg.appendChild(t); });
+    var d = SFK.map(function (s, i) { return (i ? 'L' : 'M') + x(s).toFixed(1) + ' ' + y(SF[s]).toFixed(1); }).join('');
+    svg.appendChild(el('path', { class: 'ty-line', d: d }));
+    WEB.forEach(function (p) { svg.appendChild(el('circle', { class: 'ty-dot', cx: x(p[0]), cy: y(p[1]), r: 5 })); });
+    var lb = el('text', { class: 'ty-lbl', x: x(40), y: y(22) }); lb.textContent = 'App table'; svg.appendChild(lb);
+    var lw = el('text', { class: 'ty-lbl', x: x(62), y: y(-22), 'text-anchor': 'middle' }); lw.textContent = 'Web ramp'; svg.appendChild(lw);
+    var cross = el('line', { class: 'ty-cross', y1: T, y2: H - B, x1: L, x2: L, visibility: 'hidden' }); svg.appendChild(cross);
+    svg.__x = x; svg.__cross = cross; svg.__L = L; svg.__R = R; svg.__W = W;
+    if (svg.__shown) show(focusI);
+  }
+  function show(i) {
+    i = Math.max(0, Math.min(SFK.length - 1, i)); focusI = i; svg.__shown = true;
+    var s = SFK[i], w = WEB.filter(function (p) { return p[0] === s; })[0];
+    svg.__cross.setAttribute('x1', svg.__x(s)); svg.__cross.setAttribute('x2', svg.__x(s)); svg.__cross.setAttribute('visibility', 'visible');
+    $('#ty-readout').innerHTML = '<b>' + s + ' pt</b> &middot; app table ' + (SF[s] > 0 ? '+' : '') + SF[s] + '/1000 em' + (w ? ' &middot; web ramp ' + (w[1] > 0 ? '+' : '') + w[1] + '/1000 em' : '');
+  }
+  svg.addEventListener('pointermove', function (e) {
+    var r = svg.getBoundingClientRect(), sx = 6 + (e.clientX - r.left - svg.__L) / (r.width - svg.__L - svg.__R) * 90, best = 0;
+    SFK.forEach(function (s, i) { if (Math.abs(s - sx) < Math.abs(SFK[best] - sx)) best = i; });
+    show(best);
+  });
+  svg.addEventListener('keydown', function (e) {
+    if (e.key === 'ArrowRight' || e.key === 'ArrowUp') { show(focusI + 1); e.preventDefault(); }
+    else if (e.key === 'ArrowLeft' || e.key === 'ArrowDown') { show(focusI - 1); e.preventDefault(); }
+  });
+  svg.addEventListener('focus', function () { show(focusI); });
+  $('#ty-track-rows').innerHTML = SFK.filter(function (s) { return s <= 40 || s % 8 === 0 || WEB.some(function (p) { return p[0] === s; }); }).map(function (s) {
+    var w = WEB.filter(function (p) { return p[0] === s; })[0];
+    return '<tr><td class="num">' + s + '</td><td class="num">' + (SF[s] > 0 ? '+' : '') + SF[s] + '</td><td class="num">' + (w ? (w[1] > 0 ? '+' : '') + w[1] : '&mdash;') + '</td></tr>';
+  }).join('');
+
+  /* -- 8 \u00b7 numerals ------------------------------------------------------ */
+  function readNums() {
+    var c = doc.createElement('canvas').getContext('2d');
+    $$('.ty-col').forEach(function (col) {
+      var cs = getComputedStyle(col), kind = col.getAttribute('data-nums');
+      var probe = function (t) {
+        var s = doc.createElement('span'); s.textContent = t; s.style.cssText = 'position:absolute;visibility:hidden;white-space:nowrap';
+        col.appendChild(s); var w = s.getBoundingClientRect().width; col.removeChild(s); return w;
+      };
+      var a = probe('1111'), b = probe('8888');
+      $('[data-meas="' + kind + '"]').innerHTML = 'Measured: &ldquo;1111&rdquo; sets <b>' + a.toFixed(1) + 'px</b>, &ldquo;8888&rdquo; <b>' + b.toFixed(1) + 'px</b> ' +
+        (Math.abs(a - b) < 0.5 ? '&mdash; every digit the same width.' : '&mdash; ' + Math.abs(b - a).toFixed(1) + 'px apart, so a changing number shifts.');
+    });
+  }
+  var counting = 0;
+  $('#ty-count-go').addEventListener('click', function () {
+    var targets = $$('[data-count-target]'), reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+    var fmt = function (n) { return Math.round(n).toLocaleString('en-US'); };
+    cancelAnimationFrame(counting);
+    if (reduce) { targets.forEach(function (t) { t.textContent = fmt(2880); }); return; }
+    var t0 = performance.now();
+    (function tick(now) {
+      var p = Math.min(1, (now - t0) / 2400), v = 1111 + (2880 - 1111) * p;
+      targets.forEach(function (t) { t.textContent = fmt(v); });
+      if (p < 1) counting = requestAnimationFrame(tick);
+    })(t0);
+  });
+  $('#ty-roll-go').addEventListener('click', function () {
+    var to = 1000 + Math.round(Math.random() * 8999);
+    if (window.FG3 && FG3.rollNumber) FG3.rollNumber($('#ty-roll'), to, { format: function (n) { return Math.round(n).toLocaleString('en-US'); } });
+    else $('#ty-roll').textContent = to.toLocaleString('en-US');
+  });
+
+  /* -- 9 \u00b7 symbols: measured stroke per role ----------------------------- */
+  function readSyms() {
+    $$('.ty-sym-row').forEach(function (row) {
+      var p = row.querySelector('p'), s = row.querySelector('svg.sym, .sym');
+      if (!s) return;
+      /* Chromium reports a calc() stroke as "calc(2.15px)": read the number out */
+      var fs = parseFloat(getComputedStyle(p).fontSize), sw = parseFloat((/-?\d*\.?\d+/.exec(getComputedStyle(s).strokeWidth) || [0])[0]) || 0;
+      var box = s.getBoundingClientRect().width || fs, stroke = sw * box / 24;
+      row.querySelector('.ty-sym-m').innerHTML = '<b>' + px(fs) + 'px</b> type &middot; glyph ' + px(box) + 'px &middot; stroke <b>' + stroke.toFixed(2) + 'px</b>';
+    });
+  }
+
+  /* -- 10 \u00b7 responsive simulator: a real document in a frame ------------- */
+  /* a phone opens on the phone width (a 1068 frame would show at a third) */
+  var sim = $('#ty-sim'), stage = $('#ty-sim-stage'), frame = $('#ty-sim-frame'), range = $('#ty-sim-range'), FH = 620;
+  var simW = matchMedia('(max-width:734px)').matches ? 402 : 1068;
+  function hrefOf(part) { var l = $('link[rel="stylesheet"][href*="' + part + '"]'); return l ? l.href : ''; }
+  function srcdoc() {
+    var t = html.getAttribute('data-tone') === 'dark' ? 'dark' : 'light';
+    var links = ['fg3-tokens', 'fg3-color', 'fg3.css', 'fg3-showcase'].map(function (p) { return '<link rel="stylesheet" href="' + hrefOf(p) + '">'; }).join('');
+    return '<!doctype html><html lang="en" data-tone="' + t + '"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width">' + links +
+      '<style>html{scrollbar-width:none;overflow:hidden}body{margin:0}.band{--band-pt:56px;--band-pb:64px}.sim-stack{display:grid;gap:40px;margin-top:48px}.probe{position:absolute;visibility:hidden}</style></head><body>' +
+      '<section class="band" data-band="story"><div class="viewport-content" id="col">' +
+      '<div class="lockup"><p class="lockup-eyebrow">Orbit</p><h1 class="lockup-headline" id="p-lockup">One hand. Every team.</h1>' +
+      '<p class="lockup-copy">Runs start at six every morning. <strong>Every run writes its own ledger row</strong>, so the daily limits count exactly what the workspace did.</p></div>' +
+      '<div class="sim-stack"><h2 class="t-section">Take a closer look.</h2><p class="t-callout">Opens on magnetic detents at closed, half open and open.</p>' +
+      '<p class="t-body">Body copy is 17 on 25 at every width, and nothing grows above 1441.</p></div>' +
+      '<span class="probe hero-headline" id="p-hero">Ag</span><span class="probe t-section" id="p-section">Ag</span><span class="probe t-lede" id="p-lede">Ag</span><span class="probe t-callout" id="p-callout">Ag</span>' +
+      '</div></section></body></html>';
+  }
+  function layoutSim() {
+    var avail = stage.clientWidth || 1;
+    var s = Math.min(1, avail / simW);
+    sim.style.width = simW + 'px'; sim.style.height = FH + 'px'; sim.style.transform = 'scale(' + s + ')';
+    frame.style.width = Math.round(simW * s) + 'px'; frame.style.height = Math.round(FH * s) + 'px';
+    $('#ty-grip').style.left = (Math.round(simW * s) - 22) + 'px'; $('#ty-grip').style.right = 'auto';
+    $('#ty-sim-px').textContent = simW;
+    $('#ty-sim-scale').textContent = s < 1 ? 'shown at ' + Math.round(s * 100) + '%' : 'shown at full size';
+    range.value = simW; range.dispatchEvent(new Event('input'));
+    $$('[data-w]').forEach(function (b) { b.setAttribute('aria-pressed', String(+b.getAttribute('data-w') === simW)); });
+    readSim();
+  }
+  function readSim() {
+    var d; try { d = sim.contentDocument; } catch (e) { return; }
+    if (!d || !d.getElementById('p-hero')) return;
+    var get = function (id) { var m = metrics(d.getElementById(id)); return px(m.fs) + ' / ' + +m.lh.toFixed(1); };
+    var set = function (k, v) { $('[data-k="' + k + '"]').textContent = v; };
+    set('hero', get('p-hero')); set('lockup', get('p-lockup')); set('section', get('p-section')); set('lede', get('p-lede')); set('callout', get('p-callout'));
+    set('col', Math.round(d.getElementById('col').getBoundingClientRect().width) + ' px');
+    /* the frame is as tall as the page inside it, so it never scrolls */
+    var h = Math.min(1100, Math.ceil(d.body.getBoundingClientRect().height));
+    if (h > 100 && Math.abs(h - FH) > 2) { FH = h; layoutSim(); }
+  }
+  function setW(w) { simW = Math.max(320, Math.min(1440, Math.round(w))); layoutSim(); }
+  function loadSim() { sim.srcdoc = srcdoc(); }
+  sim.addEventListener('load', function () { setTimeout(readSim, 30); });
+  range.addEventListener('input', function (e) { if (e.isTrusted) setW(+range.value); });
+  $$('[data-w]').forEach(function (b) { b.addEventListener('click', function () { setW(+b.getAttribute('data-w')); }); });
+  (function grip() {
+    var g = $('#ty-grip'), drag = null;
+    g.addEventListener('pointerdown', function (e) { drag = { x: e.clientX, w: simW, s: Math.min(1, (stage.clientWidth || 1) / simW) }; try { g.setPointerCapture(e.pointerId); } catch (err) {} e.preventDefault(); });
+    g.addEventListener('pointermove', function (e) { if (drag) setW(drag.w + (e.clientX - drag.x) / drag.s); });
+    g.addEventListener('pointerup', function () { drag = null; });
+    g.addEventListener('pointercancel', function () { drag = null; });
+    g.addEventListener('keydown', function (e) {
+      if (e.key === 'ArrowRight' || e.key === 'ArrowUp') { setW(simW + 10); e.preventDefault(); }
+      else if (e.key === 'ArrowLeft' || e.key === 'ArrowDown') { setW(simW - 10); e.preventDefault(); }
+    });
+  })();
+
+  /* -- 7 \u00b7 the two tracking specimens quote the size they render at ------- */
+  function readBig() {
+    $$('.ty-track-spec').forEach(function (s) { var b = s.querySelector('.ty-big'), o = s.querySelector('[data-big-px]'); if (b && o) o.textContent = px(metrics(b).fs); });
+  }
+
+  /* -- orchestration ----------------------------------------------------- */
+  function readAll() { readRamp(); readRoles(); readApp(); readNums(); readSyms(); readBig(); placePins(); }
+  var fontsReady = doc.fonts && doc.fonts.ready ? doc.fonts.ready : Promise.resolve();
+  doc.addEventListener('fg3:ready', function () {
+    readAll(); drawChart(); layoutSim(); loadSim();
+    fontsReady.then(function () { (doc.fonts && doc.fonts.load ? doc.fonts.load('600 48px Inter') : Promise.resolve()).then(function () { readFaces(); readAll(); }, readFaces); });
+  });
+  doc.addEventListener('fg3:tone', function () { loadSim(); drawChart(); });
+  var rz = 0;
+  window.addEventListener('resize', function () { clearTimeout(rz); rz = setTimeout(function () { readRoles(); readRamp(); drawChart(); layoutSim(); readSyms(); readBig(); placePins(); }, 120); });
+  /* stylesheets are parsed before this script runs, so the ramp can be read
+     now \u2014 the count-up in the intro then animates to the measured number */
+  readRamp();
+  window.__typePage = { readAll: readAll, setWidth: setW, readSim: readSim, faceName: faceName };
+})();
+</script>
+<script>FG3.boot(); if (window.DOCS) DOCS.mount();</script>
+</body>
+</html>

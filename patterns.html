@@ -1,0 +1,1728 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Patterns &middot; Fluid Design Open</title>
+<!--
+  The page template. Every page of the site copies this skeleton VERBATIM
+  (head, site nav, footer, scripts) and replaces only: the <title>, the
+  aria-current link in the nav, the local-nav capsule's title/jump links, and
+  <main>. Pages load assets/fg3-color.css.
+
+  Do NOT put data-tone on <html> unless the page must be pinned: an author
+  tone beats the reader's appearance toggle (FG3 precedence).
+-->
+<script>
+/* Tone without a flash (fg3.js header): reader's choice › author › host › system. */
+try{var d=document.documentElement,t=localStorage.getItem('fg3-tone');
+if(!d.hasAttribute('data-tone')){d.setAttribute('data-tone',t||d.getAttribute(
+'data-theme')||(matchMedia('(prefers-color-scheme: dark)').matches?'dark':
+'light'));d.setAttribute('data-tone-auto','')}}catch(e){}
+</script>
+<link rel="stylesheet" href="assets/fg3-tokens.css">
+<link rel="stylesheet" href="assets/fg3-color.css">
+<link rel="stylesheet" href="assets/fg3-springs.css">
+<link rel="stylesheet" href="assets/fg3.css">
+<link rel="stylesheet" href="assets/lg3.css">
+<link rel="stylesheet" href="assets/fg3-motion.css">
+<link rel="stylesheet" href="assets/fg3-components.css">
+<link rel="stylesheet" href="assets/fg3-chrome.css">
+<link rel="stylesheet" href="assets/fg3-showcase.css">
+<link rel="stylesheet" href="assets/fg3-symbols.css">
+<link rel="stylesheet" href="assets/fg3-chart.css">
+<link rel="stylesheet" href="assets/fg3-device.css">
+<link rel="stylesheet" href="assets/fg3-docs.css">    <!-- documentation pages only -->
+<style>
+/* Page layout only: roles and tokens, never a colour value (SPEC §2).
+   Page-local classes are prefixed with the page's own short name (e.g. mo- on
+   motion.html) so they can never collide with a system class. */
+
+/* ── hero + index ───────────────────────────────────────────────────────── */
+.pt-lockup .lockup-ctas{justify-content:center}
+ol.pt-index{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:var(--grid-gap);margin:var(--s-11) 0 0;padding:0;list-style:none;counter-reset:none}
+@media (max-width:1068px){ ol.pt-index{grid-template-columns:repeat(3,minmax(0,1fr))} }
+@media (max-width:734px){ ol.pt-index{grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin-top:var(--s-9)} }
+.pt-index>li{display:flex}
+.pt-tile{--card-pad:22px;display:flex;flex-direction:column;gap:2px;width:100%;padding-top:0}
+.pt-tile-art{display:grid;place-items:center;height:128px;margin-inline:calc(-1 * var(--card-pad));margin-bottom:var(--s-3);overflow:hidden;pointer-events:none}
+.pt-tile-mini{display:grid;place-items:center;gap:8px}
+.pt-tile-num{font:500 var(--t-12)/var(--t-12-lh) var(--font-mono);color:var(--label-2)}
+.pt-tile-name{font-size:var(--t-17);line-height:var(--t-17-lh);letter-spacing:var(--t-17-ls);font-weight:600}
+@media (max-width:734px){ .pt-tile{--card-pad:16px} .pt-tile-art{height:92px} .pt-tile-mini{zoom:.72} }
+/* index minis, drawn from roles */
+.pt-m-sheet{position:relative;width:128px;height:84px;margin-top:28px;border-radius:calc(18px * var(--r-scale)) calc(18px * var(--r-scale)) 0 0;corner-shape:superellipse(var(--k-continuous));background:var(--bg-1);box-shadow:var(--shadow-lift)}
+.band[data-band="story"] .pt-m-sheet{background:var(--bg-1)}
+.pt-m-sheet::before{content:"";position:absolute;top:8px;left:50%;width:30px;height:4px;translate:-50% 0;border-radius:2px;background:var(--label-3)}
+.pt-m-lines{display:grid;gap:9px;width:130px}
+.pt-m-lines>i{display:block;height:7px;border-radius:4px;background:var(--fill-1)}
+.pt-m-dots{display:flex;gap:6px;justify-content:center}
+.pt-m-dots>i{width:7px;height:7px;border-radius:4px;background:var(--label-3)}
+.pt-m-dots>i:first-child{width:22px;background:var(--label)}
+.pt-m-pill{display:inline-flex;align-items:center;gap:8px;height:36px;padding:0 8px 0 14px;border-radius:var(--r-pill);background:var(--fill-1);font-size:var(--t-14);color:var(--label-2)}
+.pt-m-mono{font:500 var(--t-12)/1.5 var(--font-mono);color:var(--label);white-space:pre}
+
+/* ── a pattern ──────────────────────────────────────────────────────────── */
+.pt-head{display:grid;gap:var(--s-4);margin-bottom:var(--band-header-gap)}
+.pt-head .t-lede{max-width:760px}
+.pt-num{margin:0;font:600 var(--t-14)/var(--t-14-lh) var(--font-text);letter-spacing:.02em;color:var(--label-2)}
+.pt-notes{display:grid;grid-template-columns:minmax(0,5fr) minmax(0,7fr);gap:var(--s-8) var(--s-10);margin-top:var(--s-10);align-items:start}
+@media (max-width:1068px){ .pt-notes{grid-template-columns:minmax(0,1fr)} }
+.pt-sub{margin:0 0 var(--s-3);font-size:var(--t-17);line-height:var(--t-17-lh);letter-spacing:var(--t-17-ls);font-weight:600}
+.pt-when{margin:0 0 var(--s-7);color:var(--label-2);font-size:var(--t-17);line-height:var(--t-17-lh-loose)}
+.pt-when strong{color:var(--label);font-weight:inherit}
+.pt-when code{color:var(--label)}
+ol.pt-rules{display:grid;gap:12px;margin:0;padding:0;list-style:none;counter-reset:rule}
+ol.pt-rules>li{position:relative;padding-inline-start:34px;font-size:var(--t-17);line-height:var(--t-17-lh-loose);color:var(--label)}
+ol.pt-rules>li::before{counter-increment:rule;content:counter(rule);position:absolute;inset-inline-start:0;top:1px;display:grid;place-items:center;width:22px;height:22px;border-radius:50%;background:var(--fill-2);color:var(--label-2-on-fill);font:600 var(--t-12)/1 var(--font-text)}
+.pt-refs{margin:var(--s-4) 0 0;font-size:var(--t-14);line-height:var(--t-14-lh-loose);color:var(--label-2)}
+.pt-notes .doc-code{max-height:460px}
+.pt-notes .doc-code+.doc-code{margin-top:12px}
+.pt-kicker{margin:0 0 var(--s-3);font-size:var(--t-12);line-height:var(--t-12-lh);font-weight:600;letter-spacing:.02em;color:var(--label-2)}
+.pt-row{display:flex;flex-wrap:wrap;align-items:center;gap:var(--s-3)}
+.pt-card-title{margin:0;font-family:var(--t-ui-title3-ff);font-size:var(--t-ui-title3-fs);line-height:var(--t-ui-title3-lh);letter-spacing:var(--t-ui-title3-ls);font-weight:600}
+.pt-card-sub{margin:4px 0 0;font-size:var(--t-14);line-height:var(--t-14-lh);color:var(--label-2)}
+
+/* 01 · form */
+.pt-form-demo{display:grid;grid-template-columns:minmax(0,7fr) minmax(0,5fr);gap:var(--grid-gap);align-items:start}
+@media (max-width:1068px){ .pt-form-demo{grid-template-columns:minmax(0,1fr)} }
+.pt-form{display:grid;gap:var(--s-6)}
+.pt-2col{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:var(--s-5);align-items:start}
+@media (max-width:734px){ .pt-2col{grid-template-columns:minmax(0,1fr)} }
+.pt-form-actions{display:flex;flex-wrap:wrap;gap:var(--s-3) var(--s-5);align-items:center;padding-top:var(--s-2)}
+.pt-form .banner a{color:var(--link)}
+.pt-state .row-title{font-size:var(--t-17)}
+.pt-state .list-inset{--c-surface:var(--bg-2)}
+
+/* 02 · search */
+.pt-search{display:grid;gap:var(--s-5)}
+.pt-search-inner{width:min(760px,100%);margin-inline:auto;display:grid;gap:var(--s-5)}
+.pt-scopes{display:flex;flex-wrap:wrap;gap:8px}
+.pt-count{margin:0;font-size:var(--t-14);line-height:var(--t-14-lh);color:var(--label-2);min-height:18px}
+.pt-results .list-header{padding-top:var(--s-3)}
+.pt-results .list-inset{--c-surface:var(--bg-1)}
+.band[data-band="story"] .pt-results .list-inset{--c-surface:var(--bg-1)}
+mark.pt-mark{background:color-mix(in srgb,var(--accent) 22%,transparent);color:var(--label);border-radius:3px;padding:0 1px}
+.pt-result-glyph{--row-icon-ink:var(--c-knob)}
+
+/* 03 + 07 · phones */
+.pt-phone-demo{display:grid;grid-template-columns:minmax(0,5fr) minmax(0,7fr);gap:var(--s-9) var(--s-10);align-items:center}
+.pt-phone-demo.pt-flip{grid-template-columns:minmax(0,7fr) minmax(0,5fr)}
+.pt-phone-demo.pt-flip>.pt-phone-wrap{order:2}
+@media (max-width:1068px){ .pt-phone-demo,.pt-phone-demo.pt-flip{grid-template-columns:minmax(0,1fr)} .pt-phone-demo.pt-flip>.pt-phone-wrap{order:0} }
+.pt-phone-wrap{display:grid;justify-items:center}
+.pt-phone-wrap>.device{--device-width:min(340px,86vw)}
+.pt-phone-cap{margin-top:var(--s-5);font-size:var(--t-14);line-height:var(--t-14-lh);color:var(--label-2);text-align:center}
+/* Grouped: the grey ground with white cells in light; the page ground with raised cells in dark */
+.pt-app{--pt-grouped:var(--bg-2);position:relative;height:874px;overflow:hidden;background:var(--pt-grouped);color:var(--label);font-family:var(--font-text);isolation:isolate}
+.pt-status{position:absolute;inset:0 0 auto;z-index:3;display:flex;justify-content:space-between;align-items:center;height:54px;padding:6px 34px 0 42px;font:600 17px/1 var(--font-text);letter-spacing:-.02em;pointer-events:none}
+.pt-status>span:last-child{display:flex;gap:6px;font-size:17px}
+.pt-screen{position:absolute;inset:0;overflow-y:auto;overscroll-behavior:contain;padding:62px 16px 40px;background:var(--pt-grouped);translate:100% 0;
+  transition:translate var(--sp-smooth-ms,674ms) var(--sp-smooth,ease),visibility 0s linear var(--sp-smooth-ms,674ms);visibility:hidden;scrollbar-width:none}
+.pt-screen::-webkit-scrollbar{display:none}
+.pt-screen[data-active]{translate:0 0;visibility:visible;transition:translate var(--sp-smooth-ms,674ms) var(--sp-smooth,ease)}
+.pt-screen[data-under]{translate:-30% 0}
+.pt-large-title{margin:6px 4px 14px;font-family:var(--t-ui-large-title-ff);font-size:var(--t-ui-large-title-fs);line-height:var(--t-ui-large-title-lh);letter-spacing:var(--t-ui-large-title-ls);font-weight:700}
+.pt-back{display:inline-flex;align-items:center;gap:4px;height:44px;margin:-6px 0 0 -6px;padding:0 8px;border-radius:22px;color:var(--link);font-size:17px;font-weight:400}
+.pt-back>.sym{width:22px;height:22px}
+.pt-back:hover{background:var(--fill-3)}
+.pt-app .list-header{padding:14px 16px 7px;font-size:15px;font-weight:600}
+.pt-app .list-footer{padding:7px 16px 4px}
+.pt-app .list-inset{--c-surface:var(--bg-elevated)}
+[data-tone="dark"] .pt-app,.pt-app[data-tone="dark"]{--pt-grouped:var(--bg-1)}
+.pt-app .list-inset + .list-header,.pt-app .list-footer + .list-header{margin-top:14px}
+.pt-app .row[role="radio"]::after{content:"";margin-inline-start:auto;width:16px;height:16px;flex:none;background:var(--accent);-webkit-mask:var(--c-tick) center/150% no-repeat;mask:var(--c-tick) center/150% no-repeat;opacity:0}
+.pt-app .row[role="radio"][aria-checked="true"]::after{opacity:1}
+.pt-app .row-destructive{color:var(--bad);justify-content:center}
+.pt-profile-head{display:grid;justify-items:center;gap:6px;margin:8px 0 18px;text-align:center}
+.pt-profile-head .avatar{--av:84px;font-size:32px}
+@media (prefers-reduced-motion:reduce){
+  .pt-screen,.pt-screen[data-active],.pt-screen[data-under]{translate:0 0;transition:opacity var(--d-200) linear,visibility 0s linear var(--d-200);opacity:0}
+  .pt-screen[data-active]{opacity:1;transition:opacity var(--d-200) linear}
+}
+
+/* 04 · confirm */
+.pt-aud-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:var(--grid-gap)}
+@media (max-width:1068px){ .pt-aud-grid{grid-template-columns:repeat(2,minmax(0,1fr))} }
+@media (max-width:734px){ .pt-aud-grid{grid-template-columns:minmax(0,1fr)} }
+.pt-aud{display:flex;flex-direction:column;transition:opacity var(--d-300) var(--ease-standard),scale var(--sp-snappy-ms,500ms) var(--sp-snappy,ease)}
+.pt-aud[data-leaving]{opacity:0;scale:.94}
+.pt-aud .card-media{position:relative;height:190px}
+.pt-aud .card-media>canvas{position:absolute;inset:0}
+.pt-aud-bar{position:absolute;inset:auto 16px 16px auto;display:flex;gap:8px;z-index:1}
+.pt-aud h3{margin:0}
+.pt-aud-meta{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-top:var(--s-4)}
+.pt-aud-meta .t-caption{color:var(--label-2)}
+.pt-confirm-foot{display:flex;justify-content:center;margin-top:var(--s-7)}
+@media (prefers-reduced-motion:reduce){ .pt-aud{transition:opacity var(--d-200) linear} .pt-aud[data-leaving]{scale:none} }
+
+/* 05 · sheet (stage band) */
+.pt-art{position:relative;overflow:hidden;min-height:480px;gap:var(--s-8);display:grid;align-content:space-between;padding:var(--s-9);
+  border-radius:var(--r-lg);corner-shape:superellipse(var(--k-continuous))}
+.pt-art>canvas{position:absolute;inset:0;width:100%;height:100%}
+.pt-art>*:not(canvas){position:relative}
+.pt-art-head{display:grid;gap:6px;max-width:520px}
+.pt-art-bar{display:flex;flex-wrap:wrap;justify-content:center;gap:12px}
+.pt-art-note{padding:14px 18px;border-radius:var(--r-md);corner-shape:superellipse(var(--k-continuous));background:var(--bg-elevated);color:var(--label)}
+/* an app's content on the art: opaque tiles (content), glass only on the bars */
+.pt-tiles{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px;width:min(880px,100%);justify-self:center}
+@media (max-width:734px){ .pt-tiles{grid-template-columns:minmax(0,1fr) minmax(0,1fr)} .pt-tiles>:last-child{display:none} }
+.pt-stat{display:grid;gap:2px;padding:18px 20px;border-radius:var(--r-md);corner-shape:superellipse(var(--k-continuous));background:var(--bg-elevated);color:var(--label);box-shadow:var(--shadow-lift)}
+.pt-stat .stat-value{font-size:var(--t-32);line-height:1.1;letter-spacing:var(--t-32-ls)}
+.pt-stat .t-caption{color:var(--label-2)}
+.pt-art-note p{font-size:var(--t-14);line-height:var(--t-14-lh-loose)}
+.pt-art-note .t-caption{color:var(--label-2)}
+@media (max-width:734px){ .pt-art{padding:var(--s-6) var(--s-4);min-height:460px} }
+/* flow, not grid: in a height-capped scroller a grid gives overflow:hidden children (the inset list) a 0px row */
+.pt-sheet .sheet__body>*+*{margin-top:var(--s-5)}
+.pt-sheet .form-field>label{font-size:var(--t-14)}
+.pt-sheet .list-inset{--c-surface:var(--fill-3)}
+
+/* 06 · states */
+.pt-states{display:grid;gap:var(--s-6)}
+.pt-states-head{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:var(--s-4)}
+.pt-states [role="tabpanel"]{min-height:300px}
+.pt-states .segmented{--seg-platter:var(--mat-control-fill-solid)}
+.pt-states [role="tabpanel"]:not([hidden]){animation:pt-in var(--d-400) var(--ease-out-cubic) both}
+@keyframes pt-in{from{opacity:0;translate:0 8px}}
+@media (prefers-reduced-motion:reduce){ @keyframes pt-in{from{opacity:0}} }
+.pt-states .list-inset{--c-surface:var(--bg-1)}
+.pt-skel-row{display:flex;align-items:center;gap:14px;padding:14px 16px}
+.pt-skel-row>div{flex:1}
+.pt-states .banner{margin-bottom:var(--s-4)}
+
+/* 07 · onboarding */
+.pt-onb{display:flex;flex-direction:column;background:var(--bg-1)}
+.pt-onb-viewport{flex:1;overflow:hidden;padding-top:70px}
+.pt-onb-track{display:flex;height:100%;translate:calc(var(--step,0) * -100%) 0;transition:translate var(--sp-move-ms,560ms) var(--sp-move,ease)}
+.pt-onb-slide{flex:0 0 100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;padding:0 32px 40px;text-align:center;transition:opacity var(--d-300) linear}
+.pt-onb-hero{position:relative;display:grid;place-items:center;width:168px;height:168px;margin-bottom:18px;border-radius:50%;overflow:hidden;color:var(--c-knob);font-size:64px}
+.pt-onb-hero>canvas{position:absolute;inset:0;width:100%;height:100%}
+.pt-onb-hero>.sym{position:relative;width:1em;height:1em}
+.pt-onb-title{margin:0;font-family:var(--t-ui-title1-ff);font-size:var(--t-ui-title1-fs);line-height:var(--t-ui-title1-lh);letter-spacing:var(--t-ui-title1-ls);font-weight:700}
+.pt-onb-body{margin:0;max-width:320px;font-size:17px;line-height:1.35;color:var(--label-2)}
+.pt-onb-chips{display:flex;flex-wrap:wrap;justify-content:center;gap:8px;margin-top:10px}
+.pt-onb .list-inset{width:100%;margin-top:14px;text-align:start;--c-surface:var(--bg-2)}
+.pt-onb-foot{display:grid;justify-items:center;gap:10px;padding:14px 28px 46px}
+.pt-onb-foot .btn-block{margin-top:8px}
+.pt-onb-dots{display:flex;gap:7px;height:8px}
+.pt-onb-dots>i{display:block;width:8px;height:8px;border-radius:4px;background:var(--label-4);transition:width var(--sp-snappy-ms,500ms) var(--sp-snappy,ease),background-color var(--d-200) linear}
+.pt-onb-dots>i[data-on]{width:24px;background:var(--label)}
+.pt-onb[data-step="3"] .pt-onb-dots{visibility:hidden}
+.pt-tick{width:132px;height:132px;margin:28px 0 18px}
+.pt-tick circle{fill:none;stroke:var(--ok);stroke-width:6;stroke-dasharray:340;stroke-dashoffset:340;transition:stroke-dashoffset 600ms var(--ease-out-cubic)}
+.pt-tick path{fill:none;stroke:var(--ok);stroke-width:8;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:80;stroke-dashoffset:80;transition:stroke-dashoffset 420ms var(--ease-out-cubic) 380ms}
+.pt-onb[data-step="3"] .pt-tick :is(circle,path){stroke-dashoffset:0}
+@media (prefers-reduced-motion:reduce){
+  .pt-onb-track{transition:none}
+  .pt-onb-slide{opacity:0} .pt-onb-slide[data-on]{opacity:1}
+  .pt-tick :is(circle,path){transition:none}
+}
+
+/* 08 · notify */
+.pt-notify{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:var(--grid-gap)}
+@media (max-width:1068px){ .pt-notify{grid-template-columns:minmax(0,1fr)} }
+.pt-notify>.card{display:flex;flex-direction:column;gap:var(--s-4)}
+.pt-notify .pt-kind{display:flex;align-items:center;gap:10px}
+.pt-notify .pt-kind .badge{flex:none}
+.pt-notify-demo{flex:1;display:grid;align-content:start;justify-items:start;gap:10px;padding:var(--s-4);border-radius:var(--r-md);corner-shape:superellipse(var(--k-continuous));background:var(--bg-1);min-height:150px}
+.band[data-band="story"] .pt-notify-demo{background:var(--bg-1)}
+.pt-notify-demo .row{padding-inline:4px;min-height:40px}
+.pt-notify-demo>:is(.list,.banner){justify-self:stretch}
+.pt-notify-demo .banner{padding:12px 14px}
+
+/* 09 · table */
+.pt-table-card{--table-bg:var(--c-surface);display:grid;gap:var(--s-5);padding-bottom:var(--s-4)}
+.pt-table-bar{display:flex;flex-wrap:wrap;align-items:center;gap:var(--s-3) var(--s-5);min-height:44px}
+.pt-table-bar .search{width:min(280px,100%);margin-inline-start:auto}
+.pt-bulk{display:flex;align-items:center;gap:10px;padding:4px 6px 4px 14px;border-radius:var(--r-pill);background:var(--fill-2)}
+.pt-bulk b{font-size:var(--t-14);font-weight:600}
+.pt-frame{max-width:none;max-height:460px;overflow:auto;margin-inline:calc(-1 * var(--card-pad));padding-inline:var(--card-pad);overscroll-behavior:contain}
+.pt-frame .table th,.pt-frame .table td{vertical-align:middle}
+.pt-frame .table thead th{z-index:2;box-shadow:inset 0 -1px 0 var(--separator-opaque)}
+.pt-frame .table td:first-child,.pt-frame .table th:first-child{width:36px;padding-inline-end:8px}
+.pt-frame .table td:last-child{width:44px;text-align:end}
+.pt-frame .table tr[aria-selected="true"]>td{background:color-mix(in srgb,var(--accent) 8%,transparent)}
+.pt-sort{display:inline-flex;align-items:center;gap:4px;font:inherit;color:inherit;letter-spacing:inherit;border-radius:6px;padding:2px 4px;margin:-2px -4px}
+.pt-sort::after{content:"";width:9px;height:6px;background:currentColor;-webkit-mask:var(--c-chevron-down) center/contain no-repeat;mask:var(--c-chevron-down) center/contain no-repeat;opacity:0}
+th[aria-sort="descending"] .pt-sort::after{opacity:1}
+th[aria-sort="ascending"] .pt-sort::after{opacity:1;rotate:180deg}
+th.num .pt-sort{flex-direction:row-reverse}
+.pt-sort:hover{color:var(--label)}
+.pt-frame tbody th{font-size:var(--t-14);line-height:var(--t-14-lh);letter-spacing:var(--t-14-ls);color:var(--label);border-bottom-color:var(--separator)}
+.pt-tbl-name{font-weight:600}
+.pt-tbl-route{color:var(--label-2)}
+.pt-frame .table :is(td,th){white-space:nowrap}
+@media (max-width:734px){ .pt-frame .table{min-width:max-content} }
+
+/* 10 · palette (stage band) */
+.pt-pal-top{display:flex;align-items:center;justify-content:center;gap:var(--s-3)}
+@media (min-width:735px){ .pt-pal-top .command__pill{min-width:min(360px,52vw)} }
+.pt-pal-title{font:600 var(--t-17)/1 var(--font-text)}
+.pt-pal-hint{justify-self:center;text-align:center;color:var(--label-2)}
+.pt-kbds{display:inline-flex;gap:4px;vertical-align:middle}
+/* an action in plain text: .btn-plain without the navigation chevron (components has no such variant; requested) */
+.btn-plain.pt-textbtn::after{display:none}
+/* on a bad banner's fill the link ink held 3.3:1; the action takes the fill's own strong ink (4.5:1 by contract), as its icon does */
+.banner-bad .pt-textbtn{--btn-ink:var(--bad-strong)}
+</style>
+</head>
+<body>
+
+<!-- ═══ SITE NAV (shared — copy verbatim; set aria-current on this page's link) ═══ -->
+<nav class="globalnav" aria-label="Fluid Design">
+  <div class="globalnav__bar">
+    <a class="globalnav__brand" href="index.html" aria-label="Fluid Design Open home"><i data-sym="sparkles"></i></a>
+    <ul class="globalnav__list">
+      <li class="globalnav__item"><a class="globalnav__link" href="index.html">Overview</a></li>
+      <li class="globalnav__item"><a class="globalnav__link" href="start.html">Start</a></li>
+      <li class="globalnav__item"><a class="globalnav__link" href="docs.html">Docs</a></li>
+      <li class="globalnav__item" data-flyout="gn-foundations"><a class="globalnav__link" href="color.html">Foundations</a><button class="globalnav__trigger" type="button"><span class="sr-only">Foundations menu</span></button></li>
+      <li class="globalnav__item" data-flyout="gn-components"><a class="globalnav__link" href="components.html" aria-current="page">Components</a><button class="globalnav__trigger" type="button"><span class="sr-only">Components menu</span></button></li>
+      <li class="globalnav__item" data-flyout="gn-instruments"><a class="globalnav__link" href="selftest.html">Instruments</a><button class="globalnav__trigger" type="button"><span class="sr-only">Instruments menu</span></button></li>
+    </ul>
+    <div class="globalnav__tools">
+      <button class="globalnav__icon" type="button" data-tone-toggle aria-label="Switch appearance"><i data-sym="circle-half"></i></button>
+      <button class="globalnav__menu" type="button" aria-label="Menu" aria-expanded="false"><i data-sym="lines"></i></button>
+    </div>
+  </div>
+  <div class="globalnav__flyout" id="gn-foundations" hidden>
+    <div class="globalnav__flyout-content">
+      <div class="globalnav__group" data-elevated>
+        <h2 class="globalnav__group-title">Foundations</h2>
+        <ul><li><a class="globalnav__flyout-link" href="color.html">Colour</a></li><li><a class="globalnav__flyout-link" href="type.html">Type</a></li><li><a class="globalnav__flyout-link" href="layout.html">Layout</a></li><li><a class="globalnav__flyout-link" href="materials.html">Materials</a></li><li><a class="globalnav__flyout-link" href="motion.html">Motion</a></li></ul>
+      </div>
+      <div class="globalnav__group">
+        <h2 class="globalnav__group-title">Content</h2>
+        <ul><li><a class="globalnav__flyout-link" href="symbols.html">Symbols</a></li><li><a class="globalnav__flyout-link" href="data.html">Data</a></li></ul>
+      </div>
+    </div>
+  </div>
+  <div class="globalnav__flyout" id="gn-components" hidden>
+    <div class="globalnav__flyout-content">
+      <div class="globalnav__group" data-elevated>
+        <h2 class="globalnav__group-title">Components</h2>
+        <ul><li><a class="globalnav__flyout-link" href="components.html">Controls</a></li><li><a class="globalnav__flyout-link" href="chrome.html">Chrome</a></li><li><a class="globalnav__flyout-link" href="showcase.html">Product pages</a></li><li><a class="globalnav__flyout-link" href="patterns.html">Patterns</a></li></ul>
+      </div>
+    </div>
+  </div>
+  <div class="globalnav__flyout" id="gn-instruments" hidden>
+    <div class="globalnav__flyout-content">
+      <div class="globalnav__group" data-elevated>
+        <h2 class="globalnav__group-title">Instruments</h2>
+        <ul><li><a class="globalnav__flyout-link" href="selftest.html">Self-test</a></li><li><a class="globalnav__flyout-link" href="audit.html">Audit</a></li></ul>
+      </div>
+    </div>
+  </div>
+</nav>
+
+<!-- ═══ LOCAL NAV (per page: title, one CTA, jump links to this page's sections) ═══ -->
+<div class="localnav" data-localnav-reveal="#hero">
+  <div class="localnav__capsule" data-lg3 data-lg3-priority="3">
+    <a class="localnav__title" href="#top">Patterns</a>
+    <button class="localnav__explore" type="button"><span class="localnav__explore-label">Explore</span></button>
+    <a class="localnav__cta" href="start.html">Adopt</a>
+    <div class="localnav__panel" aria-label="Explore Fluid Design">
+      <ul class="localnav__tiles">
+        <li><a class="localnav__tile" href="materials.html" style="--tile-hue: var(--series-1)"><span class="localnav__thumb"><i data-sym="sparkles"></i></span>Materials</a></li>
+        <li><a class="localnav__tile" href="motion.html" style="--tile-hue: var(--series-2)"><span class="localnav__thumb"><i data-sym="waveform"></i></span>Motion</a></li>
+        <li><a class="localnav__tile" href="chrome.html" style="--tile-hue: var(--series-3)"><span class="localnav__thumb"><i data-sym="sidebar"></i></span>Chrome</a></li>
+        <li><a class="localnav__tile" href="components.html" style="--tile-hue: var(--series-4)"><span class="localnav__thumb"><i data-sym="sliders"></i></span>Controls</a></li>
+        <li><a class="localnav__tile" href="showcase.html" style="--tile-hue: var(--series-5)"><span class="localnav__thumb"><i data-sym="grid"></i></span>Product pages</a></li>
+      </ul>
+      <hr class="localnav__rule">
+      <nav class="localnav__jump" aria-label="On this page">
+        <p class="localnav__jump-label">On this page <i data-sym="chevron-down"></i></p>
+        <ul class="localnav__jump-grid">
+          <li class="localnav__jump-item"><a href="#form">Form</a></li>
+          <li class="localnav__jump-item"><a href="#search">Search</a></li>
+          <li class="localnav__jump-item"><a href="#settings">Settings</a></li>
+          <li class="localnav__jump-item"><a href="#confirm">Confirm</a></li>
+          <li class="localnav__jump-item"><a href="#sheet">Sheet</a></li>
+          <li class="localnav__jump-item"><a href="#states">States</a></li>
+          <li class="localnav__jump-item"><a href="#onboarding">Onboarding</a></li>
+          <li class="localnav__jump-item"><a href="#notify">Notify</a></li>
+          <li class="localnav__jump-item"><a href="#table">Table</a></li>
+          <li class="localnav__jump-item"><a href="#palette">Palette</a></li>
+        </ul>
+      </nav>
+    </div>
+  </div>
+</div>
+
+<main id="top">
+
+<!-- ═══════════════ HERO + INDEX ═══════════════ -->
+<section class="band" data-band="story" id="hero">
+  <div class="viewport-content">
+    <div class="lockup pt-lockup">
+      <p class="lockup-eyebrow">Patterns</p>
+      <h1 class="lockup-headline">Parts, put to work.</h1>
+      <p class="lockup-copy">Ten compositions that come back in every product we make. <strong>Each one below is live</strong>: type into the form, delete a review queue, pull the sheet between its detents, open the palette. Each comes with when to reach for it, the rules it keeps and the markup it is built from.</p>
+      <div class="lockup-ctas">
+        <a class="lockup-cta" href="#form">Start with the form <i data-sym="chevron-right"></i></a>
+        <a class="lockup-cta" href="components.html">The parts <i data-sym="chevron-right"></i></a>
+      </div>
+    </div>
+    <ol class="pt-index" data-reveal="stagger">
+      <li data-staggered-item><a class="card card-hover pt-tile" href="#form"><span class="pt-tile-art" inert aria-hidden="true"><span class="pt-tile-mini"><span class="form-field" style="width:170px"><span class="field field-s" style="display:flex;align-items:center;border-color:var(--bad)">@sa me</span><span class="field-error">Letters, numbers, dots only.</span></span></span></span><span class="pt-tile-num">01</span><span class="pt-tile-name">Form with validation</span></a></li>
+      <li data-staggered-item><a class="card card-hover pt-tile" href="#search"><span class="pt-tile-art" inert aria-hidden="true"><span class="pt-tile-mini"><span class="search" style="width:176px"><input type="search" value="trail" tabindex="-1"></span><span class="pt-m-lines" style="width:150px"><i></i><i style="width:70%"></i></span></span></span><span class="pt-tile-num">02</span><span class="pt-tile-name">Search with results</span></a></li>
+      <li data-staggered-item><a class="card card-hover pt-tile" href="#settings"><span class="pt-tile-art" inert aria-hidden="true"><span class="pt-tile-mini"><span class="pt-row" style="gap:12px"><span class="t-caption">Runs</span><input class="switch" type="checkbox" role="switch" checked tabindex="-1"></span><span class="pt-row" style="gap:12px"><span class="t-caption">Warm-up</span><span class="t-caption" style="color:var(--label-2)">7 days &rsaquo;</span></span></span></span><span class="pt-tile-num">03</span><span class="pt-tile-name">Settings screen</span></a></li>
+      <li data-staggered-item><a class="card card-hover pt-tile" href="#confirm"><span class="pt-tile-art" inert aria-hidden="true"><span class="pt-tile-mini"><span class="pt-row"><span class="btn btn-s">Cancel</span><span class="btn btn-s" style="--btn-bg:var(--bad-fill);--btn-ink:var(--bad-strong)">Delete</span></span></span></span><span class="pt-tile-num">04</span><span class="pt-tile-name">Destructive confirmation</span></a></li>
+      <li data-staggered-item><a class="card card-hover pt-tile" href="#sheet"><span class="pt-tile-art" inert aria-hidden="true"><span class="pt-m-sheet"></span></span><span class="pt-tile-num">05</span><span class="pt-tile-name">Sheet with detents</span></a></li>
+      <li data-staggered-item><a class="card card-hover pt-tile" href="#states"><span class="pt-tile-art" inert aria-hidden="true"><span class="pt-tile-mini"><span class="pt-m-lines"><i></i><i style="width:80%"></i><i style="width:60%"></i></span></span></span><span class="pt-tile-num">06</span><span class="pt-tile-name">Empty, loading, error</span></a></li>
+      <li data-staggered-item><a class="card card-hover pt-tile" href="#onboarding"><span class="pt-tile-art" inert aria-hidden="true"><span class="pt-tile-mini"><span class="pt-m-dots"><i></i><i></i><i></i></span><span class="btn btn-primary btn-s">Continue</span></span></span><span class="pt-tile-num">07</span><span class="pt-tile-name">Onboarding</span></a></li>
+      <li data-staggered-item><a class="card card-hover pt-tile" href="#notify"><span class="pt-tile-art" inert aria-hidden="true"><span class="pt-tile-mini"><span class="toast"><i data-sym="checkmark-circle"></i><span>Run saved.</span></span></span></span><span class="pt-tile-num">08</span><span class="pt-tile-name">Notifications</span></a></li>
+      <li data-staggered-item><a class="card card-hover pt-tile" href="#table"><span class="pt-tile-art" inert aria-hidden="true"><span class="pt-tile-mini"><span class="pt-m-mono">Queue        Done   
+sample.api       7
+#docs         3</span></span></span><span class="pt-tile-num">09</span><span class="pt-tile-name">Data table</span></a></li>
+      <li data-staggered-item><a class="card card-hover pt-tile" href="#palette"><span class="pt-tile-art" inert aria-hidden="true"><span class="pt-tile-mini"><span class="pt-m-pill"><i data-sym="magnifier"></i>Jump to&hellip;<kbd class="kbd">&#8984;K</kbd></span></span></span><span class="pt-tile-num">10</span><span class="pt-tile-name">Command palette</span></a></li>
+    </ol>
+  </div>
+</section>
+
+<!-- ═══════════════ 01 FORM ═══════════════ -->
+<section class="band" data-band="utility" id="form">
+  <div class="viewport-content">
+    <header class="pt-head">
+      <p class="pt-num">01 &middot; Form with validation</p>
+      <h2 class="t-section" data-reveal="up">A form that says what is wrong.</h2>
+      <p class="t-lede" data-reveal="up">It stays quiet while you type, <strong>speaks when you leave a field</strong>, and on submit takes you straight to the first thing that needs a look. Try an empty project name, a runner address without its port, then fix them.</p>
+    </header>
+    <div class="pt-form-demo">
+      <form class="card pt-form" id="pf" novalidate aria-labelledby="pf-title">
+        <div class="banner banner-inset banner-bad" id="pf-summary" role="alert" tabindex="-1" hidden><i data-sym="exclamation-triangle"></i><span id="pf-summary-text"></span></div>
+        <div class="banner banner-inset banner-ok" id="pf-done" role="status" hidden><i data-sym="checkmark-circle"></i><span id="pf-done-text"></span></div>
+        <div>
+          <h3 class="pt-card-title" id="pf-title">Add a project</h3>
+          <p class="pt-card-sub">It joins the workspace on its next run.</p>
+        </div>
+        <div class="form-field">
+          <label for="pf-handle">Project name</label>
+          <input class="field" id="pf-handle" name="handle" autocomplete="off" spellcheck="false" placeholder="sample.project" aria-describedby="pf-handle-help pf-handle-err" aria-required="true">
+          <span class="field-help" id="pf-handle-help">Letters, numbers, dots and underscores.</span>
+          <span class="field-error" id="pf-handle-err" hidden></span>
+        </div>
+        <div class="pt-2col">
+          <div class="form-field">
+            <label for="pf-cap">Daily run cap</label>
+            <input class="field" id="pf-cap" name="cap" inputmode="numeric" value="24" aria-describedby="pf-cap-help pf-cap-err" aria-required="true">
+            <span class="field-help" id="pf-cap-help">From 1 to 200 a day.</span>
+            <span class="field-error" id="pf-cap-err" hidden></span>
+          </div>
+          <div class="form-field">
+            <label for="pf-pace">Pace</label>
+            <select class="select" id="pf-pace" name="pace"><option>Calm</option><option selected>Steady</option><option>Brisk</option></select>
+          </div>
+        </div>
+        <div class="form-field">
+          <label for="pf-proxy">Runner address <span style="font-weight:400;color:var(--label-2)">(optional)</span></label>
+          <input class="field" id="pf-proxy" name="proxy" autocomplete="off" spellcheck="false" placeholder="host:port" aria-describedby="pf-proxy-help pf-proxy-err">
+          <span class="field-help" id="pf-proxy-help">Host and port, for example 10.0.0.8:1080.</span>
+          <span class="field-error" id="pf-proxy-err" hidden></span>
+        </div>
+        <label class="choice"><input class="check" type="checkbox" name="pause" checked> Pause at the daily limit</label>
+        <div class="pt-form-actions">
+          <button class="btn btn-primary btn-l" type="submit" id="pf-submit">Add project</button>
+          <button class="btn btn-plain btn-l pt-textbtn" type="reset">Clear the form</button>
+        </div>
+      </form>
+      <aside class="card pt-state" aria-label="What the form knows">
+        <p class="pt-kicker">What the form knows</p>
+        <ul class="list list-inset">
+          <li><div class="row"><span class="row-title">Project name</span><span class="pill-status" data-pf-state="handle">Untouched</span></div></li>
+          <li><div class="row"><span class="row-title">Daily run cap</span><span class="pill-status" data-pf-state="cap">Untouched</span></div></li>
+          <li><div class="row"><span class="row-title">Runner address</span><span class="pill-status" data-pf-state="proxy">Untouched</span></div></li>
+        </ul>
+        <p class="list-footer">An error appears when you leave a field, and clears the moment the value is right.</p>
+      </aside>
+    </div>
+    <div class="pt-notes">
+      <div>
+        <h3 class="pt-sub">When to use</h3>
+        <p class="pt-when">Any time people type something the product must trust: a project, a limit, an address. <strong>If a wrong value costs nothing, skip validation</strong> and let the product correct it quietly.</p>
+        <h3 class="pt-sub">The rules</h3>
+        <ol class="pt-rules">
+          <li>Label above, help below; the error replaces the help, in the same place.</li>
+          <li>Judge a field when it is left, not on each keystroke; once it is wrong, clear the error the moment it is right.</li>
+          <li>Say what to do, not what went wrong: &ldquo;Add the port, for example :1080.&rdquo;</li>
+          <li>On submit, count the problems in one banner, link each field, and move focus there.</li>
+          <li>Success is shown where the form was, and confirmed once more with a toast.</li>
+        </ol>
+      </div>
+      <div>
+        <h3 class="pt-sub">Markup</h3>
+<pre class="doc-code" data-lang="html"><code>&lt;form novalidate&gt;
+  &lt;div class="banner banner-inset banner-bad" role="alert" tabindex="-1" hidden&gt;
+    &lt;span&gt;2 things need a look.&lt;/span&gt;
+  &lt;/div&gt;
+  &lt;div class="form-field"&gt;
+    &lt;label for="handle"&gt;Project name&lt;/label&gt;
+    &lt;input class="field" id="handle"
+           aria-describedby="handle-help handle-err"&gt;
+    &lt;span class="field-help" id="handle-help"&gt;Letters, numbers&hellip;&lt;/span&gt;
+    &lt;span class="field-error" id="handle-err" hidden&gt;&lt;/span&gt;
+  &lt;/div&gt;
+  &lt;button class="btn btn-primary btn-l"&gt;Add project&lt;/button&gt;
+&lt;/form&gt;</code></pre>
+<pre class="doc-code" data-lang="js"><code>function show(input, message) {        // message = '' when valid
+  const err = document.getElementById(input.id + '-err');
+  input.setAttribute('aria-invalid', message ? 'true' : 'false');
+  err.textContent = message;
+  err.hidden = !message;                 // .field-help hides itself
+}</code></pre>
+        <p class="pt-refs">Built from <a href="components.html#fields">fields</a>, <a href="components.html#feedback">banners and toasts</a>, and a <a href="components.html#buttons">loading button</a>.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════ 02 SEARCH ═══════════════ -->
+<section class="band" data-band="story" id="search">
+  <div class="viewport-content">
+    <header class="pt-head">
+      <p class="pt-num">02 &middot; Search with results</p>
+      <h2 class="t-section" data-reveal="up">Results as you type.</h2>
+      <p class="t-lede" data-reveal="up">Every keystroke narrows the list; the matching letters are marked; <strong>the count is spoken, not just shown</strong>. Scope chips cut the list by kind. Arrow down from the field into the results; Escape clears.</p>
+    </header>
+    <div class="card pt-search">
+      <div class="pt-search-inner">
+        <div class="search"><input type="search" id="ps-q" placeholder="Search projects, review queues and runs" aria-label="Search projects, review queues and runs" aria-controls="ps-results" aria-describedby="ps-count" autocomplete="off" spellcheck="false"></div>
+        <div class="pt-scopes" role="radiogroup" aria-label="Show">
+          <button class="chip chip-s" type="button" role="radio" aria-checked="true" data-scope="all">All</button>
+          <button class="chip chip-s" type="button" role="radio" aria-checked="false" data-scope="account">Projects</button>
+          <button class="chip chip-s" type="button" role="radio" aria-checked="false" data-scope="audience">Review queues</button>
+          <button class="chip chip-s" type="button" role="radio" aria-checked="false" data-scope="run">Runs</button>
+        </div>
+        <p class="pt-count" id="ps-count" role="status" aria-live="polite"></p>
+        <div class="pt-results" id="ps-results"></div>
+      </div>
+    </div>
+    <div class="pt-notes">
+      <div>
+        <h3 class="pt-sub">When to use</h3>
+        <p class="pt-when">When there are more things than fit on one screen and people know <strong>roughly what they are called</strong>. For browsing without a name in mind, use filters and sorting instead.</p>
+        <h3 class="pt-sub">The rules</h3>
+        <ol class="pt-rules">
+          <li>Filter as people type; no search button, no page reload.</li>
+          <li>Mark the matched letters, so it is clear why a result is there.</li>
+          <li>Announce the count in a polite live region.</li>
+          <li>An empty result says what was searched and how to widen it.</li>
+          <li>Escape clears the field; a second Escape leaves it.</li>
+        </ol>
+      </div>
+      <div>
+        <h3 class="pt-sub">Markup</h3>
+<pre class="doc-code" data-lang="html"><code>&lt;div class="search"&gt;
+  &lt;input type="search" aria-label="Search" aria-controls="results"
+         aria-describedby="count"&gt;
+&lt;/div&gt;
+&lt;div role="radiogroup" aria-label="Show"&gt;
+  &lt;button class="chip chip-s" role="radio" aria-checked="true"&gt;All&lt;/button&gt;
+  &lt;button class="chip chip-s" role="radio" aria-checked="false"&gt;Runs&lt;/button&gt;
+&lt;/div&gt;
+&lt;p id="count" role="status" aria-live="polite"&gt;4 results&lt;/p&gt;
+&lt;div id="results"&gt;
+  &lt;p class="list-header"&gt;Review queues&lt;/p&gt;
+  &lt;ul class="list list-inset"&gt;
+    &lt;li&gt;&lt;a class="row" href="&hellip;"&gt;&lt;span class="row-title"&gt;
+      sample.&lt;mark&gt;we&lt;/mark&gt;b&lt;/span&gt;&lt;/a&gt;&lt;/li&gt;
+  &lt;/ul&gt;
+&lt;/div&gt;</code></pre>
+        <p class="pt-refs">Built from <a href="components.html#fields">search</a>, <a href="components.html#chips">chips</a>, <a href="components.html#lists">rows</a> and the <a href="components.html#empty">empty state</a>.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════ 03 SETTINGS ═══════════════ -->
+<section class="band" data-band="utility" id="settings">
+  <div class="viewport-content">
+    <header class="pt-head">
+      <p class="pt-num">03 &middot; Settings screen</p>
+      <h2 class="t-section" data-reveal="up">Settings, grouped.</h2>
+      <p class="t-lede" data-reveal="up">Inset grouped lists: switches that act at once, steppers for small numbers, and <strong>a disclosure row that pushes the next screen in</strong>. Tap Warm-up, pick a length, and come back.</p>
+    </header>
+    <div class="pt-phone-demo">
+      <div class="pt-phone-wrap">
+        <div class="device" data-device="phone">
+          <div class="device__screen" data-screen-width="402">
+            <div class="pt-app" id="pts">
+              <div class="pt-status" aria-hidden="true"><span>9:41</span><span><i data-sym="signal"></i><i data-sym="battery"></i></span></div>
+              <section class="pt-screen" id="pts-main" data-active aria-label="Settings">
+                <h3 class="pt-large-title">Settings</h3>
+                <ul class="list list-inset">
+                  <li><button class="row row-nav" type="button" data-push="pts-profile"><span class="avatar avatar-l">AD</span><span class="row-body"><span class="row-title">aurora</span><span class="row-sub">Team project &middot; on runner-01</span></span></button></li>
+                </ul>
+                <p class="list-header">Pacing</p>
+                <ul class="list list-inset">
+                  <li><label class="row"><span class="row-icon" style="--row-icon-bg:var(--sys-green);--row-icon-ink:var(--c-knob)"><i data-sym="bolt"></i></span><span class="row-title">Runs</span><input class="switch" type="checkbox" role="switch" checked></label></li>
+                  <li><div class="row"><span class="row-icon" style="--row-icon-bg:var(--sys-orange);--row-icon-ink:var(--c-knob)"><i data-sym="target"></i></span><span class="row-title">Per run</span><div class="stepper" data-min="1" data-max="12" data-value="8" aria-label="Tasks per run"><button></button><output>8</output><button></button></div></div></li>
+                  <li><button class="row row-nav" type="button" data-push="pts-warm"><span class="row-icon" style="--row-icon-bg:var(--sys-indigo);--row-icon-ink:var(--c-knob)"><i data-sym="calendar"></i></span><span class="row-title">Warm-up</span><span class="row-detail" id="pts-warm-value">7 days</span></button></li>
+                  <li><label class="row"><span class="row-icon" style="--row-icon-bg:var(--sys-red);--row-icon-ink:var(--c-knob)"><i data-sym="clock"></i></span><span class="row-title">Pause at daily limit</span><input class="switch" type="checkbox" role="switch" checked></label></li>
+                </ul>
+                <p class="list-footer">Changes apply from the next run.</p>
+                <p class="list-header">Notifications</p>
+                <ul class="list list-inset">
+                  <li><label class="row"><span class="row-title">When a run finds nothing</span><input class="switch" type="checkbox" role="switch"></label></li>
+                  <li><label class="row"><span class="row-title">When a reply arrives</span><input class="switch" type="checkbox" role="switch" checked></label></li>
+                </ul>
+                <p class="list-header">About</p>
+                <ul class="list list-inset">
+                  <li><div class="row"><span class="row-title">Version</span><span class="row-detail">3.0</span></div></li>
+                </ul>
+              </section>
+              <section class="pt-screen" id="pts-warm" aria-label="Warm-up" inert>
+                <button class="pt-back" type="button" data-pop><i data-sym="chevron-left"></i>Settings</button>
+                <h3 class="pt-large-title">Warm-up</h3>
+                <ul class="list list-inset" role="radiogroup" aria-label="Warm-up length">
+                  <li><button class="row" type="button" role="radio" aria-checked="false" data-warm="3 days"><span class="row-title">3 days</span></button></li>
+                  <li><button class="row" type="button" role="radio" aria-checked="true" data-warm="7 days"><span class="row-title">7 days</span></button></li>
+                  <li><button class="row" type="button" role="radio" aria-checked="false" data-warm="14 days"><span class="row-title">14 days</span></button></li>
+                  <li><button class="row" type="button" role="radio" aria-checked="false" data-warm="21 days"><span class="row-title">21 days</span></button></li>
+                </ul>
+                <p class="list-footer">A new project starts at a quarter of its cap and reaches full pace over this many days.</p>
+              </section>
+              <section class="pt-screen" id="pts-profile" aria-label="Project" inert>
+                <button class="pt-back" type="button" data-pop><i data-sym="chevron-left"></i>Settings</button>
+                <div class="pt-profile-head"><span class="avatar">AD</span><h3 class="ui-title2 ui-emphasized" style="margin:0">aurora</h3><span class="pill-status" data-state="ok">Connected</span></div>
+                <ul class="list list-inset">
+                  <li><div class="row"><span class="row-title">Runner</span><span class="row-detail">runner-01</span></div></li>
+                  <li><div class="row"><span class="row-title">Builds today</span><span class="row-detail">312 of 400</span></div></li>
+                  <li><div class="row"><span class="row-title">Retry rate</span><span class="row-detail">5%</span></div></li>
+                </ul>
+                <ul class="list list-inset" style="margin-top:28px">
+                  <li><button class="row row-destructive" type="button">Remove from the workspace</button></li>
+                </ul>
+              </section>
+            </div>
+          </div>
+        </div>
+        <p class="pt-phone-cap">A phone at 402 logical points, scaled into original device art.</p>
+      </div>
+      <div class="pt-side">
+        <h3 class="pt-sub">When to use</h3>
+        <p class="pt-when">For preferences people set once and revisit rarely. <strong>Group by what people think about together</strong> &mdash; pacing, notifications &mdash; not by how the code is organised.</p>
+        <h3 class="pt-sub">The rules</h3>
+        <ol class="pt-rules">
+          <li>A switch acts the moment it flips; nothing waits for a Save button.</li>
+          <li>A row that opens a screen shows its current value, then the chevron.</li>
+          <li>The pushed screen slides in from the trailing edge; the old one shifts back by a third.</li>
+          <li>Back names where it goes (&ldquo;Settings&rdquo;), not just &ldquo;Back&rdquo;.</li>
+          <li>Headers in title case; footers explain the consequence, once.</li>
+        </ol>
+      </div>
+    </div>
+    <div class="pt-notes">
+      <div>
+        <h3 class="pt-sub">Why a phone</h3>
+        <p class="pt-when">Settings live on the companion app, so the pattern is shown where it will run. The same list classes render at desktop density in the console; nothing here is phone-only.</p>
+      </div>
+      <div>
+        <h3 class="pt-sub">Markup</h3>
+<pre class="doc-code" data-lang="html"><code>&lt;p class="list-header"&gt;Pacing&lt;/p&gt;
+&lt;ul class="list list-inset"&gt;
+  &lt;li&gt;&lt;label class="row"&gt;
+    &lt;span class="row-icon" style="--row-icon-bg: var(--sys-green)"&gt;&hellip;&lt;/span&gt;
+    &lt;span class="row-title"&gt;Runs&lt;/span&gt;
+    &lt;input class="switch" type="checkbox" role="switch" checked&gt;
+  &lt;/label&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;button class="row row-nav" data-push="warm-up"&gt;
+    &lt;span class="row-title"&gt;Warm-up&lt;/span&gt;
+    &lt;span class="row-detail"&gt;7 days&lt;/span&gt;
+  &lt;/button&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p class="list-footer"&gt;Changes apply from the next run.&lt;/p&gt;</code></pre>
+        <p class="pt-refs">Built from <a href="components.html#lists">lists and rows</a>, <a href="components.html#toggles">switches</a>, <a href="components.html#sliders">the stepper</a>, in a <a href="showcase.html">DEVICE</a> phone.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════ 04 CONFIRM ═══════════════ -->
+<section class="band" data-band="story" id="confirm">
+  <div class="viewport-content">
+    <header class="pt-head">
+      <p class="pt-num">04 &middot; Destructive confirmation</p>
+      <h2 class="t-section" data-reveal="up">Ask once, and only when it matters.</h2>
+      <p class="t-lede" data-reveal="up">Pausing a review queue is undone as easily as it is done, so it just happens. Deleting one is not: <strong>the trash button becomes the question</strong>, grown out of the glass it was pressed on, and melts back into it if you cancel.</p>
+    </header>
+    <div class="pt-aud-grid" id="pc-grid">
+      <article class="card pt-aud" data-aud="trailrunners">
+        <div class="card-media"><canvas data-art="aurora" data-art-seed="21" aria-hidden="true"></canvas>
+          <div class="pt-aud-bar">
+            <button class="btn btn-glass btn-s" type="button" data-lg3 data-lg3-interactive data-lg3-adaptive data-pc-pause>Pause</button>
+            <button class="btn btn-glass btn-icon" type="button" data-lg3 data-lg3-interactive data-lg3-adaptive data-lg3-id="pc-del-1" data-pc-delete aria-label="Delete sample.web"><i data-sym="trash"></i></button>
+          </div>
+        </div>
+        <h3 class="ui-headline">sample.web</h3>
+        <p class="pt-card-sub">Reviewers of &middot; aurora</p>
+        <div class="pt-aud-meta"><span class="t-caption">7 of 8 completed today</span><span class="badge badge-ok" data-pc-badge>Healthy</span></div>
+      </article>
+      <article class="card pt-aud" data-aud="runclub">
+        <div class="card-media"><canvas data-art="twilight" data-art-seed="8" aria-hidden="true"></canvas>
+          <div class="pt-aud-bar">
+            <button class="btn btn-glass btn-s" type="button" data-lg3 data-lg3-interactive data-lg3-adaptive data-pc-pause>Pause</button>
+            <button class="btn btn-glass btn-icon" type="button" data-lg3 data-lg3-interactive data-lg3-adaptive data-lg3-id="pc-del-2" data-pc-delete aria-label="Delete sample.api"><i data-sym="trash"></i></button>
+          </div>
+        </div>
+        <h3 class="ui-headline">sample.api</h3>
+        <p class="pt-card-sub">Reviewers of &middot; basil</p>
+        <div class="pt-aud-meta"><span class="t-caption">8 of 8 completed today</span><span class="badge badge-ok" data-pc-badge>Healthy</span></div>
+      </article>
+      <article class="card pt-aud" data-aud="trailrunning">
+        <div class="card-media"><canvas data-art="ember" data-art-seed="14" aria-hidden="true"></canvas>
+          <div class="pt-aud-bar">
+            <button class="btn btn-glass btn-s" type="button" data-lg3 data-lg3-interactive data-lg3-adaptive data-pc-pause>Pause</button>
+            <button class="btn btn-glass btn-icon" type="button" data-lg3 data-lg3-interactive data-lg3-adaptive data-lg3-id="pc-del-3" data-pc-delete aria-label="Delete #docs"><i data-sym="trash"></i></button>
+          </div>
+        </div>
+        <h3 class="ui-headline">#docs</h3>
+        <p class="pt-card-sub">Label &middot; cobalt</p>
+        <div class="pt-aud-meta"><span class="t-caption">3 of 8 completed today</span><span class="badge badge-warn" data-pc-badge>Thin</span></div>
+      </article>
+    </div>
+    <div class="pt-confirm-foot"><button class="btn btn-plain btn-l pt-textbtn" type="button" id="pc-reset" hidden>Bring every review queue back</button></div>
+    <div class="pt-notes">
+      <div>
+        <h3 class="pt-sub">When to use</h3>
+        <p class="pt-when">Only for actions that <strong>cannot be undone</strong> or that throw away someone&rsquo;s work. Everything reversible happens at once and offers Undo in a toast.</p>
+        <h3 class="pt-sub">The rules</h3>
+        <ol class="pt-rules">
+          <li>The title asks the exact question: &ldquo;Delete sample.api?&rdquo;</li>
+          <li>The message states the consequence in one sentence, including what is kept.</li>
+          <li>The destructive button names the verb; Cancel is always there, and Escape means Cancel.</li>
+          <li>The alert grows out of the button that asked, and returns into it.</li>
+          <li>After it is done, a toast confirms &mdash; with Undo whenever undo is possible.</li>
+        </ol>
+      </div>
+      <div>
+        <h3 class="pt-sub">Markup</h3>
+<pre class="doc-code" data-lang="html"><code>&lt;!-- a glass control over media, with a stable id to morph from --&gt;
+&lt;button class="btn btn-glass btn-icon" data-lg3 data-lg3-interactive
+        data-lg3-id="del-api" aria-label="Delete sample.api"&gt;
+  &lt;i data-sym="trash"&gt;&lt;/i&gt;
+&lt;/button&gt;</code></pre>
+<pre class="doc-code" data-lang="js"><code>button.addEventListener('click', async (e) =&gt; {
+  const ok = await UI.alert({
+    title: 'Delete sample.api?',
+    message: 'Its ledger rows stay. Future runs stop reaching it.',
+    from: e.currentTarget,               // same data-lg3-id: a morph
+    actions: [
+      { label: 'Cancel', value: false, role: 'cancel' },
+      { label: 'Delete', value: true, role: 'destructive' }
+    ]
+  });
+  if (ok) remove(card);                  // then a toast with Undo
+});</code></pre>
+        <p class="pt-refs">Built from <a href="components.html#feedback">UI.alert and UI.toast</a>, <a href="components.html#glass">glass buttons</a> and <a href="components.html#cards">cards with media</a>.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════ 05 SHEET ═══════════════ -->
+<section class="band" data-band="stage" id="sheet">
+  <div class="viewport-content">
+    <header class="pt-head">
+      <p class="pt-num">05 &middot; Overlay flow</p>
+      <h2 class="t-section" data-reveal="up">A sheet that grows from its button.</h2>
+      <p class="t-lede" data-reveal="up">A short task that should not lose your place. The sheet opens at half height, as glass you can see the page through; <strong>pull it up and it turns opaque and anchors to the edges</strong>. Flick it down to dismiss.</p>
+    </header>
+    <div class="pt-art">
+      <canvas data-art="deep" data-art-seed="17" data-art-contrast="1.15" aria-hidden="true"></canvas>
+      <div class="pt-tiles">
+        <div class="pt-stat"><span class="t-caption">The last runs</span><span class="stat-value">38</span><span class="t-caption">14 came back empty, 1 never started</span></div>
+        <div class="pt-stat"><span class="t-caption">Completed</span><span class="stat-value">1,222</span><span class="t-caption">of 1,904 queued</span></div>
+        <div class="pt-stat"><span class="t-caption">Inside runs</span><span class="stat-value">12.6&thinsp;s</span><span class="t-caption">a completed task</span></div>
+      </div>
+      <div class="pt-art-bar">
+        <button class="btn btn-glass btn-icon btn-l" type="button" data-lg3 data-lg3-interactive data-lg3-adaptive aria-label="Filters"><i data-sym="sliders"></i></button>
+        <button class="btn btn-glass btn-primary btn-l" type="button" data-lg3 data-lg3-interactive data-lg3-adaptive data-lg3-priority="2" data-sheet-open="pt-sheet">New run</button>
+        <button class="btn btn-glass btn-l" type="button" data-lg3 data-lg3-interactive data-lg3-adaptive id="pt-sheet-large">Open full height</button>
+      </div>
+    </div>
+    <div class="pt-notes">
+      <div>
+        <h3 class="pt-sub">When to use</h3>
+        <p class="pt-when">For a task that belongs to what is on screen and takes under a minute: <strong>set up a run, filter a list, edit one thing</strong>. Longer work gets its own page; a single decision is an alert.</p>
+        <h3 class="pt-sub">The rules</h3>
+        <ol class="pt-rules">
+          <li>Partial height is inset glass; full height is opaque and meets the edges.</li>
+          <li>Dim the page only when the sheet interrupts; a parallel task leaves it lit.</li>
+          <li>Close on the leading edge, Done on the trailing edge, never a third.</li>
+          <li>The grabber cycles the detents and works with a keyboard.</li>
+          <li>One sheet at a time. Escape closes the topmost surface.</li>
+        </ol>
+      </div>
+      <div>
+        <h3 class="pt-sub">Markup</h3>
+<pre class="doc-code" data-lang="html"><code>&lt;button class="btn btn-glass btn-primary" data-lg3
+        data-sheet-open="new-run"&gt;New run&lt;/button&gt;
+
+&lt;div class="sheet" id="new-run" data-lg3 data-detents="medium large"
+     data-sheet-dim aria-labelledby="new-run-title" hidden&gt;
+  &lt;button class="sheet__grabber" aria-label="Sheet size"&gt;&lt;/button&gt;
+  &lt;div class="sheet__header"&gt;
+    &lt;button class="sheet__close" aria-label="Close" data-sheet-close&gt;&hellip;&lt;/button&gt;
+    &lt;h2 class="sheet__title" id="new-run-title"&gt;New run&lt;/h2&gt;
+    &lt;button class="sheet__done" aria-label="Done" data-sheet-close&gt;&hellip;&lt;/button&gt;
+  &lt;/div&gt;
+  &lt;div class="sheet__body"&gt;&hellip;&lt;/div&gt;
+&lt;/div&gt;</code></pre>
+<pre class="doc-code" data-lang="js"><code>CHROME.sheet.open(sheet, { from: button, detent: 'large' });
+sheet.addEventListener('chrome:sheet', e =&gt; log(e.detail.detent));</code></pre>
+        <p class="pt-refs">Built from the chrome module&rsquo;s <a href="chrome.html">sheet</a>, with <a href="components.html#segmented">segmented</a>, <a href="components.html#sliders">stepper</a> and <a href="components.html#toggles">switch</a> inside.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="sheet pt-sheet" id="pt-sheet" data-lg3 data-detents="medium large" data-sheet-dim aria-labelledby="pt-sheet-title" hidden>
+  <button class="sheet__grabber" type="button" aria-label="Sheet size"></button>
+  <div class="sheet__header">
+    <button class="sheet__close" type="button" aria-label="Close" data-sheet-close><i data-sym="xmark"></i></button>
+    <h2 class="sheet__title" id="pt-sheet-title">New run</h2>
+    <button class="sheet__done" type="button" aria-label="Schedule the run" data-sheet-close data-pt-schedule><i data-sym="checkmark"></i></button>
+  </div>
+  <div class="sheet__body">
+    <div class="form-field"><span class="pt-kicker" id="pt-route-l" style="margin:0">Reach</span>
+      <div class="segmented" role="radiogroup" aria-labelledby="pt-route-l"><button role="radio" aria-checked="true">Reviewers of</button><button role="radio">Authors of</button><button role="radio">Label</button></div>
+    </div>
+    <div class="form-field"><label for="pt-sheet-aud">Review queue</label><input class="field" id="pt-sheet-aud" value="sample.web" spellcheck="false"></div>
+    <ul class="list list-inset">
+      <li><div class="row"><span class="row-title">Tasks in this run</span><div class="stepper" data-min="1" data-max="12" data-value="8" aria-label="Tasks in this run"><button></button><output>8</output><button></button></div></div></li>
+      <li><label class="row"><span class="row-title">Pause at the daily limit</span><input class="switch" type="checkbox" role="switch" checked></label></li>
+      <li><label class="row"><span class="row-title">Act from the row</span><input class="switch" type="checkbox" role="switch" checked></label></li>
+    </ul>
+    <div class="form-field"><span class="pt-kicker" id="pt-when-l" style="margin:0">Start</span>
+      <div class="segmented" role="radiogroup" aria-labelledby="pt-when-l"><button role="radio" aria-checked="true">Now</button><button role="radio">In an hour</button><button role="radio">Tonight</button></div>
+    </div>
+    <p class="t-caption" style="color:var(--label-2)">Credit goes to what completes, not to what was queued: a run that finds nothing costs nothing against the cap.</p>
+    <button class="btn btn-primary btn-l btn-block" type="button" data-sheet-close data-pt-schedule>Schedule run</button>
+  </div>
+</div>
+
+<!-- ═══════════════ 06 STATES ═══════════════ -->
+<section class="band" data-band="story" id="states">
+  <div class="viewport-content">
+    <header class="pt-head">
+      <p class="pt-num">06 &middot; Empty, loading, error, success</p>
+      <h2 class="t-section" data-reveal="up">One list, four honest states.</h2>
+      <p class="t-lede" data-reveal="up">A list is never just blank. It is loading, empty, broken or up to date, and <strong>each state says which, in the same place</strong>. Switch between them, or replay a real load.</p>
+    </header>
+    <div class="card pt-states">
+      <div class="pt-states-head">
+        <div><h3 class="pt-card-title">Review queues</h3><p class="pt-card-sub">aurora &middot; today</p></div>
+        <div class="pt-row">
+          <div class="segmented" role="tablist" aria-label="List state" id="pst-seg">
+            <button role="tab" aria-selected="true" aria-controls="pst-loaded">Loaded</button>
+            <button role="tab" aria-controls="pst-loading">Loading</button>
+            <button role="tab" aria-controls="pst-empty">Empty</button>
+            <button role="tab" aria-controls="pst-error">Error</button>
+          </div>
+          <button class="btn btn-secondary" type="button" id="pst-replay">Replay a load</button>
+        </div>
+      </div>
+      <div id="pst-loaded" role="tabpanel" aria-label="Loaded">
+        <div class="banner banner-inset banner-ok" id="pst-fresh" role="status" hidden><i data-sym="checkmark-circle"></i><span>Up to date &middot; refreshed just now</span></div>
+        <ul class="list list-inset">
+          <li><div class="row"><span class="avatar">T</span><span class="row-body"><span class="row-title">sample.web</span><span class="row-sub">Reviewers of &middot; 7 of 8 completed</span></span><span class="badge badge-ok">Healthy</span></div></li>
+          <li><div class="row"><span class="avatar">R</span><span class="row-body"><span class="row-title">sample.api</span><span class="row-sub">Reviewers of &middot; 8 of 8 completed</span></span><span class="badge badge-ok">Healthy</span></div></li>
+          <li><div class="row"><span class="avatar">#</span><span class="row-body"><span class="row-title">#docs</span><span class="row-sub">Label &middot; 3 of 8 completed</span></span><span class="badge badge-warn">Thin</span></div></li>
+          <li><div class="row"><span class="avatar">C</span><span class="row-body"><span class="row-title">sample.mobile</span><span class="row-sub">Authors of &middot; came back empty</span></span><span class="badge">Empty</span></div></li>
+        </ul>
+      </div>
+      <div id="pst-loading" role="tabpanel" aria-label="Loading" aria-busy="true" hidden>
+        <ul class="list list-inset" aria-hidden="true">
+          <li><div class="pt-skel-row"><span class="skeleton skeleton-circle" style="width:36px"></span><div><span class="skeleton skeleton-text" style="width:48%"></span><span class="skeleton skeleton-text" style="width:30%"></span></div></div></li>
+          <li><div class="pt-skel-row"><span class="skeleton skeleton-circle" style="width:36px"></span><div><span class="skeleton skeleton-text" style="width:40%"></span><span class="skeleton skeleton-text" style="width:34%"></span></div></div></li>
+          <li><div class="pt-skel-row"><span class="skeleton skeleton-circle" style="width:36px"></span><div><span class="skeleton skeleton-text" style="width:52%"></span><span class="skeleton skeleton-text" style="width:26%"></span></div></div></li>
+          <li><div class="pt-skel-row"><span class="skeleton skeleton-circle" style="width:36px"></span><div><span class="skeleton skeleton-text" style="width:36%"></span><span class="skeleton skeleton-text" style="width:28%"></span></div></div></li>
+        </ul>
+        <p class="sr-only">Loading review queues</p>
+      </div>
+      <div id="pst-empty" role="tabpanel" aria-label="Empty" hidden>
+        <div class="empty-state">
+          <span class="empty-state-glyph"><i data-sym="target"></i></span>
+          <h4 class="empty-state-title">No review queues yet</h4>
+          <p class="empty-state-body">Add a project whose reviewers look like yours. The first run starts within the hour.</p>
+          <div class="empty-state-actions"><button class="btn btn-primary btn-l" type="button" data-pst-add>Add review queue</button></div>
+        </div>
+      </div>
+      <div id="pst-error" role="tabpanel" aria-label="Error" hidden>
+        <div class="empty-state">
+          <span class="empty-state-glyph"><i data-sym="exclamation-triangle"></i></span>
+          <h4 class="empty-state-title">runner-02 stopped answering</h4>
+          <p class="empty-state-body">The list could not be read from the runner. Nothing was lost; the ledger has every row.</p>
+          <div class="empty-state-actions"><button class="btn btn-l" type="button" id="pst-retry">Try again</button><a class="btn btn-plain btn-l" href="#states">Check the runner</a></div>
+        </div>
+      </div>
+    </div>
+    <div class="pt-notes">
+      <div>
+        <h3 class="pt-sub">When to use</h3>
+        <p class="pt-when">Every list and table, without exception. <strong>Design the empty and broken states first</strong>: they are what a new project sees on its first day.</p>
+        <h3 class="pt-sub">The rules</h3>
+        <ol class="pt-rules">
+          <li>Loading shows the shape of what is coming, not a lone spinner, and carries <code>aria-busy</code>.</li>
+          <li>Empty says what belongs here and gives the one action that fills it.</li>
+          <li>Error says what failed, what was not lost, and offers a retry.</li>
+          <li>Success replaces the loading shape in place; a quiet banner says it is fresh.</li>
+          <li>Every state keeps the same frame, so nothing jumps.</li>
+        </ol>
+      </div>
+      <div>
+        <h3 class="pt-sub">Markup</h3>
+<pre class="doc-code" data-lang="html"><code>&lt;div id="loading" role="tabpanel" aria-busy="true"&gt;
+  &lt;ul class="list list-inset" aria-hidden="true"&gt;
+    &lt;li&gt;&lt;span class="skeleton skeleton-circle" style="width:36px"&gt;&lt;/span&gt;
+        &lt;span class="skeleton skeleton-text"&gt;&lt;/span&gt;&lt;/li&gt;
+  &lt;/ul&gt;
+&lt;/div&gt;
+
+&lt;div class="empty-state"&gt;
+  &lt;span class="empty-state-glyph"&gt;&lt;i data-sym="exclamation-triangle"&gt;&lt;/i&gt;&lt;/span&gt;
+  &lt;h3 class="empty-state-title"&gt;runner-02 stopped answering&lt;/h3&gt;
+  &lt;p class="empty-state-body"&gt;Nothing was lost; the ledger has every row.&lt;/p&gt;
+  &lt;div class="empty-state-actions"&gt;&lt;button class="btn"&gt;Try again&lt;/button&gt;&lt;/div&gt;
+&lt;/div&gt;</code></pre>
+        <p class="pt-refs">Built from <a href="components.html#progress">skeletons</a>, <a href="components.html#empty">empty states</a>, <a href="components.html#feedback">banners</a> and <a href="components.html#segmented">segmented tabs</a>.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════ 07 ONBOARDING ═══════════════ -->
+<section class="band" data-band="utility" id="onboarding">
+  <div class="viewport-content">
+    <header class="pt-head">
+      <p class="pt-num">07 &middot; Onboarding</p>
+      <h2 class="t-section" data-reveal="up">Three steps, then out of the way.</h2>
+      <p class="t-lede" data-reveal="up">Each step asks for one thing. The pages travel on a spring you can interrupt, the page dot stretches into a pill, and <strong>the last step ends in a tick that draws itself</strong>.</p>
+    </header>
+    <div class="pt-phone-demo pt-flip">
+      <div class="pt-phone-wrap">
+        <div class="device" data-device="phone">
+          <div class="device__screen" data-screen-width="402">
+            <div class="pt-app pt-onb" id="pob" data-step="0">
+              <div class="pt-status" aria-hidden="true"><span>9:41</span><span><i data-sym="signal"></i><i data-sym="battery"></i></span></div>
+              <div class="pt-onb-viewport">
+                <div class="pt-onb-track">
+                  <section class="pt-onb-slide" aria-labelledby="pob-t1">
+                    <div class="pt-onb-hero"><canvas data-art="twilight" data-art-seed="31" aria-hidden="true"></canvas><i data-sym="phone"></i></div>
+                    <h3 class="pt-onb-title" id="pob-t1">Connect a runner.</h3>
+                    <p class="pt-onb-body">Orbit runs your team&rsquo;s jobs on a runner you own. The runner does the work; this app shows you every step it took.</p>
+                  </section>
+                  <section class="pt-onb-slide" aria-labelledby="pob-t2" inert>
+                    <div class="pt-onb-hero"><canvas data-art="aurora" data-art-seed="12" aria-hidden="true"></canvas><i data-sym="target"></i></div>
+                    <h3 class="pt-onb-title" id="pob-t2">Choose what to review.</h3>
+                    <p class="pt-onb-body">Pick the review queues that look like yours.</p>
+                    <div class="pt-onb-chips">
+                      <button class="chip" type="button" aria-pressed="true">sample.web</button>
+                      <button class="chip" type="button" aria-pressed="false">sample.api</button>
+                      <button class="chip" type="button" aria-pressed="true">#docs</button>
+                      <button class="chip" type="button" aria-pressed="false">sample.mobile</button>
+                    </div>
+                  </section>
+                  <section class="pt-onb-slide" aria-labelledby="pob-t3" inert>
+                    <div class="pt-onb-hero"><canvas data-art="ember" data-art-seed="5" aria-hidden="true"></canvas><i data-sym="shield"></i></div>
+                    <h3 class="pt-onb-title" id="pob-t3">Set your limits.</h3>
+                    <p class="pt-onb-body">The cap is counted on what completes, every day.</p>
+                    <ul class="list list-inset">
+                      <li><div class="row"><span class="row-title">Runs a day</span><div class="stepper" data-min="4" data-max="200" data-step="4" data-value="24" aria-label="Runs a day"><button></button><output>24</output><button></button></div></div></li>
+                      <li><label class="row"><span class="row-title">Pause at the cap</span><input class="switch" type="checkbox" role="switch" checked></label></li>
+                    </ul>
+                  </section>
+                  <section class="pt-onb-slide pt-onb-done" aria-labelledby="pob-t4" inert>
+                    <svg class="pt-tick" viewBox="0 0 120 120" aria-hidden="true"><circle cx="60" cy="60" r="54"></circle><path d="M36 62 53 79 86 44"></path></svg>
+                    <h3 class="pt-onb-title" id="pob-t4">You&rsquo;re set.</h3>
+                    <p class="pt-onb-body">The first run starts within the hour. You can change any of this in Settings.</p>
+                  </section>
+                </div>
+              </div>
+              <div class="pt-onb-foot">
+                <div class="pt-onb-dots" aria-hidden="true"><i></i><i></i><i></i></div>
+                <button class="btn btn-primary btn-l btn-block" type="button" id="pob-next">Continue</button>
+                <button class="btn btn-plain pt-textbtn" type="button" id="pob-back">Skip for now</button>
+                <p class="sr-only" id="pob-live" role="status" aria-live="polite"></p>
+              </div>
+            </div>
+          </div>
+        </div>
+        <p class="pt-phone-cap">Continue, Back and the arrow keys all move it.</p>
+      </div>
+      <div class="pt-side">
+        <h3 class="pt-sub">When to use</h3>
+        <p class="pt-when">Once, on first launch, when the product <strong>cannot work until it knows a few things</strong>. Never to tour features people can find on their own.</p>
+        <h3 class="pt-sub">The rules</h3>
+        <ol class="pt-rules">
+          <li>Three steps at most, one question each; every step can be skipped or revisited.</li>
+          <li>The page travels on a spring and can be reversed mid-flight.</li>
+          <li>The progress dot stretches into a pill: where you are, at a glance.</li>
+          <li>Under reduced motion the pages cross-fade; nothing slides.</li>
+          <li>Finish with what happens next, and where to change it later.</li>
+        </ol>
+      </div>
+    </div>
+    <div class="pt-notes">
+      <div>
+        <h3 class="pt-sub">The motion</h3>
+        <p class="pt-when">The track moves on <code>--sp-move</code> (.46&thinsp;s, bounce .18) as a CSS transition, so a second press retargets from wherever it is. The tick draws in 600&thinsp;ms on <code>--ease-out-cubic</code>.</p>
+      </div>
+      <div>
+        <h3 class="pt-sub">Markup</h3>
+<pre class="doc-code" data-lang="css"><code>.onb-track {
+  display: flex;
+  translate: calc(var(--step) * -100%) 0;
+  transition: translate var(--sp-move-ms) var(--sp-move);   /* interruptible */
+}
+.onb-dots i { width: 8px; transition: width var(--sp-snappy-ms) var(--sp-snappy); }
+.onb-dots i[data-on] { width: 24px; }
+@media (prefers-reduced-motion: reduce) {
+  .onb-track { transition: none; }       /* slides cross-fade instead */
+}</code></pre>
+        <p class="pt-refs">Built from <a href="components.html#buttons">block buttons</a>, <a href="components.html#chips">chips</a>, <a href="components.html#lists">rows</a> and <a href="motion.html">the spring tokens</a>.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════ 08 NOTIFY ═══════════════ -->
+<section class="band" data-band="story" id="notify">
+  <div class="viewport-content">
+    <header class="pt-head">
+      <p class="pt-num">08 &middot; Notifications</p>
+      <h2 class="t-section" data-reveal="up">The right weight for the news.</h2>
+      <p class="t-lede" data-reveal="up">Something happened: a toast. Something is still true: a banner, in the flow, until it is not. Something needs a decision: an alert. <strong>Choose by what the news asks of the reader</strong>, never by how important it feels.</p>
+    </header>
+    <div class="pt-notify">
+      <div class="card">
+        <div class="pt-kind"><span class="badge badge-accent">Toast</span><h3 class="ui-headline">It happened.</h3></div>
+        <p class="t-caption" style="color:var(--label-2)">Transient, never blocks, never asks. Stacks from the bottom.</p>
+        <div class="pt-notify-demo">
+          <button class="btn btn-tinted" type="button" data-pn="save">Save the run</button>
+          <button class="btn btn-tinted" type="button" data-pn="remove">Remove a review queue</button>
+          <button class="btn btn-tinted" type="button" data-pn="three">Three at once</button>
+        </div>
+      </div>
+      <div class="card">
+        <div class="pt-kind"><span class="badge badge-warn">Banner</span><h3 class="ui-headline">It is still true.</h3></div>
+        <p class="t-caption" style="color:var(--label-2)">In the flow, above what it affects; it leaves when the fact changes.</p>
+        <div class="pt-notify-demo">
+          <div class="banner banner-inset banner-bad" id="pn-banner"><i data-sym="xmark-circle"></i><span>runner-02 has been offline for 18 min. Its runs are paused.</span><button class="btn btn-plain btn-s pt-textbtn" type="button" id="pn-reconnect">Reconnect</button></div>
+          <ul class="list">
+            <li><div class="row"><span class="row-title">runner-01</span><span class="pill-status" data-state="ok">Connected</span></div></li>
+            <li><div class="row"><span class="row-title">runner-02</span><span class="pill-status" data-state="bad" id="pn-farm2">Offline 18 min</span></div></li>
+          </ul>
+          <button class="btn btn-secondary" type="button" id="pn-unplug" hidden>Detach runner-02</button>
+        </div>
+      </div>
+      <div class="card">
+        <div class="pt-kind"><span class="badge badge-bad">Alert</span><h3 class="ui-headline">Decide now.</h3></div>
+        <p class="t-caption" style="color:var(--label-2)">Interrupts, so it is rare: only for what cannot be undone.</p>
+        <div class="pt-notify-demo">
+          <p class="t-caption">Four projects are mid-run.</p>
+          <button class="btn" type="button" data-pn="stop">Stop all runs&hellip;</button>
+        </div>
+      </div>
+    </div>
+    <div class="pt-notes">
+      <div>
+        <h3 class="pt-sub">When to use</h3>
+        <p class="pt-when">Whenever the product has news the reader did not directly cause, or confirmation of something that happened out of view. <strong>If people can see the change happen, say nothing.</strong></p>
+        <h3 class="pt-sub">The rules</h3>
+        <ol class="pt-rules">
+          <li>A toast is one short sentence, past tense: &ldquo;Run saved.&rdquo;</li>
+          <li>A toast with Undo waits for its decision; others leave after reading time.</li>
+          <li>Errors that need an action are banners or alerts, never toasts alone.</li>
+          <li>A banner changes with the fact, then leaves on its own.</li>
+          <li>Toasts are a polite live region; failures use an assertive one.</li>
+        </ol>
+      </div>
+      <div>
+        <h3 class="pt-sub">Markup</h3>
+<pre class="doc-code" data-lang="js"><code>UI.toast('Run saved.', { kind: 'ok' });
+
+UI.toast('Review queue removed.', {
+  kind: 'info',
+  action: { label: 'Undo', run: () =&gt; restore() }
+});
+
+UI.toast('Could not reach runner-02.', { kind: 'bad' });  // role="alert"</code></pre>
+<pre class="doc-code" data-lang="html"><code>&lt;div class="banner banner-inset banner-bad"&gt;
+  &lt;i data-sym="xmark-circle"&gt;&lt;/i&gt;
+  &lt;span&gt;runner-02 stopped answering. Its runs are paused.&lt;/span&gt;
+  &lt;button class="btn btn-plain btn-s"&gt;Reconnect&lt;/button&gt;
+&lt;/div&gt;</code></pre>
+        <p class="pt-refs">Built from <a href="components.html#feedback">toast, banner and alert</a> and <a href="components.html#chips">status pills</a>.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════ 09 TABLE ═══════════════ -->
+<section class="band" data-band="utility" id="table">
+  <div class="viewport-content">
+    <header class="pt-head">
+      <p class="pt-num">09 &middot; Data table</p>
+      <h2 class="t-section" data-reveal="up">A table that stays in its frame.</h2>
+      <p class="t-lede" data-reveal="up">The header stays pinned while the rows scroll under it. Sort by any number, select rows for a bulk action, or <strong>open a row&rsquo;s own menu</strong> for the rest.</p>
+    </header>
+    <div class="card pt-table-card">
+      <div class="pt-table-bar">
+        <div><h3 class="pt-card-title">Review queues</h3><p class="pt-card-sub" id="ptb-count">16 review queues</p></div>
+        <div class="pt-bulk" id="ptb-bulk" hidden><b id="ptb-sel">0 selected</b><button class="btn btn-s" type="button" id="ptb-pause">Pause</button><button class="btn btn-s btn-tinted" type="button" id="ptb-delete">Delete&hellip;</button></div>
+        <div class="search"><input type="search" id="ptb-q" placeholder="Filter" aria-label="Filter review queues" autocomplete="off"></div>
+      </div>
+      <div class="table-scroll pt-frame" tabindex="0" aria-label="Review queues, scrollable">
+        <table class="table table-sticky table-hover" aria-describedby="ptb-count">
+          <thead><tr>
+            <th scope="col"><input class="check" type="checkbox" id="ptb-all" aria-label="Select all review queues"></th>
+            <th scope="col" aria-sort="none"><button class="pt-sort" type="button" data-key="name">Review queue</button></th>
+            <th scope="col">Route</th>
+            <th scope="col">State</th>
+            <th scope="col" class="num" aria-sort="none"><button class="pt-sort" type="button" data-key="asked">Queued</button></th>
+            <th scope="col" class="num" aria-sort="descending"><button class="pt-sort" type="button" data-key="landed">Completed</button></th>
+            <th scope="col" class="num" aria-sort="none"><button class="pt-sort" type="button" data-key="secs">s / task</button></th>
+            <th scope="col"><span class="sr-only">Actions</span></th>
+          </tr></thead>
+          <tbody id="ptb-body"></tbody>
+        </table>
+      </div>
+    </div>
+    <div class="pt-notes">
+      <div>
+        <h3 class="pt-sub">When to use</h3>
+        <p class="pt-when">When people <strong>compare rows by their numbers</strong>. If each item is read on its own, a list of rows or cards reads better, especially on a phone.</p>
+        <h3 class="pt-sub">The rules</h3>
+        <ol class="pt-rules">
+          <li>The table scrolls inside its own frame; the header is sticky in that frame.</li>
+          <li>Numbers are end-aligned in tabular digits; missing values are a dash, never zero.</li>
+          <li>Sortable headers are buttons, and <code>aria-sort</code> says which way.</li>
+          <li>Selection reveals a bulk bar with a count; it hides again at zero.</li>
+          <li>Row actions live in the row&rsquo;s own menu; destructive ones come last.</li>
+        </ol>
+      </div>
+      <div>
+        <h3 class="pt-sub">Markup</h3>
+<pre class="doc-code" data-lang="html"><code>&lt;div class="table-scroll" style="max-height: 460px" tabindex="0"&gt;
+  &lt;table class="table table-sticky table-hover"&gt;
+    &lt;thead&gt;&lt;tr&gt;
+      &lt;th&gt;&lt;input class="check" type="checkbox" aria-label="Select all"&gt;&lt;/th&gt;
+      &lt;th class="num" aria-sort="descending"&gt;
+        &lt;button&gt;Completed&lt;/button&gt;&lt;/th&gt;
+      &lt;th&gt;&lt;span class="sr-only"&gt;Actions&lt;/span&gt;&lt;/th&gt;
+    &lt;/tr&gt;&lt;/thead&gt;
+    &lt;tbody&gt;&lt;tr&gt;
+      &lt;td&gt;&lt;input class="check" type="checkbox" aria-label="Select"&gt;&lt;/td&gt;
+      &lt;td class="num"&gt;7&lt;/td&gt;
+      &lt;td&gt;&lt;button class="btn btn-icon btn-s" data-menu="row-1"
+                  aria-label="Actions"&gt;&hellip;&lt;/button&gt;&lt;/td&gt;
+    &lt;/tr&gt;&lt;/tbody&gt;
+  &lt;/table&gt;
+&lt;/div&gt;
+&lt;!-- the frame's ground: --table-bg on the card --&gt;</code></pre>
+        <p class="pt-refs">Built from <a href="components.html#table">the table</a>, <a href="components.html#menus">menus</a>, <a href="components.html#toggles">checkboxes</a> and <a href="components.html#chips">badges</a>.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════ 10 PALETTE ═══════════════ -->
+<section class="band" data-band="stage" id="palette">
+  <div class="viewport-content">
+    <header class="pt-head">
+      <p class="pt-num">10 &middot; Command palette</p>
+      <h2 class="t-section" data-reveal="up">Everything, one keystroke away.</h2>
+      <p class="t-lede" data-reveal="up">A glass pill in the toolbar <strong>becomes the palette</strong>: type to narrow, arrows to choose, Enter to go. This one knows this page &mdash; jump to any pattern, switch the appearance, open the sheet.</p>
+    </header>
+    <div class="pt-art">
+      <canvas data-art="aurora" data-art-seed="27" data-art-contrast="1.1" aria-hidden="true"></canvas>
+      <div class="pt-pal-top">
+        <button class="btn btn-glass btn-icon" type="button" data-lg3 data-lg3-interactive data-lg3-adaptive aria-label="Sidebar"><i data-sym="sidebar"></i></button>
+        <div class="command" data-command-hotkey>
+          <button class="command__pill" type="button" data-lg3 data-lg3-interactive data-lg3-priority="1"><i data-sym="magnifier"></i><span class="command__pill-label">Jump to&hellip;</span><kbd>&#8984;K</kbd></button>
+          <div class="command__panel" data-lg3 hidden aria-label="Jump to">
+            <div class="command__field"><i data-sym="magnifier"></i><input class="command__input" type="text" placeholder="Search this page" aria-label="Search this page"></div>
+            <ul class="command__list">
+              <li class="command__group" role="presentation"><div class="command__group-title" id="pcg1">Patterns</div>
+                <ul role="group" aria-labelledby="pcg1">
+                  <li class="command__item" data-value="#form" data-keywords="validation error field"><i data-sym="pencil"></i><span class="command__label">Form with validation</span></li>
+                  <li class="command__item" data-value="#search" data-keywords="find filter results"><i data-sym="magnifier"></i><span class="command__label">Search with results</span></li>
+                  <li class="command__item" data-value="#settings" data-keywords="preferences list switch"><i data-sym="gear"></i><span class="command__label">Settings screen</span></li>
+                  <li class="command__item" data-value="#confirm" data-keywords="delete alert destructive"><i data-sym="trash"></i><span class="command__label">Destructive confirmation</span></li>
+                  <li class="command__item" data-value="#sheet" data-keywords="overlay detent modal"><i data-sym="sliders"></i><span class="command__label">Sheet with detents</span></li>
+                  <li class="command__item" data-value="#states" data-keywords="empty loading error skeleton"><i data-sym="list-bullet"></i><span class="command__label">Empty, loading, error</span></li>
+                  <li class="command__item" data-value="#onboarding" data-keywords="welcome steps first"><i data-sym="sparkles"></i><span class="command__label">Onboarding</span></li>
+                  <li class="command__item" data-value="#notify" data-keywords="toast banner"><i data-sym="bell"></i><span class="command__label">Notifications</span></li>
+                  <li class="command__item" data-value="#table" data-keywords="data sort rows"><i data-sym="grid"></i><span class="command__label">Data table</span></li>
+                </ul>
+              </li>
+              <li class="command__group" role="presentation"><div class="command__group-title" id="pcg2">Actions</div>
+                <ul role="group" aria-labelledby="pcg2">
+                  <li class="command__item" data-value="tone" data-keywords="dark light theme appearance"><i data-sym="circle-half"></i><span class="command__label">Switch appearance</span><kbd>&#8679;&#8984;L</kbd></li>
+                  <li class="command__item" data-value="sheet" data-keywords="new run"><i data-sym="plus"></i><span class="command__label">New run&hellip;</span></li>
+                  <li class="command__item" data-value="toast" data-keywords="notify"><i data-sym="checkmark-circle"></i><span class="command__label">Show a toast</span></li>
+                  <li class="command__item" data-value="components" data-keywords="parts controls"><i data-sym="arrow-up-right"></i><span class="command__label">Open the components</span></li>
+                </ul>
+              </li>
+            </ul>
+            <p class="command__empty" hidden>Nothing on this page matches.</p>
+          </div>
+        </div>
+        <button class="btn btn-glass btn-icon" type="button" data-lg3 data-lg3-interactive data-lg3-adaptive aria-label="Notifications"><i data-sym="bell"></i></button>
+      </div>
+      <div class="pt-tiles">
+        <div class="pt-stat"><span class="t-caption">aurora</span><span class="stat-value">312</span><span class="t-caption">of 400 builds today</span></div>
+        <div class="pt-stat"><span class="t-caption">basil</span><span class="stat-value">41</span><span class="t-caption">of 70 tests today</span></div>
+        <div class="pt-stat"><span class="t-caption">Replies</span><span class="stat-value">3</span><span class="t-caption">waiting for you</span></div>
+      </div>
+      <div class="pt-art-note pt-pal-hint">
+        <p>Press <span class="pt-kbds"><kbd class="kbd">&#8984;</kbd><kbd class="kbd">K</kbd></span> or <span class="pt-kbds"><kbd class="kbd">Ctrl</kbd><kbd class="kbd">K</kbd></span> anywhere on this page, or click the pill.</p>
+      </div>
+    </div>
+    <div class="pt-notes">
+      <div>
+        <h3 class="pt-sub">When to use</h3>
+        <p class="pt-when">In a product with <strong>more places and actions than a sidebar can hold</strong>, for people who return every day. It is an accelerator: everything in it must also be reachable without it.</p>
+        <h3 class="pt-sub">The rules</h3>
+        <ol class="pt-rules">
+          <li>The pill morphs into the panel and back; it never fades in.</li>
+          <li>Focus lands in the field; arrows move the highlight; Enter runs it.</li>
+          <li>Group by destination and by action; show shortcuts where they exist.</li>
+          <li>Match on keywords as well as labels, and say so when nothing matches.</li>
+          <li>&#8984;K opens it from anywhere; Escape closes it into the pill.</li>
+        </ol>
+      </div>
+      <div>
+        <h3 class="pt-sub">Markup</h3>
+<pre class="doc-code" data-lang="html"><code>&lt;div class="command" data-command-hotkey&gt;
+  &lt;button class="command__pill" data-lg3 data-lg3-interactive&gt;
+    &lt;i data-sym="magnifier"&gt;&lt;/i&gt;
+    &lt;span class="command__pill-label"&gt;Jump to&hellip;&lt;/span&gt;&lt;kbd&gt;&amp;#8984;K&lt;/kbd&gt;
+  &lt;/button&gt;
+  &lt;div class="command__panel" data-lg3 hidden&gt;
+    &lt;div class="command__field"&gt;
+      &lt;input class="command__input" aria-label="Search this page"&gt;
+    &lt;/div&gt;
+    &lt;ul class="command__list"&gt;
+      &lt;li class="command__item" data-value="#form" data-keywords="validation"&gt;
+        &lt;span class="command__label"&gt;Form with validation&lt;/span&gt;&lt;/li&gt;
+    &lt;/ul&gt;
+    &lt;p class="command__empty" hidden&gt;Nothing matches.&lt;/p&gt;
+  &lt;/div&gt;
+&lt;/div&gt;</code></pre>
+<pre class="doc-code" data-lang="js"><code>palette.addEventListener('chrome:command', e =&gt; run(e.detail.value));</code></pre>
+        <p class="pt-refs">Built from the chrome module&rsquo;s <a href="chrome.html">command palette</a> and <a href="components.html#kbd">key caps</a>.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<script>
+/* patterns.html \u2014 page behaviour. Runs during parse (before the modules);
+   anything that needs UI / CHROME / MOTION runs from a click, by which time
+   they exist, or after 'fg3:ready'. Copy is fictional (aurora etc.). */
+(function () {
+  'use strict';
+  var doc = document;
+  function $(s, r) { return (r || doc).querySelector(s); }
+  function $$(s, r) { return [].slice.call((r || doc).querySelectorAll(s)); }
+  function esc(s) { return String(s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
+  function RM() { try { return matchMedia('(prefers-reduced-motion: reduce)').matches; } catch (e) { return false; } }
+  function toast(m, o) { if (window.UI && UI.toast) return UI.toast(m, o); }
+  function ready(fn) {
+    if (doc.documentElement.getAttribute('data-fg3') === 'ready') fn();
+    else doc.addEventListener('fg3:ready', fn, { once: true });
+  }
+
+  /* -- 01 \u00b7 FORM ----------------------------------------------------------- */
+  var form = $('#pf');
+  var FIELDS = {
+    handle: function (v) {
+      v = v.trim().replace(/^@/, '');
+      if (!v) return 'Enter the project name, for example sample.project.';
+      if (!/^[a-z0-9._]+$/i.test(v)) return 'Use letters, numbers, dots and underscores only.';
+      if (v.length < 3 || v.length > 30) return 'A project name is 3 to 30 characters long.';
+      return '';
+    },
+    cap: function (v) {
+      v = v.trim();
+      if (!/^\d+$/.test(v) || +v < 1 || +v > 200) return 'Enter a whole number from 1 to 200.';
+      return '';
+    },
+    proxy: function (v) {
+      v = v.trim();
+      if (!v) return '';
+      if (v.indexOf(':') < 0) return 'Add the port, for example :1080.';
+      if (!/^[a-z0-9.-]+:\d{2,5}$/i.test(v)) return 'Use host:port, for example 10.0.0.8:1080.';
+      return '';
+    }
+  };
+  var touched = {};
+  function setState(name, st) {
+    var pill = $('[data-pf-state="' + name + '"]');
+    if (!pill) return;
+    if (st === 'ok') { pill.setAttribute('data-state', 'ok'); pill.textContent = 'Looks right'; }
+    else if (st === 'bad') { pill.setAttribute('data-state', 'bad'); pill.textContent = 'Needs a look'; }
+    else if (st === 'empty') { pill.setAttribute('data-state', 'idle'); pill.textContent = 'Left empty'; }
+    else { pill.removeAttribute('data-state'); pill.textContent = 'Untouched'; }
+  }
+  function check(name) {
+    var input = form.elements[name], msg = FIELDS[name](input.value), err = $('#pf-' + name + '-err');
+    input.setAttribute('aria-invalid', msg ? 'true' : 'false');
+    err.textContent = msg; err.hidden = !msg;
+    setState(name, msg ? 'bad' : (input.value.trim() ? 'ok' : 'empty'));
+    return !msg;
+  }
+  if (form) {
+    Object.keys(FIELDS).forEach(function (name) {
+      var input = form.elements[name];
+      input.addEventListener('blur', function () {
+        if (input.value !== input.defaultValue || touched[name]) { touched[name] = true; check(name); }
+      });
+      input.addEventListener('input', function () {
+        $('#pf-done').hidden = true;
+        if (input.getAttribute('aria-invalid') === 'true') check(name);   /* reward early */
+      });
+    });
+    form.addEventListener('submit', function (e) {
+      e.preventDefault();
+      var bad = [];
+      Object.keys(FIELDS).forEach(function (name) { touched[name] = true; if (!check(name)) bad.push(name); });
+      var sum = $('#pf-summary'), done = $('#pf-done');
+      done.hidden = true;
+      if (bad.length) {
+        var LABEL = { handle: 'Project name', cap: 'Daily run cap', proxy: 'Runner address' };
+        $('#pf-summary-text').innerHTML = '<b>' + (bad.length === 1 ? 'One thing needs' : bad.length + ' things need') + ' a look:</b> ' +
+          bad.map(function (n) { return '<a href="#pf-' + n + '" data-pf-go="' + n + '">' + LABEL[n] + '</a>'; }).join(', ') + '.';
+        sum.hidden = false; sum.focus();
+        return;
+      }
+      sum.hidden = true;
+      var btn = $('#pf-submit'), who = form.elements.handle.value.trim().replace(/^@/, '');
+      btn.setAttribute('aria-busy', 'true'); btn.disabled = true;
+      setTimeout(function () {
+        btn.removeAttribute('aria-busy'); btn.disabled = false;
+        $('#pf-done-text').innerHTML = '<b>' + esc(who) + ' was added.</b> Its first run starts within the hour.';
+        done.hidden = false;
+        toast(who + ' added to the workspace.', { kind: 'ok' });
+      }, 900);
+    });
+    form.addEventListener('click', function (e) {
+      var a = e.target.closest('[data-pf-go]');
+      if (!a) return;
+      e.preventDefault();
+      var f = form.elements[a.getAttribute('data-pf-go')]; f.focus(); f.select && f.select();
+    });
+    form.addEventListener('reset', function () {
+      setTimeout(function () {
+        touched = {};
+        Object.keys(FIELDS).forEach(function (n) { var i = form.elements[n]; i.removeAttribute('aria-invalid'); $('#pf-' + n + '-err').hidden = true; setState(n, ''); });
+        $('#pf-summary').hidden = true; $('#pf-done').hidden = true;
+      }, 0);
+    });
+  }
+
+  /* -- 02 \u00b7 SEARCH --------------------------------------------------------- */
+  var ITEMS = [
+    { k: 'account', t: 'aurora', s: 'Build \u00b7 312 of 400 today', g: 'person', h: 'var(--sys-blue)' },
+    { k: 'account', t: 'basil', s: 'Test \u00b7 41 of 70', g: 'person', h: 'var(--sys-blue)' },
+    { k: 'account', t: 'cobalt', s: 'Review blocked \u00b7 17h 12m', g: 'person', h: 'var(--sys-blue)' },
+    { k: 'account', t: 'dune', s: 'Runs paused', g: 'person', h: 'var(--sys-blue)' },
+    { k: 'audience', t: 'sample.web', s: 'Reviewers of \u00b7 7 of 8 completed', g: 'target', h: 'var(--sys-orange)' },
+    { k: 'audience', t: 'sample.api', s: 'Reviewers of \u00b7 8 of 8 completed', g: 'target', h: 'var(--sys-orange)' },
+    { k: 'audience', t: '#docs', s: 'Label \u00b7 thin today', g: 'target', h: 'var(--sys-orange)' },
+    { k: 'audience', t: 'sample.mobile', s: 'Authors of \u00b7 came back empty', g: 'target', h: 'var(--sys-orange)' },
+    { k: 'audience', t: 'sample.infra', s: 'Reviewers of \u00b7 11 of 12 completed', g: 'target', h: 'var(--sys-orange)' },
+    { k: 'audience', t: 'sample.data', s: 'Reviewers of \u00b7 6 of 8 completed', g: 'target', h: 'var(--sys-orange)' },
+    { k: 'run', t: 'Run 42', s: 'aurora \u00b7 sample.web \u00b7 7 of 8', g: 'bolt', h: 'var(--sys-indigo)' },
+    { k: 'run', t: 'Run 41', s: 'basil \u00b7 sample.api \u00b7 8 of 8', g: 'bolt', h: 'var(--sys-indigo)' },
+    { k: 'run', t: 'Run 40', s: 'cobalt \u00b7 #docs \u00b7 3 of 8', g: 'bolt', h: 'var(--sys-indigo)' },
+    { k: 'run', t: 'Run 39', s: 'aurora \u00b7 sample.mobile \u00b7 came back empty', g: 'bolt', h: 'var(--sys-indigo)' }
+  ];
+  var GROUP = { account: 'Projects', audience: 'Review queues', run: 'Runs' };
+  var scope = 'all', q = '';
+  function hi(text) {
+    if (!q) return esc(text);
+    var i = text.toLowerCase().indexOf(q.toLowerCase());
+    if (i < 0) return esc(text);
+    return esc(text.slice(0, i)) + '<mark class="pt-mark">' + esc(text.slice(i, i + q.length)) + '</mark>' + esc(text.slice(i + q.length));
+  }
+  function renderSearch() {
+    var box = $('#ps-results'); if (!box) return;
+    var ql = q.toLowerCase();
+    var hits = ITEMS.filter(function (it) {
+      return (scope === 'all' || it.k === scope) && (!ql || it.t.toLowerCase().indexOf(ql) >= 0 || it.s.toLowerCase().indexOf(ql) >= 0);
+    });
+    var n = hits.length;
+    $('#ps-count').textContent = n ? n + (n === 1 ? ' result' : ' results') + (q ? ' for \u201c' + q + '\u201d' : '') : 'No results';
+    if (!n) {
+      box.innerHTML = '<div class="empty-state" style="padding-block:32px"><span class="empty-state-glyph"><i data-sym="magnifier"></i></span>' +
+        '<h4 class="empty-state-title">No results for \u201c' + esc(q) + '\u201d</h4>' +
+        '<p class="empty-state-body">Search looks at names, review queues and run numbers. Try fewer letters, or search all kinds.</p>' +
+        '<div class="empty-state-actions"><button class="btn" type="button" data-ps-clear>Clear the search</button></div></div>';
+    } else {
+      var html = '';
+      ['account', 'audience', 'run'].forEach(function (k) {
+        var g = hits.filter(function (it) { return it.k === k; }), more = 0;
+        if (!g.length) return;
+        if (!ql && scope === 'all' && g.length > 3) { more = g.length - 3; g = g.slice(0, 3); }
+        html += '<p class="list-header">' + GROUP[k] + '</p><ul class="list list-inset">' + g.map(function (it) {
+          return '<li><a class="row" href="#search" data-ps-item><span class="row-icon pt-result-glyph" style="--row-icon-bg:' + it.h + '"><i data-sym="' + it.g + '"></i></span>' +
+            '<span class="row-body"><span class="row-title">' + hi(it.t) + '</span><span class="row-sub">' + hi(it.s) + '</span></span></a></li>';
+        }).join('') + '</ul>' + (more ? '<p class="list-footer">' + more + ' more ' + GROUP[k].toLowerCase() + ' \u00b7 type to narrow, or choose ' + GROUP[k] + '.</p>' : '');
+      });
+      box.innerHTML = html;
+    }
+    if (window.SYM && SYM.mount) SYM.mount(box);
+  }
+  var qIn = $('#ps-q');
+  if (qIn) {
+    qIn.addEventListener('input', function () { q = qIn.value.trim(); renderSearch(); });
+    qIn.addEventListener('keydown', function (e) {
+      if (e.key === 'ArrowDown') { var f = $('#ps-results [data-ps-item]'); if (f) { e.preventDefault(); f.focus(); } }
+      else if (e.key === 'Escape' && qIn.value) { e.preventDefault(); qIn.value = ''; q = ''; renderSearch(); }
+    });
+    $('#ps-results').addEventListener('keydown', function (e) {
+      if (e.key !== 'ArrowDown' && e.key !== 'ArrowUp') return;
+      var all = $$('#ps-results [data-ps-item]'), i = all.indexOf(doc.activeElement);
+      if (i < 0) return;
+      e.preventDefault();
+      if (e.key === 'ArrowUp' && i === 0) qIn.focus(); else if (all[i + (e.key === 'ArrowDown' ? 1 : -1)]) all[i + (e.key === 'ArrowDown' ? 1 : -1)].focus();
+    });
+    $('#ps-results').addEventListener('click', function (e) {
+      if (e.target.closest('[data-ps-clear]')) { qIn.value = ''; q = ''; renderSearch(); qIn.focus(); return; }
+      var it = e.target.closest('[data-ps-item]');
+      if (it) { e.preventDefault(); toast('Opened ' + $('.row-title', it).textContent + '.', { kind: 'info' }); }
+    });
+    $$('.pt-scopes [data-scope]').forEach(function (b) {
+      b.addEventListener('click', function () {
+        scope = b.getAttribute('data-scope');
+        $$('.pt-scopes [data-scope]').forEach(function (x) { x.setAttribute('aria-checked', String(x === b)); });
+        renderSearch();
+      });
+    });
+    renderSearch();
+  }
+
+  /* -- 03 \u00b7 SETTINGS (push / pop inside the phone) ------------------------- */
+  var pts = $('#pts'), stack = [];
+  function activate(next, under) {
+    var cur = $('.pt-screen[data-active]', pts);
+    if (!next || next === cur) return;
+    next.inert = false;
+    next.removeAttribute('data-under');
+    if (cur) { cur.removeAttribute('data-active'); cur.inert = true; if (under) cur.setAttribute('data-under', ''); }
+    next.setAttribute('data-active', '');
+    var f = $('.pt-back', next) || $('.row, button', next);
+    setTimeout(function () { if (f) f.focus({ preventScroll: true }); }, 60);
+  }
+  if (pts) {
+    pts.addEventListener('click', function (e) {
+      var push = e.target.closest('[data-push]'), pop = e.target.closest('[data-pop]'), warm = e.target.closest('[data-warm]');
+      if (push) { stack.push($('.pt-screen[data-active]', pts)); activate($('#' + push.getAttribute('data-push')), true); }
+      else if (pop) {
+        var prev = stack.pop() || $('#pts-main'), cur = $('.pt-screen[data-active]', pts);
+        prev.removeAttribute('data-under');
+        activate(prev, false);
+        var back = cur && $('[data-push="' + cur.id + '"]', prev);
+        if (back) setTimeout(function () { back.focus({ preventScroll: true }); }, 80);
+      } else if (warm) {
+        $$('[data-warm]', pts).forEach(function (r) { r.setAttribute('aria-checked', String(r === warm)); });
+        $('#pts-warm-value').textContent = warm.getAttribute('data-warm');
+      }
+    });
+    pts.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape' && stack.length) { e.preventDefault(); var b = $('.pt-screen[data-active] [data-pop]', pts); if (b) b.click(); }
+    });
+  }
+
+  /* -- 04 \u00b7 CONFIRM -------------------------------------------------------- */
+  var grid = $('#pc-grid'), removed = [];
+  function removeCard(card, cb) {
+    card.setAttribute('data-leaving', '');
+    setTimeout(function () {
+      var next = card.nextElementSibling, prev = card.previousElementSibling, ae = doc.activeElement;
+      /* focus that was on (or returned to) the card must not fall to <body>:
+         it moves to the neighbour's delete, or to the way back */
+      var had = !ae || ae === doc.body || card.contains(ae);
+      removed.push({ el: card, next: next });
+      card.remove(); card.removeAttribute('data-leaving');
+      $('#pc-reset').hidden = false;
+      if (had) { var to = (next && $('[data-pc-delete]', next)) || (prev && $('[data-pc-delete]', prev)) || $('#pc-reset'); if (to) to.focus({ preventScroll: true }); }
+      if (cb) cb();
+    }, RM() ? 200 : 380);
+  }
+  function restore(item) {
+    if (!item) return;
+    if (item.next && item.next.parentNode === grid) grid.insertBefore(item.el, item.next); else grid.appendChild(item.el);
+    removed = removed.filter(function (x) { return x !== item; });
+    if (!removed.length) $('#pc-reset').hidden = true;
+  }
+  if (grid) {
+    grid.addEventListener('click', function (e) {
+      var del = e.target.closest('[data-pc-delete]'), pause = e.target.closest('[data-pc-pause]');
+      if (pause) {
+        var card = pause.closest('.pt-aud'), badge = $('[data-pc-badge]', card), paused = pause.textContent.trim() === 'Resume';
+        if (!badge.__was) badge.__was = { t: badge.textContent, c: badge.className };
+        if (paused) { badge.textContent = badge.__was.t; badge.className = badge.__was.c; pause.querySelector('.lg3-text') ? (pause.querySelector('.lg3-text').textContent = 'Pause') : (pause.textContent = 'Pause'); }
+        else { badge.textContent = 'Paused'; badge.className = 'badge'; pause.querySelector('.lg3-text') ? (pause.querySelector('.lg3-text').textContent = 'Resume') : (pause.textContent = 'Resume'); }
+        var name = $('h3', card).textContent;
+        if (!paused) toast(name + ' paused.', { kind: 'info', action: { label: 'Undo', run: function () { pause.click(); } } });
+        return;
+      }
+      if (!del || !window.UI) return;
+      var c = del.closest('.pt-aud'), who = $('h3', c).textContent;
+      UI.alert({ title: 'Delete ' + who + '?', message: 'Its ledger rows stay. Future runs stop reaching it.', from: del,
+        actions: [{ label: 'Cancel', value: false, role: 'cancel' }, { label: 'Delete', value: true, role: 'destructive' }] })
+        .then(function (ok) {
+          if (!ok) return;
+          removeCard(c, function () {
+            var item = removed[removed.length - 1];
+            toast(who + ' deleted.', { kind: 'info', action: { label: 'Undo', run: function () { restore(item); } } });
+          });
+        });
+    });
+    $('#pc-reset').addEventListener('click', function () { removed.slice().reverse().forEach(restore); });
+  }
+
+  /* -- 05 \u00b7 SHEET ---------------------------------------------------------- */
+  doc.addEventListener('click', function (e) {
+    if (e.target.closest('[data-pt-schedule]')) toast('Run scheduled for aurora.', { kind: 'ok' });
+    if (e.target.closest('#pt-sheet-large') && window.CHROME) CHROME.sheet.open($('#pt-sheet'), { from: e.target.closest('#pt-sheet-large'), detent: 'large' });
+  });
+
+  /* -- 06 \u00b7 STATES --------------------------------------------------------- */
+  var loadTimer = 0;
+  function seg() { var h = $('#pst-seg'); return window.UI && h ? UI.segmented(h) : null; }
+  function load() {
+    var s = seg(); if (!s) return;
+    clearTimeout(loadTimer);
+    $('#pst-fresh').hidden = true;
+    s.select(1);
+    loadTimer = setTimeout(function () {
+      s.select(0); $('#pst-fresh').hidden = false;
+      loadTimer = setTimeout(function () { $('#pst-fresh').hidden = true; }, 3200);
+    }, 1500);
+  }
+  doc.addEventListener('click', function (e) {
+    if (e.target.closest('#pst-replay') || e.target.closest('#pst-retry')) load();
+    var add = e.target.closest('[data-pst-add]');
+    if (add && window.CHROME) CHROME.sheet.open($('#pt-sheet'), { from: add });
+  });
+
+  /* -- 07 \u00b7 ONBOARDING ----------------------------------------------------- */
+  var ob = $('#pob');
+  var TITLES = ['Connect a runner.', 'Choose what to review.', 'Set your limits.', 'You\u2019re set.'];
+  function obGo(n) {
+    n = Math.max(0, Math.min(3, n));
+    ob.setAttribute('data-step', n); ob.style.setProperty('--step', n);
+    $$('.pt-onb-slide', ob).forEach(function (s, i) { s.inert = i !== n; if (i === n) s.setAttribute('data-on', ''); else s.removeAttribute('data-on'); });
+    $$('.pt-onb-dots > i', ob).forEach(function (d, i) { if (i === n) d.setAttribute('data-on', ''); else d.removeAttribute('data-on'); });
+    $('#pob-next').textContent = n === 2 ? 'Finish' : n === 3 ? 'Start again' : 'Continue';
+    $('#pob-back').textContent = n === 0 ? 'Skip for now' : 'Back';
+    $('#pob-back').hidden = n === 3;
+    $('#pob-live').textContent = n < 3 ? 'Step ' + (n + 1) + ' of 3: ' + TITLES[n] : TITLES[3];
+  }
+  if (ob) {
+    obGo(0);
+    $('#pob-next').addEventListener('click', function () { var n = +ob.getAttribute('data-step'); obGo(n === 3 ? 0 : n + 1); });
+    $('#pob-back').addEventListener('click', function () { var n = +ob.getAttribute('data-step'); obGo(n === 0 ? 3 : n - 1); });
+    ob.addEventListener('keydown', function (e) {
+      if (e.target.closest('.stepper, input, .chip')) return;
+      var n = +ob.getAttribute('data-step');
+      if (e.key === 'ArrowRight') { e.preventDefault(); obGo(n + 1); } else if (e.key === 'ArrowLeft') { e.preventDefault(); obGo(n - 1); }
+    });
+    ob.addEventListener('click', function (e) {
+      var c = e.target.closest('.pt-onb-chips .chip');
+      if (c) c.setAttribute('aria-pressed', String(c.getAttribute('aria-pressed') !== 'true'));
+    });
+  }
+
+  /* -- 08 \u00b7 NOTIFY --------------------------------------------------------- */
+  doc.addEventListener('click', function (e) {
+    var b = e.target.closest('[data-pn]');
+    if (b && window.UI) {
+      var k = b.getAttribute('data-pn');
+      if (k === 'save') toast('Run saved.', { kind: 'ok' });
+      else if (k === 'remove') toast('sample.mobile removed.', { kind: 'info', action: { label: 'Undo', run: function () { toast('sample.mobile is back.', { kind: 'ok' }); } } });
+      else if (k === 'three') { toast('Run 42 saved.', { kind: 'ok' }); setTimeout(function () { toast('Run 43 saved.', { kind: 'ok' }); }, 260); setTimeout(function () { toast('Run 44 saved.', { kind: 'ok' }); }, 520); }
+      else if (k === 'stop') UI.alert({ title: 'Stop all runs?', message: 'Four projects stop mid-run. Nothing is lost; the ledger keeps what completed.', from: b,
+        actions: [{ label: 'Cancel', value: false, role: 'cancel' }, { label: 'Stop runs', value: true, role: 'destructive' }] })
+        .then(function (ok) { if (ok) toast('All runs stopped.', { kind: 'ok' }); });
+    }
+    if (e.target.closest('#pn-unplug')) {
+      $('#pn-banner').className = 'banner banner-inset banner-bad';
+      $('#pn-banner').querySelector('span').textContent = 'runner-02 stopped answering. Its runs are paused.';
+      $('#pn-reconnect').hidden = false;
+      $('#pn-banner').hidden = false; $('#pn-unplug').hidden = true;
+      var p = $('#pn-farm2'); p.setAttribute('data-state', 'bad'); p.textContent = 'Offline';
+      $('#pn-reconnect').focus({ preventScroll: true });   /* the pressed control is gone: focus the one that replaced it */
+    }
+    if (e.target.closest('#pn-reconnect')) {
+      var bn = $('#pn-banner');
+      bn.className = 'banner banner-inset banner-ok';
+      bn.querySelector('span').textContent = 'runner-02 is back. Its runs resume.';
+      /* Reconnect hides itself, so the news that replaced it holds focus until
+         the banner leaves, then Unplug (never <body>) */
+      bn.tabIndex = -1; bn.focus({ preventScroll: true });
+      $('#pn-reconnect').hidden = true;
+      var p2 = $('#pn-farm2'); p2.setAttribute('data-state', 'ok'); p2.textContent = 'Connected';
+      setTimeout(function () {
+        var had = bn.contains(doc.activeElement), u = $('#pn-unplug');
+        bn.hidden = true; u.hidden = false;
+        if (had) u.focus({ preventScroll: true });
+      }, 2600);
+    }
+  });
+
+  /* -- 09 \u00b7 TABLE ---------------------------------------------------------- */
+  var ROWS = [
+    ['sample.web', 'Reviewers of', 'landing', 8, 7, 11.2], ['sample.api', 'Reviewers of', 'landing', 8, 8, 10.4],
+    ['#docs', 'Label', 'thin', 8, 3, 19.8], ['sample.mobile', 'Authors of', 'empty', 8, 0, null],
+    ['sample.infra', 'Reviewers of', 'landing', 12, 11, 9.6], ['sample.data', 'Reviewers of', 'landing', 8, 6, 12.9],
+    ['#design', 'Label', 'thin', 8, 2, 24.1], ['sample.search', 'Reviewers of', 'landing', 10, 9, 10.1],
+    ['sample.auth', 'Authors of', 'thin', 8, 3, 17.5], ['sample.billing', 'Reviewers of', 'cooling', 8, 5, 13.3],
+    ['#perf', 'Label', 'empty', 8, 0, null], ['sample.core', 'Reviewers of', 'landing', 12, 12, 9.2],
+    ['sample.edge', 'Reviewers of', 'landing', 8, 7, 11.8], ['sample.ops', 'Authors of', 'cooling', 8, 4, 15.0],
+    ['#legal', 'Label', 'thin', 8, 1, 31.0], ['sample.admin', 'Reviewers of', 'landing', 8, 8, 10.7]
+  ];
+  var BADGE = { landing: ['badge-ok', 'Healthy'], thin: ['badge-warn', 'Thin'], empty: ['', 'Empty'], cooling: ['badge-warn', 'Waiting'], paused: ['', 'Paused'] };
+  var tbody = $('#ptb-body'), trash = [];
+  function badge(st) { var b = BADGE[st]; return '<span class="badge ' + b[0] + '">' + b[1] + '</span>'; }
+  if (tbody) {
+    tbody.innerHTML = ROWS.map(function (r, i) {
+      var id = 'ptb-m' + i;
+      return '<tr data-name="' + esc(r[0]) + '" data-asked="' + r[3] + '" data-landed="' + r[4] + '" data-secs="' + (r[5] == null ? '' : r[5]) + '" data-state="' + r[2] + '">' +
+        '<td><input class="check" type="checkbox" aria-label="Select ' + esc(r[0]) + '"></td>' +
+        '<th scope="row" class="pt-tbl-name">' + esc(r[0]) + '</th>' +
+        '<td class="pt-tbl-route">' + r[1] + '</td>' +
+        '<td data-badge>' + badge(r[2]) + '</td>' +
+        '<td class="num">' + r[3] + '</td><td class="num">' + r[4] + '</td>' +
+        '<td class="num">' + (r[5] == null ? '&mdash;' : r[5].toFixed(1)) + '</td>' +
+        '<td><button class="btn btn-icon btn-s" type="button" data-menu="' + id + '" aria-label="Actions for ' + esc(r[0]) + '"><i data-sym="ellipsis"></i></button>' +
+        '<div class="menu" id="' + id + '" popover="manual"><button class="menu-item" data-value="pause"><i data-sym="pause"></i><span>Pause</span></button>' +
+        '<button class="menu-item" data-value="duplicate"><i data-sym="doc"></i><span>Duplicate</span></button>' +
+        '<hr class="menu-separator"><button class="menu-item menu-item-destructive" data-value="delete"><i data-sym="trash"></i><span>Delete</span></button></div></td></tr>';
+    }).join('');
+  }
+  function rows() { return $$('tr', tbody); }
+  function visibleRows() { return rows().filter(function (r) { return !r.hidden; }); }
+  function syncSel() {
+    var vis = visibleRows(), sel = vis.filter(function (r) { return $('.check', r).checked; });
+    rows().forEach(function (r) { r.setAttribute('aria-selected', String($('.check', r).checked)); });
+    var all = $('#ptb-all');
+    all.checked = sel.length > 0 && sel.length === vis.length;
+    all.indeterminate = sel.length > 0 && sel.length < vis.length;
+    $('#ptb-bulk').hidden = !sel.length;
+    $('#ptb-sel').textContent = sel.length + ' selected';
+    $('#ptb-count').textContent = rows().length + ' review queues' + (vis.length !== rows().length ? ' \u00b7 ' + vis.length + ' shown' : '');
+    return sel;
+  }
+  function sortBy(key, dir) {
+    var list = rows().sort(function (a, b) {
+      var x = a.getAttribute('data-' + key), y = b.getAttribute('data-' + key);
+      if (key === 'name') return dir * x.localeCompare(y);
+      x = x === '' ? -Infinity : +x; y = y === '' ? -Infinity : +y;
+      return dir * (x - y);
+    });
+    list.forEach(function (r) { tbody.appendChild(r); });
+  }
+  function setBadge(r, st) { r.setAttribute('data-state', st); $('[data-badge]', r).innerHTML = badge(st); }
+  function dropRows(list, label) {
+    list.forEach(function (r) { r.__next = r.nextElementSibling; r.remove(); $('.check', r).checked = false; });
+    trash.push(list);
+    syncSel();
+    toast(label, { kind: 'info', action: { label: 'Undo', run: function () {
+      list.slice().reverse().forEach(function (r) { if (r.__next && r.__next.parentNode === tbody) tbody.insertBefore(r, r.__next); else tbody.appendChild(r); });
+      syncSel();
+    } } });
+  }
+  if (tbody) {
+    sortBy('landed', -1);
+    syncSel();
+    tbody.addEventListener('change', function (e) { if (e.target.matches('.check')) syncSel(); });
+    $('#ptb-all').addEventListener('change', function (e) {
+      visibleRows().forEach(function (r) { $('.check', r).checked = e.target.checked; }); syncSel();
+    });
+    $$('.pt-sort').forEach(function (b) {
+      b.addEventListener('click', function () {
+        var th = b.closest('th'), cur = th.getAttribute('aria-sort'), dir = cur === 'descending' ? 1 : -1;
+        $$('th[aria-sort]').forEach(function (x) { x.setAttribute('aria-sort', 'none'); });
+        th.setAttribute('aria-sort', dir === 1 ? 'ascending' : 'descending');
+        sortBy(b.getAttribute('data-key'), b.getAttribute('data-key') === 'name' ? -dir : dir);
+      });
+    });
+    $('#ptb-q').addEventListener('input', function (e) {
+      var v = e.target.value.trim().toLowerCase();
+      rows().forEach(function (r) { r.hidden = !!v && r.getAttribute('data-name').toLowerCase().indexOf(v) < 0; });
+      syncSel();
+    });
+    $('#ptb-pause').addEventListener('click', function () {
+      var sel = syncSel(); sel.forEach(function (r) { setBadge(r, 'paused'); $('.check', r).checked = false; }); syncSel();
+      toast(sel.length + (sel.length === 1 ? ' review queue' : ' review queues') + ' paused.', { kind: 'ok' });
+    });
+    $('#ptb-delete').addEventListener('click', function (e) {
+      var sel = syncSel(); if (!sel.length || !window.UI) return;
+      UI.alert({ title: 'Delete ' + sel.length + (sel.length === 1 ? ' review queue?' : ' review queues?'), message: 'Their ledger rows stay. Future runs stop reaching them.', from: e.currentTarget,
+        actions: [{ label: 'Cancel', value: false, role: 'cancel' }, { label: 'Delete', value: true, role: 'destructive' }] })
+        .then(function (ok) { if (ok) dropRows(sel, sel.length + (sel.length === 1 ? ' review queue' : ' review queues') + ' deleted.'); });
+    });
+    doc.addEventListener('ui:select', function (e) {
+      var menu = e.target, row = menu.closest && menu.closest('#ptb-body tr');
+      if (!row) return;
+      var v = e.detail && e.detail.value, name = row.getAttribute('data-name');
+      if (v === 'pause') { setBadge(row, row.getAttribute('data-state') === 'paused' ? 'landing' : 'paused'); toast(name + (row.getAttribute('data-state') === 'paused' ? ' paused.' : ' resumed.'), { kind: 'ok' }); }
+      else if (v === 'duplicate') toast(name + ' duplicated as a draft.', { kind: 'ok' });
+      else if (v === 'delete') dropRows([row], name + ' deleted.');
+    });
+  }
+
+  /* -- 10 \u00b7 PALETTE -------------------------------------------------------- */
+  doc.addEventListener('chrome:command', function (e) {
+    var v = e.detail && e.detail.value;
+    if (!v) return;
+    if (v.charAt(0) === '#') { var t = $(v); if (t) { t.scrollIntoView({ block: 'start' }); var h = $('h2', t); if (h) { h.tabIndex = -1; h.focus({ preventScroll: true }); } } }
+    else if (v === 'tone' && window.FG3) FG3.setTone(FG3.getTone().tone === 'dark' ? 'light' : 'dark');
+    else if (v === 'sheet' && window.CHROME) CHROME.sheet.open($('#pt-sheet'), { from: $('[data-sheet-open="pt-sheet"]') });
+    else if (v === 'toast') toast('Hello from the palette.', { kind: 'ok' });
+    else if (v === 'components') location.href = 'components.html';
+  });
+  doc.addEventListener('keydown', function (e) {
+    if ((e.metaKey || e.ctrlKey) && e.shiftKey && (e.key === 'l' || e.key === 'L') && window.FG3) { e.preventDefault(); FG3.setTone(FG3.getTone().tone === 'dark' ? 'light' : 'dark'); }
+  });
+
+  ready(function () { if (window.SYM && SYM.mount) SYM.mount($('#ps-results')); });
+})();
+</script>
+</main>
+
+<!-- ═══ FOOTER (shared — copy verbatim) ═══ -->
+<footer class="band" data-band="utility" data-band-seam="keep">
+  <div class="viewport-content stack-4">
+    <p class="t-caption" style="color: var(--label-2)">Fluid Design Open &middot; Type follows the system face where one exists and Inter elsewhere. Device art is original.</p>
+    <p class="t-caption"><a href="index.html">Overview</a> &middot; <a href="start.html">Start</a> &middot; <a href="docs.html">Docs</a> &middot; <a href="components.html">Components</a> &middot; <a href="selftest.html">Self-test</a> &middot; <a href="audit.html">Audit</a></p>
+  </div>
+</footer>
+
+<script src="assets/geom.js"></script>
+<script src="assets/spring.js"></script>
+<script src="assets/palette.js"></script>
+<script src="assets/art3.js"></script>
+<script src="assets/lg3-core.js"></script>
+<script src="assets/fg3.js"></script>
+<script src="assets/symbols.js"></script>
+<script src="assets/chart.js"></script>
+<script src="assets/motion.js"></script>
+<script src="assets/anim.js"></script>
+<script src="assets/device.js"></script>
+<script src="assets/ui.js"></script>
+<script src="assets/chrome.js"></script>
+<script src="assets/showcase.js"></script>
+<script src="assets/docs.js"></script>   <!-- documentation pages only -->
+<script>FG3.boot(); if (window.DOCS) DOCS.mount();</script>
+</body>
+</html>

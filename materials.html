@@ -1,0 +1,1528 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Materials &middot; Fluid Design Open</title>
+<!--
+  The page template. Every page of the site copies this skeleton VERBATIM
+  (head, site nav, footer, scripts) and replaces only: the <title>, the
+  aria-current link in the nav, the local-nav capsule's title/jump links, and
+  <main>. Pages load assets/fg3-color.css.
+
+  Do NOT put data-tone on <html> unless the page must be pinned: an author
+  tone beats the reader's appearance toggle (FG3 precedence).
+-->
+<script>
+/* Tone without a flash (fg3.js header): reader's choice › author › host › system. */
+try{var d=document.documentElement,t=localStorage.getItem('fg3-tone');
+if(!d.hasAttribute('data-tone')){d.setAttribute('data-tone',t||d.getAttribute(
+'data-theme')||(matchMedia('(prefers-color-scheme: dark)').matches?'dark':
+'light'));d.setAttribute('data-tone-auto','')}}catch(e){}
+</script>
+<link rel="stylesheet" href="assets/fg3-tokens.css">
+<link rel="stylesheet" href="assets/fg3-color.css">
+<link rel="stylesheet" href="assets/fg3-springs.css">
+<link rel="stylesheet" href="assets/fg3.css">
+<link rel="stylesheet" href="assets/lg3.css">
+<link rel="stylesheet" href="assets/fg3-motion.css">
+<link rel="stylesheet" href="assets/fg3-components.css">
+<link rel="stylesheet" href="assets/fg3-chrome.css">
+<link rel="stylesheet" href="assets/fg3-showcase.css">
+<link rel="stylesheet" href="assets/fg3-symbols.css">
+<link rel="stylesheet" href="assets/fg3-chart.css">
+<link rel="stylesheet" href="assets/fg3-device.css">
+<link rel="stylesheet" href="assets/fg3-docs.css">    <!-- documentation pages only -->
+<style>
+/* Page layout only: roles and tokens, never a colour value (SPEC §2).
+   Page-local classes are prefixed ma- (materials) so they can never collide
+   with a system class. */
+
+/* ── shared ─────────────────────────────────────────────────────────────── */
+/* .doc-specimen centres its children (place-items:center), and Chromium now
+   honours justify-items in BLOCK layout too: a block child shrinks to fit.
+   Art stages lay their own grids out, so reset it. */
+.ma-stage{position:relative;overflow:clip;isolation:isolate;display:block;place-items:normal;padding:0;min-height:0}
+.ma-stack{display:grid;gap:var(--s-5);align-content:start}
+/* inline code inherits a grey paragraph ink; on its fill that is 4.38:1 (measured) */
+:where(p,li,td,dd) > code{color:var(--label-2-on-fill)}
+.doc-note code{color:var(--label)}
+.ma-tag{position:absolute;inset-block-start:20px;inset-inline-start:20px;place-self:start;z-index:4;display:inline-flex;align-items:center;gap:6px;
+  height:32px;margin:0;padding:0 14px;border-radius:var(--r-pill);corner-shape:round;
+  font-size:var(--t-14);line-height:1;letter-spacing:var(--t-14-ls);font-weight:600;white-space:nowrap}
+.ma-read{margin:0;font-size:var(--t-14);line-height:var(--t-14-lh);letter-spacing:var(--t-14-ls);color:var(--label-2);font-variant-numeric:tabular-nums}
+.ma-read b{color:var(--label);font-weight:600}
+.ma-below{margin-top:var(--s-8)}
+.ma-h3{margin:0 0 6px;font-family:var(--t-ui-headline-ff);font-size:var(--t-ui-headline-fs);line-height:var(--t-ui-headline-lh);letter-spacing:var(--t-ui-headline-ls);font-weight:600}
+.ma-p{margin:0;font-size:var(--t-17);line-height:var(--t-17-lh);letter-spacing:var(--t-17-ls);color:var(--label-2)}
+.ma-p strong{color:var(--label);font-weight:inherit}
+.ma-cols{display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:var(--s-9) var(--grid-gap)}
+.ma-cols > *{grid-column:span 6;min-width:0}
+.ma-cols > .ma-c7{grid-column:span 7}
+.ma-cols > .ma-c5{grid-column:span 5}
+.ma-panel-surface{background:var(--c-surface);border-radius:var(--r-lg);corner-shape:superellipse(var(--k-continuous));padding:28px}
+.ma-ctl{display:grid;gap:10px}
+.ma-ctl + .ma-ctl{margin-top:22px}
+.ma-ctl-head{display:flex;justify-content:space-between;align-items:baseline;gap:12px;font-size:var(--t-14);line-height:var(--t-14-lh);letter-spacing:var(--t-14-ls)}
+.ma-ctl-head label,.ma-ctl-head span:first-child{color:var(--label);font-weight:600}
+.ma-ctl-head output{color:var(--label-2);font-variant-numeric:tabular-nums}
+.ma-ctl .slider{width:100%}
+.ma-kv{margin-top:14px}
+.ma-kv dd code,.ma-kv dd{overflow-wrap:anywhere}
+@keyframes ma-float{0%,100%{translate:0 0}50%{translate:0 -12px}}
+
+/* ── 1 · hero ───────────────────────────────────────────────────────────── */
+.ma-hero .hero-art{--hero-art-from:16%;--hero-art-to:50%}
+.ma-hero-stage{position:relative;flex:1 1 auto;align-self:stretch;display:grid;place-items:center;min-height:300px;margin-top:24px}
+.ma-hero-float{animation:ma-float 7s var(--ease-in-out-quad) infinite}
+.ma-hero-glass{display:flex;align-items:center;justify-content:center;gap:.34em;width:min(760px,86vw);height:clamp(96px,11vw,160px);
+  border-radius:var(--r-pill);corner-shape:round;font-family:var(--font-display);font-size:clamp(28px,4vw,var(--t-56));
+  line-height:1;letter-spacing:var(--t-56-ls);font-weight:600;user-select:none;-webkit-user-select:none}
+.ma-hero-glass .sym{width:.86em;height:.86em}
+.ma-hero-hint{position:absolute;inset-block-end:40px;left:50%;translate:-50% 0;margin:0;height:36px;display:inline-flex;align-items:center;gap:8px;
+  padding:0 16px;border-radius:var(--r-pill);corner-shape:round;font-size:var(--t-14);letter-spacing:var(--t-14-ls);font-weight:600;white-space:nowrap}
+
+/* ── 2 · kinds ──────────────────────────────────────────────────────────── */
+.ma-kinds{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));height:400px}
+.ma-kind{position:relative;display:grid;place-items:center}
+.ma-kind + .ma-kind::before{content:"";position:absolute;inset-block:48px;inset-inline-start:0;width:1px;
+  background:color-mix(in srgb,var(--label) 16%,transparent)}
+.ma-k-glass{display:flex;align-items:center;gap:6px;height:62px;padding:0 10px;border-radius:var(--r-pill);corner-shape:round;font-size:24px}
+.ma-k-glass .ma-tab{display:grid;place-items:center;width:52px;height:44px;border-radius:var(--r-pill)}
+.ma-k-clear{display:grid;place-items:center;width:84px;height:84px;border-radius:50%;font-size:34px}
+.ma-k-chrome{display:flex;align-items:center;justify-content:space-between;gap:12px;width:calc(100% - 40px);max-width:260px;height:52px;padding:0 18px;
+  border-radius:var(--r-sm);corner-shape:superellipse(var(--k-continuous));font-size:var(--t-17);letter-spacing:var(--t-17-ls);font-weight:600}
+.ma-k-chrome .sym{font-size:20px}
+.ma-k-platter{display:inline-flex;align-items:center;gap:10px;height:56px;padding:0 24px 0 14px;border-radius:var(--r-pill);corner-shape:round;
+  font-size:var(--t-17);letter-spacing:var(--t-17-ls);font-weight:600}
+.ma-k-plus{display:grid;place-items:center;width:28px;height:28px;border-radius:50%;box-shadow:inset 0 0 0 1.5px currentColor;font-size:16px}
+.ma-kind-name{position:absolute;inset-block-end:24px;inset-inline:0;text-align:center}
+.ma-kind-name span{display:inline-flex;height:28px;align-items:center;padding:0 12px;border-radius:var(--r-pill);corner-shape:round;
+  font-size:var(--t-12);letter-spacing:.01em;font-weight:600}
+.ma-kinds-info{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:var(--grid-gap);margin-top:var(--s-8)}
+
+/* ── 3 · anatomy ────────────────────────────────────────────────────────── */
+.ma-anat{display:grid;grid-template-columns:1fr 1fr;height:600px}
+.ma-anat-half{position:relative;display:grid;place-items:center;min-width:0}
+.ma-asm{position:relative;width:var(--ma-aw,380px);height:var(--ma-ah,230px)}
+.ma-asm-glass,.ma-x-plate,.ma-x-ghost{position:absolute;inset:0;border-radius:var(--r-xl);corner-shape:superellipse(var(--k-continuous))}
+.ma-asm .doc-pin{z-index:8}
+.ma-x-view{position:absolute;inset:0;display:grid;place-items:center;perspective:1800px;overflow:visible}
+.ma-x-scene{--ma-gap:56px;position:relative;width:var(--ma-pw,320px);height:var(--ma-ph,192px);transform-style:preserve-3d;
+  transform:translateY(-10px) rotateX(56deg) rotateZ(-36deg)}
+.ma-x-plane{position:absolute;inset:0;transform-style:preserve-3d;
+  transform:translateZ(calc((3.5 - var(--i)) * var(--ma-gap) * var(--ma-explode,1)))}
+.ma-x-ghost{box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--label) 34%,transparent);pointer-events:none}
+.ma-x-plane .doc-pin{left:-30px;top:58%;transform:translateZ(2px) rotateZ(36deg) rotateX(-56deg)}
+.ma-x-plane.is-off .ma-x-plate{visibility:hidden}
+.ma-x-plane.is-off .ma-x-ghost{box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--label) 18%,transparent)}
+.ma-x-plane.is-off .doc-pin,.ma-asm.is-off-pins .doc-pin.is-off{opacity:.38}
+.ma-x-plane,.ma-x-plate{transition:opacity var(--d-240) linear}
+/* plate isolation: each plate is a real LG3 host with everything but ONE layer removed */
+.ma-only:not(.ma-only-shadow):is(.lg3,[data-lg3]){box-shadow:none !important}
+.ma-only > :is(.lg3__spec,.lg3__edge,.lg3__tint,.lg3__rim,.lg3__glow,.lg3__dim){display:none}
+.ma-only-light:is(.lg3,[data-lg3]),.ma-only-edge:is(.lg3,[data-lg3]),.ma-only-shadow:is(.lg3,[data-lg3]){-webkit-backdrop-filter:none !important;backdrop-filter:none !important}
+.ma-only-light > :is(.lg3__spec,.lg3__edge,.lg3__tint){display:block}
+.ma-only-edge > .lg3__rim{display:block}
+.ma-only-frost:is(.lg3,[data-lg3]){-webkit-backdrop-filter:blur(var(--ma-frost,12px)) !important;backdrop-filter:blur(var(--ma-frost,12px)) !important}
+.ma-only-rim.is-flat:is(.lg3,[data-lg3]){-webkit-backdrop-filter:none !important;backdrop-filter:none !important}
+/* the assembled specimen: layer switches */
+.ma-asm.hide-light .ma-asm-glass > :is(.lg3__spec,.lg3__edge,.lg3__tint){display:none}
+.ma-asm.hide-edge .ma-asm-glass > .lg3__rim{display:none}
+.ma-asm.hide-shadow .ma-asm-glass{box-shadow:none !important}
+.ma-asm.hide-pass .ma-asm-glass{-webkit-backdrop-filter:none !important;backdrop-filter:none !important}
+ul.ma-layers{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:var(--grid-gap);margin:var(--s-6) 0 0;padding:0;list-style:none}
+.ma-layer{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:4px 14px;align-items:start;padding:20px 20px 22px;
+  background:var(--c-surface);border-radius:var(--r-md);corner-shape:superellipse(var(--k-continuous))}
+.ma-layer .doc-pin{position:relative;translate:none;margin-top:1px}
+.ma-layer .ma-h3{margin:0}
+.ma-layer p{grid-column:2 / 4;margin:0;font-size:var(--t-14);line-height:var(--t-14-lh);letter-spacing:var(--t-14-ls);color:var(--label-2)}
+.ma-layer p.ma-val{color:var(--label);font-variant-numeric:tabular-nums}
+.ma-layer .switch{grid-row:1;grid-column:3}
+
+/* ── 4 · adaptivity ─────────────────────────────────────────────────────── */
+.ma-adapt{height:540px}
+.ma-adapt-src{position:absolute;inset:0;visibility:hidden;pointer-events:none;overflow:hidden}
+.ma-adapt-src canvas{position:absolute;inset:0;width:100%;height:100%}
+.ma-adapt-panel{position:absolute;inset-block-start:64px;left:50%;width:min(560px,calc(100% - 48px));translate:-50% 0;box-sizing:border-box;
+  padding:26px 30px 28px;border-radius:var(--r-xl);corner-shape:superellipse(var(--k-continuous))}
+.ma-adapt-panel .ma-h3{font-size:var(--t-21);line-height:var(--t-21-lh);letter-spacing:var(--t-21-ls)}
+.ma-adapt-panel p{margin:0;font-size:var(--t-17);line-height:var(--t-17-lh);letter-spacing:var(--t-17-ls)}
+.ma-adapt-chip{position:absolute;left:24px;inset-block-end:48px;touch-action:none;cursor:grab;gap:10px}
+.ma-adapt-chip[data-m-dragging]{cursor:grabbing}
+.ma-adapt-chip .sym{width:1.1em;height:1.1em}
+.ma-gauge{position:relative;height:50px;margin-top:18px}
+.ma-gauge-track{position:absolute;inset-inline:0;top:8px;height:8px;border-radius:var(--r-pill);background:var(--fill-2)}
+.ma-gauge-band{position:absolute;top:8px;height:8px;left:50%;width:12%;background:color-mix(in srgb,var(--accent) 45%,transparent)}
+.ma-gauge-mark{position:absolute;top:0;width:4px;height:24px;margin-left:-2px;border-radius:2px;background:var(--label);left:calc(var(--luma,0) * 100%);
+  transition:left 120ms linear}
+.ma-gauge-t{position:absolute;top:30px;translate:-50% 0;left:calc(var(--at) * 100%);font-size:var(--t-12);line-height:1;color:var(--label-2);font-variant-numeric:tabular-nums}
+.ma-gauge-ends{display:flex;justify-content:space-between;margin-top:0}
+.ma-flips{display:flex;flex-wrap:wrap;gap:8px 24px;margin-top:14px}
+
+/* ── 5 · interaction ────────────────────────────────────────────────────── */
+.ma-press{height:420px;display:grid;place-items:center}
+.ma-press-row{display:flex;align-items:center;justify-content:center;flex-wrap:wrap;gap:var(--ma-press-gap,16px);padding:24px}
+
+/* ── 6 · merge ──────────────────────────────────────────────────────────── */
+.ma-merge-stage{height:420px;display:grid;place-items:center}
+/* Chromium (Edge 153) drops a descendant's mask-image from its backdrop pass
+   when an overflow-clipping ancestor has a superellipse corner-shape: the
+   merged host frosts its whole box. This card clips with the equal-mass
+   circle instead (28px) so the union silhouette holds. */
+.ma-merge-stage.doc-specimen{corner-shape:round;border-radius:calc(var(--r-lg) / var(--r-scale))}
+.ma-merge{--d:120px;position:relative;width:calc(var(--d) * 2 + 180px);height:var(--d)}
+.ma-merge-shape{position:absolute;top:0;width:var(--d);height:var(--d);border-radius:50%;corner-shape:round}
+.ma-merge-a{left:0}
+.ma-merge-b{left:calc(var(--d) + var(--gap,40px));touch-action:none;cursor:grab}
+.ma-merge-glyph{position:absolute;top:0;width:var(--d);height:var(--d);display:grid;place-items:center;font-size:40px;pointer-events:none;z-index:1}
+.ma-merge-glyph.b{left:calc(var(--d) + var(--gap,40px))}
+.ma-merge-state{display:inline-flex;align-items:center;gap:8px}
+.ma-merge-state i{width:8px;height:8px;border-radius:50%;background:var(--label-3)}
+.ma-merge-state[data-merged] i{background:var(--ok)}
+
+/* ── 7 · morph ──────────────────────────────────────────────────────────── */
+.ma-morphs{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));height:520px}
+.ma-mcell{position:relative;min-width:0;display:flex;justify-content:center;align-items:flex-start;padding-top:120px}
+.ma-mcell + .ma-mcell::before{content:"";position:absolute;inset-block:48px;inset-inline-start:0;width:1px;background:color-mix(in srgb,var(--label) 16%,transparent)}
+.ma-mpanel{position:absolute;top:120px;left:calc(50% - var(--w) / 2);width:var(--w);box-sizing:border-box;padding:18px;
+  border-radius:var(--r-xl);corner-shape:superellipse(var(--k-continuous))}
+.ma-mpanel-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:8px}
+.ma-mpanel-head b{font-size:var(--t-17);letter-spacing:var(--t-17-ls);font-weight:600}
+.ma-mpanel ul{list-style:none;margin:0;padding:0}
+.ma-mpanel li{display:flex;align-items:center;gap:12px;min-height:44px;font-size:var(--t-17);letter-spacing:var(--t-17-ls);
+  border-top:1px solid color-mix(in srgb,currentColor 16%,transparent)}
+.ma-mpanel li:first-child{border-top:0}
+.ma-mpanel li .sym{width:1.1em;height:1.1em}
+.ma-mclose{flex:none}
+.ma-np{display:grid;gap:10px}
+.ma-np-title{font-size:var(--t-21);line-height:var(--t-21-lh);letter-spacing:var(--t-21-ls);font-weight:600}
+.ma-np-sub{font-size:var(--t-14);line-height:var(--t-14-lh);letter-spacing:var(--t-14-ls);opacity:.86}
+.ma-np-bar{height:6px;border-radius:3px;background:color-mix(in srgb,currentColor 24%,transparent);overflow:hidden}
+.ma-np-bar span{display:block;height:100%;width:54%;background:currentColor;border-radius:inherit}
+.ma-np-time{display:flex;justify-content:space-between;font-size:var(--t-12);font-variant-numeric:tabular-nums;opacity:.86}
+.ma-np-ctl{display:flex;justify-content:center;gap:28px;font-size:26px}
+/* text-bearing large glass is denser (the components' menu rule, applied to these panels) */
+@media not (prefers-contrast:more){
+  .ma-dense.lg3[data-lg3-appearance="dark"] > .lg3__tint{background:color-mix(in srgb,var(--lg3-rt-dark) 48%,transparent)}
+  .ma-dense.lg3[data-lg3-appearance="light"] > .lg3__tint{background:color-mix(in srgb,var(--lg3-rt-light) 52%,transparent)}
+  /* a tab bar with 10px labels takes the components' text-bearing control share (34% / 40%) */
+  .ma-set-bar.lg3[data-lg3-appearance="dark"] > .lg3__tint{background:color-mix(in srgb,var(--lg3-rt-dark) 34%,transparent)}
+  .ma-set-bar.lg3[data-lg3-appearance="light"] > .lg3__tint{background:color-mix(in srgb,var(--lg3-rt-light) 40%,transparent)}
+}
+
+/* ── 8 · materialize ────────────────────────────────────────────────────── */
+.ma-mat{display:grid;grid-template-columns:1fr 1fr;height:380px}
+.ma-mat > div{position:relative;display:grid;place-items:center}
+.ma-mat > div + div::before{content:"";position:absolute;inset-block:48px;inset-inline-start:0;width:1px;background:color-mix(in srgb,var(--label) 16%,transparent)}
+.ma-mat-chip{display:inline-flex;align-items:center;gap:12px;height:72px;padding:0 30px 0 22px;border-radius:var(--r-pill);corner-shape:round;
+  font-size:var(--t-21);letter-spacing:var(--t-21-ls);font-weight:600}
+.ma-mat-chip .sym{width:1.2em;height:1.2em}
+.ma-fade-wrap{display:inline-block}
+.ma-behind{position:absolute;inset:0;display:grid;place-content:center;margin:0;text-align:center;font-family:var(--font-display);
+  font-size:var(--t-40);line-height:1.12;letter-spacing:var(--t-40-ls);font-weight:600;color:var(--on-art-1);opacity:.5;pointer-events:none;user-select:none}
+.ma-mat-chip{position:relative;z-index:1}
+.ma-mat-ctl{display:flex;flex-wrap:wrap;align-items:center;gap:12px 20px;margin-top:16px}
+
+/* ── 9 · density ────────────────────────────────────────────────────────── */
+.ma-dens{height:360px;display:grid;place-items:center}
+.ma-dens-glass{--ma-stretch:0;display:flex;align-items:center;justify-content:center;gap:10px;height:64px;box-sizing:border-box;
+  width:calc(220px + (min(620px, 100% - 48px) - 220px) * var(--ma-stretch));border-radius:var(--r-pill);corner-shape:round;
+  font-size:var(--t-17);letter-spacing:var(--t-17-ls);font-weight:600;white-space:nowrap;overflow:hidden}
+.ma-dens-wrap{width:100%;display:grid;place-items:center}
+.ma-trace{display:block;width:100%;height:150px}
+.ma-trace path{fill:none;stroke-width:2;vector-effect:non-scaling-stroke}
+.ma-trace .t-blur{stroke:var(--accent)}
+.ma-trace .t-wash{stroke:var(--label-2)}
+.ma-trace .t-grid{stroke:var(--separator);stroke-width:1}
+.ma-legend{display:flex;flex-wrap:wrap;gap:6px 20px}
+.ma-legend span{display:inline-flex;align-items:center;gap:8px}
+.ma-legend i{width:14px;height:3px;border-radius:2px;background:var(--accent)}
+.ma-legend i.w{background:var(--label-2)}
+
+/* ── 10 · settings ──────────────────────────────────────────────────────── */
+.ma-set-stage{height:100%;min-height:420px;display:grid;place-items:center;align-content:center;gap:28px}
+.ma-set-bar{display:flex;align-items:center;gap:4px;height:62px;padding:0 8px;border-radius:var(--r-pill);corner-shape:round}
+.ma-set-bar .ma-tab{display:grid;place-items:center;width:74px;height:48px;gap:2px;font-size:22px;border-radius:var(--r-pill)}
+.ma-set-bar .ma-tab small{font-size:10px;line-height:1;font-weight:600;letter-spacing:0}
+.ma-set-row{display:flex;gap:16px;align-items:center}
+.ma-set-read{inset-block-start:auto;inset-block-end:20px;left:50%;right:auto;translate:-50% 0;font-weight:400;font-variant-numeric:tabular-nums}
+.ma-set-read b{font-weight:600}
+.ma-set-list .row{min-height:52px}
+.ma-set-slider{display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:12px;padding:12px 16px 14px;font-size:var(--t-14);color:var(--label-2)}
+.ma-set-slider .slider{width:100%}
+
+/* ── 11 · blending ──────────────────────────────────────────────────────── */
+.ma-blend{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:var(--grid-gap)}
+.ma-blend-card{display:grid;grid-template-rows:auto auto;gap:14px;min-width:0}
+.ma-blend-stage{height:300px;display:flex;align-items:center;justify-content:center;gap:36px}
+.ma-orb{display:grid;place-items:center;width:132px;height:132px;border-radius:50%;corner-shape:round;font-size:46px}
+.ma-normal > .lg3__spec,.ma-normal > .lg3__glow{mix-blend-mode:normal !important}
+.ma-vib{display:grid;gap:6px;padding:20px 26px;border-radius:var(--r-lg);corner-shape:superellipse(var(--k-continuous));min-width:220px}
+.ma-vib .ma-vt{font-size:var(--t-21);letter-spacing:var(--t-21-ls);font-weight:600}
+.ma-vib .ma-vl{display:flex;align-items:center;gap:10px;font-size:var(--t-21);letter-spacing:var(--t-21-ls);font-weight:600}
+.ma-vib-plus .ma-vl{color:color-mix(in srgb,currentColor 78%,transparent);mix-blend-mode:plus-lighter}
+.ma-vib-flat .ma-vl{color:var(--label-2-on-fill)}
+.ma-grad{font-family:var(--font-display);font-size:var(--t-64);line-height:var(--t-64-lh);letter-spacing:var(--t-64-ls);font-weight:600}
+.ma-ring{border-radius:var(--r-pill);corner-shape:round}
+.ma-ring-field{display:flex;align-items:center;gap:12px;width:min(420px,78vw);height:60px;padding:0 22px;border-radius:inherit;
+  background:var(--bg-2);color:var(--label-2);font-size:var(--t-19);letter-spacing:var(--t-19-ls)}
+.ma-ring-field .sym{color:var(--label)}
+
+/* ── 12 · budget ────────────────────────────────────────────────────────── */
+.ma-bud-big{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap}
+.ma-bud-big .t-stat{font-size:var(--t-80);line-height:1}
+.ma-hosts{max-height:420px;overflow:auto;margin-top:16px}
+.ma-hosts .table td,.ma-hosts .table th{padding-block:9px}
+.ma-path{display:inline-flex;align-items:center;gap:6px}
+.ma-path i{width:8px;height:8px;border-radius:50%;background:var(--label-3)}
+.ma-path[data-path="refraction"] i{background:var(--ok)}
+.ma-renderer{display:block;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+
+/* ── 13 · playground ────────────────────────────────────────────────────── */
+.ma-pg{display:grid;grid-template-columns:minmax(0,7fr) minmax(0,5fr);gap:var(--grid-gap);align-items:start}
+.ma-pg-stage{height:560px;display:grid;place-items:center;position:sticky;top:88px}
+.ma-pg-host{display:flex;align-items:center;justify-content:center;gap:12px;font-size:var(--t-21);letter-spacing:var(--t-21-ls);font-weight:600}
+.ma-pg-host[data-shape="capsule"]{width:min(380px,80%);height:104px;border-radius:var(--r-pill);corner-shape:round}
+.ma-pg-host[data-shape="rounded"]{width:min(400px,84%);height:240px;border-radius:var(--r-xl);corner-shape:superellipse(var(--k-continuous))}
+.ma-pg-host[data-shape="circle"]{width:180px;height:180px;border-radius:50%;corner-shape:round}
+.ma-pg-host .sym{width:1.2em;height:1.2em}
+.ma-panel-surface .segmented{--seg-platter:var(--fill-1)}
+.ma-pg-panel .segmented{width:100%}
+.ma-pg-panel .segmented > button{flex:1 1 0;padding-inline:8px}
+.ma-pg-panel .select{width:100%}
+.ma-pg-two{display:grid;grid-template-columns:1fr 1fr;gap:22px 20px}
+.ma-pg-two .ma-ctl + .ma-ctl{margin-top:0}
+.ma-pg-out{margin-top:var(--s-6)}
+.ma-pg-actions{display:flex;flex-wrap:wrap;gap:12px;margin-top:16px}
+
+/* ── responsive ─────────────────────────────────────────────────────────── */
+@media (max-width:1068px){
+  .ma-kinds{grid-template-columns:repeat(2,minmax(0,1fr));height:auto}
+  .ma-kind{height:230px}
+  .ma-kind:nth-child(3)::before{display:none}
+  .ma-kinds-info{grid-template-columns:repeat(2,minmax(0,1fr));row-gap:var(--s-8)}
+  ul.ma-layers{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .ma-pg{grid-template-columns:1fr}
+  .ma-pg-stage{position:relative;top:auto;height:460px}
+  .ma-blend{grid-template-columns:1fr}
+}
+@media (max-width:734px){
+  .ma-cols > *,.ma-cols > .ma-c7,.ma-cols > .ma-c5{grid-column:span 12}
+  .ma-anat{grid-template-columns:1fr;height:auto}
+  .ma-anat-half{height:340px}
+  .ma-anat-half + .ma-anat-half{height:420px}
+  .ma-asm{--ma-aw:280px;--ma-ah:170px}
+  .ma-x-scene{--ma-pw:210px;--ma-ph:126px;--ma-gap:44px}
+  ul.ma-layers{grid-template-columns:1fr}
+  .ma-kinds-info{grid-template-columns:1fr}
+  .ma-kind{height:200px}
+  .ma-k-glass .ma-tab{width:40px}
+  .ma-adapt{height:560px}
+  .ma-adapt-panel{inset-block-start:24px;padding:20px 22px}
+  .ma-morphs{grid-template-columns:1fr;height:auto}
+  .ma-mcell{height:400px}
+  .ma-mcell + .ma-mcell::before{inset-block:auto;inset-block-start:0;inset-inline:24px;width:auto;height:1px}
+  .ma-mat{grid-template-columns:1fr;height:auto}
+  .ma-mat > div{height:220px}
+  .ma-mat > div + div::before{inset-block:auto;inset-block-start:0;inset-inline:24px;width:auto;height:1px}
+  .ma-merge{--d:88px;width:calc(var(--d) * 2 + 100px)}
+  .ma-merge-glyph{font-size:30px}
+  .ma-blend-stage{height:260px;gap:14px}
+  .doc-specimen.ma-blend-stage{padding-inline:16px}
+  .ma-vib{min-width:0;flex:1 1 0;padding:16px 16px}
+  .ma-vib .ma-vt,.ma-vib .ma-vl{font-size:var(--t-19);letter-spacing:var(--t-19-ls)}
+  .ma-hosts .table :is(th,td):nth-child(3){display:none}
+  .ma-orb{width:104px;height:104px;font-size:36px}
+  .ma-grad{font-size:var(--t-40);line-height:var(--t-40-lh);letter-spacing:var(--t-40-ls)}
+  .ma-pg-two{grid-template-columns:1fr}
+  .ma-pg-stage{height:380px}
+  .ma-set-bar .ma-tab{width:56px}
+  .ma-hero-hint{inset-block-end:28px}
+  .ma-panel-surface{padding:22px}
+}
+@media (prefers-reduced-motion:reduce){
+  .ma-hero-float{animation:none}
+  .ma-gauge-mark{transition:none}
+}
+</style>
+</head>
+<body>
+
+<!-- ═══ SITE NAV (shared — copy verbatim; set aria-current on this page's link) ═══ -->
+<nav class="globalnav" aria-label="Fluid Design">
+  <div class="globalnav__bar">
+    <a class="globalnav__brand" href="index.html" aria-label="Fluid Design Open home"><i data-sym="sparkles"></i></a>
+    <ul class="globalnav__list">
+      <li class="globalnav__item"><a class="globalnav__link" href="index.html">Overview</a></li>
+      <li class="globalnav__item"><a class="globalnav__link" href="start.html">Start</a></li>
+      <li class="globalnav__item"><a class="globalnav__link" href="docs.html">Docs</a></li>
+      <li class="globalnav__item" data-flyout="gn-foundations"><a class="globalnav__link" href="color.html">Foundations</a><button class="globalnav__trigger" type="button"><span class="sr-only">Foundations menu</span></button></li>
+      <li class="globalnav__item" data-flyout="gn-components"><a class="globalnav__link" href="components.html">Components</a><button class="globalnav__trigger" type="button"><span class="sr-only">Components menu</span></button></li>
+      <li class="globalnav__item" data-flyout="gn-instruments"><a class="globalnav__link" href="selftest.html">Instruments</a><button class="globalnav__trigger" type="button"><span class="sr-only">Instruments menu</span></button></li>
+    </ul>
+    <div class="globalnav__tools">
+      <button class="globalnav__icon" type="button" data-tone-toggle aria-label="Switch appearance"><i data-sym="circle-half"></i></button>
+      <button class="globalnav__menu" type="button" aria-label="Menu" aria-expanded="false"><i data-sym="lines"></i></button>
+    </div>
+  </div>
+  <div class="globalnav__flyout" id="gn-foundations" hidden>
+    <div class="globalnav__flyout-content">
+      <div class="globalnav__group" data-elevated>
+        <h2 class="globalnav__group-title">Foundations</h2>
+        <ul><li><a class="globalnav__flyout-link" href="color.html">Colour</a></li><li><a class="globalnav__flyout-link" href="type.html">Type</a></li><li><a class="globalnav__flyout-link" href="layout.html">Layout</a></li><li><a class="globalnav__flyout-link" href="materials.html" aria-current="page">Materials</a></li><li><a class="globalnav__flyout-link" href="motion.html">Motion</a></li></ul>
+      </div>
+      <div class="globalnav__group">
+        <h2 class="globalnav__group-title">Content</h2>
+        <ul><li><a class="globalnav__flyout-link" href="symbols.html">Symbols</a></li><li><a class="globalnav__flyout-link" href="data.html">Data</a></li></ul>
+      </div>
+    </div>
+  </div>
+  <div class="globalnav__flyout" id="gn-components" hidden>
+    <div class="globalnav__flyout-content">
+      <div class="globalnav__group" data-elevated>
+        <h2 class="globalnav__group-title">Components</h2>
+        <ul><li><a class="globalnav__flyout-link" href="components.html">Controls</a></li><li><a class="globalnav__flyout-link" href="chrome.html">Chrome</a></li><li><a class="globalnav__flyout-link" href="showcase.html">Product pages</a></li><li><a class="globalnav__flyout-link" href="patterns.html">Patterns</a></li></ul>
+      </div>
+    </div>
+  </div>
+  <div class="globalnav__flyout" id="gn-instruments" hidden>
+    <div class="globalnav__flyout-content">
+      <div class="globalnav__group" data-elevated>
+        <h2 class="globalnav__group-title">Instruments</h2>
+        <ul><li><a class="globalnav__flyout-link" href="selftest.html">Self-test</a></li><li><a class="globalnav__flyout-link" href="audit.html">Audit</a></li></ul>
+      </div>
+    </div>
+  </div>
+</nav>
+
+<!-- ═══ LOCAL NAV (per page: title, one CTA, jump links to this page's sections) ═══ -->
+<div class="localnav" data-localnav-reveal="#hero">
+  <div class="localnav__capsule" data-lg3 data-lg3-priority="3">
+    <a class="localnav__title" href="#top">Materials</a>
+    <button class="localnav__explore" type="button"><span class="localnav__explore-label">Explore</span></button>
+    <a class="localnav__cta" href="start.html">Adopt</a>
+    <div class="localnav__panel" aria-label="Explore Fluid Design">
+      <ul class="localnav__tiles">
+        <li><a class="localnav__tile" href="materials.html" style="--tile-hue: var(--series-1)"><span class="localnav__thumb"><i data-sym="sparkles"></i></span>Materials</a></li>
+        <li><a class="localnav__tile" href="motion.html" style="--tile-hue: var(--series-2)"><span class="localnav__thumb"><i data-sym="waveform"></i></span>Motion</a></li>
+        <li><a class="localnav__tile" href="chrome.html" style="--tile-hue: var(--series-3)"><span class="localnav__thumb"><i data-sym="sidebar"></i></span>Chrome</a></li>
+        <li><a class="localnav__tile" href="components.html" style="--tile-hue: var(--series-4)"><span class="localnav__thumb"><i data-sym="sliders"></i></span>Controls</a></li>
+        <li><a class="localnav__tile" href="showcase.html" style="--tile-hue: var(--series-5)"><span class="localnav__thumb"><i data-sym="grid"></i></span>Product pages</a></li>
+      </ul>
+      <hr class="localnav__rule">
+      <nav class="localnav__jump" aria-label="On this page">
+        <p class="localnav__jump-label">On this page <i data-sym="chevron-down"></i></p>
+        <ul class="localnav__jump-grid">
+          <li class="localnav__jump-item"><a href="#kinds">Four kinds</a></li>
+          <li class="localnav__jump-item"><a href="#anatomy">Anatomy</a></li>
+          <li class="localnav__jump-item"><a href="#adapt">Adaptivity</a></li>
+          <li class="localnav__jump-item"><a href="#press">Interaction</a></li>
+          <li class="localnav__jump-item"><a href="#merge">Merge</a></li>
+          <li class="localnav__jump-item"><a href="#morph">Morph</a></li>
+          <li class="localnav__jump-item"><a href="#materialize">Materialize</a></li>
+          <li class="localnav__jump-item"><a href="#density">Density</a></li>
+          <li class="localnav__jump-item"><a href="#settings">Settings</a></li>
+          <li class="localnav__jump-item"><a href="#blending">Blending</a></li>
+          <li class="localnav__jump-item"><a href="#budget">Budget</a></li>
+          <li class="localnav__jump-item"><a href="#playground">Playground</a></li>
+        </ul>
+      </nav>
+    </div>
+  </div>
+</div>
+
+<main id="top">
+
+<!-- ═══ 1 · HERO — a lens over light ═══ -->
+<section class="band hero ma-hero" data-band="stage" id="hero" aria-labelledby="ma-hero-h">
+  <canvas class="hero-art" data-art="twilight" data-art-seed="7" data-art-contrast="1.3" data-art-vignette=".22" data-art-drift=".8" aria-hidden="true"></canvas>
+  <div class="hero-marquee viewport-content">
+    <p class="hero-eyebrow">Materials</p>
+    <h1 class="hero-headline" id="ma-hero-h">Glass that bends the&nbsp;light.</h1>
+    <p class="hero-sub">The glass material for the web.<br>Move the pointer across it. Press it.</p>
+    <div class="ma-hero-stage">
+      <div class="ma-hero-float">
+        <div class="ma-hero-glass" id="ma-hero-glass" data-lg3 data-lg3-live data-lg3-interactive data-lg3-priority="9" data-ma-name="Hero capsule" role="img" aria-label="A large glass capsule over violet light">
+          <i data-sym="sparkles"></i><span>Glass</span>
+        </div>
+      </div>
+      <p class="ma-hero-hint" data-lg3="platter" id="ma-hero-hint"><i data-sym="bolt"></i><span id="ma-hero-read">Refraction on this browser</span></p>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ 2 · FOUR KINDS ═══ -->
+<section class="band" data-band="story" id="kinds" aria-labelledby="ma-kinds-h">
+  <div class="viewport-content">
+    <header class="section-header" data-reveal="up">
+      <h2 class="section-header-headline" id="ma-kinds-h">Four kinds. One attribute.</h2>
+      <a class="section-header-link" href="#playground">Tune them in the playground <i data-sym="chevron-right"></i></a>
+    </header>
+    <div class="doc-specimen ma-stage" data-ground="art" data-pad="none" data-tone="dark">
+      <canvas class="doc-specimen__art" data-art="aurora" data-art-seed="12" data-art-contrast="1.24" aria-hidden="true"></canvas>
+      <div class="ma-kinds">
+        <div class="ma-kind">
+          <div class="ma-k-glass" id="ma-k-glass" data-lg3 data-lg3-recipe="pill" data-lg3-adaptive data-lg3-priority="6" data-ma-name="Kinds: glass" role="img" aria-label="Glass tab bar">
+            <span class="ma-tab"><i data-sym="house"></i></span><span class="ma-tab"><i data-sym="magnifier"></i></span><span class="ma-tab"><i data-sym="person"></i></span>
+          </div>
+          <p class="ma-kind-name"><span data-lg3="platter">data-lg3</span></p>
+        </div>
+        <div class="ma-kind">
+          <div class="ma-k-clear" id="ma-k-clear" data-lg3="clear" data-lg3-priority="6" data-ma-name="Kinds: clear" role="img" aria-label="Clear glass play button"><i data-sym="play"></i></div>
+          <p class="ma-kind-name"><span data-lg3="platter">data-lg3="clear"</span></p>
+        </div>
+        <div class="ma-kind">
+          <div class="ma-k-chrome" id="ma-k-chrome" data-lg3="chrome" role="img" aria-label="Chrome navigation bar"><span>Library</span><i data-sym="ellipsis"></i></div>
+          <p class="ma-kind-name"><span data-lg3="platter">data-lg3="chrome"</span></p>
+        </div>
+        <div class="ma-kind">
+          <div class="ma-k-platter" id="ma-k-platter" data-lg3="platter" role="img" aria-label="Platter chip"><span class="ma-k-plus"><i data-sym="plus"></i></span>Seated</div>
+          <p class="ma-kind-name"><span data-lg3="platter">data-lg3="platter"</span></p>
+        </div>
+      </div>
+    </div>
+    <div class="ma-kinds-info">
+      <div data-reveal="up">
+        <h3 class="ma-h3">Glass</h3>
+        <p class="ma-p">The default. Tab bars, floating controls, sheets at partial height. <strong>Refracts on Chromium with a GPU.</strong></p>
+        <dl class="doc-kv ma-kv"><dt>Frost</dt><dd id="ma-kv-glass-blur">8 px</dd><dt>Transform</dt><dd id="ma-kv-glass-tx">sat 1.93 &middot; scale .517 &middot; offset .266</dd><dt>Adapts</dt><dd>Tone flips when small</dd></dl>
+      </div>
+      <div data-reveal="up">
+        <h3 class="ma-h3">Clear</h3>
+        <p class="ma-p">Over photos and video only, with bold, bright content. <strong>It ships with its own dim.</strong></p>
+        <dl class="doc-kv ma-kv"><dt>Frost</dt><dd id="ma-kv-clear-blur">2.5 px</dd><dt>Dim</dt><dd id="ma-kv-clear-dim">12&ndash;48%, from the backdrop</dd><dt>Adapts</dt><dd>Never</dd></dl>
+      </div>
+      <div data-reveal="up">
+        <h3 class="ma-h3">Chrome</h3>
+        <p class="ma-p">The bar material, for navigation that spans an edge. <strong>No script, no lens.</strong></p>
+        <dl class="doc-kv ma-kv"><dt>Filter</dt><dd id="ma-kv-chrome-f">saturate(180%) blur(20px)</dd><dt>Fill</dt><dd id="ma-kv-chrome-bg">rgba(22, 22, 23, 0.8)</dd></dl>
+      </div>
+      <div data-reveal="up">
+        <h3 class="ma-h3">Platter</h3>
+        <p class="ma-p">Small controls on media: pose chips, paddles, captions. <strong>Measured, not guessed.</strong></p>
+        <dl class="doc-kv ma-kv"><dt>Filter</dt><dd id="ma-kv-platter-f">blur(20px)</dd><dt>Fill</dt><dd id="ma-kv-platter-bg">rgba(51, 51, 54, 0.72)</dd></dl>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ 3 · ANATOMY — six layers, exploded ═══ -->
+<section class="band" data-band="stage" id="anatomy" aria-labelledby="ma-anat-h">
+  <div class="viewport-content">
+    <div class="lockup" data-reveal="up">
+      <p class="lockup-eyebrow">Anatomy</p>
+      <h2 class="lockup-headline" id="ma-anat-h">Six layers. One surface.</h2>
+      <p class="lockup-copy">Glass is drawn as a stack of layers, and LG3 does the same. <strong>Switch any layer off</strong> and both the assembled glass and its exploded twin lose it.</p>
+    </div>
+    <div class="doc-specimen ma-stage ma-below" data-ground="art" data-pad="none" data-tone="dark" style="margin-top:var(--s-11)">
+      <canvas class="doc-specimen__art" data-art="ember" data-art-seed="5" data-art-contrast="1.2" aria-hidden="true"></canvas>
+      <div class="ma-anat">
+        <div class="ma-anat-half">
+          <p class="ma-tag" data-lg3="platter">Assembled</p>
+          <div class="ma-asm" id="ma-asm">
+            <div class="ma-asm-glass" id="ma-asm-glass" data-lg3 data-lg3-size="large" data-lg3-priority="8" data-ma-name="Anatomy: assembled" role="img" aria-label="Assembled glass panel"></div>
+            <span class="doc-pin" data-n="1" style="left:50%;top:0"></span>
+            <span class="doc-pin" data-n="2" style="left:0;top:50%"></span>
+            <span class="doc-pin" data-n="3" style="left:calc(100% - 12px);top:72%"></span>
+            <span class="doc-pin" data-n="4" style="left:36%;top:52%"></span>
+            <span class="doc-pin" data-n="5" style="left:64%;top:52%"></span>
+            <span class="doc-pin" data-n="6" style="left:50%;top:calc(100% + 22px)"></span>
+          </div>
+        </div>
+        <div class="ma-anat-half">
+          <p class="ma-tag" data-lg3="platter">Exploded</p>
+          <div class="ma-x-view">
+            <!-- planes are in PAINT order, back to front: a backdrop-filter in a preserve-3d scene is painted in DOM order, not depth order -->
+            <div class="ma-x-scene" id="ma-x-scene" data-anim-keyframe='{"start":"t - 95vh","end":"t - 35vh","--ma-explode":[0,1],"easeFunction":"easeInOutQuad"}'>
+              <div class="ma-x-plane" data-layer="shadow" style="--i:6"><div class="ma-x-ghost"></div><div class="ma-x-plate ma-only ma-only-shadow" data-lg3 data-lg3-mode="frost" data-lg3-size="large" data-ma-name="Plate: shadow"></div><span class="doc-pin" data-n="6"></span></div>
+              <div class="ma-x-plane" data-layer="frost" style="--i:5"><div class="ma-x-ghost"></div><div class="ma-x-plate ma-only ma-only-frost" data-lg3 data-lg3-mode="frost" data-lg3-size="large" data-ma-name="Plate: frost"></div><span class="doc-pin" data-n="5"></span></div>
+              <div class="ma-x-plane" data-layer="colour" style="--i:4"><div class="ma-x-ghost"></div><div class="ma-x-plate ma-only ma-only-colour" data-lg3 data-lg3-mode="frost" data-lg3-blur="0" data-lg3-size="large" data-ma-name="Plate: colour transform"></div><span class="doc-pin" data-n="4"></span></div>
+              <div class="ma-x-plane" data-layer="rim" style="--i:3"><div class="ma-x-ghost"></div><div class="ma-x-plate ma-only ma-only-rim" id="ma-plate-rim" data-lg3 data-lg3-debug="rimOnly" data-lg3-size="large" data-lg3-priority="7" data-ma-name="Plate: refraction rim"></div><span class="doc-pin" data-n="3"></span></div>
+              <div class="ma-x-plane" data-layer="edge" style="--i:2"><div class="ma-x-ghost"></div><div class="ma-x-plate ma-only ma-only-edge" data-lg3 data-lg3-mode="frost" data-lg3-size="large" data-ma-name="Plate: dark edge"></div><span class="doc-pin" data-n="2"></span></div>
+              <div class="ma-x-plane" data-layer="light" style="--i:1"><div class="ma-x-ghost"></div><div class="ma-x-plate ma-only ma-only-light" data-lg3 data-lg3-mode="frost" data-lg3-size="large" data-ma-name="Plate: top highlight"></div><span class="doc-pin" data-n="1"></span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <ul class="ma-layers" id="ma-layers" aria-label="Glass layers">
+      <li class="ma-layer"><span class="doc-pin" data-n="1"></span><h3 class="ma-h3" id="ma-l1">Top highlight</h3><input class="switch" type="checkbox" role="switch" checked data-layer="light" aria-labelledby="ma-l1">
+        <p>Blinn&ndash;Phong plus a Fresnel rim, lit from above, added with plus-lighter.</p><p class="ma-val">Brightest on top, then the bottom</p></li>
+      <li class="ma-layer"><span class="doc-pin" data-n="2"></span><h3 class="ma-h3" id="ma-l2">Dark edge</h3><input class="switch" type="checkbox" role="switch" checked data-layer="edge" aria-labelledby="ma-l2">
+        <p>A line on the sides that fades toward the top and bottom.</p><p class="ma-val">b &rarr; max(b &minus; 76, .22&thinsp;b)</p></li>
+      <li class="ma-layer"><span class="doc-pin" data-n="3"></span><h3 class="ma-h3" id="ma-l3">Refraction rim</h3><input class="switch" type="checkbox" role="switch" checked data-layer="rim" aria-labelledby="ma-l3">
+        <p>Snell&rsquo;s law across the bevel bends what is behind the edge. Chromium with a GPU only.</p><p class="ma-val" id="ma-val-rim">Bend measured at load</p></li>
+      <li class="ma-layer"><span class="doc-pin" data-n="4"></span><h3 class="ma-h3" id="ma-l4">Colour transform</h3><input class="switch" type="checkbox" role="switch" checked data-layer="colour" aria-labelledby="ma-l4">
+        <p>c&prime; = (lum + (c &minus; lum)&middot;sat)&middot;scale + offset: light compresses, colour stays.</p><p class="ma-val" id="ma-val-colour">sat 2.84 &middot; scale .378 &middot; offset .313</p></li>
+      <li class="ma-layer"><span class="doc-pin" data-n="5"></span><h3 class="ma-h3" id="ma-l5">Frost</h3><input class="switch" type="checkbox" role="switch" checked data-layer="frost" aria-labelledby="ma-l5">
+        <p>A Gaussian blur of the backdrop: 8&nbsp;px on controls, 12&nbsp;px on large glass.</p><p class="ma-val" id="ma-val-frost">12 px here</p></li>
+      <li class="ma-layer"><span class="doc-pin" data-n="6"></span><h3 class="ma-h3" id="ma-l6">Adaptive shadow</h3><input class="switch" type="checkbox" role="switch" checked data-layer="shadow" aria-labelledby="ma-l6">
+        <p>Deeper over busy art, lighter over a calm, light ground. Sampled, not fixed.</p><p class="ma-val" id="ma-val-shadow">Strength sampled at load</p></li>
+    </ul>
+  </div>
+</section>
+
+<!-- ═══ 4 · ADAPTIVITY ═══ -->
+<section class="band" data-band="utility" id="adapt" aria-labelledby="ma-adapt-h">
+  <div class="viewport-content">
+    <header class="section-header" data-reveal="up">
+      <h2 class="section-header-headline" id="ma-adapt-h">Small glass flips. Large glass holds.</h2>
+    </header>
+    <div class="doc-specimen ma-stage ma-adapt" id="ma-adapt" data-ground="art" data-pad="none" data-tone="dark">
+      <canvas class="doc-specimen__art" id="ma-adapt-art" aria-hidden="true"></canvas>
+      <div class="ma-adapt-src" aria-hidden="true">
+        <canvas id="ma-adapt-dark" data-art="deep" data-art-seed="9" data-art-vignette=".2"></canvas>
+        <canvas id="ma-adapt-light" data-art="paper" data-art-seed="4" data-art-vignette="0" data-art-contrast="1.1"></canvas>
+      </div>
+      <div class="ma-adapt-panel ma-dense" id="ma-adapt-panel" data-lg3 data-lg3-tone="light" data-lg3-priority="5" data-ma-name="Adaptivity: large panel">
+        <h3 class="ma-h3">Large glass keeps its tone.</h3>
+        <p>This panel spans dark and light art. It adapts its shadow, never its ink.</p>
+      </div>
+      <div class="btn btn-glass btn-l ma-adapt-chip" id="ma-adapt-chip" data-lg3 data-lg3-adaptive data-lg3-interactive data-lg3-priority="6" data-ma-name="Adaptivity: small chip"
+           role="slider" tabindex="0" aria-label="Glass chip position" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" aria-valuetext="0%, dark">
+        <i data-sym="chevron-left"></i><span>Drag me</span><i data-sym="chevron-right"></i>
+      </div>
+    </div>
+    <div class="ma-cols ma-below">
+      <div>
+        <p class="ma-read" id="ma-adapt-read">Backdrop luma under the chip: <b>&ndash;</b></p>
+        <div class="ma-gauge" aria-hidden="true">
+          <span class="ma-gauge-track"></span><span class="ma-gauge-band"></span><span class="ma-gauge-mark" id="ma-gauge-mark"></span>
+          <span class="ma-gauge-t" style="--at:.5">.50</span><span class="ma-gauge-t" style="--at:.62">.62</span>
+        </div>
+        <div class="ma-gauge-ends ma-read"><span>Dark backdrop</span><span>Light backdrop</span></div>
+        <div class="ma-flips ma-read" id="ma-flips"><span>No flip yet</span></div>
+      </div>
+      <div class="ma-stack">
+        <p class="ma-p">Drag the chip, or focus it and use the arrow keys. It turns light when the backdrop under it passes <strong>.62</strong> and turns dark again only below <strong>.50</strong>, so it never strobes on an edge. The panel is large glass: <strong>it keeps the tone it was given</strong>.</p>
+        <p class="doc-note" data-kind="chosen">Small glass flips; large glass adapts but never flips. The two thresholds are ours.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ 5 · INTERACTION ═══ -->
+<section class="band" data-band="story" id="press" aria-labelledby="ma-press-h">
+  <div class="viewport-content">
+    <header class="section-header" data-reveal="up">
+      <h2 class="section-header-headline" id="ma-press-h">Press it. The light spreads.</h2>
+    </header>
+    <div class="doc-specimen ma-stage ma-press" data-ground="art" data-pad="none" data-tone="dark">
+      <canvas class="doc-specimen__art" data-art="twilight" data-art-seed="23" data-art-contrast="1.2" aria-hidden="true"></canvas>
+      <div class="ma-press-row" id="ma-press-row" data-lg3-container="16">
+        <button class="btn btn-glass btn-icon btn-xl" type="button" data-lg3 data-lg3-interactive data-lg3-priority="4" data-ma-name="Press: back" aria-label="Back"><i data-sym="backward"></i></button>
+        <button class="btn btn-glass btn-icon btn-xl" type="button" data-lg3 data-lg3-interactive data-lg3-priority="5" data-ma-name="Press: play" aria-label="Play"><i data-sym="play"></i></button>
+        <button class="btn btn-glass btn-icon btn-xl" type="button" data-lg3 data-lg3-interactive data-lg3-priority="5" data-ma-name="Press: forward" aria-label="Forward"><i data-sym="forward"></i></button>
+        <button class="btn btn-glass btn-icon btn-xl" type="button" data-lg3 data-lg3-interactive data-lg3-priority="4" data-ma-name="Press: like" aria-label="Like"><i data-sym="heart"></i></button>
+        <button class="btn btn-glass btn-icon btn-xl" type="button" data-lg3 data-lg3-interactive data-lg3-priority="3" data-ma-name="Press: more" aria-label="More"><i data-sym="ellipsis"></i></button>
+      </div>
+    </div>
+    <div class="ma-cols ma-below">
+      <div class="ma-panel-surface">
+        <div class="ma-ctl"><div class="ma-ctl-head"><label for="ma-reach">Glow reach</label><output id="ma-reach-v" for="ma-reach">150 px</output></div>
+          <input class="slider" type="range" id="ma-reach" min="0" max="320" step="10" value="150"></div>
+        <div class="ma-ctl"><div class="ma-ctl-head"><label for="ma-gap">Gap between controls</label><output id="ma-gap-v" for="ma-gap">16 px</output></div>
+          <input class="slider" type="range" id="ma-gap" min="4" max="72" step="2" value="16"></div>
+        <p class="ma-read" style="margin-top:16px">Press and hold any control. Its neighbours light by <b>how far away they really are</b>, not by their index.</p>
+      </div>
+      <div class="ma-stack">
+        <p class="ma-p">Interactive glass <strong>lifts</strong> on press and lights up from the touch point. The glow spreads onto neighbouring glass in the same container and falls off with the real gap.</p>
+        <dl class="doc-kv" aria-label="Measured press values, tab bar">
+          <dt>Glow</dt><dd>White, 93&nbsp;pt across, rises in 0.1&nbsp;s</dd>
+          <dt>Release</dt><dd>Expands 4&times; and fades over 0.5&nbsp;s</dd>
+          <dt>Held press</dt><dd>Spring 0.356&nbsp;s, bounce 0.41</dd>
+          <dt>Let go</dt><dd>Spring 0.25&nbsp;s, no bounce; a small wobble 0.9&nbsp;s later</dd>
+        </dl>
+        <p class="doc-note" data-kind="measured">Frame logs of a tab bar. Pointer hover gets a quieter glow than touch.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ 6 · MERGE ═══ -->
+<section class="band" data-band="utility" id="merge" aria-labelledby="ma-merge-h">
+  <div class="viewport-content">
+    <header class="section-header" data-reveal="up">
+      <h2 class="section-header-headline" id="ma-merge-h">Close enough, and two become one.</h2>
+    </header>
+    <div class="doc-specimen ma-stage ma-merge-stage" data-ground="art" data-pad="none" data-tone="dark">
+      <canvas class="doc-specimen__art" data-art="aurora" data-art-seed="31" data-art-contrast="1.2" aria-hidden="true"></canvas>
+      <div class="ma-merge" id="ma-merge" data-lg3 data-lg3-container="24" data-lg3-priority="6" data-ma-name="Merge: container" style="--gap:40px">
+        <span class="ma-merge-shape ma-merge-a" data-lg3-shape></span>
+        <span class="ma-merge-shape ma-merge-b" id="ma-merge-b" data-lg3-shape></span>
+        <span class="ma-merge-glyph"><i data-sym="plus"></i></span>
+        <span class="ma-merge-glyph b"><i data-sym="heart"></i></span>
+      </div>
+      <p class="ma-tag" data-lg3="platter">Drag the heart</p>
+    </div>
+    <div class="ma-cols ma-below">
+      <div class="ma-panel-surface">
+        <div class="ma-ctl"><div class="ma-ctl-head"><label for="ma-mgap">Gap</label><output id="ma-mgap-v" for="ma-mgap">40 px</output></div>
+          <input class="slider" type="range" id="ma-mgap" min="-40" max="180" step="1" value="40"></div>
+        <div class="ma-ctl"><div class="ma-ctl-head"><label for="ma-mspace">Container spacing</label><output id="ma-mspace-v" for="ma-mspace">24 px</output></div>
+          <input class="slider" type="range" id="ma-mspace" min="0" max="64" step="1" value="24"></div>
+        <p class="ma-read ma-merge-state" id="ma-merge-state" style="margin-top:16px"><i></i><span>Apart</span></p>
+      </div>
+      <div class="ma-stack">
+        <p class="ma-p">Shapes in one container fuse by a <strong>smooth union</strong>. Its smoothing <strong>k is twice the container&rsquo;s spacing</strong>, so the bridge closes the moment the gap drops below the spacing: k&nbsp;&ge;&nbsp;2g. That is the distance at which shapes start to blend.</p>
+<pre class="doc-code" data-lang="html"><code>&lt;div data-lg3 data-lg3-container="24"&gt;
+  &lt;span data-lg3-shape&gt;&lt;/span&gt;
+  &lt;span data-lg3-shape&gt;&lt;/span&gt;
+&lt;/div&gt;</code></pre>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ 7 · MORPH ═══ -->
+<section class="band" data-band="stage" id="morph" aria-labelledby="ma-morph-h">
+  <div class="viewport-content">
+    <div class="lockup" data-reveal="up">
+      <p class="lockup-eyebrow">Morph</p>
+      <h2 class="lockup-headline" id="ma-morph-h">Morph, don&rsquo;t swap.</h2>
+      <p class="lockup-copy">A menu is its button, grown. Give both ends one <code>data-lg3-id</code> and <strong>LG3.morph</strong> carries the silhouette, the corner, the density and the content on one spring.</p>
+    </div>
+    <div class="doc-specimen ma-stage ma-morphs" data-ground="art" data-pad="none" data-tone="dark" style="margin-top:var(--s-11)">
+      <canvas class="doc-specimen__art" data-art="twilight" data-art-seed="41" data-art-contrast="1.22" aria-hidden="true"></canvas>
+      <div class="ma-mcell">
+        <p class="ma-tag" data-lg3="platter">Button &rarr; menu</p>
+        <button class="btn btn-glass btn-icon btn-xl ma-mtrig" type="button" data-lg3 data-lg3-interactive data-lg3-id="ma-more" data-menu="ma-menu" data-lg3-priority="5" data-ma-name="Morph: more button" aria-label="More actions"><i data-sym="ellipsis"></i></button>
+      </div>
+      <div class="ma-mcell">
+        <p class="ma-tag" data-lg3="platter">Pill &rarr; panel</p>
+        <button class="btn btn-glass btn-l ma-mtrig" id="ma-pill" type="button" data-lg3 data-lg3-interactive data-lg3-id="ma-opts" data-lg3-priority="5" data-ma-name="Morph: options pill" aria-expanded="false" aria-controls="ma-panel"><i data-sym="sliders"></i><span>Options</span></button>
+        <div class="ma-mpanel ma-dense" id="ma-panel" style="--w:300px" data-lg3 data-lg3-id="ma-opts" data-lg3-size="large" data-lg3-priority="6" data-lg3-away data-ma-name="Morph: options panel" role="dialog" aria-label="Options">
+          <div class="ma-mpanel-head"><b>Options</b><button class="btn btn-icon btn-s ma-mclose" type="button" id="ma-panel-close" aria-label="Close options"><i data-sym="xmark"></i></button></div>
+          <ul>
+            <li><i data-sym="paperplane"></i>Share</li>
+            <li><i data-sym="bookmark"></i>Save to library</li>
+            <li><i data-sym="arrow-down-tray"></i>Download</li>
+            <li><i data-sym="bell"></i>Notify me</li>
+          </ul>
+        </div>
+      </div>
+      <div class="ma-mcell">
+        <p class="ma-tag" data-lg3="platter">Chip &rarr; card</p>
+        <button class="btn btn-glass btn-l ma-mtrig" id="ma-chip" type="button" data-lg3 data-lg3-interactive data-lg3-id="ma-np" data-lg3-priority="5" data-ma-name="Morph: now playing chip" aria-expanded="false" aria-controls="ma-card"><i data-sym="waveform"></i><span>Now playing</span></button>
+        <div class="ma-mpanel ma-dense ma-np" id="ma-card" style="--w:320px" data-lg3 data-lg3-id="ma-np" data-lg3-size="large" data-lg3-priority="6" data-lg3-away data-ma-name="Morph: now playing card" role="dialog" aria-label="Now playing">
+          <div class="ma-mpanel-head"><span class="ma-np-title">Aurora sessions</span><button class="btn btn-icon btn-s ma-mclose" type="button" id="ma-card-close" aria-label="Close now playing"><i data-sym="xmark"></i></button></div>
+          <span class="ma-np-sub">aurora.demo &middot; Side A</span>
+          <span class="ma-np-bar"><span></span></span>
+          <span class="ma-np-time"><span>2:14</span><span>&minus;1:51</span></span>
+          <span class="ma-np-ctl" aria-hidden="true"><i data-sym="backward"></i><i data-sym="pause"></i><i data-sym="forward"></i></span>
+        </div>
+      </div>
+    </div>
+    <div class="menu" id="ma-menu" data-lg3 data-lg3-id="ma-more" data-lg3-size="large" data-lg3-priority="6" data-ma-name="Morph: menu" data-align="center">
+      <button class="menu-item" type="button"><i data-sym="paperplane"></i><span>Share</span></button>
+      <button class="menu-item" type="button"><i data-sym="star"></i><span>Favourite</span></button>
+      <button class="menu-item" type="button"><i data-sym="link"></i><span>Copy link</span></button>
+      <hr class="menu-separator">
+      <button class="menu-item menu-item-destructive" type="button"><i data-sym="trash"></i><span>Delete</span></button>
+    </div>
+    <div class="ma-cols ma-below">
+      <p class="ma-p">Within a container&rsquo;s spacing a new shape <strong>grows out of its neighbour</strong>; farther away it <strong>materializes</strong>. Both do more than change opacity. Reduced motion keeps the change and drops the travel: the destination appears and its content cross-fades.</p>
+<pre class="doc-code" data-lang="js"><code>// both ends carry data-lg3-id="opts"; the panel starts with data-lg3-away
+LG3.morph(pill, panel, { spring: 'morph' });
+LG3.morph(panel, pill, { duration: 0.45, bounce: 0.1 });</code></pre>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ 8 · MATERIALIZE ═══ -->
+<section class="band" data-band="story" id="materialize" aria-labelledby="ma-mat-h">
+  <div class="viewport-content">
+    <header class="section-header" data-reveal="up">
+      <h2 class="section-header-headline" id="ma-mat-h">Materialize. Never fade.</h2>
+    </header>
+    <div class="doc-specimen ma-stage ma-mat" data-ground="art" data-pad="none" data-tone="dark">
+      <canvas class="doc-specimen__art" data-art="ember" data-art-seed="17" data-art-contrast="1.2" aria-hidden="true"></canvas>
+      <div>
+        <p class="ma-tag" data-lg3="platter">LG3.materialize</p>
+        <p class="ma-behind" aria-hidden="true" data-audit-exempt>Side A &middot; Track 04<br>Aurora sessions<br>Live at dusk &middot; 4:05</p>
+        <div class="ma-mat-chip ma-dense" id="ma-mat-a" data-lg3 data-lg3-priority="6" data-ma-name="Materialize: engine"><i data-sym="waveform"></i><span>Now playing</span></div>
+      </div>
+      <div>
+        <p class="ma-tag" data-lg3="platter">Opacity on a wrapper</p>
+        <p class="ma-behind" aria-hidden="true" data-audit-exempt>Side A &middot; Track 04<br>Aurora sessions<br>Live at dusk &middot; 4:05</p>
+        <div class="ma-fade-wrap" id="ma-fade-wrap"><div class="ma-mat-chip ma-dense" id="ma-mat-b" data-lg3 data-lg3-priority="6" data-ma-name="Materialize: faded wrapper"><i data-sym="waveform"></i><span>Now playing</span></div></div>
+      </div>
+    </div>
+    <div class="ma-cols ma-below">
+      <div>
+        <p class="ma-p">LG3 brings glass in by ramping <strong>lensing, blur and wash</strong> together with a slight scale, 0.9 to 1. The label fades in over the top.</p>
+        <div class="ma-mat-ctl"><button class="btn" type="button" id="ma-mat-go">Dematerialize</button><p class="ma-read" id="ma-mat-read">Lensing <b>1.00</b> &middot; blur <b>8.0 px</b></p></div>
+      </div>
+      <div>
+        <p class="ma-p">Fade a wrapper instead and the wrapper becomes a <strong>backdrop root</strong>: for the whole fade the glass samples nothing behind it and reads as a flat slab.</p>
+        <div class="ma-ctl" style="margin-top:16px"><div class="ma-ctl-head"><label for="ma-fade">Wrapper opacity</label><output id="ma-fade-v" for="ma-fade">1.00</output></div>
+          <input class="slider" type="range" id="ma-fade" min="0" max="100" value="100"></div>
+      </div>
+    </div>
+    <p class="doc-note ma-below" data-kind="trap">Any ancestor with opacity below 1, a filter, a mask or a blend mode cuts the glass off from what is behind it. Nothing throws; the lens just goes flat. Animate transforms on ancestors, and use <code>LG3.materialize</code> / <code>LG3.dematerialize</code> on the glass.</p>
+  </div>
+</section>
+
+<!-- ═══ 9 · DENSITY FOLLOWS MOTION ═══ -->
+<section class="band" data-band="story" id="density" data-band-fade="utility" aria-labelledby="ma-dens-h">
+  <div class="viewport-content">
+    <header class="section-header" data-reveal="up">
+      <h2 class="section-header-headline" id="ma-dens-h">Denser while it moves.</h2>
+    </header>
+    <div class="doc-specimen ma-stage ma-dens" data-ground="art" data-pad="none" data-tone="dark">
+      <canvas class="doc-specimen__art" data-art="aurora" data-art-seed="8" data-art-contrast="1.22" aria-hidden="true"></canvas>
+      <div class="ma-dens-wrap"><div class="ma-dens-glass ma-dense" id="ma-dens" data-lg3 data-lg3-priority="6" data-ma-name="Density: bar"><i data-sym="play-pause"></i><span>Up next</span></div></div>
+    </div>
+    <div class="ma-cols ma-below">
+      <div class="ma-panel-surface">
+        <div class="ma-legend ma-read"><span><i></i>Blur (px)</span><span><i class="w"></i>Wash (%)</span><span id="ma-dens-now">At rest</span></div>
+        <svg class="ma-trace" id="ma-trace" viewBox="0 0 600 150" preserveAspectRatio="none" role="img" aria-label="Blur and wash of the bar over the last four seconds">
+          <path class="t-grid" d="M0 37.5H600M0 75H600M0 112.5H600"/><path class="t-wash" id="ma-trace-w" d="M0 150"/><path class="t-blur" id="ma-trace-b" d="M0 150"/>
+        </svg>
+        <div class="ma-pg-actions"><button class="btn" type="button" id="ma-dens-go">Stretch the bar</button></div>
+      </div>
+      <div class="ma-stack">
+        <p class="ma-p">A control bar blurs <strong>7 &rarr; 14&nbsp;px</strong> and fills <strong>72% &rarr; 100%</strong> while it moves, then relaxes. LG3 does the same on every resize and morph: density rises with speed and drains in 320&nbsp;ms once the glass is still.</p>
+        <p class="doc-note" data-kind="measured">The trace is read from <code>LG3.material(host)</code> every frame: the numbers the engine actually wrote to the filter.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ 10 · SETTINGS — tint, reduce transparency, increase contrast ═══ -->
+<section class="band" data-band="utility" id="settings" aria-labelledby="ma-set-h">
+  <div class="viewport-content">
+    <header class="section-header" data-reveal="up">
+      <h2 class="section-header-headline" id="ma-set-h">Clear or tinted. The reader decides.</h2>
+    </header>
+    <div class="ma-cols">
+      <div class="doc-specimen ma-stage ma-c7" data-ground="art" data-pad="none" data-tone="dark">
+        <canvas class="doc-specimen__art" data-art="twilight" data-art-seed="3" data-art-contrast="1.24" aria-hidden="true"></canvas>
+        <div class="ma-set-stage">
+          <div class="ma-set-bar" id="ma-set-bar" data-lg3 data-lg3-recipe="pill" data-lg3-adaptive data-lg3-priority="5" data-ma-name="Settings: tab bar" role="img" aria-label="Glass tab bar">
+            <span class="ma-tab"><i data-sym="house"></i><small>Home</small></span><span class="ma-tab"><i data-sym="calendar"></i><small>Plan</small></span><span class="ma-tab"><i data-sym="chart-bar"></i><small>Stats</small></span><span class="ma-tab"><i data-sym="gear"></i><small>Settings</small></span>
+          </div>
+          <div class="ma-set-row">
+            <button class="btn btn-glass btn-icon btn-xl" type="button" data-lg3 data-lg3-interactive data-lg3-priority="4" data-ma-name="Settings: round button" aria-label="Search"><i data-sym="magnifier"></i></button>
+            <button class="btn btn-glass btn-l" type="button" data-lg3 data-lg3-interactive data-lg3-priority="4" data-ma-name="Settings: text button">Portrait</button>
+          </div>
+          <p class="ma-tag ma-set-read" data-lg3="platter" id="ma-set-read">Tint 0.50</p>
+        </div>
+      </div>
+      <div class="ma-c5">
+        <p class="list-header">Appearance &rsaquo; Glass</p>
+        <ul class="list list-inset ma-set-list">
+          <li><div class="ma-set-slider"><span>Clear</span><input class="slider" type="range" id="ma-tint" min="0" max="100" value="50" aria-label="Glass, clear to tinted"><span>Tinted</span></div></li>
+          <li><label class="row"><span class="row-title">Reduce Transparency</span><input class="switch" type="checkbox" role="switch" id="ma-rt"></label></li>
+          <li><label class="row"><span class="row-title">Increase Contrast</span><input class="switch" type="checkbox" role="switch" id="ma-ic"></label></li>
+        </ul>
+        <p class="list-footer">Applies to every glass surface on this page, the navigation included. The slider is off while Reduce Transparency or Increase Contrast is on.</p>
+        <p class="ma-p" style="margin-top:var(--s-7)">The midpoint is <strong>exactly the measured recipe</strong>. Toward clear, the wash and blur thin; toward tinted, they thicken until the glass is nearly a solid.</p>
+        <p class="doc-note" data-kind="chosen" style="margin-top:var(--s-5)">The slider has no published end points. LG3&rsquo;s curve is its own, anchored so 0.5 is the default recipe.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ 11 · BLENDING ═══ -->
+<section class="band" data-band="stage" id="blending" aria-labelledby="ma-blend-h">
+  <div class="viewport-content">
+    <div class="lockup" data-reveal="up">
+      <p class="lockup-eyebrow">Blending</p>
+      <h2 class="lockup-headline headline-sweep" id="ma-blend-h">Light adds. It never paints.</h2>
+      <p class="lockup-copy">Highlights and glows are light arriving, so they <strong>add</strong> to what is behind them. Labels stay monochrome, and brand colour lives in the content under the glass.</p>
+    </div>
+    <div class="ma-blend" style="margin-top:var(--s-11)">
+      <div class="ma-blend-card">
+        <div class="doc-specimen ma-stage ma-blend-stage" data-ground="art" data-pad="none" data-tone="dark">
+          <canvas class="doc-specimen__art" data-art="deep" data-art-seed="14" data-art-contrast="1.3" aria-hidden="true"></canvas>
+          <div class="ma-orb ma-normal" data-lg3 data-lg3-interactive data-lg3-priority="4" data-ma-name="Blending: source-over orb" role="img" aria-label="Glass orb with a painted highlight"><i data-sym="sparkles"></i></div>
+          <div class="ma-orb" data-lg3 data-lg3-interactive data-lg3-priority="4" data-ma-name="Blending: plus-lighter orb" role="img" aria-label="Glass orb with an additive highlight"><i data-sym="sparkles"></i></div>
+        </div>
+        <div><h3 class="ma-h3">Plus-lighter specular</h3><p class="ma-p">Both glows are held on. Left: the highlight and glow <strong>painted</strong> with normal blending lay down a white film. Right: <strong>plus-lighter</strong> adds light, so the hue behind it survives.</p></div>
+      </div>
+      <div class="ma-blend-card">
+        <div class="doc-specimen ma-stage ma-blend-stage" data-ground="art" data-pad="none" data-tone="dark">
+          <canvas class="doc-specimen__art" data-art="aurora" data-art-seed="21" data-art-contrast="1.24" aria-hidden="true"></canvas>
+          <div class="ma-vib ma-vib-flat ma-dense" data-lg3 data-lg3-priority="3" data-ma-name="Blending: flat label"><b class="ma-vt">Library</b><span class="ma-vl"><i data-sym="clock"></i>Recent</span></div>
+          <div class="ma-vib ma-vib-plus ma-dense" data-lg3 data-lg3-priority="3" data-ma-name="Blending: vibrant label"><b class="ma-vt">Library</b><span class="ma-vl"><i data-sym="clock"></i>Recent</span></div>
+        </div>
+        <div><h3 class="ma-h3">Vibrancy on glass</h3><p class="ma-p">Primary labels are the glass&rsquo;s monochrome ink. A secondary label drawn with <strong>plus-lighter</strong> (right) picks up the colour under the glass; a flat grey (left) sits on top of it.</p></div>
+      </div>
+      <div class="ma-blend-card">
+        <div class="doc-specimen ma-blend-stage" data-ground="alt">
+          <p class="ma-grad headline-sweep">Intelligence</p>
+        </div>
+        <div><h3 class="ma-h3">Gradient text</h3><p class="ma-p">A six-stop hue ramp clipped to the glyphs, under a vertical ink fade. <code>.headline-sweep</code>; add <code>data-sweep</code> and it plays once on scroll.</p></div>
+      </div>
+      <div class="ma-blend-card">
+        <div class="doc-specimen ma-blend-stage" data-ground="alt">
+          <div class="glow-ring ma-ring"><div class="ma-ring-field"><i data-sym="sparkles"></i><span>Ask about materials</span></div></div>
+        </div>
+        <div><h3 class="ma-h3">The glow ring</h3><p class="ma-p">A conic ring cut out with <code>mask-composite</code>, plus a blurred copy for the bloom. It turns slowly; under reduced motion it holds still and stays visible.</p></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ 12 · BUDGET + ENGINE GATE ═══ -->
+<section class="band" data-band="story" id="budget" aria-labelledby="ma-bud-h">
+  <div class="viewport-content">
+    <header class="section-header" data-reveal="up">
+      <h2 class="section-header-headline" id="ma-bud-h">Three lenses at a time.</h2>
+    </header>
+    <div class="ma-cols">
+      <div class="ma-c7">
+        <div class="ma-bud-big"><span class="t-stat" id="ma-bud-n">0 / 3</span><span class="ma-read">surfaces refracting now, of the budget</span></div>
+        <p class="ma-p" style="margin-top:12px">A refracting surface costs about 0.5&nbsp;ms of GPU per frame, so LG3 grants the lens to <strong>at most three on screen</strong> (one at phone width), highest <code>data-lg3-priority</code> first. The rest fall back to frost, automatically, and win it back when a slot frees. Scroll and watch the list change.</p>
+        <div class="ma-hosts table-scroll" tabindex="0" role="region" aria-label="Glass on this page">
+          <table class="table table-sticky"><thead><tr><th>Surface</th><th class="num">Priority</th><th>On screen</th><th>Path</th></tr></thead><tbody id="ma-hosts"></tbody></table>
+        </div>
+      </div>
+      <div class="ma-c5 ma-stack" style="gap:var(--s-9)">
+        <div class="ma-panel-surface ma-stack">
+          <h3 class="ma-h3">This browser</h3>
+          <dl class="doc-kv" id="ma-caps"><dt>Engine</dt><dd>&ndash;</dd></dl>
+          <div class="ma-ctl"><div class="ma-ctl-head"><span>Force a path</span></div>
+            <div class="segmented" role="radiogroup" aria-label="Glass engine" id="ma-eng"><button role="radio" aria-checked="true" data-value="">Automatic</button><button role="radio" data-value="frost">Frost only</button></div></div>
+          <div class="ma-ctl"><div class="ma-ctl-head"><span>Budget</span></div>
+            <div class="segmented" role="radiogroup" aria-label="Refraction budget" id="ma-bud"><button role="radio" aria-checked="true" data-value="">Auto</button><button role="radio" data-value="0">0</button><button role="radio" data-value="1">1</button><button role="radio" data-value="3">3</button><button role="radio" data-value="6">6</button></div></div>
+        </div>
+        <div class="ma-stack">
+          <h3 class="ma-h3">What Safari and Firefox get</h3>
+          <p class="ma-p">WebKit parses <code>backdrop-filter: url()</code> and then drops the whole backdrop, so asking <code>CSS.supports</code> lies. LG3 refracts only on <strong>Chromium with a hardware GPU</strong>. Everywhere else, and on software renderers, glass takes the frost path: the same blur, the same colour transform, highlight, dark edge and shadow &mdash; <strong>no bending at the rim</strong>.</p>
+          <p class="doc-note" data-kind="measured" id="ma-bar-note">A 50&nbsp;px capsule bends the backdrop by at least 8&nbsp;px at the rim and 2&nbsp;px on average (acceptance). Measured here at load.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ 13 · PLAYGROUND ═══ -->
+<section class="band" data-band="stage" id="playground" aria-labelledby="ma-pg-h">
+  <div class="viewport-content">
+    <div class="lockup" data-reveal="up">
+      <p class="lockup-eyebrow">Playground</p>
+      <h2 class="lockup-headline" id="ma-pg-h">Make your own glass.</h2>
+      <p class="lockup-copy">Every <code>data-lg3</code> parameter on one surface. <strong>The markup below is what you built</strong>, and the address bar keeps it, so a link reproduces it exactly.</p>
+    </div>
+    <div class="ma-pg" style="margin-top:var(--s-11)">
+      <div class="doc-specimen ma-stage ma-pg-stage" data-ground="art" data-pad="none" data-tone="dark" id="ma-pg-stage">
+        <canvas class="doc-specimen__art" id="ma-pg-art" data-art="twilight" data-art-seed="11" data-art-contrast="1.26" aria-hidden="true"></canvas>
+        <div class="ma-pg-host" id="ma-pg-host" data-shape="capsule" data-lg3 data-lg3-interactive data-lg3-priority="10" data-ma-name="Playground" role="img" aria-label="Your glass"><i data-sym="sparkles"></i><span>Glass</span></div>
+      </div>
+      <div class="ma-panel-surface ma-pg-panel" id="ma-pg-panel">
+        <div class="ma-ctl"><div class="ma-ctl-head"><span id="ma-pg-kind-l">Kind</span></div>
+          <div class="segmented" role="radiogroup" aria-labelledby="ma-pg-kind-l" data-pg="kind"><button role="radio" aria-checked="true" data-value="">glass</button><button role="radio" data-value="clear">clear</button><button role="radio" data-value="chrome">chrome</button><button role="radio" data-value="platter">platter</button></div></div>
+        <div class="ma-ctl"><div class="ma-ctl-head"><span id="ma-pg-recipe-l">Recipe</span></div>
+          <div class="segmented" role="radiogroup" aria-labelledby="ma-pg-recipe-l" data-pg="recipe"><button role="radio" aria-checked="true" data-value="">panel</button><button role="radio" data-value="pill">pill</button><button role="radio" data-value="bar">bar</button></div></div>
+        <div class="ma-ctl"><div class="ma-ctl-head"><span id="ma-pg-shape-l">Shape</span></div>
+          <div class="segmented" role="radiogroup" aria-labelledby="ma-pg-shape-l" data-pg="shape"><button role="radio" aria-checked="true" data-value="capsule">capsule</button><button role="radio" data-value="rounded">rounded</button><button role="radio" data-value="circle">circle</button></div></div>
+        <div class="ma-ctl"><div class="ma-ctl-head"><span id="ma-pg-size-l">Size class</span></div>
+          <div class="segmented" role="radiogroup" aria-labelledby="ma-pg-size-l" data-pg="size"><button role="radio" aria-checked="true" data-value="">auto</button><button role="radio" data-value="small">small</button><button role="radio" data-value="large">large</button></div></div>
+        <div class="ma-ctl"><div class="ma-ctl-head"><span id="ma-pg-profile-l">Profile</span></div>
+          <div class="segmented" role="radiogroup" aria-labelledby="ma-pg-profile-l" data-pg="profile"><button role="radio" aria-checked="true" data-value="">auto</button><button role="radio" data-value="circle">circle</button><button role="radio" data-value="lip">lip</button><button role="radio" data-value="squircle">squircle</button><button role="radio" data-value="flat">flat</button></div></div>
+        <div class="ma-pg-two ma-ctl" style="margin-top:22px">
+          <div class="ma-ctl"><div class="ma-ctl-head"><label for="ma-pg-bezel">Bezel</label><output for="ma-pg-bezel" data-out="bezel">auto</output></div><input class="slider" type="range" id="ma-pg-bezel" data-pg="bezel" min="2" max="40" step="0.5" value="17.5"></div>
+          <div class="ma-ctl"><div class="ma-ctl-head"><label for="ma-pg-thickness">Thickness</label><output for="ma-pg-thickness" data-out="thickness">auto</output></div><input class="slider" type="range" id="ma-pg-thickness" data-pg="thickness" min="0" max="48" step="0.5" value="14.5"></div>
+          <div class="ma-ctl"><div class="ma-ctl-head"><label for="ma-pg-ior">Index of refraction</label><output for="ma-pg-ior" data-out="ior">auto</output></div><input class="slider" type="range" id="ma-pg-ior" data-pg="ior" min="1" max="2.4" step="0.01" value="1.48"></div>
+          <div class="ma-ctl"><div class="ma-ctl-head"><label for="ma-pg-dispersion">Dispersion</label><output for="ma-pg-dispersion" data-out="dispersion">auto</output></div><input class="slider" type="range" id="ma-pg-dispersion" data-pg="dispersion" min="0" max="0.3" step="0.005" value="0.045"></div>
+          <div class="ma-ctl"><div class="ma-ctl-head"><label for="ma-pg-blur">Blur</label><output for="ma-pg-blur" data-out="blur">auto</output></div><input class="slider" type="range" id="ma-pg-blur" data-pg="blur" min="0" max="32" step="0.5" value="8"></div>
+          <div class="ma-ctl"><div class="ma-ctl-head"><label for="ma-pg-light">Light angle</label><output for="ma-pg-light" data-out="light">auto</output></div><input class="slider" type="range" id="ma-pg-light" data-pg="light" min="0" max="355" step="5" value="0"></div>
+          <div class="ma-ctl"><div class="ma-ctl-head"><label for="ma-pg-shine">Shine</label><output for="ma-pg-shine" data-out="shine">auto</output></div><input class="slider" type="range" id="ma-pg-shine" data-pg="shine" min="4" max="80" step="1" value="34"></div>
+          <div class="ma-ctl"><div class="ma-ctl-head"><label for="ma-pg-tint">Tint (page-wide)</label><output for="ma-pg-tint" data-out="tint">0.50</output></div><input class="slider" type="range" id="ma-pg-tint" data-pg="tint" min="0" max="100" step="1" value="50"></div>
+          <div class="ma-ctl"><div class="ma-ctl-head"><label for="ma-pg-debug">Show a stage</label></div>
+            <select class="select" id="ma-pg-debug" data-pg="debug"><option value="">Full chain</option><option value="map">Displacement map</option><option value="frost">Frost only</option><option value="lens">Lens only</option><option value="rimOnly">Rim only</option><option value="joined">Rim over frost</option><option value="sat">Before the colour transform</option></select></div>
+          <div class="ma-ctl"><div class="ma-ctl-head"><label for="ma-pg-art">Backdrop</label></div>
+            <select class="select" id="ma-pg-art-sel" data-pg="art" aria-label="Backdrop art"><option value="">twilight</option><option value="aurora">aurora</option><option value="ember">ember</option><option value="deep">deep</option><option value="dawn">dawn</option><option value="steel">steel</option><option value="paper">paper</option></select></div>
+        </div>
+        <p class="ma-read" id="ma-pg-read" style="margin-top:18px">&ndash;</p>
+      </div>
+    </div>
+    <div class="ma-pg-out">
+<pre class="doc-code" data-lang="html" id="ma-pg-code"><code>&lt;div data-lg3&gt;&hellip;&lt;/div&gt;</code></pre>
+      <div class="ma-pg-actions"><button class="btn" type="button" id="ma-pg-link">Copy link</button><button class="btn btn-secondary" type="button" id="ma-pg-reset">Reset</button></div>
+    </div>
+  </div>
+</section>
+
+<script>
+/* materials.html — page behaviour. Runs on fg3:ready (FG3.boot has mounted
+   ART3, LG3, SYM, MOTION, ANIM, UI, CHROME, SHOW by then). Every number shown
+   on this page is read back from the running engine. */
+(function () {
+  'use strict';
+  var doc = document, html = doc.documentElement;
+  var MID = ' ' + String.fromCharCode(183) + ' ', ARROW = String.fromCharCode(8594), MINUS = String.fromCharCode(8722), ND = String.fromCharCode(8211);
+  function $(s, r) { return (r || doc).querySelector(s); }
+  function $$(s, r) { return Array.prototype.slice.call((r || doc).querySelectorAll(s)); }
+  function f(n, d) { return (+n).toFixed(d == null ? 2 : d); }
+  function f0(n, d) { return f(n, d).replace(/^0\./, '.').replace(/^-0\./, '-.'); }
+  function clamp(v, a, b) { return Math.max(a, Math.min(b, v)); }
+  function smooth(a, b, x) { var t = clamp((x - a) / (b - a), 0, 1); return t * t * (3 - 2 * t); }
+  var RM = matchMedia('(prefers-reduced-motion: reduce)');
+  function guard(name, fn) { try { fn(); } catch (e) { if (window.console) console.error('[materials] ' + name, e); } }
+  function inView(el, margin) { var r = el.getBoundingClientRect(), m = margin || 0; return r.bottom > -m && r.top < innerHeight + m && r.width > 0; }
+  /* rAF does not run on a hidden page: pair it with a timeout, first wins */
+  function soon(fn) { var done = false, run = function () { if (!done) { done = true; fn(); } }; requestAnimationFrame(run); setTimeout(run, 100); }
+  function watch(el, onIn, onOut) {
+    if (!('IntersectionObserver' in window)) { onIn(); return; }
+    new IntersectionObserver(function (es) { es.forEach(function (e) { if (e.isIntersecting) onIn(); else if (onOut) onOut(); }); }, { rootMargin: '80px' }).observe(el);
+  }
+  function loop(el, fn) {
+    var on = false;
+    function tick() { if (!on) return; fn(); requestAnimationFrame(tick); }
+    watch(el, function () { if (!on) { on = true; requestAnimationFrame(tick); } }, function () { on = false; });
+  }
+
+  doc.addEventListener('fg3:ready', function () {
+    if (!window.LG3 || !LG3.mount) return;
+    guard('hero', hero);
+    guard('kinds', kinds);
+    guard('anatomy', anatomy);
+    guard('adapt', adapt);
+    guard('press', press);
+    guard('merge', merge);
+    guard('morph', morph);
+    guard('materialize', materialize);
+    guard('density', density);
+    guard('settings', settings);
+    guard('blending', blending);
+    guard('budget', budget);
+    guard('playground', playground);
+  });
+
+  /* ── 1 · hero ───────────────────────────────────────────────────────── */
+  function hero() {
+    var g = $('#ma-hero-glass'), read = $('#ma-hero-read');
+    function say() {
+      var path = g.getAttribute('data-lg3-engine');
+      var rtA = html.getAttribute('data-reduce-transparency');
+      var rt = rtA !== 'off' && (rtA != null || matchMedia('(prefers-reduced-transparency: reduce)').matches);
+      var ic = html.getAttribute('data-contrast') === 'more' || matchMedia('(prefers-contrast: more)').matches;
+      read.textContent = path === 'refraction' ? 'Refracting on this browser'
+        : ic ? 'Increase Contrast: the glass turns solid'
+        : rt ? 'Reduce Transparency: the glass frosts over'
+        : LG3.engine === 'refraction' ? 'Frost while another surface holds the lens' : 'Frost path on this browser';
+    }
+    say(); setTimeout(say, 400);
+    new MutationObserver(say).observe(g, { attributes: true, attributeFilter: ['data-lg3-engine'] });
+    doc.addEventListener('ma:material', say);
+  }
+
+  /* ── 2 · kinds: the recipes, read back from the engine and the CSS ──── */
+  function kinds() {
+    function tx(host) {
+      var m = LG3.material(host); if (!m) return null;
+      return { blur: f(m.blur, 1) + ' px', tx: 'sat ' + f(m.sat) + MID + 'scale ' + f0(m.scale, 3) + MID + 'offset ' + f0(m.offset, 3) };
+    }
+    function fill() {
+      var g = tx($('#ma-k-glass')), c = tx($('#ma-k-clear'));
+      if (g) { $('#ma-kv-glass-blur').textContent = g.blur; $('#ma-kv-glass-tx').textContent = g.tx; }
+      if (c) { $('#ma-kv-clear-blur').textContent = c.blur; }
+      var cd = parseFloat(getComputedStyle($('#ma-k-clear')).getPropertyValue('--lg3-dim'));
+      if (isFinite(cd)) $('#ma-kv-clear-dim').textContent = Math.round(cd * 100) + '% here' + MID + '12' + ND + '48% by backdrop';
+      ['chrome', 'platter'].forEach(function (k) {
+        var cs = getComputedStyle($('#ma-k-' + k));
+        var bf = cs.backdropFilter || cs.webkitBackdropFilter;
+        if (bf && bf !== 'none') $('#ma-kv-' + k + '-f').textContent = bf;
+        $('#ma-kv-' + k + '-bg').textContent = cs.backgroundColor;
+      });
+    }
+    fill(); setTimeout(fill, 600);
+    doc.addEventListener('fg3:tone', function () { setTimeout(fill, 60); });
+    doc.addEventListener('ma:material', fill);
+  }
+
+  /* ── 3 · anatomy: six switches → the assembled host and its plates ─── */
+  function anatomy() {
+    var asm = $('#ma-asm'), glass = $('#ma-asm-glass'), rimPlate = $('#ma-plate-rim');
+    var on = { light: true, edge: true, rim: true, colour: true, frost: true, shadow: true };
+    function apply() {
+      var F = on.frost, C = on.colour, R = on.rim;
+      ['data-lg3-debug', 'data-lg3-mode', 'data-lg3-blur'].forEach(function (a) { glass.removeAttribute(a); });
+      asm.classList.toggle('hide-light', !on.light);
+      asm.classList.toggle('hide-edge', !on.edge);
+      asm.classList.toggle('hide-shadow', !on.shadow);
+      asm.classList.toggle('hide-pass', !F && !C && !R);
+      /* the backdrop pass is ONE filter chain; each combination is a real
+         engine configuration, not a CSS imitation */
+      if (F || C || R) {
+        if (!F) glass.setAttribute('data-lg3-blur', '0');
+        if (!R && C) glass.setAttribute('data-lg3-mode', 'frost');
+        if (R && !C) glass.setAttribute('data-lg3-debug', F ? 'joined' : 'lens');
+        if (!R && !C && F) glass.setAttribute('data-lg3-debug', 'frost');
+      }
+      LG3.refresh(glass);
+      $$('.ma-x-plane').forEach(function (p) { p.classList.toggle('is-off', !on[p.getAttribute('data-layer')]); });
+      $$('.ma-asm .doc-pin').forEach(function (pin, i) {
+        var key = ['light', 'edge', 'rim', 'colour', 'frost', 'shadow'][i];
+        pin.style.opacity = on[key] ? '' : '.38';
+      });
+    }
+    $$('#ma-layers input[data-layer]').forEach(function (inp) {
+      inp.addEventListener('change', function () { on[inp.getAttribute('data-layer')] = inp.checked; apply(); });
+    });
+    /* the rim plate needs the refraction path; on frost it shows nothing */
+    function rimState() {
+      var flat = rimPlate.getAttribute('data-lg3-engine') !== 'refraction';
+      rimPlate.classList.toggle('is-flat', flat);
+    }
+    new MutationObserver(rimState).observe(rimPlate, { attributes: true, attributeFilter: ['data-lg3-engine'] });
+    rimState();
+    function values() {
+      var m = LG3.material(glass);
+      if (m) {
+        $('#ma-val-colour').textContent = 'sat ' + f(m.sat) + MID + 'scale ' + f0(m.scale, 3) + MID + 'offset ' + f0(m.offset, 3);
+        if (on.frost) $('#ma-val-frost').textContent = f(m.blur, 1) + ' px on this large glass';
+        doc.querySelector('.ma-only-frost').style.setProperty('--ma-frost', f(m.blur, 2) + 'px');
+      }
+      var s = parseFloat(getComputedStyle(glass).getPropertyValue('--lg3-shadow-strength'));
+      if (isFinite(s)) $('#ma-val-shadow').textContent = 'Strength ' + f(s) + ' over this art';
+    }
+    var st = LG3.stats(glass);
+    function rimText() {
+      var live = glass.getAttribute('data-lg3-engine') === 'refraction';
+      if (st) $('#ma-val-rim').textContent = 'Up to ' + f(st.max, 1) + ' px' + MID + 'mean ' + f(st.mean, 1) + ' px' + MID + (live ? 'refracting now' : LG3.engine === 'refraction' ? 'waiting for a slot' : 'frost on this browser');
+    }
+    new MutationObserver(rimText).observe(glass, { attributes: true, attributeFilter: ['data-lg3-engine'] });
+    rimText();
+    values(); setTimeout(values, 700);
+    watch(asm, function () { soon(values); setTimeout(values, 400); });
+    doc.addEventListener('ma:material', values);
+  }
+
+  /* ── 4 · adaptivity: one canvas, dark art melting into light ──────── */
+  function adapt() {
+    var stage = $('#ma-adapt'), cv = $('#ma-adapt-art'), dark = $('#ma-adapt-dark'), light = $('#ma-adapt-light');
+    var chip = $('#ma-adapt-chip'), mark = $('#ma-gauge-mark'), read = $('#ma-adapt-read'), flips = $('#ma-flips');
+    function composite() {
+      var W = dark.width, H = dark.height;
+      if (!W || !H || light.width !== W || light.height !== H) return;
+      cv.width = W; cv.height = H;
+      var ctx = cv.getContext('2d', { willReadFrequently: true });
+      ctx.globalAlpha = 1; ctx.drawImage(light, 0, 0);
+      var strip = Math.max(2, Math.round(W / 300));
+      for (var x = 0; x < W; x += strip) {
+        var a = 1 - smooth(0.34, 0.66, (x + strip / 2) / W);
+        if (a <= 0.001) break;
+        ctx.globalAlpha = a; ctx.drawImage(dark, x, 0, strip, H, x, 0, strip, H);
+      }
+      ctx.globalAlpha = 1;
+      cv.setAttribute('data-lg3-source', '');
+      LG3.adapt(); tick(true);
+    }
+    [dark, light].forEach(function (c) { c.addEventListener('art3:painted', function () { soon(composite); }); });
+    composite();
+    var pad = 24;
+    function maxX() { return Math.max(0, stage.clientWidth - chip.offsetWidth - pad * 2); }
+    function xNow() { var t = getComputedStyle(chip).getPropertyValue('--m-x'); return parseFloat(t) || 0; }
+    var kb = null;
+    var drag = MOTION.draggable(chip, { axis: 'x', hysteresis: 4, onStart: function () { kb = null; }, bounds: function () { return { min: 0, max: maxX(), size: 200 }; } });
+    chip.addEventListener('keydown', function (e) {
+      var step = maxX() / 20, x = kb != null ? kb : xNow(), to = null;
+      if (e.key === 'ArrowRight' || e.key === 'ArrowUp') to = x + step;
+      else if (e.key === 'ArrowLeft' || e.key === 'ArrowDown') to = x - step;
+      else if (e.key === 'Home') to = 0;
+      else if (e.key === 'End') to = maxX();
+      if (to == null) return;
+      e.preventDefault(); kb = clamp(to, 0, maxX());
+      drag.to(kb, 'snappy');
+    });
+    var lastX = -1, lastApp = chip.getAttribute('data-lg3-appearance'), log = [];
+    function tick(force) {
+      var x = xNow();
+      if (!force && Math.abs(x - lastX) < 0.5) return;
+      lastX = -1;
+      LG3.adapt();
+      var b = LG3.sampleBackdrop(chip), app = chip.getAttribute('data-lg3-appearance');
+      var pct = Math.round(x / (maxX() || 1) * 100);
+      chip.setAttribute('aria-valuenow', String(pct));
+      chip.setAttribute('aria-valuetext', pct + '%, ' + app + ' glass');
+      if (!b) return;
+      lastX = x;
+      stage.style.setProperty('--luma', f(b.mean, 3));
+      mark.style.setProperty('--luma', f(b.mean, 3));
+      read.innerHTML = 'Backdrop luma under the chip: <b>' + f0(b.mean) + '</b>' + MID + 'appearance <b>' + app + '</b>';
+      if (app !== lastApp && lastApp) {
+        log.unshift('Turned <b>' + app + '</b> at luma <b>' + f0(b.mean) + '</b>');
+        log = log.slice(0, 2);
+        flips.innerHTML = log.map(function (s) { return '<span>' + s + '</span>'; }).join('');
+      }
+      lastApp = app;
+    }
+    loop(stage, function () { tick(false); });
+    watch(stage, function () { setTimeout(function () { tick(true); }, 150); });
+    addEventListener('resize', function () { soon(function () { tick(true); }); });
+  }
+
+  /* ── 5 · press: glow reach and the real gap ─────────────────────────── */
+  function press() {
+    var row = $('#ma-press-row'), reach = $('#ma-reach'), gap = $('#ma-gap');
+    reach.addEventListener('input', function () { row.setAttribute('data-lg3-glow', reach.value); $('#ma-reach-v').textContent = reach.value + ' px'; });
+    gap.addEventListener('input', function () { row.style.setProperty('--ma-press-gap', gap.value + 'px'); $('#ma-gap-v').textContent = gap.value + ' px'; });
+  }
+
+  /* ── 6 · merge: the gap against the container's spacing ─────────────── */
+  function merge() {
+    var host = $('#ma-merge'), b = $('#ma-merge-b'), gIn = $('#ma-mgap'), sIn = $('#ma-mspace'), state = $('#ma-merge-state');
+    var gap = +gIn.value, pending = false, lastBuild = 0;
+    function rebuild() {
+      if (pending) return; pending = true;
+      soon(function () {
+        pending = false;
+        var t = performance.now();
+        if (t - lastBuild < 33) { setTimeout(rebuild, 34 - (t - lastBuild)); return; }
+        lastBuild = t; LG3.refresh(host);
+      });
+    }
+    function paint() {
+      var s = +host.getAttribute('data-lg3-container');
+      host.style.setProperty('--gap', gap + 'px');
+      gIn.value = String(Math.round(gap));
+      $('#ma-mgap-v').textContent = Math.round(gap) + ' px';
+      $('#ma-mspace-v').textContent = s + ' px';
+      var merged = gap < s;
+      state.toggleAttribute('data-merged', merged);
+      state.lastChild.innerHTML = (merged ? 'One shape' : 'Two shapes') + MID + 'gap <b>' + Math.round(gap) + ' px</b> ' + (merged ? '&lt;' : '&ge;') + ' spacing <b>' + s + ' px</b>' + MID + 'k = <b>' + 2 * s + ' px</b>';
+      rebuild();
+    }
+    gIn.addEventListener('input', function () { gap = +gIn.value; paint(); });
+    sIn.addEventListener('input', function () { host.setAttribute('data-lg3-container', sIn.value); paint(); });
+    /* drag the heart along the row */
+    var start = null;
+    b.addEventListener('pointerdown', function (e) { start = { x: e.clientX, g: gap, id: e.pointerId }; try { b.setPointerCapture(e.pointerId); } catch (err) {} });
+    b.addEventListener('pointermove', function (e) {
+      if (!start || e.pointerId !== start.id) return;
+      gap = clamp(start.g + (e.clientX - start.x), +gIn.min, +gIn.max); paint();
+    });
+    ['pointerup', 'pointercancel'].forEach(function (t) { b.addEventListener(t, function () { start = null; soon(function () { LG3.refresh(host); }); }); });
+    paint();
+  }
+
+  /* ── 7 · morph by identity ──────────────────────────────────────────── */
+  function morph() {
+    function pair(trigger, panel, close) {
+      var open = false;
+      function show() {
+        if (open) return; open = true;
+        trigger.setAttribute('aria-expanded', 'true');
+        LG3.morph(trigger, panel, { spring: 'morph' }).then(function () { if (open) close.focus({ preventScroll: true }); });
+      }
+      function hide() {
+        if (!open) return; open = false;
+        trigger.setAttribute('aria-expanded', 'false');
+        LG3.morph(panel, trigger, { duration: 0.45, bounce: 0.1 }).then(function () { if (!open) trigger.focus({ preventScroll: true }); });
+      }
+      trigger.addEventListener('click', show);
+      close.addEventListener('click', hide);
+      panel.addEventListener('keydown', function (e) { if (e.key === 'Escape') { e.preventDefault(); hide(); } });
+      doc.addEventListener('pointerdown', function (e) { if (open && !panel.contains(e.target) && !trigger.contains(e.target)) hide(); });
+    }
+    pair($('#ma-pill'), $('#ma-panel'), $('#ma-panel-close'));
+    pair($('#ma-chip'), $('#ma-card'), $('#ma-card-close'));
+  }
+
+  /* ── 8 · materialize vs a faded wrapper ─────────────────────────────── */
+  function materialize() {
+    var a = $('#ma-mat-a'), go = $('#ma-mat-go'), read = $('#ma-mat-read'), wrap = $('#ma-fade-wrap'), fade = $('#ma-fade'), on = true, running = false;
+    function show() {
+      var m = LG3.material(a);
+      var hidden = a.hasAttribute('data-lg3-away');
+      read.innerHTML = 'Lensing <b>' + (hidden ? '0.00' : f(m ? m.refr : 1)) + '</b>' + MID + 'blur <b>' + (hidden ? '0.0' : f(m ? m.blur : 8, 1)) + ' px</b>';
+    }
+    go.addEventListener('click', function () {
+      on = !on; go.textContent = on ? 'Dematerialize' : 'Materialize';
+      running = true;
+      (on ? LG3.materialize(a) : LG3.dematerialize(a)).then(function () { running = false; show(); });
+      (function t() { show(); if (running) requestAnimationFrame(t); })();
+    });
+    fade.addEventListener('input', function () {
+      var v = fade.value / 100;
+      wrap.style.opacity = v >= 1 ? '' : String(v);
+      $('#ma-fade-v').textContent = f(v);
+    });
+    show();
+  }
+
+  /* ── 9 · density follows motion: a live trace of what the engine wrote ── */
+  function density() {
+    var host = $('#ma-dens'), go = $('#ma-dens-go'), pb = $('#ma-trace-b'), pw = $('#ma-trace-w'), now = $('#ma-dens-now');
+    var N = 240, blur = [], wash = [], out = false;
+    for (var i = 0; i < N; i++) { blur.push(null); wash.push(null); }
+    var rest = null;
+    function path(arr, max) {
+      var d = '', started = false;
+      for (var k = 0; k < N; k++) {
+        if (arr[k] == null) continue;
+        var x = (k / (N - 1) * 600).toFixed(1), y = (150 - clamp(arr[k] / max, 0, 1) * 144 - 3).toFixed(1);
+        d += (started ? 'L' : 'M') + x + ' ' + y; started = true;
+      }
+      return d || 'M0 150';
+    }
+    loop(host, function () {
+      var m = LG3.material(host); if (!m) return;
+      if (!rest && !host.hasAttribute('data-m-moving')) rest = { blur: m.blur, wash: 1 - m.scale };
+      blur.push(m.blur); blur.shift();
+      wash.push((1 - m.scale) * 100); wash.shift();
+      pb.setAttribute('d', path(blur, 32));
+      pw.setAttribute('d', path(wash, 100));
+      var pk = Math.max.apply(null, blur.filter(function (v) { return v != null; })), pwk = Math.max.apply(null, wash.filter(function (v) { return v != null; }));
+      now.innerHTML = 'Now <b>' + f(m.blur, 1) + ' px</b>' + MID + '<b>' + Math.round((1 - m.scale) * 100) + '%</b>' + (pk > (rest ? rest.blur + 0.5 : 99) ? MID + 'peak ' + f(pk, 1) + ' px' + MID + Math.round(pwk) + '%' : rest ? MID + 'at rest' : '');
+    });
+    go.addEventListener('click', function () {
+      out = !out;
+      go.textContent = out ? 'Shrink the bar' : 'Stretch the bar';
+      MOTION.progress(host, out ? 1 : 0, { spring: 'bouncy', var: '--ma-stretch' });
+    });
+  }
+
+  /* ── 10 · settings: tint, reduce transparency, increase contrast ───── */
+  function settings() {
+    var tint = $('#ma-tint'), rt = $('#ma-rt'), ic = $('#ma-ic'), read = $('#ma-set-read'), bar = $('#ma-set-bar');
+    var pgTint = $('#ma-pg-tint');
+    function readout() {
+      var m = LG3.material(bar);
+      read.innerHTML = 'Tint <b>' + f(LG3.tint) + '</b>' + (m ? MID + 'wash <b>' + Math.round((1 - m.scale) * 100) + '%</b>' + MID + 'blur <b>' + f(m.blur, 1) + ' px</b>' : '') +
+        (rt.checked ? MID + 'reduce transparency' : '') + (ic.checked ? MID + 'increase contrast' : '');
+      doc.dispatchEvent(new CustomEvent('ma:material'));
+    }
+    function setTint(v, from) {
+      LG3.setTint(v);
+      if (from !== tint) { tint.value = String(Math.round(v * 100)); if (tint.__uiSlider) tint.__uiSlider.paint(); }
+      if (from !== pgTint && pgTint) { pgTint.value = String(Math.round(v * 100)); if (pgTint.__uiSlider) pgTint.__uiSlider.paint(); var o = $('[data-out="tint"]'); if (o) o.textContent = f(v); }
+      readout();
+    }
+    window.__maSetTint = setTint;
+    tint.addEventListener('input', function () { setTint(tint.value / 100, tint); });
+    function lock() { var off = rt.checked || ic.checked; tint.disabled = off; if (pgTint) pgTint.disabled = off; }
+    rt.addEventListener('change', function () { LG3.setReduceTransparency(rt.checked ? true : null); lock(); readout(); });
+    ic.addEventListener('change', function () {
+      if (ic.checked) html.setAttribute('data-contrast', 'more'); else html.removeAttribute('data-contrast');
+      LG3.setTint(LG3.tint); lock(); readout();
+    });
+    readout();
+  }
+
+  /* ── 11 · blending: hold both glows on, so the two blend modes compare at rest ── */
+  function blending() {
+    var orbs = $$('.ma-orb');
+    function hold() {
+      orbs.forEach(function (o) {
+        o.style.setProperty('--lg3-glow', '1'); o.style.setProperty('--lg3-glow-r', '1.7');
+        o.style.setProperty('--lg3-gx', '32%'); o.style.setProperty('--lg3-gy', '26%');
+      });
+    }
+    hold();
+    orbs.forEach(function (o) { o.addEventListener('pointerleave', function () { setTimeout(hold, 700); }); });
+  }
+
+  /* ── 12 · budget: every glass surface on the page, live ─────────────── */
+  function budget() {
+    var body = $('#ma-hosts'), n = $('#ma-bud-n'), caps = LG3.caps;
+    var names = new Map();
+    function nameOf(h) {
+      if (names.has(h)) return names.get(h);
+      var s = h.getAttribute('data-ma-name') || (h.classList.contains('localnav__capsule') ? 'Local navigation' : h.getAttribute('aria-label') || h.className.split(' ')[0]);
+      names.set(h, s); return s;
+    }
+    function render() {
+      var list = [];
+      LG3.hosts.forEach(function (h) {
+        if (!h.isConnected || !h.__lg3) return;
+        var kind = h.getAttribute('data-lg3-kind');
+        if (kind !== 'glass' && kind !== 'clear') return;
+        if (h.hasAttribute('data-lg3-away') || h.closest('.globalnav__flyout')) return;
+        var r = h.getBoundingClientRect(), vis = r.width > 0 && r.bottom > -120 && r.top < innerHeight + 120;
+        list.push({ h: h, name: nameOf(h), p: +(h.getAttribute('data-lg3-priority') || 0), vis: vis, path: h.getAttribute('data-lg3-engine') || 'frost', mode: h.getAttribute('data-lg3-mode') });
+      });
+      list.sort(function (a, b) { return (b.path === 'refraction') - (a.path === 'refraction') || (b.vis - a.vis) || (b.p - a.p); });
+      var rows = list.map(function (x) {
+        return '<tr><td>' + x.name + '</td><td class="num">' + x.p + '</td><td>' + (x.vis ? 'Yes' : 'No') + '</td><td><span class="ma-path" data-path="' + x.path + '"><i></i>' +
+          (x.path === 'refraction' ? 'Refraction' : x.mode === 'frost' ? 'Frost (asked)' : 'Frost') + '</span></td></tr>';
+      }).join('');
+      if (body.__rows !== rows) { body.innerHTML = rows; body.__rows = rows; }
+      n.textContent = (html.getAttribute('data-lg3-refracting') || '0/0').replace('/', ' / ');
+    }
+    function capsOut() {
+      var eng = LG3.engine;
+      $('#ma-caps').innerHTML = '<dt>Browser</dt><dd>' + (caps.chromium ? 'Chromium' : 'Not Chromium') + '</dd>' +
+        '<dt>Renderer</dt><dd><span class="ma-renderer" title="' + (caps.renderer || '').replace(/"/g, '&quot;') + '">' + (caps.software ? 'Software' : 'Hardware GPU') + (caps.renderer ? MID + caps.renderer.replace(/</g, '&lt;') : '') + '</span></dd>' +
+        '<dt>Path</dt><dd><b>' + (eng === 'refraction' ? 'Refraction' : eng === 'frost' ? 'Frost' : 'Flat (no backdrop-filter)') + '</b></dd>' +
+        '<dt>Probe</dt><dd>' + f(caps.detectMs, 1) + ' ms' + (caps.cached ? ', cached' : '') + '</dd>';
+    }
+    capsOut(); render();
+    setInterval(render, 500);
+    addEventListener('scroll', function () { soon(render); }, { passive: true });
+    $('#ma-eng').addEventListener('change', function (e) { LG3.setEngine(e.detail.item.getAttribute('data-value') || null); capsOut(); render(); doc.dispatchEvent(new CustomEvent('ma:material')); });
+    $('#ma-bud').addEventListener('change', function (e) { var v = e.detail.item.getAttribute('data-value'); LG3.setBudget(v === '' ? null : +v); render(); });
+    /* acceptance: the 50 px capsule (720 x 50, engine defaults) */
+    var probe = doc.createElement('div');
+    probe.setAttribute('data-lg3', ''); probe.setAttribute('data-lg3-mode', 'frost');
+    probe.style.cssText = 'position:absolute;left:-3000px;top:0;width:720px;height:50px;border-radius:999px';
+    doc.body.appendChild(probe); LG3.apply(probe);
+    var s = LG3.stats(probe); probe.remove(); if (LG3.hosts.delete) LG3.hosts.delete(probe);
+    if (s) $('#ma-bar-note').innerHTML = 'A 50&nbsp;px capsule must bend the backdrop by at least 8&nbsp;px at the rim and 2&nbsp;px on average. Measured here: <b>' + f(s.max, 1) + ' px</b> max, <b>' + f(s.mean, 2) + ' px</b> mean, over ' + s.displaced + ' px &mdash; ' + (s.max >= 8 && s.mean >= 2 ? 'passes.' : 'fails.');
+  }
+
+  /* ── 13 · playground: every parameter, markup out, state in the URL ─── */
+  function playground() {
+    var stage = $('#ma-pg-stage'), art = $('#ma-pg-art'), host = $('#ma-pg-host'), code = $('#ma-pg-code code'), read = $('#ma-pg-read');
+    var NUM = ['bezel', 'thickness', 'ior', 'dispersion', 'blur', 'light', 'shine'];
+    var SEG = ['kind', 'recipe', 'shape', 'size', 'profile'];
+    var st = {}, tmp = host.cloneNode(true);
+    $$('[class^="lg3__"]', tmp).forEach(function (x) { x.remove(); });
+    var CONTENT = tmp.innerHTML;
+    function segOf(k) { return $('.segmented[data-pg="' + k + '"]'); }
+    function slider(k) { return $('input[data-pg="' + k + '"]'); }
+    function out(k) { return $('output[data-out="' + k + '"]'); }
+    function fmt(k, v) { return k === 'ior' ? f(v, 2) : k === 'dispersion' ? f(v, 3) : k === 'light' ? Math.round(v) + String.fromCharCode(176) : String(+(+v).toFixed(1)); }
+    /* URL: ?pg-bezel=18&pg-kind=clear … (only what differs from the default) */
+    function toURL() {
+      var q = new URLSearchParams(location.search);
+      Array.from(q.keys()).forEach(function (k) { if (/^pg-/.test(k)) q.delete(k); });
+      Object.keys(st).forEach(function (k) { if (st[k] !== '' && st[k] != null) q.set('pg-' + k, st[k]); });
+      var s = q.toString();
+      try { history.replaceState(null, '', location.pathname + (s ? '?' + s : '') + location.hash); } catch (e) {}
+    }
+    function fromURL() {
+      var q = new URLSearchParams(location.search);
+      q.forEach(function (v, k) { if (/^pg-/.test(k)) st[k.slice(3)] = v; });
+    }
+    function markup() {
+      var a = ['data-lg3' + (st.kind ? '="' + st.kind + '"' : '')];
+      if (st.recipe) a.push('data-lg3-recipe="' + st.recipe + '"');
+      if (st.size) a.push('data-lg3-size="' + st.size + '"');
+      if (st.profile) a.push('data-lg3-profile="' + st.profile + '"');
+      NUM.forEach(function (k) { if (st[k] != null && st[k] !== '') a.push('data-lg3-' + k + '="' + st[k] + '"'); });
+      if (st.debug) a.push('data-lg3-debug="' + st.debug + '"');
+      a.push('data-lg3-interactive');
+      var lines = ['<div class="glass ' + (st.shape || 'capsule') + '"'];
+      a.forEach(function (x) { lines.push('     ' + x); });
+      var s = lines.join('\n') + '>\n  ' + String.fromCharCode(8230) + '\n</div>';
+      if (st.tint != null && st.tint !== '' && +st.tint !== 50) s += '\n<script>LG3.setTint(' + f(st.tint / 100) + ');</' + 'script>';
+      code.textContent = s;
+    }
+    function attrs(el) {
+      el.setAttribute('data-lg3', st.kind || '');
+      el.setAttribute('data-shape', st.shape || 'capsule');
+      [['recipe', 'data-lg3-recipe'], ['size', 'data-lg3-size'], ['profile', 'data-lg3-profile'], ['debug', 'data-lg3-debug']].forEach(function (p) {
+        if (st[p[0]]) el.setAttribute(p[1], st[p[0]]); else el.removeAttribute(p[1]);
+      });
+      NUM.forEach(function (k) { if (st[k] != null && st[k] !== '') el.setAttribute('data-lg3-' + k, st[k]); else el.removeAttribute('data-lg3-' + k); });
+    }
+    /* a kind or shape change rebuilds the host: chrome and platter are CSS
+       materials, and the engine's layers must not linger on them */
+    var lastKind = null;
+    function rebuild() {
+      var n = doc.createElement('div');
+      n.className = 'ma-pg-host'; n.id = 'ma-pg-host';
+      n.setAttribute('data-lg3-interactive', ''); n.setAttribute('data-lg3-priority', '10');
+      n.setAttribute('data-ma-name', 'Playground'); n.setAttribute('role', 'img'); n.setAttribute('aria-label', 'Your glass');
+      n.innerHTML = CONTENT;
+      attrs(n);
+      host.replaceWith(n); host = n;
+      LG3.mount(n);
+      lastKind = st.kind || '';
+    }
+    var queued = false;
+    function applyHost(forceRebuild) {
+      if (forceRebuild || (st.kind || '') !== lastKind) { rebuild(); }
+      else { attrs(host); if (!queued) { queued = true; soon(function () { queued = false; LG3.refresh(host); readback(); }); } }
+      markup(); toURL(); readback();
+    }
+    function readback() {
+      /* the kind first: chrome and platter are CSS materials with no lens
+         recipe, so the engine's stats and material do not apply to them */
+      var k = host.getAttribute('data-lg3-kind') || st.kind || '';
+      if (k === 'chrome' || k === 'platter') { read.innerHTML = 'A CSS material: <b>' + (getComputedStyle(host).backdropFilter || '') + '</b>'; return; }
+      var s = LG3.stats(host), m = LG3.material(host), eng = host.getAttribute('data-lg3-engine');
+      if (s && m) {
+        /* frost does not bend: it is blur and colour only, whatever took the lens */
+        var bend = eng === 'frost' ? 'no bend (frost is blur and colour only)' : 'bend <b>' + f(s.max, 1) + ' px</b> max, <b>' + f(s.mean, 1) + '</b> mean';
+        read.innerHTML = 'Path <b>' + (eng || ND) + '</b>' + MID + 'size <b>' + host.getAttribute('data-lg3-size-class') + '</b>' + MID + bend + MID + 'blur <b>' + f(m.blur, 1) + ' px</b>';
+        /* sliders that were never touched show the engine's own value */
+        var auto = { bezel: s.bezel, thickness: s.thickness, blur: m.blur };
+        Object.keys(auto).forEach(function (key) {
+          if (st[key] == null || st[key] === '') { var inp = slider(key); inp.value = String(auto[key]); if (inp.__uiSlider) inp.__uiSlider.paint(); out(key).textContent = 'auto ' + fmt(key, auto[key]); }
+        });
+      }
+    }
+    NUM.forEach(function (k) {
+      var inp = slider(k);
+      inp.addEventListener('input', function () { st[k] = String(+inp.value); out(k).textContent = fmt(k, inp.value); applyHost(false); });
+    });
+    SEG.forEach(function (k) {
+      segOf(k).addEventListener('change', function (e) {
+        st[k] = e.detail.item.getAttribute('data-value') || '';
+        applyHost(k === 'shape' || k === 'kind');
+      });
+    });
+    $('#ma-pg-debug').addEventListener('change', function (e) { st.debug = e.target.value; applyHost(false); });
+    $('#ma-pg-art-sel').addEventListener('change', function (e) { st.art = e.target.value; art.setAttribute('data-art', st.art || 'twilight'); ART3.repaint(art); markup(); toURL(); });
+    var tIn = slider('tint');
+    tIn.addEventListener('input', function () { st.tint = tIn.value; out('tint').textContent = f(tIn.value / 100); if (window.__maSetTint) window.__maSetTint(tIn.value / 100, tIn); else LG3.setTint(tIn.value / 100); markup(); toURL(); });
+    $('#ma-pg-link').addEventListener('click', function () {
+      var url = location.href.split('#')[0] + '#playground', done = function (ok) { if (window.UI && UI.toast) UI.toast(ok ? 'Link copied' : 'The clipboard is not available here', { kind: ok ? 'ok' : 'bad' }); };
+      try { navigator.clipboard.writeText(url).then(function () { done(true); }, function () { done(false); }); } catch (e) { done(false); }
+    });
+    $('#ma-pg-reset').addEventListener('click', function () {
+      st = {};
+      NUM.forEach(function (k) { out(k).textContent = 'auto'; });
+      SEG.forEach(function (k) { var s = segOf(k); if (s.__uiSeg) s.__uiSeg.select(0, { silent: true }); });
+      $('#ma-pg-debug').value = ''; $('#ma-pg-art-sel').value = '';
+      art.setAttribute('data-art', 'twilight'); ART3.repaint(art);
+      if (window.__maSetTint) window.__maSetTint(0.5, null);
+      applyHost(true);
+    });
+    /* the path changes when the budget grants or takes the lens: say so */
+    var pathObs = new MutationObserver(function () { readback(); });
+    function observePath() { pathObs.disconnect(); pathObs.observe(host, { attributes: true, attributeFilter: ['data-lg3-engine', 'data-lg3-size-class'] }); }
+    var rebuild0 = rebuild;
+    rebuild = function () { rebuild0(); observePath(); };
+    observePath();
+    /* restore from the URL */
+    fromURL();
+    SEG.forEach(function (k) {
+      if (!st[k]) return;
+      var s = segOf(k), items = $$('button', s), i = items.findIndex(function (b) { return (b.getAttribute('data-value') || '') === st[k]; });
+      if (i >= 0 && s.__uiSeg) s.__uiSeg.select(i, { silent: true });
+    });
+    NUM.forEach(function (k) { if (st[k] != null) { var inp = slider(k); inp.value = st[k]; if (inp.__uiSlider) inp.__uiSlider.paint(); out(k).textContent = fmt(k, st[k]); } });
+    if (st.debug) $('#ma-pg-debug').value = st.debug;
+    if (st.art) { $('#ma-pg-art-sel').value = st.art; art.setAttribute('data-art', st.art); ART3.repaint(art); }
+    if (st.tint != null) { if (window.__maSetTint) window.__maSetTint(st.tint / 100, null); }
+    lastKind = '';
+    applyHost(Object.keys(st).length > 0);
+  }
+})();
+</script>
+</main>
+
+<!-- ═══ FOOTER (shared — copy verbatim) ═══ -->
+<footer class="band" data-band="utility" data-band-seam="keep">
+  <div class="viewport-content stack-4">
+    <p class="t-caption" style="color: var(--label-2)">Fluid Design Open &middot; Type follows the system face where one exists and Inter elsewhere. Device art is original.</p>
+    <p class="t-caption"><a href="index.html">Overview</a> &middot; <a href="start.html">Start</a> &middot; <a href="docs.html">Docs</a> &middot; <a href="components.html">Components</a> &middot; <a href="selftest.html">Self-test</a> &middot; <a href="audit.html">Audit</a></p>
+  </div>
+</footer>
+
+<script src="assets/geom.js"></script>
+<script src="assets/spring.js"></script>
+<script src="assets/palette.js"></script>
+<script src="assets/art3.js"></script>
+<script src="assets/lg3-core.js"></script>
+<script src="assets/fg3.js"></script>
+<script src="assets/symbols.js"></script>
+<script src="assets/chart.js"></script>
+<script src="assets/motion.js"></script>
+<script src="assets/anim.js"></script>
+<script src="assets/device.js"></script>
+<script src="assets/ui.js"></script>
+<script src="assets/chrome.js"></script>
+<script src="assets/showcase.js"></script>
+<script src="assets/docs.js"></script>   <!-- documentation pages only -->
+<script>FG3.boot(); if (window.DOCS) DOCS.mount();</script>
+</body>
+</html>

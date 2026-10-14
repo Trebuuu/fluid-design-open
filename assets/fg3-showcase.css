@@ -1,0 +1,914 @@
+/* ═══════════════════════════════════════════════════════════════════════════
+   fg3-showcase.css — the product-page section kit (Fluid Design Open)
+   ───────────────────────────────────────────────────────────────────────────
+   The marketing building blocks, wired to the engines:
+   ANIM presets for scroll choreography, MOTION springs for anything a finger
+   touches, LG3 / --mat-* for the few chrome surfaces, DEVICE for devices.
+   Behaviour lives in showcase.js (global SHOW); every component renders its
+   FINAL state without it (no JS, reduced motion and the base experience all
+   read complete).
+
+   COMPONENTS (canonical names, SPEC §7) and their parts
+     .hero            .hero-art .hero-marquee .hero-eyebrow .hero-headline
+                      .hero-sub .hero-media .hero-platter .hero-price .hero-cta
+     .lockup          .lockup-eyebrow .lockup-headline .lockup-copy .lockup-ctas
+                      .lockup-cta · variant .lockup-start
+     .section-header  .section-header-headline .section-header-link
+     .gallery         .gallery-rail .gallery-list .gallery-item .gallery-card[data-tone]
+                      .gallery-caption[data-pin=bottom] .gallery-media
+                      + the chrome module's .control-bar inside (preferred: SHOW drives it), or
+                      .gallery-bar-track .gallery-bar .gallery-dots .gallery-dot
+                      .gallery-play      (SHOW builds this fallback when chrome is absent)
+     .scroller        .scroller-rail .scroller-list .scroller-item .scroller-card
+                      .scroller-eyebrow .scroller-headline .scroller-body
+                      .scroller-media .scroller-paddles .scroller-paddle
+     .bento           .bento-tile .bento-copy .bento-media (+ fg3 .span-N)
+     .feature-tabs    .feature-tabs-media .feature-tabs-panel .feature-tabs-nav
+                      .feature-tabs-list .feature-tabs-indicator .feature-tabs-tab
+                      .feature-tabs-captions .feature-tabs-caption
+     .pose            .pose-stage .pose-media .pose-list .pose-item .pose-chip
+                      .pose-icon .pose-label .pose-card .pose-paddles
+                      .pose-paddle .pose-close
+     .stat-grid       .stat-cell (or the components' .stat) .stat-lead .stat-value .stat-caption
+                      [data-cols="2|3|4"] · variants .stat-grid-stack .stat-grid-center
+     .compare         .compare-label .compare-select .compare-grid
+     .scene           .scene-sticky .scene-media .scene-visual .scene-copy
+     .clip-expand     (card → full bleed on phones)
+     .headline-sweep  (+ [data-sweep] for the animated sweep)
+     .glow-ring       .glow-ring-edge .glow-ring-bloom > .glow-ring-cone (SHOW builds them)
+     .card-overlay    .card-overlay-toggle[data-sheet="#id"] .card-overlay-icon
+                      .card-overlay-panel (in-card) · dialog.card-overlay-sheet (a
+                      web modal) .card-overlay-sheet-body .card-overlay-close
+                      .card-overlay-topic .card-overlay-title · or the .sheet as target
+     .footnotes       sup.fn
+     .swatches        .swatches-list .swatch .swatch-disc .swatches-name
+     .detent          .detent-caption (+ DEVICE's .device-fold-slider inside)
+     .faq             details.faq-item > summary (.faq-question + a chevron) +
+                      .faq-answer · .faq-bar > button.faq-expand ("Expand all")
+
+   CUSTOM PROPERTIES (inputs)
+     --show-surface         a card's ground; set per band (utility → bg-1, else bg-2)
+     --gallery-h --gallery-cap-inset --gallery-cap-w --gallery-dot-active --gallery-dur
+     --scroller-w --scroller-h --scroller-pad · --bento-h
+     --pose-card-w · --sheet-w --sheet-pad · --swatch (a finish colour)
+     --glow-w --glow-blur (+ --glow-size when it hugs a .device) · --hero-overlap
+     --hero-art-from/--hero-art-to (art fade) · --bento-fade · --scene-scrim-max
+     --scene-scrim-mask (a mask-image list that limits the scene scrim, e.g. to
+       the copy's area; default: the whole media when enhanced, the copy and
+       the note only in the base experience)
+   WRITTEN BY SHOW: --autoplay-progress (gallery) --i (index) --progress
+     (pose, MOTION) --chip-w --card-h (pose) --ind-x --ind-w (tabs)
+     --frame --scene-scrim (scene, via ANIM keyframes, 0→1) --hover-scale
+     --scene-copy-end --scene-note-h (scene: px, where the copy ends below the
+       media's top, and the note's height — the base scrim's extent)
+     --show-sbw (html: classic-scrollbar width) --progress-intro (gallery bar)
+     data-glow-idle (glow ring off screen: the turn is parked)
+
+   MEDIA BOXES (.gallery-media .bento-media .scroller-media .feature-tabs-panel)
+     take a canvas (the art, absolute) plus any content: every non-canvas
+     child is position:relative at zero specificity, so it paints above the
+     art without the page positioning it (a page's own position still wins).
+
+   RULES KEPT: colour is a role (the only literals are the swatch finishes and
+   the swatch specular ring, which are hardware finish — SPEC exception);
+   glass is chrome (hero platter, gallery bar, pose chips, paddles) and never
+   sits on glass; springs for touch, curves only for fire-and-forget
+   choreography; reduced motion keeps every state, drops displacement.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* ── 0 · SHARED ────────────────────────────────────────────────────────────
+   A card is the band's OTHER ground: white on #f5f5f7, #f5f5f7 on white,
+   #1d1d1f on black. One variable, set where the band is. */
+.band{--show-surface:var(--bg-2)}
+.band[data-band="utility"]{--show-surface:var(--bg-1)}
+
+/* THE content radius (28) as a continuous corner: the core's r-lg is
+   28 × r-scale on a superellipse of equal 45° mass. FG3 redraws these where
+   corner-shape is unsupported. Elements that clip-path themselves (scene,
+   clip-expand) never take corner-shape — the fallback would fight the clip. */
+:is(.gallery-card,.scroller-card,.bento-tile,.compare,.feature-tabs-media,.card-overlay-sheet){
+  border-radius:var(--r-lg);corner-shape:superellipse(var(--k-continuous))}
+
+/* Hit area helper: a visual 36px control keeps a 44px target (an
+   ::after expander). */
+:is(.scroller-paddle,.pose-paddle,.pose-close,.card-overlay-close)::after{
+  content:"";position:absolute;inset:-4px;border-radius:inherit}
+
+/* Rails bleed to the viewport edge but start and snap on the content column:
+   padded max(6.25%, (100% − 1260) / 2), the media-card-set (the parent
+   of a rail must be full width — a direct child of the band). */
+:is(.gallery-rail,.scroller-rail){padding-inline:max(6.25%,calc((100% - var(--w-content)) / 2));
+  scroll-padding-inline:max(6.25%,calc((100% - var(--w-content)) / 2))}
+
+/* Media boxes: the art canvas is absolute, so an in-flow sibling (a panel,
+   a device figure) would paint UNDER it and the art's mask would show it
+   through only where the art fades. Positioning the content puts it in the
+   same layer, after the canvas in paint order. :where() keeps this at zero
+   specificity — a page that positions a child itself still wins. */
+:where(.gallery-media,.bento-media,.scroller-media,.feature-tabs-panel) > :where(:not(canvas)){position:relative}
+
+/* ═══ 1 · HERO + PRICE PLATTER ═════════════════════════════════════════════
+   Hero: one viewport — clamp(745px, 100svh, 1244px) —
+   padded 45 / 36; eyebrow 21, headline 80/84 with 8px above, a 14/18 two-line
+   sub 24px below, the product filling the rest down to the band's bottom
+   edge, and the glass price platter overlapping the product's foot. */
+.band.hero{--band-pt:0px;--band-pb:0px;--hero-overlap:40px;position:relative;overflow:clip;isolation:isolate}
+.hero-art{position:absolute;inset:0;width:100%;height:100%;z-index:-1;
+  -webkit-mask-image:linear-gradient(180deg,transparent var(--hero-art-from,16%),#000 var(--hero-art-to,62%));
+          mask-image:linear-gradient(180deg,transparent var(--hero-art-from,16%),#000 var(--hero-art-to,62%))}
+/* Art is the product's light, not the copy's ground: it rises behind the
+   device and fades out on the way up to the stage black, so the headline
+   sits on a flat ground at any art (measured: every ART3 palette is L ≈ .6
+   under a hero headline — the on-art inks need ≤ .40). */
+.hero-marquee{position:relative;display:flex;flex-direction:column;align-items:center;text-align:center;
+  height:clamp(745px,100svh,1244px);padding-block:45px 36px}
+/* height, not min-height: a size container that is a flex item of a column
+   whose height is only a MINIMUM resolves 100cqh to 0 in Chromium (measured,
+   Edge 153) — the device below sizes itself in cqh. */
+.hero-eyebrow{font-family:var(--t-eyebrow-ff);font-size:var(--t-21);line-height:1;letter-spacing:var(--t-21-ls);font-weight:600}
+.hero-headline{font-family:var(--t-hero-ff);font-size:var(--t-hero-fs);line-height:var(--t-hero-lh);
+  letter-spacing:var(--t-hero-ls);font-weight:600;padding-top:8px;text-wrap:balance}
+.hero-sub{margin-top:24px;font-family:var(--t-caption-ff);font-size:var(--t-caption-fs);line-height:var(--t-caption-lh);
+  letter-spacing:var(--t-caption-ls)}
+/* The media fills the space between the sub and the platter and runs
+   --hero-overlap under the platter, so the glass sits over the device's
+   foot. A size container: the device fits by width OR height. */
+.hero-media{position:relative;flex:1 1 auto;align-self:stretch;min-height:240px;margin-top:32px;
+  margin-bottom:calc(-1 * var(--hero-overlap));container-type:size;
+  display:grid;touch-action:pan-y;outline-offset:-2px}
+/* The product stands at the foot, centred. Scoped to a device child:
+   Chromium (Edge 153) applies justify-items to BLOCK children too, so a page
+   that puts other content here would be shrink-wrapped by it. One column
+   the width of the box, so an over-wide device overhangs both edges
+   equally instead of growing the track to the right. */
+.hero-media:has(> .device){place-items:end center;grid-template-columns:minmax(0,1fr)}
+/* Each device fits by width OR height at its own aspect (fg3-device.css:
+   duo 788 × 636, phone 426 × 898, laptop 1440 × 880, browser 1280 × 820). */
+.hero-media > .device{--device-width:min(100cqw,calc(94cqh * 788 / 636))}
+.hero-media > .device[data-device="phone"]{--device-width:min(100cqw,calc(94cqh * 426 / 898))}
+.hero-media > .device[data-device="laptop"]{--device-width:min(100cqw,calc(94cqh * 1440 / 880))}
+.hero-media > .device[data-device="browser"]{--device-width:min(100cqw,calc(94cqh * 1280 / 820))}
+.hero-media[data-dragging]{cursor:grabbing}
+.hero-media[role="slider"]{cursor:grab}
+/* The platter: 572×64 capsule at ≥1069, 10px padding, pricing 14/18 600
+   (14 start / 34 end), 44px CTA on the right. Glass (LG3) — the one hero
+   chip, over the device and the art where a lens has something to bend. */
+.hero-platter{position:relative;z-index:1;display:flex;align-items:center;justify-content:space-between;
+  min-height:64px;padding:10px;border-radius:var(--r-pill);corner-shape:round;text-align:start}
+/* The measured 572 is a floor, not the content's width: shorter pricing
+   keeps the capsule, the CTA stays at its right end */
+@media (min-width:1069px){ .hero-platter{min-width:572px} }
+.hero-price{margin:0;padding-inline:14px 34px;font-family:var(--t-caption-ff);font-size:var(--t-14);
+  line-height:var(--t-14-lh);letter-spacing:var(--t-14-ls);font-weight:600}
+.hero-price > *{display:block}
+/* CTA stand-in at element specificity (it must beat fg3.css a{color:inherit})
+   and no more: the components' .btn / .btn-primary win wherever they declare; this only guarantees the elevated geometry if the components module is not
+   loaded (44px, 11/21 + 1px border, 17px, capsule, brand fill). */
+:is(a,button):where(.hero-cta){display:inline-flex;align-items:center;justify-content:center;flex:none;min-height:44px;
+  padding:11px 21px;border:1px solid transparent;border-radius:var(--r-pill);
+  font-family:var(--font-text);font-size:var(--t-17);line-height:var(--t-17-lh-button);letter-spacing:var(--t-17-ls);
+  background:var(--accent-fill);color:var(--accent-ink);white-space:nowrap;text-decoration:none}
+:is(a,button):where(.hero-cta):hover{background:var(--accent-fill-hover)}
+:is(a,button):where(.hero-cta):active{background:var(--accent-fill-active)}
+/* ≤1068: the platter becomes a full-bleed glass band, radius 0, 18px block
+   padding, content on the column; the CTA drops to 36px / 14px. */
+@media (max-width:1068px){
+  .hero-platter{align-self:stretch;margin-inline:calc(50% - 50vw + var(--show-sbw,0px) / 2);border-radius:0;
+    padding:18px max(6.25vw,calc((100vw - var(--w-content)) / 2))}
+  .hero-price{padding-inline:0 16px}
+  :is(a,button):where(.hero-cta){min-height:36px;padding:8px 15px;font-size:var(--t-14);line-height:var(--t-14-lh);letter-spacing:var(--t-14-ls)}
+}
+@media (max-width:734px){
+  .hero-marquee{padding-top:40px} .band.hero{--hero-overlap:28px}
+  /* phones: the product runs past the column to the screen edges, as
+     The hand-held hero video does */
+  .hero-media{margin-inline:calc(50% - 50vw + var(--show-sbw,0px) / 2)}
+  .hero-media > .device{--device-width:min(100vw,calc(94cqh * 788 / 636));inline-size:var(--device-width)}
+  /* a page may ask for more than the screen (a window that bleeds past both
+     edges): the overhang splits evenly — the margins absorb it, so the
+     margin box is exactly the media's width */
+  .hero-media > .device{margin-inline:calc((100% - var(--device-width)) / 2)}
+}
+/* The marquee headline is 48/52 at 402, a step above
+   the ≤480 lockup role that .t-hero follows. */
+@media (max-width:480px){ .hero-headline{font-size:var(--t-48);line-height:var(--t-48-lh);letter-spacing:var(--t-48-ls)} }
+
+/* ═══ 2 · TYPE LOCKUP ══════════════════════════════════════════════════════
+   ric-type-lockup-xxl: eyebrow 21 (mb 20/18/12), headline 80/84 at 7 of 12
+   columns (mb 26/24/18), copy 21/29 grey with dark same-weight highlights
+   at 8 columns, CTAs 33px apart (12 on phones). Centred; .lockup-start is
+   the left-aligned variant offset one column (cameras / performance). */
+.lockup{display:flex;flex-direction:column;align-items:center;text-align:center;
+  --lk-eb:20px;--lk-hl:26px;--lk-hw:calc(7 / 12 * 100%);--lk-cw:calc(8 / 12 * 100%)}
+.lockup-eyebrow{margin-bottom:var(--lk-eb);font-family:var(--t-eyebrow-ff);font-size:var(--t-eyebrow-fs);
+  line-height:var(--t-eyebrow-lh);letter-spacing:var(--t-eyebrow-ls);font-weight:600}
+.lockup-headline{max-width:var(--lk-hw);margin-bottom:var(--lk-hl);font-family:var(--t-hero-ff);font-size:var(--t-hero-fs);
+  line-height:var(--t-hero-lh);letter-spacing:var(--t-hero-ls);font-weight:600;text-wrap:balance}
+.lockup-headline:last-child,.lockup-copy:last-child{margin-bottom:0}
+.lockup-copy{max-width:var(--lk-cw);font-family:var(--t-lede-ff);font-size:var(--t-lede-fs);line-height:var(--t-lede-lh);
+  letter-spacing:var(--t-lede-ls);color:var(--label-2);text-wrap:pretty}
+.lockup-copy :is(strong,b){color:var(--label);font-weight:inherit}
+.lockup-ctas{display:flex;flex-wrap:wrap;justify-content:inherit;align-items:center;gap:12px 33px;margin-top:24px}
+/* centred like the lockup when the CTAs wrap (.lockup centres with
+   align-items, so an inherited justify-content would be 'normal') */
+.lockup .lockup-ctas{justify-content:center}
+.lockup-cta,.section-header-link{display:inline-flex;align-items:center;gap:.2em;color:var(--link);text-decoration:none}
+.lockup-cta{font-family:var(--t-lede-ff);font-size:var(--t-lede-fs);line-height:var(--t-lede-lh);letter-spacing:var(--t-lede-ls)}
+:is(.lockup-cta,.section-header-link):hover{text-decoration:underline}
+:is(.lockup-cta,.section-header-link) .sym{width:.82em;height:.82em}
+.lockup-start{align-items:flex-start;text-align:start;justify-content:flex-start;padding-inline-start:calc(100% / 12)}
+.lockup-start .lockup-ctas{justify-content:flex-start}
+@media (max-width:1068px){ .lockup{--lk-eb:18px;--lk-hl:24px;--lk-hw:calc(8 / 12 * 100%);--lk-cw:calc(9 / 12 * 100%)} }
+@media (max-width:734px){
+  .lockup{--lk-eb:12px;--lk-hl:18px;--lk-hw:100%;--lk-cw:100%}
+  .lockup-ctas{gap:12px 24px}
+  .lockup-start{padding-inline-start:0}
+}
+
+/* ═══ 3 · SECTION HEADER ═══════════════════════════════════════════════════
+   Headline ≤75% (48/40/32) + a CTA link on the right, last-baseline aligned,
+   80px column gap / 20 row; 48/40/32 to the content. Phones: a column, gap 16,
+   link 14/18 (computed sectionHeader*). */
+.section-header{display:flex;align-items:last baseline;justify-content:space-between;gap:20px 80px;
+  margin-bottom:var(--band-header-gap)}
+.section-header-headline{max-width:75%;font-family:var(--t-section-ff);font-size:var(--t-section-fs);
+  line-height:var(--t-section-lh);letter-spacing:var(--t-section-ls);font-weight:600;text-wrap:balance}
+.section-header-link{flex:none;font-family:var(--font-text);font-size:var(--t-17);line-height:var(--t-17-lh);
+  letter-spacing:var(--t-17-ls);white-space:nowrap}
+@media (max-width:734px){
+  .section-header{flex-direction:column;align-items:flex-start;gap:16px}
+  .section-header-headline{max-width:none}
+  .section-header-link{font-size:var(--t-14);line-height:var(--t-14-lh);letter-spacing:var(--t-14-ls)}
+}
+
+/* ═══ 4 · HIGHLIGHTS GALLERY ═══════════════════════════════════════════════
+   Cards the width of the content column × 612 (576 medium; phones the column
+   − 20 × 480, so the next card peeks), 20px gap, snap centre (start on
+   phones). A page move is a 1s easeInOutQuad scrollLeft tween (SHOW). ONE
+   number, --autoplay-progress (the float card index), drives the caption
+   parallax (−.45 × 3 × 120px per card of travel) and its cubic opacity wave
+   (1 − |offset|)³, exactly the MediaCardGallery CSS. */
+.gallery{--gallery-h:612px;--gallery-cap-inset:48px;--gallery-cap-w:584px;--gallery-dot-active:48px;
+  --gallery-dur:6.15s;--gallery-cw:min(calc((100vw - var(--show-sbw,0px)) * .875),var(--w-content));
+  --gallery-w:var(--gallery-cw)}
+@media (max-width:1068px){ .gallery{--gallery-h:576px} }
+@media (max-width:734px){ .gallery{--gallery-h:480px;--gallery-cap-inset:32px;--gallery-dot-active:32px;
+  --gallery-w:calc(var(--gallery-cw) - 20px)} }
+.gallery-rail{position:relative;overflow-x:auto;overflow-y:hidden;overscroll-behavior-x:contain;
+  scroll-snap-type:x mandatory;scrollbar-width:none;padding-bottom:30px;margin-bottom:-30px}
+.gallery-rail::-webkit-scrollbar{display:none}
+.gallery-list{display:flex;gap:20px;width:max-content;margin:0;padding:0;list-style:none}
+.gallery-item{flex:0 0 var(--gallery-w);scroll-snap-align:center;
+  --offset:calc(var(--autoplay-progress,0) - var(--i,0));--abs:max(var(--offset),-1 * var(--offset));
+  --wave:max(0,1 - var(--abs))}
+@media (max-width:734px){ .gallery-item{scroll-snap-align:start} }
+.gallery-card{position:relative;height:var(--gallery-h);overflow:clip;background:var(--show-surface);isolation:isolate}
+.gallery-media{position:absolute;inset:0;z-index:0;display:grid;place-items:center}
+.gallery-media > canvas{position:absolute;inset:0;width:100%;height:100%;
+  -webkit-mask-image:linear-gradient(180deg,transparent calc(var(--gallery-cap-inset) + 64px),#000 62%);
+          mask-image:linear-gradient(180deg,transparent calc(var(--gallery-cap-inset) + 64px),#000 62%)}
+.gallery-card:has(.gallery-caption[data-pin="bottom"]) .gallery-media > canvas{
+  -webkit-mask-image:linear-gradient(0deg,transparent calc(var(--gallery-cap-inset) + 64px),#000 62%);
+          mask-image:linear-gradient(0deg,transparent calc(var(--gallery-cap-inset) + 64px),#000 62%)}
+@media (max-width:734px){ .gallery-card:has(.gallery-caption[data-pin="bottom"]) .gallery-media > canvas{
+  -webkit-mask-image:linear-gradient(180deg,transparent calc(var(--gallery-cap-inset) + 64px),#000 62%);
+          mask-image:linear-gradient(180deg,transparent calc(var(--gallery-cap-inset) + 64px),#000 62%)} }
+/* a card that pins its own tone takes that tone's page ground */
+.gallery-card[data-tone]{background:var(--bg-1)}
+.gallery-caption{position:absolute;z-index:1;top:var(--gallery-cap-inset);left:50%;
+  width:min(var(--gallery-cap-w),calc(100% - 2 * var(--gallery-cap-inset)));margin:0;
+  translate:-50% 0;text-align:center;color:var(--label);text-wrap:balance;
+  font-family:var(--t-subtitle-ff);font-size:var(--t-subtitle-fs);line-height:var(--t-subtitle-lh);
+  letter-spacing:var(--t-subtitle-ls);font-weight:600;
+  transform:translateX(calc(var(--offset) * 3 * 120px * -.45));
+  opacity:calc(var(--wave) * var(--wave) * var(--wave))}
+.gallery-caption[data-pin="bottom"]{top:auto;bottom:var(--gallery-cap-inset)}
+@media (max-width:734px){ .gallery-caption{font-size:var(--t-17);line-height:var(--t-17-lh);letter-spacing:var(--t-17-ls)} }
+@media (max-width:734px){ .gallery-caption[data-pin="bottom"]{top:var(--gallery-cap-inset);bottom:auto} }
+
+/* The floating control bar: a track the size
+   of the BAND (the band is position:relative; the gallery is not, on
+   purpose) so the bar can stick 32px above the viewport bottom over the
+   cards and park 120/80/56 above the band's end — which is why the band
+   carries data-band-bar (224 bottom). Dot pill 56 tall, 8px dots 16 apart,
+   the current one a 48px (32 phones) pill that fills over 6.15s linear;
+   a 56px play/pause bubble 16px away. */
+.gallery-bar-track{position:absolute;inset:0;z-index:2;pointer-events:none;overflow:clip;
+  display:flex;flex-direction:column;justify-content:flex-end;align-items:center}
+.gallery-bar{pointer-events:auto;position:sticky;bottom:32px;margin:380px 0 var(--band-pad-reduced);
+  display:flex;align-items:center;gap:16px;--progress-intro:1}
+@media (max-width:734px){ .gallery-bar{bottom:20px;margin-top:340px;max-width:calc(100vw - 40px)} }
+.gallery-bubble{height:56px;border-radius:var(--r-pill);corner-shape:round;color:var(--label);
+  background:var(--mat-platter-bg);-webkit-backdrop-filter:blur(7px);backdrop-filter:blur(7px);
+  box-shadow:var(--mat-platter-ring);
+  transition:background-color 250ms linear,-webkit-backdrop-filter 250ms linear,backdrop-filter 250ms linear}
+/* density follows motion: denser while the rail moves (7 → 14px) */
+.gallery[data-m-moving] .gallery-bubble{background:var(--mat-platter-fill-fallback);
+  -webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px)}
+.gallery-dots{display:flex;align-items:center;gap:16px;padding-inline:24px;margin:0;list-style:none}
+.gallery-dot{position:relative;display:block;flex:none;height:8px;padding:0;border-radius:10px;overflow:hidden;
+  width:calc(8px + (var(--gallery-dot-active) - 8px) * var(--dot-expand,0) * var(--progress-intro));
+  background:color-mix(in srgb,currentColor 42%,transparent);cursor:pointer;
+  --dot-o:calc(var(--di,0) - var(--autoplay-progress,0));--dot-expand:max(0,1 - max(var(--dot-o),-1 * var(--dot-o)))}
+.gallery-dot::before{content:"";position:absolute;inset:-18px -8px}
+.gallery-dot:hover:not([aria-current]){background:color-mix(in srgb,currentColor 54%,transparent)}
+.gallery-dot:focus-visible{overflow:visible;outline-offset:3px}
+.gallery-dot[aria-current]{cursor:default;overflow:hidden}
+.gallery-dot[aria-current]::after{content:"";position:absolute;inset-block:0;inset-inline-start:0;width:0;
+  min-width:15%;margin-inline-start:-15%;border-radius:inherit;background:color-mix(in srgb,currentColor 90%,transparent);
+  animation:show-dot-fill var(--gallery-dur) linear forwards;animation-play-state:paused}
+.gallery[data-playing] .gallery-dot[aria-current]::after{animation-play-state:running}
+.gallery-dot[aria-current][data-restart]::after{animation:none}
+.gallery[data-ended] .gallery-dot[aria-current]::after{animation:none;width:115%}
+@keyframes show-dot-fill{from{width:0}to{width:115%}}
+.gallery-play{width:56px;flex:none;display:grid;place-items:center;padding:0;cursor:pointer}
+.gallery-play .sym{width:22px;height:22px;stroke-width:2.4}
+.gallery-play:active{scale:.95;transition:scale 200ms var(--ease-standard)}
+/* Entrance (SHOW arms it; no JS = always shown): the bar rises on the
+   drop spring (k100 c8) when 60% of the rail has entered, dots spread on
+   --progress-intro. The drop → bubble morph itself is the chrome module's .control-bar. */
+.gallery-bar[data-armed]{transition:translate var(--sp-drop-ms,1498ms) var(--sp-drop,var(--ease-decel))}
+.gallery-bar[data-armed]:not(.is-in){translate:0 calc(100% + 60px)}
+
+/* ═══ 5 · CARD SCROLLER + PADDLES ══════════════════════════════════════════
+   The card rail: cards 372 / 344 / 260 × 495 (360 phones), 20px gap,
+   snap start, room above/below for the hover grow and the staggered rise;
+   two 36px alpha paddles at the column's right end, 48/44/40 below; a page is
+   a 1s easeInOutQuad scrollLeft tween (SHOW). Card hover grows 3px a side:
+   scale (w + 6)/w, .3s cubic-bezier(0,0,.5,1). */
+.scroller{--scroller-w:372px;--scroller-h:495px;--scroller-pad:32px}
+@media (max-width:1068px){ .scroller{--scroller-w:344px;--scroller-pad:28px} }
+@media (max-width:734px){ .scroller{--scroller-w:260px;--scroller-h:360px;--scroller-pad:24px} }
+.scroller-rail{position:relative;overflow-x:auto;overflow-y:hidden;overscroll-behavior-x:contain;
+  scroll-snap-type:x mandatory;scrollbar-width:none;padding-block:10px 30px;margin-block:-10px -30px}
+.scroller-rail::-webkit-scrollbar{display:none}
+.scroller-list{display:flex;gap:20px;width:max-content;margin:0;padding:0;list-style:none}
+.scroller-item{flex:0 0 var(--scroller-w);display:flex;scroll-snap-align:start}
+.scroller-card{position:relative;flex:1;display:flex;flex-direction:column;min-height:var(--scroller-h);
+  padding:var(--scroller-pad) var(--scroller-pad) 0;overflow:clip;background:var(--show-surface);
+  transition:scale .3s var(--ease-card),background-color .344s ease}
+@media (hover:hover) and (pointer:fine){ .scroller-card:hover{scale:var(--hover-scale,1.016)} }
+.scroller-eyebrow{font-family:var(--font-text);font-size:var(--t-17);line-height:var(--t-17-lh);letter-spacing:var(--t-17-ls);font-weight:600}
+.scroller-headline{margin-top:8px;font-family:var(--t-subtitle-ff);font-size:var(--t-subtitle-fs);
+  line-height:var(--t-subtitle-lh);letter-spacing:var(--t-subtitle-ls);font-weight:600;text-wrap:balance}
+.scroller-body{margin-top:12px;font-family:var(--font-text);font-size:var(--t-17);line-height:var(--t-17-lh);letter-spacing:var(--t-17-ls)}
+.scroller-media{position:relative;flex:1 0 auto;min-height:200px;margin:24px calc(-1 * var(--scroller-pad)) 0;display:grid;place-items:center}
+.scroller-media > canvas{position:absolute;inset:0;width:100%;height:100%}
+@media (max-width:734px){ .scroller-body{font-size:var(--t-14);line-height:var(--t-14-lh);letter-spacing:var(--t-14-ls)} }
+.scroller-paddles{display:flex;justify-content:flex-end;gap:18px;padding-top:48px}
+@media (max-width:1068px){ .scroller-paddles{padding-top:44px} }
+@media (max-width:734px){ .scroller-paddles{padding-top:40px} }
+.scroller-paddle{position:relative;width:36px;height:36px;padding:0;display:grid;place-items:center;border-radius:50%;
+  background:var(--mat-control-bg);color:var(--mat-control-ink);cursor:pointer;
+  transition:background-color 100ms linear,color 100ms linear,opacity 100ms linear}
+.scroller-paddle:hover:not(:disabled){background:var(--mat-control-bg-hover)}
+.scroller-paddle:active:not(:disabled){background:var(--mat-control-bg-active)}
+.scroller-paddle:disabled{opacity:.42;cursor:default}
+.scroller-paddle .sym{width:20px;height:20px;stroke-width:2.6}
+
+/* ═══ 6 · BENTO ════════════════════════════════════════════════════════════
+   The nested 12-column bento (--ric-gap 20): tiles 620 × 506 in halves,
+   the band's other ground, clipped to THE radius. Place with fg3's .span-N;
+   default is a half. Phones: one column (tile 352 × 308). */
+.bento{display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:20px;--bento-h:506px}
+:where(.bento) > *{grid-column-end:span 6}   /* zero specificity: fg3's .span-N wins */
+@media (max-width:1068px){ .bento{--bento-h:440px} }
+@media (max-width:734px){ .bento{--bento-h:308px} .bento > *{grid-column:auto / span 12} }
+.bento-tile{position:relative;min-height:var(--bento-h);overflow:clip;background:var(--show-surface);
+  display:grid;grid-template-rows:auto 1fr;isolation:isolate}
+.bento-tile[data-tone]{background:var(--bg-2)}
+.bento-copy{position:relative;z-index:1;padding:32px 32px 0}
+.bento-copy > p:first-child{font-family:var(--font-text);font-size:var(--t-17);line-height:var(--t-17-lh);letter-spacing:var(--t-17-ls);font-weight:600}
+.bento-copy > h3,.bento-copy > .bento-title{margin-top:8px;font-family:var(--t-subtitle-ff);font-size:var(--t-subtitle-fs);
+  line-height:var(--t-subtitle-lh);letter-spacing:var(--t-subtitle-ls);font-weight:600;text-wrap:balance}
+.bento-copy > p + p{margin-top:12px;color:var(--label-2);font-size:var(--t-17);line-height:var(--t-17-lh)}
+.bento-media{position:relative;display:grid;place-items:center;padding:24px}
+.bento-tile > .bento-media:only-child{grid-row:1 / -1}
+.bento-media > canvas{position:absolute;inset:0;width:100%;height:100%;z-index:-1}
+.bento-tile > canvas{position:absolute;inset:0;width:100%;height:100%;z-index:-1;
+  /* the copy keeps a flat ground: art only below --bento-fade (px, not %, so a
+     short phone tile with a two-line title does not put words on the art) */
+  -webkit-mask-image:linear-gradient(180deg,transparent var(--bento-fade,160px),#000 calc(var(--bento-fade,160px) + 35%));
+          mask-image:linear-gradient(180deg,transparent var(--bento-fade,160px),#000 calc(var(--bento-fade,160px) + 35%))}
+
+/* ═══ 7 · FEATURE TABS (pill tab switcher driving media) ═══════════════════
+   Cameras' "A whole family of possibilities": one media box 1260 × 712
+   (aspect 1.77, THE radius; phones full-bleed 402 × 536, aspect .75, no
+   radius); panels cross-fade 200ms; a 44px capsule platter (4px pad, the
+   control fill) whose dark 36px indicator travels on the select spring
+   (MOTION) and whose labels invert only after it arrives (160ms + 160ms);
+   the caption below cross-fades 300ms easeOutCubic. */
+.feature-tabs{display:flex;flex-direction:column;align-items:center}
+.feature-tabs-media{position:relative;align-self:stretch;aspect-ratio:1260 / 712;overflow:clip;
+  background:var(--show-surface);display:grid;isolation:isolate}
+.feature-tabs-panel{grid-area:1 / 1;position:relative;display:grid;place-items:center;overflow:clip;
+  opacity:0;visibility:hidden;transition:opacity var(--d-200) linear,visibility 0s linear var(--d-200)}
+.feature-tabs-panel[data-active]{opacity:1;visibility:visible;transition:opacity var(--d-200) linear,visibility 0s}
+.feature-tabs-panel > canvas{position:absolute;inset:0;width:100%;height:100%;z-index:-1}
+@media (max-width:734px){
+  .feature-tabs-media{margin-inline:calc(50% - 50vw + var(--show-sbw,0px) / 2);aspect-ratio:3 / 4;border-radius:0;corner-shape:round}
+}
+.feature-tabs-nav{position:relative;max-width:100%;margin-block:32px;display:flex;align-items:center}
+.feature-tabs-list{position:relative;display:flex;height:44px;padding:4px;border-radius:var(--r-pill);corner-shape:round;
+  background:var(--fill-1);overflow-x:auto;scrollbar-width:none;overscroll-behavior-x:contain;max-width:100%}
+.feature-tabs-list::-webkit-scrollbar{display:none}
+.feature-tabs-indicator{position:absolute;top:4px;left:0;height:36px;border-radius:var(--r-pill);background:var(--label);
+  width:calc(var(--ind-w,0) * 1px);translate:calc(var(--ind-x,0) * 1px) 0;pointer-events:none}
+.feature-tabs-tab{position:relative;z-index:1;flex:none;height:36px;padding:0 16px;border-radius:var(--r-pill);
+  font-family:var(--font-text);font-size:var(--t-14);line-height:var(--t-14-lh);letter-spacing:var(--t-14-ls);
+  color:var(--label);opacity:.8;white-space:nowrap;cursor:pointer;
+  transition:color 160ms var(--ease-exit),opacity 100ms linear}
+.feature-tabs-tab:hover{opacity:1}
+.feature-tabs-tab::before{content:"";position:absolute;inset:-4px 0}   /* 44px target in the 44px platter */
+.feature-tabs-tab[aria-selected="true"]{color:var(--label-inv);opacity:1;cursor:default;
+  transition:color 160ms cubic-bezier(.42,0,1,1) 160ms,opacity 100ms linear}
+.feature-tabs-tab:focus-visible{outline-offset:-2px;outline-color:currentColor}
+/* before SHOW measures, the selected tab carries the pill itself */
+.feature-tabs-list:not([data-ready]) .feature-tabs-tab[aria-selected="true"]{background:var(--label)}
+/* phones: the list scrolls under a 22px mask; paddles fade in (SHOW sets
+   data-overflow = start | end | both) */
+.feature-tabs-list[data-overflow~="end"]{-webkit-mask-image:linear-gradient(90deg,#000 calc(100% - 22px),transparent);mask-image:linear-gradient(90deg,#000 calc(100% - 22px),transparent)}
+.feature-tabs-list[data-overflow~="start"]{-webkit-mask-image:linear-gradient(90deg,transparent,#000 22px);mask-image:linear-gradient(90deg,transparent,#000 22px)}
+.feature-tabs-list[data-overflow~="start"][data-overflow~="end"]{-webkit-mask-image:linear-gradient(90deg,transparent,#000 22px,#000 calc(100% - 22px),transparent);mask-image:linear-gradient(90deg,transparent,#000 22px,#000 calc(100% - 22px),transparent)}
+.feature-tabs-more{position:relative;flex:none;width:36px;height:36px;margin-inline-start:4px;border-radius:50%;display:grid;place-items:center;
+  background:var(--mat-control-bg);color:var(--mat-control-ink);opacity:0;visibility:hidden;
+  transition:opacity 80ms linear,visibility 0s 80ms}
+.feature-tabs-nav[data-overflow] .feature-tabs-more{opacity:1;visibility:visible;transition:opacity 80ms linear}
+.feature-tabs-captions{display:grid;max-width:calc(8 / 12 * 100%);text-align:center}
+@media (max-width:734px){ .feature-tabs-captions{max-width:100%} .feature-tabs-nav{margin-block:28px} }
+.feature-tabs-caption{grid-area:1 / 1;margin:0;color:var(--label-2);font-family:var(--font-text);font-size:var(--t-17);
+  line-height:var(--t-17-lh);letter-spacing:var(--t-17-ls);text-wrap:pretty;
+  opacity:0;visibility:hidden;transition:opacity 300ms var(--ease-out-cubic),visibility 0s 300ms}
+.feature-tabs-caption[data-active]{opacity:1;visibility:visible;transition:opacity 300ms var(--ease-out-cubic),visibility 0s}
+.feature-tabs-caption :is(strong,b){color:var(--label);font-weight:inherit}
+
+/* ═══ 8 · POSE CHIPS → GLASS CARDS ═════════════════════════════════════════
+   The product viewer's switcher: 56px platter
+   chips — 14px start pad, a 24px circled "+", a 17/600 label — that MORPH
+   (one --progress on MOTION's tour spring .5/.42) into a 423px card holding
+   a paragraph with a bold lead-in. Width, height, radius AND corner shape
+   come from the one number: a capsule (true semicircle) at 0, THE continuous
+   radius at 1. The card's content rises 24px over 420ms after 200ms; the
+   chip label leaves in 200. Density follows motion ([data-m-moving]). */
+.pose-stage{position:relative;overflow:clip;height:760px;background:var(--bg-1);isolation:isolate}
+@media (max-width:1068px){ .pose-stage{height:720px} }
+@media (max-width:734px){ .pose-stage{height:640px} }
+.pose-media{position:absolute;inset:0;display:grid;place-items:center;padding-inline:calc(var(--pose-card-w,423px) + 6.25vw) 6.25vw;z-index:0}
+@media (max-width:1068px){ .pose-media{padding-inline:calc(374px + 6.25vw) 4vw} }
+@media (max-width:734px){ .pose-media{padding:40px 24px 120px} }
+.pose{--pose-card-w:423px;position:absolute;z-index:1;top:0;bottom:0;left:max(6.25vw,calc((100% - var(--w-content)) / 2));
+  display:flex;align-items:center;gap:26px;pointer-events:none}
+@media (max-width:1068px){ .pose{--pose-card-w:374px} }
+.pose > *{pointer-events:auto}
+.pose-paddles{position:absolute;right:calc(100% + 24px);display:flex;flex-direction:column;gap:28px;top:50%;translate:0 -50%}
+@media (max-width:1300px){ .pose-paddles{position:static;translate:none} }
+.pose-paddle,.pose-close{position:relative;width:36px;height:36px;padding:0;display:grid;place-items:center;border-radius:50%;
+  background:var(--mat-platter-bg);-webkit-backdrop-filter:var(--mat-platter-filter);backdrop-filter:var(--mat-platter-filter);
+  box-shadow:var(--mat-platter-ring);color:var(--label);cursor:pointer;transition:opacity 100ms linear}
+.pose-paddle:disabled{opacity:.42;cursor:default}
+.pose-paddle .sym,.pose-close .sym{width:20px;height:20px;stroke-width:2.6}
+.pose-close{position:absolute;z-index:2;top:16px;right:max(16px,calc((100% - 1440px) / 2 + 16px));width:36px;height:36px;
+  opacity:0;visibility:hidden;transition:opacity 200ms linear,visibility 0s 200ms}
+.pose-stage[data-open] .pose-close{opacity:1;visibility:visible;transition:opacity 200ms linear}
+.pose-list{display:flex;flex-direction:column;align-items:flex-start;gap:12px;margin:0;padding:0;list-style:none}
+.pose-item{--p:var(--progress,0);position:relative;flex:none;overflow:clip;
+  width:calc(var(--chip-w,180px) + (var(--pose-card-w) - var(--chip-w,180px)) * var(--p));
+  height:calc(56px + (var(--card-h,56px) - 56px) * var(--p));
+  border-radius:calc(28px + (var(--r-lg) - 28px) * var(--p));
+  corner-shape:superellipse(calc(1 + (var(--k-continuous) - 1) * var(--p)));
+  color:var(--label);background:var(--mat-platter-bg);box-shadow:var(--mat-platter-ring);
+  -webkit-backdrop-filter:var(--mat-platter-filter);backdrop-filter:var(--mat-platter-filter)}
+.pose-item[data-m-moving]{background:var(--mat-platter-fill-fallback)}
+.pose-chip{display:flex;align-items:center;gap:14px;height:56px;padding:0 32px 0 14px;white-space:nowrap;
+  font-family:var(--font-text);font-size:var(--t-17);line-height:var(--t-17-lh);letter-spacing:var(--t-17-ls);font-weight:600;
+  color:inherit;cursor:pointer;border-radius:inherit;transition:opacity 200ms linear}
+.pose-chip:focus-visible{outline-offset:-3px;outline-color:currentColor}
+/* a tile that carries its own tone draws its ring inside, on its own ground:
+   outside, a dark tile's accent ring landed on the light page at 2.4:1 */
+.bento-tile:focus-visible{outline-offset:calc(-1 * var(--focus-w) - 3px)}
+.pose-icon{flex:none;width:24px;height:24px;border-radius:50%;box-shadow:inset 0 0 0 1.5px currentColor;display:grid;place-items:center}
+.pose-icon .sym{width:16px;height:16px;stroke-width:2.2}
+.pose-item[data-open] .pose-chip{opacity:0}
+.pose-card{position:absolute;top:0;left:0;width:var(--pose-card-w);padding:28px 28px 30px;margin:0;
+  font-family:var(--font-text);font-size:var(--t-17);line-height:var(--t-17-lh-loose);letter-spacing:var(--t-17-ls);
+  opacity:0;visibility:hidden;translate:0 24px;
+  transition:opacity 200ms linear,translate 300ms var(--ease-exit),visibility 0s 300ms}
+.pose-item[data-open] .pose-card{opacity:1;visibility:visible;translate:0 0;
+  transition:opacity 420ms linear 200ms,translate 420ms var(--ease-out-cubic) 200ms,visibility 0s}
+.pose-card :is(strong,b){font-weight:600}
+/* phones: the chips become a horizontal rail at the viewer's foot and the
+   card expands upward (min(100vw − 80px, 400px)) */
+@media (max-width:734px){
+  .pose{--pose-card-w:min(calc(100vw - 80px),400px);top:auto;bottom:20px;left:0;right:0;display:block}
+  .pose-paddles{display:none}
+  .pose-list{flex-direction:row;align-items:flex-end;gap:12px;overflow-x:auto;scrollbar-width:none;
+    padding-inline:26px;scroll-padding-inline:26px;scroll-snap-type:x proximity}
+  .pose-list::-webkit-scrollbar{display:none}
+  .pose-item{scroll-snap-align:start}
+}
+
+/* ═══ 9 · STAT GRAMMAR ═════════════════════════════════════════════════════
+   Optional caption above, a 40/40 600 value (inset −2px to align the display
+   glyphs optically), a 14/18 caption below — duo's .stat-reduced, measured at
+   1440 and 402. Values count up with data-count (ANIM → FG3.rollNumber).
+   Cells align at the TOP: a row's values share one line and a caption that
+   wraps runs on below (bottom-aligned, a two-line caption lifted its value
+   18px above its neighbour's). */
+.stat-grid{display:grid;gap:28px 48px;grid-template-columns:repeat(auto-fit,minmax(min(100%,var(--stat-min,150px)),1fr));align-items:start}
+.stat-grid[data-cols="2"]{grid-template-columns:repeat(2,minmax(0,1fr))}
+.stat-grid[data-cols="3"]{grid-template-columns:repeat(3,minmax(0,1fr))}
+.stat-grid[data-cols="4"]{grid-template-columns:repeat(4,minmax(0,1fr))}
+@media (max-width:1068px){ .stat-grid[data-cols="4"]{grid-template-columns:repeat(2,minmax(0,1fr))} }   /* 2 × 2, never 3 + an orphan */
+@media (max-width:734px){ .stat-grid:is([data-cols="3"],[data-cols="4"]){grid-template-columns:repeat(2,minmax(0,1fr))} }
+.stat-grid-stack{grid-template-columns:minmax(0,1fr);align-items:start}
+.stat-grid-center{text-align:center;justify-items:center}
+/* Cells are the components' .stat (or .stat-cell): the grid adds the caption ABOVE and
+   The spacing, scoped so a lone components .stat elsewhere is untouched. */
+.stat-grid > :is(.stat-cell,.stat){display:block;min-width:0}
+.stat-grid :is(.stat-lead,.stat-caption){margin:0;font-family:var(--t-stat-caption-ff);font-size:var(--t-stat-caption-fs);
+  line-height:var(--t-stat-caption-lh);letter-spacing:var(--t-stat-caption-ls);color:var(--label)}
+.stat-grid .stat-lead{margin-bottom:6px}
+.stat-grid .stat-caption{margin-top:2px}
+/* A value is one unit and never breaks ("1.27 MB" over two lines in a
+   2-up grid at 402). Tabular figures only where a number changes in place
+   — a count-up ([data-count]), an author's [data-numeric], a .stat-num span
+   (FG3.rollNumber's digits carry their own): Inter's tnum also widens the
+   hyphen, which set a word value like "self-tested" as "self - tested"
+   (the components' lone .stat-value is tabular: reset here, inside the grid only). */
+.stat-grid .stat-value{margin:0;margin-inline-start:-2px;font-family:var(--t-stat-ff);font-size:var(--t-stat-fs);line-height:var(--t-stat-lh);
+  letter-spacing:var(--t-stat-ls);font-weight:600;font-variant-numeric:normal;white-space:nowrap}
+.stat-grid .stat-value:is([data-count],[data-numeric]),.stat-grid .stat-num{font-variant-numeric:tabular-nums}
+.stat-grid-center .stat-value{margin-inline-start:0}
+
+/* ═══ 10 · COMPARE SELECTOR ════════════════════════════════════════════════
+   Performance's inline compare: the band's other ground, THE radius, padding
+   48/44/32, 10 of 12 columns (1050); "Compare with" 17/600; a native select
+   styled as the 314 × 44 pill (190 × 36, 14px on phones) with a 1px
+   label-3 ring (3:1, a control boundary) and 24/45 padding; a 2-up centred
+   stat grid 62px below whose numbers ROLL to the chosen model. */
+.compare{margin-inline:auto;max-width:calc(10 / 12 * 100%);padding:48px;background:var(--show-surface);text-align:center}
+@media (max-width:1068px){ .compare{padding:44px;max-width:100%} }
+@media (max-width:734px){ .compare{padding:32px} }
+.compare-label{display:block;margin-bottom:8px;font-family:var(--font-text);font-size:var(--t-17);line-height:var(--t-17-lh);
+  letter-spacing:var(--t-17-ls);font-weight:600}
+.compare-select{position:relative;display:inline-block;width:min(314px,100%)}
+.compare-select select{appearance:none;-webkit-appearance:none;display:block;width:100%;height:44px;margin:0;padding:0 45px 0 24px;
+  border:1px solid var(--label-3);border-radius:var(--r-pill);background:var(--bg-1);color:var(--label);
+  font-family:var(--font-text);font-size:var(--t-17);line-height:var(--t-17-lh);letter-spacing:var(--t-17-ls);cursor:pointer;
+  text-overflow:ellipsis}
+.compare-select .sym{position:absolute;right:18px;top:50%;translate:0 -50%;width:18px;height:18px;pointer-events:none;color:var(--label)}
+@media (max-width:734px){
+  .compare-select{width:min(190px,100%)}
+  .compare-select select{height:36px;font-size:var(--t-14);line-height:var(--t-14-lh);letter-spacing:var(--t-14-ls)}
+}
+.compare-grid{margin-top:62px;gap:48px}
+/* phones: one column (the 288px-wide stack) — two 40px values do not fit side by side */
+@media (max-width:734px){ .compare-grid.stat-grid{margin-top:40px;gap:32px;grid-template-columns:minmax(0,1fr)} }
+.compare [data-compare] :is(.stat-lead,.stat-caption){transition:opacity var(--d-200) linear}
+.compare [data-compare][data-swapping] :is(.stat-lead,.stat-caption){opacity:0}
+
+/* ═══ 11 · STICKY FRAME-DOWN SCENE (TextOverMedia) ═════════════════════════
+   On ANIM: the scene (data-scene) is 170vh;
+   its media is pinned (data-scene-sticky) while the copy scrolls over it and
+   fades (t − 30vh → t − 10vh); a .5 scrim fades in on entry and out before
+   the end; as the scene LEAVES (b − 100vh → b − 40vh) the media frames down:
+   inner scale → .9, clip inset 6.25% / the column edge, radius 40/36/28.
+   SHOW authors those keyframes as data-anim-keyframe on the parts (ANIM
+   compiles them to scroll timelines). Base experience (no-fd-enhanced,
+   reduced motion, no JS): static, framed, scrim .5 behind the copy and the
+   note only — the final state. --scene-scrim-max (default .5) tunes the scrim
+   for darker media; --scene-scrim-mask limits where it falls. */
+.scene{position:relative;display:grid;--frame:1;--scene-scrim:1;--scene-scrim-max:.5;color:var(--label)}
+/* no ground of its own: framed down, the media is a card on the PAGE's
+   ground (white in a light page), exactly as a text-over-media scene */
+.scene > .scene-sticky,.scene > .scene-copy{grid-area:1 / 1}
+.scene-sticky{position:relative;align-self:start;height:clamp(560px,90vh,960px)}
+html.fd-enhanced .scene > .scene-sticky{height:calc(max(100vh,var(--scene-min-h)) - var(--scene-top) + 1px)}
+.scene-media{position:absolute;inset:0;overflow:clip;isolation:isolate;
+  clip-path:inset(calc(var(--frame) * var(--frame-inset)) calc(var(--frame) * max(6.25%,(100% - var(--w-content)) / 2))
+    round calc(var(--frame) * var(--frame-radius)))}
+.scene-visual{position:absolute;inset:0;display:grid;place-items:center;scale:calc(1 - .1 * var(--frame))}
+.scene-visual > canvas{position:absolute;inset:0;width:100%;height:100%;z-index:-1}
+.scene-media::after{content:"";position:absolute;inset:0;pointer-events:none;
+  background:var(--band-stage-bg);opacity:calc(var(--scene-scrim) * var(--scene-scrim-max));
+  -webkit-mask-image:var(--scene-scrim-mask,none);mask-image:var(--scene-scrim-mask,none)}
+/* The scrim is for the WORDS. .scene-visual scales (a stacking context), so
+   nothing inside it — a device's light screen — can rise above the scrim;
+   --scene-scrim-mask limits it instead (e.g. linear-gradient(#000 45%,
+   transparent 70%) keeps it to the copy's area). The base experience has no
+   scroll to fade it by, so there the default mask keeps it behind the words
+   (down to where SHOW measured the copy ending — plus the note under it —
+   + 24px, fading over 120px), and the media below is clear. */
+html:not(.fd-enhanced) .scene{
+  --scene-scrim-base:linear-gradient(180deg,#000 calc(var(--scene-copy-end,calc(22vh + 240px)) + 24px),
+    transparent calc(var(--scene-copy-end,calc(22vh + 240px)) + 144px))}
+html:not(.fd-enhanced) .scene:has(.scene-note){
+  --scene-scrim-base:linear-gradient(180deg,#000 calc(var(--scene-copy-end,calc(22vh + 240px)) + 36px + var(--scene-note-h,64px)),
+    transparent calc(var(--scene-copy-end,calc(22vh + 240px)) + 156px + var(--scene-note-h,64px)))}
+html:not(.fd-enhanced) .scene-media::after{
+  -webkit-mask-image:var(--scene-scrim-mask,var(--scene-scrim-base));mask-image:var(--scene-scrim-mask,var(--scene-scrim-base))}
+.scene-copy{position:relative;z-index:1;align-self:start;height:clamp(560px,90vh,960px);display:grid;align-content:start;justify-items:center;
+  padding:22vh 6.25vw 0;text-align:center;color:var(--on-art-1)}
+html.fd-enhanced .scene > .scene-copy{height:100vh}
+.scene-copy > :is(h2,h3,.scene-headline){font-family:var(--t-headline-ff);font-size:var(--t-headline-fs);line-height:var(--t-headline-lh);
+  letter-spacing:var(--t-headline-ls);font-weight:600;text-wrap:balance;max-width:16ch}
+.scene-copy > p{margin-top:16px;max-width:560px;color:var(--on-art-2);font-family:var(--t-lede-ff);font-size:var(--t-lede-fs);
+  line-height:var(--t-lede-lh);letter-spacing:var(--t-lede-ls)}
+/* the pinned phase (--progress 0→1) lifts a second line in: derived in CSS */
+.scene-note{position:absolute;z-index:1;left:6.25vw;right:6.25vw;top:24vh;margin:0;text-align:center;color:var(--on-art-1);
+  font-family:var(--t-subtitle-ff);font-size:var(--t-subtitle-fs);line-height:var(--t-subtitle-lh);font-weight:600;
+  opacity:clamp(0,(var(--progress,1) - .35) * 4,1);translate:0 calc(clamp(0,(.6 - var(--progress,1)) * 4,1) * 24px)}
+/* base experience: copy and note are both on screen at once — the note
+   follows the copy, 12px under where SHOW measured it ending, instead of
+   sharing its place. Not at the frame's foot: that is where a scene's
+   product stands, and the note was drawn over the phone's own screen. */
+html:not(.fd-enhanced) .scene-note{top:calc(var(--scene-copy-end,calc(22vh + 240px)) + 12px)}
+
+/* ═══ 12 · CARD → FULL BLEED (phones) ══════════════════════════════════════
+   Product viewer on small screens: an inset rounded card that un-clips to
+   the viewport edges as it arrives (--clip-path-progress 1 → 0, t − 70vh → t,
+   lerp .3). fg3-motion.css owns the clip-path; this names the box and uses
+   A 28px radius (a clip-path round is circular: 28 IS the
+   mass of the continuous r-lg). SHOW masks it to phones unless authored. */
+.clip-expand{--clip-radius:28px;position:relative;overflow:clip}
+
+/* ═══ 13 · GRADIENT HEADLINE ═══════════════════════════════════════════════
+   Static: a vertical ink fade over a six-stop hue
+   ramp, clipped to the glyphs — here from the palette's
+   series roles. With [data-sweep] ANIM plays the headline sweep
+   (fg3-motion.css) and the text lands solid — which is also what the base
+   experience shows; these tune its two stops. */
+.headline-sweep{--sweep-1:var(--accent);--sweep-2:var(--label-3)}
+.headline-sweep:not([data-sweep]){
+  background-image:linear-gradient(180deg,var(--label) -5%,transparent 70%),
+    linear-gradient(90deg,var(--series-2) 0%,var(--series-6) 21%,var(--series-4) 41%,var(--series-3) 54%,var(--series-1) 78%,var(--series-5) 97%);
+  -webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;color:var(--label);
+  padding-bottom:.05em;width:fit-content}
+/* fg3-motion.css pulls a sweeping line up by .05em for its descender room;
+   inside a lockup the lockup's own rhythm wins. */
+.lockup .lockup-headline[data-sweep].anim-armed{margin-bottom:calc(var(--lk-hl) - .05em)}
+.lockup .lockup-headline[data-sweep].anim-armed:last-child{margin-bottom:-.05em}
+@media (forced-colors:active){ .headline-sweep{background:none !important;-webkit-text-fill-color:currentColor !important} }
+
+/* ═══ 14 · GLOW RING (an edge light) ═══════════════════════
+   A conic ring cut out with mask-composite (padding-box minus content-box),
+   plus a blurred copy behind the host for the bloom. Hues are the system
+   roles. The TURN is a transform: SHOW builds the
+   two layers (.glow-ring-edge, .glow-ring-bloom — static, in the host's
+   corner) with one pre-rendered conic cone inside each and turns the cone,
+   which the compositor does to a layer rastered once. (Turning a registered
+   angle repainted the gradient and re-blurred the bloom on every frame at
+   every scroll position — 127–229 ms frames on docs.html.) SHOW parks the
+   turn while the ring is off screen ([data-glow-idle]); reduced motion
+   stops it (ambient) and keeps the ring. Without SHOW the pseudo-elements
+   draw the same ring, still.
+   SHOW's BLOOM IS NOT FILTERED. A blur over a turning cone is a live blur
+   pass on every frame (22–27 ms passes on docs.html's phone, where the
+   edge's mask pass is ≤ 7). Instead the bloom layer is grown by 3σ
+   (σ = --glow-blur) and faded by a static mask: four one-sided Gaussian
+   edges (Φ, the normal CDF, sampled every σ/2) multiplied (intersect) —
+   the Gaussian blur of the box, which is separable, so the product is exact
+   for a square corner; against the true blur of the rounded box it is off
+   by ≤ .08 alpha (before the .62) at a phone's corner (r 35, σ 22), ≤ .06
+   around a capsule — rastered once; the cone turns under it like the edge's.
+   The first frame is the rest of the cost (the programs for the mask, the
+   conic and what the ring hugs compile inside one raster flush): SHOW draws
+   a still copy of each ring once in idle time before it scrolls in. */
+.glow-ring{position:relative;isolation:isolate;--glow-w:3px;--glow-blur:22px;
+  --glow-cone:conic-gradient(var(--sys-orange),var(--sys-pink),var(--sys-purple),var(--sys-indigo),var(--sys-cyan),var(--sys-mint),var(--sys-orange))}
+/* a device is an inline-size container (no intrinsic width): a ring hugging
+   one takes its width from --glow-size (set it to the device width) */
+.glow-ring:has(> .device){width:var(--glow-size,320px)}
+.glow-ring > .device{--device-width:100%}
+/* Around a phone the ring takes the phone's own corner: DEVICE's 67u frame
+   radius (u = width / 426; the phone is 426 × 898, so 67u is 15.73% of the
+   width by 7.46% of the height — true in any unit --glow-size uses). It is
+   the circle of equal 45° mass to the frame's continuous corner (the one
+   fg3-device.css itself falls back to; within 1.1px of the superellipse on
+   a 320px phone), not corner-shape: a page that sets its own radius here
+   keeps the round corner it chose, and FG3's corner fallback never clips
+   the ring. Zero specificity: a page's own radius wins. */
+:where(.glow-ring:has(> .device[data-device="phone"])){border-radius:calc(6700% / 426) / calc(6700% / 898)}
+.glow-ring::before,.glow-ring::after,.glow-ring > :is(.glow-ring-edge,.glow-ring-bloom){content:"";position:absolute;
+  inset:calc(-1 * var(--glow-w));border-radius:inherit;corner-shape:inherit;pointer-events:none}
+.glow-ring::before,.glow-ring::after{background:var(--glow-cone)}
+.glow-ring::before,.glow-ring > .glow-ring-edge{z-index:2;padding:var(--glow-w);
+  -webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;
+  mask:linear-gradient(#000 0 0) content-box exclude,linear-gradient(#000 0 0)}
+.glow-ring::after,.glow-ring > .glow-ring-bloom{z-index:-1;filter:blur(var(--glow-blur));opacity:.62}
+/* SHOW built the layers: the still pseudo-elements step aside */
+.glow-ring:has(> .glow-ring-edge)::before,.glow-ring:has(> .glow-ring-bloom)::after{content:none}
+.glow-ring > :is(.glow-ring-edge,.glow-ring-bloom){overflow:clip;container-type:size}
+.glow-ring > .glow-ring-bloom{filter:none;inset:calc(-1 * var(--glow-w) - 3 * var(--glow-blur));border-radius:0;
+  --glow-soft:#0000 0,rgb(0 0 0/.006) calc(.5 * var(--glow-blur)),rgb(0 0 0/.023) var(--glow-blur),rgb(0 0 0/.067) calc(1.5 * var(--glow-blur)),
+    rgb(0 0 0/.159) calc(2 * var(--glow-blur)),rgb(0 0 0/.309) calc(2.5 * var(--glow-blur)),rgb(0 0 0/.5) calc(3 * var(--glow-blur)),
+    rgb(0 0 0/.691) calc(3.5 * var(--glow-blur)),rgb(0 0 0/.841) calc(4 * var(--glow-blur)),rgb(0 0 0/.933) calc(4.5 * var(--glow-blur)),
+    rgb(0 0 0/.977) calc(5 * var(--glow-blur)),rgb(0 0 0/.994) calc(5.5 * var(--glow-blur)),#000 calc(6 * var(--glow-blur));
+  -webkit-mask:linear-gradient(90deg,var(--glow-soft)),linear-gradient(270deg,var(--glow-soft)),linear-gradient(180deg,var(--glow-soft)),linear-gradient(0deg,var(--glow-soft));
+  -webkit-mask-composite:source-in;
+  mask:linear-gradient(90deg,var(--glow-soft)) intersect,linear-gradient(270deg,var(--glow-soft)) intersect,linear-gradient(180deg,var(--glow-soft)) intersect,linear-gradient(0deg,var(--glow-soft))}
+/* the cone: a square as wide as the layer's diagonal (+ slack for the ring),
+   centred, so it covers the layer at any angle */
+.glow-ring-cone{position:absolute;left:50%;top:50%;aspect-ratio:1;translate:-50% -50%;
+  width:calc(142cqmax + 4 * var(--glow-w));width:calc(hypot(100cqw,100cqh) + 4 * var(--glow-w));
+  background:var(--glow-cone);animation:show-glow-turn 7s linear infinite}
+@keyframes show-glow-turn{to{transform:rotate(1turn)}}
+.glow-ring[data-glow-idle] .glow-ring-cone{animation-play-state:paused}
+@media (prefers-reduced-motion:reduce){ .glow-ring-cone{animation-play-state:paused} }
+html.fd-reduced-motion .glow-ring-cone{animation-play-state:paused}
+@media (forced-colors:active){ .glow-ring::before,.glow-ring::after,.glow-ring > :is(.glow-ring-edge,.glow-ring-bloom){display:none} }
+
+/* ═══ 15 · CARD OVERLAY → SHEET ════════════════════════════════════════════
+   A card whose whole face is one button (the .card-control), marked by a
+   36px "+" disc 16px in from the bottom-right that turns 45° into "×". Two
+   targets: an in-card overlay in the card's own fill (.344s fade,
+   copy rises 10px over .414s after .2s, cubic-bezier(.66,0,.1,1)), or a modal
+   sheet (<dialog>): scrim to .48 + blur 20 and the sheet rising from 100vh
+   over .8s easeInOutCubic. SHOW
+   runs both. The sheet is OPAQUE (a full-height sheet is content). */
+.card-overlay{position:relative}
+.card-overlay-toggle{position:static;padding:0;margin:0;border:0;background:none;color:inherit;font:inherit;cursor:pointer}
+.card-overlay-toggle::after{content:"";position:absolute;inset:0;z-index:3;border-radius:var(--r-lg);corner-shape:superellipse(var(--k-continuous))}
+.card-overlay-toggle:focus-visible{outline:none}
+/* the ring is drawn INSIDE the card's edge: the card clips (overflow:clip,
+   THE radius), so an outside offset would be cut away with it */
+.card-overlay-toggle:focus-visible::after{outline:var(--focus-w) solid var(--focus-color,var(--accent));outline-offset:calc(-1 * var(--focus-w) - 2px)}
+.card-overlay-icon{position:absolute;z-index:4;right:20px;bottom:20px;width:36px;height:36px;border-radius:50%;
+  display:grid;place-items:center;pointer-events:none;background:var(--mat-control-fill-solid);color:var(--mat-control-ink);
+  transition:background-color 100ms linear}
+.card-overlay-toggle:hover .card-overlay-icon{background:var(--mat-control-fill-solid-hover)}
+.card-overlay-icon .sym{width:20px;height:20px;stroke-width:2.6;rotate:0deg;
+  transition:rotate var(--sp-toggle-ms,412ms) var(--sp-toggle,var(--ease-overlay))}
+.card-overlay[data-open] .card-overlay-icon .sym{rotate:45deg}
+.card-overlay-panel{position:absolute;inset:0;z-index:2;overflow:auto;padding:var(--scroller-pad,32px) var(--scroller-pad,32px) 76px;
+  background:inherit;color:var(--label);border-radius:inherit;corner-shape:inherit;opacity:0;visibility:hidden;
+  transition:opacity .344s var(--ease-overlay),visibility 0s .344s}
+.card-overlay[data-open] .card-overlay-panel{opacity:1;visibility:visible;transition:opacity .344s var(--ease-overlay),visibility 0s}
+.card-overlay-panel > *{translate:0 10px;transition:translate .414s var(--ease-overlay)}
+.card-overlay[data-open] .card-overlay-panel > *{translate:0 0;transition:translate .414s var(--ease-overlay) .2s}
+.card-overlay[data-open] .card-overlay-toggle{z-index:4}
+/* the sheet */
+.card-overlay-sheet{--sheet-w:816px;--sheet-pad:76px;position:fixed;inset:0;margin:auto;padding:0;border:0;
+  width:min(var(--sheet-w),calc(100vw - 20px));max-width:none;height:fit-content;max-height:calc(100dvh - 80px);
+  overflow:auto;overscroll-behavior:contain;background:var(--bg-elevated);color:var(--label);
+  translate:0 100vh;opacity:0;transition:translate .8s var(--ease-in-out-cubic),opacity .02s linear}
+.card-overlay-sheet[data-state="open"]{translate:0 0;opacity:1}
+.card-overlay-sheet[data-state="closing"]{transition:translate .8s var(--ease-in-out-quad),opacity .8s var(--ease-in-out-quad)}
+/* scrim alpha and blur rise together: one opacity on a layer that is both */
+.card-overlay-sheet::backdrop{background:var(--scrim,color-mix(in srgb,var(--band-stage-bg) 48%,transparent));
+  -webkit-backdrop-filter:blur(20px);backdrop-filter:blur(20px);opacity:0;transition:opacity .8s var(--ease-in-out-cubic)}
+.card-overlay-sheet[data-state="open"]::backdrop{opacity:1}
+.card-overlay-sheet[data-state="closing"]::backdrop{transition:opacity .8s var(--ease-in-out-quad)}
+@media (max-width:1068px){ .card-overlay-sheet{--sheet-w:692px} }
+@media (max-width:734px){ .card-overlay-sheet{--sheet-w:480px;--sheet-pad:6.25%} }
+.card-overlay-sheet-body{padding:var(--sheet-pad)}
+@media (max-width:734px){ .card-overlay-sheet-body{padding:60px 6.25% 60px} }
+.card-overlay-close{position:sticky;z-index:1;top:20px;float:right;margin:20px 20px -56px 0;width:36px;height:36px;padding:0;
+  display:grid;place-items:center;border-radius:50%;background:var(--mat-control-fill-solid);color:var(--mat-control-ink);cursor:pointer;
+  transition:background-color 100ms linear}
+.card-overlay-close:hover{background:var(--mat-control-fill-solid-hover)}
+.card-overlay-close .sym{width:18px;height:18px;stroke-width:2.8}
+.card-overlay-topic{font-family:var(--t-19-ff,var(--font-display));font-size:var(--t-19);line-height:var(--t-19-lh-loose);
+  letter-spacing:var(--t-19-ls);font-weight:600}
+.card-overlay-title{margin-top:8px;font-family:var(--t-headline-ff);font-size:var(--t-headline-fs);line-height:var(--t-headline-lh);
+  letter-spacing:var(--t-headline-ls);font-weight:600;text-wrap:balance}
+.card-overlay-sheet-body > p:not(.card-overlay-topic){margin-top:24px;font-family:var(--font-display);font-size:var(--t-19);
+  line-height:var(--t-19-lh-loose);letter-spacing:var(--t-19-ls);text-wrap:pretty}
+@media (max-width:734px){ .card-overlay-sheet-body > p:not(.card-overlay-topic){font-family:var(--font-text);font-size:var(--t-17);
+  line-height:var(--t-17-lh-loose);letter-spacing:var(--t-17-ls)} }
+html[data-show-modal]{overflow:hidden}
+
+/* ═══ 16 · FOOTNOTES (sosumi) ══════════════════════════════════════════════
+   980px measure, 12/16, grey (the .56 black → the label-2 role, since
+   12px text needs 4.5:1), paragraphs .8em apart, underlined links; the
+   in-text marker is .6em with numerator figures. */
+.footnotes{max-width:980px;margin-inline:auto;padding-block:17px 11px;color:var(--label-2);
+  font-family:var(--t-micro-ff);font-size:var(--t-micro-fs);line-height:var(--t-micro-lh);letter-spacing:var(--t-micro-ls)}
+.footnotes :is(p,li){margin:0 0 .8em}
+.footnotes ol{margin:0 0 .8em;padding-inline-start:1.5em}
+.footnotes li::marker{font-variant-numeric:tabular-nums}
+.footnotes a{color:inherit;text-decoration:underline}
+.footnotes a:hover{color:var(--label)}
+.footnotes li:target{color:var(--label)}
+sup.fn{font-size:.6em;line-height:0;vertical-align:.8em;font-feature-settings:"numr" 0;font-variant-numeric:tabular-nums}
+sup.fn a{color:inherit;text-decoration:underline;text-underline-offset:.12em}
+sup.fn a:focus-visible{outline-offset:1px;border-radius:2px}
+
+/* ═══ 17 · COLOUR SWATCHES ═════════════════════════════════════════════════
+   colornav: a 28px disc in a 36px ring (2px border, 2px gap) that is the
+   label ink when chosen, the chosen finish's name 12/16 below, every disc
+   lit from the upper left by the conic specular ring (§2.5, masked to
+   1.5px). Native radios (arrow keys, no JS needed); 44px targets; discs pop
+   in (400ms cubic-bezier(.3,2,.5,1), 50ms apart) on entry. */
+.swatches{margin:0;padding:18px 0 0;border:0;min-inline-size:0;display:flex;flex-direction:column;align-items:center}
+.swatches-list{display:flex;gap:0}
+.swatch{position:relative;width:44px;height:44px;display:grid;place-items:center;cursor:pointer}
+.swatch input{position:absolute;inset:0;width:100%;height:100%;margin:0;opacity:0;cursor:pointer}
+.swatch-disc{position:relative;width:28px;height:28px;border-radius:50%;background:var(--swatch,var(--fill-1));
+  outline:2px solid transparent;outline-offset:2px;pointer-events:none;transition:outline-color 100ms linear}
+.swatch:has(input:checked) .swatch-disc{outline-color:var(--label)}
+/* forced colours: the disc's colour IS the content (the finish, the palette
+   the radio picks) — the UA forced it to Canvas and every outline to
+   CanvasText, seven identical rings. The disc keeps its paint, a 1px
+   CanvasText edge so a pale one shows on any Canvas, and only the chosen
+   one keeps its ring, in Highlight. */
+@media (forced-colors:active){
+  .swatch-disc{forced-color-adjust:none;box-shadow:0 0 0 1px CanvasText;outline-color:transparent}
+  .swatch:has(input:checked) .swatch-disc{outline-color:Highlight}
+}
+.swatch:has(input:focus-visible){outline:var(--focus-w) solid var(--focus-color,var(--accent));outline-offset:0;border-radius:50%}
+/* specular ring — a hardware finish (light on a physical swatch), so its
+   stops are the literal alphas of black */
+.swatch-disc::after{content:"";position:absolute;inset:0;border-radius:50%;
+  background:conic-gradient(from 270deg,rgba(0,0,0,.08) 0deg,rgba(0,0,0,.48) 64.8deg,rgba(0,0,0,.48) 115.2deg,rgba(0,0,0,.08) 180deg,
+    rgba(0,0,0,0) 208.8deg,rgba(0,0,0,0) 331.2deg,rgba(0,0,0,.08) 360deg);
+  -webkit-mask:radial-gradient(closest-side,transparent calc(100% - 1.5px),#000 calc(100% - 1px));
+  mask:radial-gradient(closest-side,transparent calc(100% - 1.5px),#000 calc(100% - 1px))}
+/* DEVICE's three finishes as swatch colours (fg3-device.css metal mid-tones) */
+.swatch[data-finish="light"]{--swatch:oklch(89% .004 250)}
+.swatch[data-finish="dark"]{--swatch:oklch(40% .006 262)}
+.swatch[data-finish="accent"]{--swatch:color-mix(in oklch,var(--accent) 45%,oklch(78% .01 280))}
+.swatches-name{margin:1px 0 0;min-height:16px;color:var(--label);font-family:var(--t-micro-ff);font-size:var(--t-micro-fs);
+  line-height:var(--t-micro-lh);letter-spacing:var(--t-micro-ls)}
+html.fd-enhanced .swatches[data-armed]:not(.is-in) .swatch-disc{scale:0}
+.swatches[data-armed] .swatch-disc{transition:outline-color 100ms linear,scale 400ms var(--ease-pop) calc(var(--si,0) * 50ms)}
+::view-transition-group(.show-finish){animation-duration:200ms;animation-timing-function:linear}
+
+/* ═══ 18 · DETENT (fold slider holder) ═════════════════════════════════════
+   The slider itself is DEVICE's .device-fold-slider (MOTION.detent, magnets
+   at 0 / ⅓ / 1, rubber-band stretch) — never a second one. This is the
+   "Drag below to open and close" caption 12px above it, 18px apart. */
+.detent{display:grid;gap:18px;justify-items:start}
+.detent-caption{margin:0;color:var(--label-2);font-family:var(--t-micro-ff);font-size:var(--t-micro-fs);
+  line-height:var(--t-micro-lh);letter-spacing:var(--t-micro-ls)}
+.pose-card .detent{margin-top:14px;--fold-slider-width:min(367px,100%)}
+.pose-card .detent-caption{color:var(--label-2-on-fill)}
+
+/* ═══ 19 · FAQ ("Questions? Answers.") ═════════════════════════════════════
+   The accordion on native
+   <details>, so it opens with no JS and from find-in-page: rows divided by
+   one opaque separator (none above the first); a 28/32 600 title (the
+   subtitle role, 24 / 21 on smaller screens) with 1em above and below and
+   at most 10 of 12 columns; a wide chevron (the 28 × 15 at 28px) in
+   label-2 that darkens on hover and turns over on the snappy spring; the
+   answer 17/25 at 10 of 12 columns, 32px under it, its height tweening on
+   the smooth spring (::details-content + interpolate-size; where that is
+   unsupported the row simply opens). "Expand all" is a 14px link-blue
+   button above the rows (.faq-bar > .faq-expand): SHOW wires it — or builds
+   it on .faq[data-expand-all] — and turns it into "Collapse all". */
+.faq-bar{display:flex;justify-content:flex-end;margin-bottom:var(--s-6)}
+.faq-expand{display:inline-flex;align-items:center;gap:.25em;margin:0;padding:0;border:0;background:none;cursor:pointer;
+  color:var(--link);font-family:var(--font-text);font-size:var(--t-14);line-height:var(--t-14-lh);letter-spacing:var(--t-14-ls)}
+.faq-expand:hover{text-decoration:underline}
+.faq-expand .sym{width:.9em;height:.9em;transition:rotate var(--sp-snappy-ms,500ms) var(--sp-snappy,ease)}
+.faq-expand[aria-expanded="true"] .sym{rotate:180deg}
+.faq-item{interpolate-size:allow-keywords}
+.faq-item + .faq-item{border-top:1px solid var(--separator-opaque)}
+.faq-item > summary{display:flex;align-items:flex-start;justify-content:space-between;gap:var(--s-7);padding-block:1em;
+  list-style:none;cursor:pointer;color:var(--label);font-family:var(--t-subtitle-ff);font-size:var(--t-subtitle-fs);
+  line-height:var(--t-subtitle-lh);letter-spacing:var(--t-subtitle-ls);font-weight:600}
+.faq-item > summary::-webkit-details-marker{display:none}
+.faq-item > summary:focus-visible{outline-offset:4px;border-radius:8px}
+.faq-item > summary > :not(.sym){max-width:calc(10 / 12 * 100%)}
+/* the chevron: SYM's glyph spans 13 of its 24 units, so a 1.85em box draws
+   it 1em wide; centred on the FIRST line of a long title, and pulled right
+   by its side bearing so it ends on the column edge */
+.faq-item > summary .sym{align-self:flex-start;width:1.85em;height:1.85em;margin-block:calc((var(--t-subtitle-lh) - 1.85) * .5em);
+  margin-inline-end:-.42em;--sym-optical:1.15;color:var(--label-2);
+  transition:color 100ms linear,rotate var(--sp-snappy-ms,500ms) var(--sp-snappy,ease)}
+.faq-item > summary:hover .sym{color:var(--label)}
+.faq-item[open] > summary .sym{rotate:180deg}
+.faq-item::details-content{block-size:0;overflow:clip;
+  transition:block-size var(--sp-smooth-ms,500ms) var(--sp-smooth,ease),content-visibility var(--sp-smooth-ms,500ms) allow-discrete}
+.faq-item[open]::details-content{block-size:auto}
+.faq-answer{max-width:calc(10 / 12 * 100%);padding-bottom:32px;color:var(--label);font-family:var(--t-body-ff);
+  font-size:var(--t-body-fs);line-height:var(--t-body-lh);letter-spacing:var(--t-body-ls);text-wrap:pretty}
+.faq-answer > * + *{margin-top:.8em}
+@media (max-width:734px){ .faq-item > summary{gap:var(--s-4)} .faq-item > summary > :not(.sym),.faq-answer{max-width:none} }
+
+/* ═══ 20 · REDUCED MOTION ══════════════════════════════════════════════════
+   Keep every state, drop displacement: captions stop drifting, cards stop
+   growing, the chip→card morph and the tab pill jump (MOTION does that),
+   the bar and discs appear in place. Progress fills keep running — they
+   report time, not decoration. */
+@media (prefers-reduced-motion:reduce){
+  .gallery-caption{transform:none;opacity:1}
+  .scroller-card{transition:background-color .344s ease}
+  .scroller-card:hover{scale:none}
+  .gallery-bar[data-armed]{transition:none}
+  .gallery-bar[data-armed]:not(.is-in){translate:none;visibility:hidden}
+  .pose-card,.pose-item[data-open] .pose-card{translate:none}
+  .card-overlay-panel > *,.card-overlay[data-open] .card-overlay-panel > *{translate:none}
+  .card-overlay-icon .sym{transition:none}
+  .swatches[data-armed] .swatch-disc{transition:outline-color 100ms linear}
+  html.fd-enhanced .swatches[data-armed]:not(.is-in) .swatch-disc{scale:none}
+  .scene-note{translate:none}
+  .card-overlay-sheet{translate:none;transition:opacity .2s linear}
+  .card-overlay-sheet[data-state="closing"]{transition:opacity .2s linear}
+  .card-overlay-sheet::backdrop,.card-overlay-sheet[data-state="closing"]::backdrop{transition:opacity .2s linear}
+  .faq-item > summary .sym,.faq-expand .sym{transition:none}
+  .faq-item::details-content{transition:none}   /* own rule: an engine without it drops the whole list */
+}
+html.fd-reduced-motion .gallery-caption{transform:none;opacity:1}
+html.fd-reduced-motion .faq-item > summary .sym,html.fd-reduced-motion .faq-expand .sym{transition:none}
+html.fd-reduced-motion .faq-item::details-content{transition:none}

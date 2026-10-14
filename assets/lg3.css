@@ -1,0 +1,429 @@
+/* ═══════════════════════════════════════════════════════════════════════════
+   lg3.css — the glass material material, its layers (Fluid Design Open)
+   ───────────────────────────────────────────────────────────────────────────
+   lg3-core.js writes the backdrop pass (refraction filter or frost chain) and
+   the measured custom properties; this file draws everything the browser can
+   draw at any size, every frame, for free:
+
+     .lg3             HOST — the backdrop pass, the two-part adaptive shadow,
+                      the monochrome ink for its appearance
+     .lg3__dim        clear's mandatory dimming layer                z −2
+     .lg3__veil       legibility share / wash (data-lg3-text, -wash)  z −1
+     .lg3__tint       vertical light ramp (light arrives from above)  z −1
+     .lg3__glow       touch light, white, 93 px, spreads to neighbours z −1
+     .lg3__spec       the specular rim, 9-sliced by border-image     z  6
+     .lg3__rim        dark edge — side borders taper to 0
+                      at top and bottom exactly as the does      z  7
+     .lg3__edge       1 px hairline, bright at the top (and bottom)  z  7
+     .lg3__aa         raster hint: a 4 px crisp-edged paint at alpha
+                      1/255 that keeps the host out of MSAA raster   z −1
+
+   KINDS: data-lg3 = glass (default) · clear · chrome · platter. chrome and
+   platter are the web materials and need no script at all.
+
+   CUSTOM PROPERTIES (read): --lg3-shadow-strength --lg3-shadow-hard
+   --lg3-shadow-spread --lg3-dim --lg3-glow --lg3-glow-r --lg3-gx --lg3-gy
+   --lg3-press-scale --lg3-mat (materialize 0..1) --lg3-spec-boost --lg3-tint
+   --lg3-density (motion 0..1) --lg3-legible (the engine's legibility share)
+   Tokens (override on :root): the --lg3-* colour block below.
+
+   LEGIBILITY + WASH (public hooks, both drawn by .lg3__veil):
+     data-lg3-text           the engine reads the backdrop under the host and
+     data-lg3-text="dense"   raises the veil — the reduce-transparency fill,
+                             --lg3-veil-dark/-light — by the smallest share
+                             that holds ≥ 4.5:1 for the host's ink ("dense":
+                             for the secondary ink, --lg3-ink-2-on-dark/-light)
+                             on the worst sampled patch → --lg3-legible
+     data-lg3-wash           a floor for large glass: --lg3-wash-dark (.72) /
+                             --lg3-wash-light (.12), growing to opaque with
+                             --lg3-density (denser while it moves)
+     The veil shows max(share, wash). Its colour is the host's --bg-elevated
+     when the host carries its appearance as data-tone (chrome mirrors it),
+     else the neutral --lg3-veil-*. Reduce transparency, increased contrast
+     and forced colours hide it: their own fills replace the whole answer.
+     Layer switches: data-lg3-hide-{lens,veil,tint,spec,rim,edge,glow,shadow}
+     on <html>, on any ancestor, or on the host.
+   Springs: --sp-lift/--sp-hold (+ -ms) from fg3-springs.css; fallbacks here.
+
+   THE RULE THAT DECIDES WHETHER ANY OF THIS WORKS: nothing on the host or its
+   ancestors may be a backdrop root — no opacity < 1, filter, mix-blend-mode,
+   isolation or will-change on the host; no opacity/filter on an ancestor
+   (entrances animate transform, never fade a glass ancestor).
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* ── registered so transitions can interpolate them ─────────────────────── */
+@property --lg3-glow   { syntax: "<number>"; inherits: true; initial-value: 0; }  /* set on the host, read by its glow layer: must inherit */
+@property --lg3-glow-r { syntax: "<number>"; inherits: true; initial-value: 1; }
+
+/* ── material tokens: the only place this material names a colour ──────── */
+:root{
+  --lg3-ink-on-dark:#fff;               /* monochrome label on dark glass    */
+  --lg3-ink-on-light:#1d1d1f;           /* …and on light glass */
+  /* the top rim pixel measures ≈35% white on dark glass, ≈57% on light; hairline + highlight together are
+     tuned to that (readout "rim white") */
+  --lg3-spec-dark:.62;
+  --lg3-spec-light:.34;
+  --lg3-rim-dark:.55;                   /* dark edge alpha ≈ max(b−76,.22b)  */
+  --lg3-rim-light:.36;                  /*   at this appearance's glass value */
+  --lg3-edge-top-dark:.2;   --lg3-edge-bottom-dark:.1;
+  --lg3-edge-top-light:.32; --lg3-edge-bottom-light:.2;
+  --lg3-glow-color:255 255 255;
+  --lg3-chrome-light:rgba(250,250,252,.8);  --lg3-chrome-dark:rgba(22,22,23,.8);
+  --lg3-chrome-ring-light:rgba(0,0,0,.16);  --lg3-chrome-ring-dark:rgba(255,255,255,.24);
+  --lg3-platter-light:rgba(232,232,237,.72); --lg3-platter-dark:rgba(66,66,69,.72);
+  --lg3-platter-ring-light:rgba(0,0,0,.11); --lg3-platter-ring-dark:rgba(255,255,255,.11);
+  --lg3-rt-dark:rgba(28,28,30,.94);         --lg3-rt-light:rgba(246,246,248,.96);
+  --lg3-ic-dark:rgba(0,0,0,.92);            --lg3-ic-light:rgba(255,255,255,.95);
+  /* legibility veil and wash: the reduce-transparency fill, at a share */
+  --lg3-veil-dark:var(--lg3-rt-dark);       --lg3-veil-light:var(--lg3-rt-light);
+  --lg3-wash-dark:.72;                      --lg3-wash-light:.12;
+  /* the secondary ink data-lg3-text="dense" holds (the glyph-gray-
+     secondary-alt, the colour module's --label-2-on-fill); a brand with a dimmer one sets it */
+  --lg3-ink-2-on-dark:#d2d2d7;              --lg3-ink-2-on-light:#424245;
+  --lg3-ease-lift:linear(0 0%,.0018 5%,.0163 10%,.0551 15%,.123 20%,.2172 25%,.3294 30%,.4485 35%,.5644 40%,.669 45%,.7578 50%,.8291 55%,.8835 60%,.9232 65%,.951 70%,.9696 75%,.9818 80%,.9894 85%,.994 90%,.9967 95%,1 100%);
+  --lg3-ease-hold:linear(0 0%,.0024 5%,.0226 10%,.0787 15%,.1812 20%,.3281 25%,.5051 30%,.6897 35%,.8567 40%,.9857 45%,1.0661 50%,1.0988 55%,1.0944 60%,1.0688 65%,1.0374 70%,1.0113 75%,.9957 80%,.9901 85%,.9911 90%,.9949 95%,1 100%);
+  --lg3-tint:.5;
+}
+
+/* ── before (or without) the script: a plain frost that still reads ─────── */
+:where([data-lg3=""],[data-lg3="glass"],[data-lg3="clear"]):not(.lg3){
+  background:rgb(128 128 128 / .28);
+  -webkit-backdrop-filter:blur(8px) saturate(1.8);
+          backdrop-filter:blur(8px) saturate(1.8);
+  box-shadow:0 8px 26px -6px rgb(0 0 0 / .3), inset 0 1px 0 rgb(255 255 255 / .28);
+}
+
+/* ─────────────────────────────────────────────────────────────────────────
+   THE HOST (glass + clear)
+   :where() keeps position at zero specificity: an author's fixed tab bar
+   stays fixed. The shadow is the pair — a contact shadow that says the
+   slab touches, an ambient one that says how high it floats — scaled by the
+   sampler (strength, and "hard" = busy: a busier backdrop gets a tighter,
+   darker shadow) and by size (spread: bigger glass is thicker glass).
+   ───────────────────────────────────────────────────────────────────────── */
+:where(.lg3[data-lg3-kind="glass"], .lg3[data-lg3-kind="clear"]){ position:relative; }
+.lg3[data-lg3-kind="glass"], .lg3[data-lg3-kind="clear"]{
+  --lg3-s:var(--lg3-shadow-spread,1);
+  --lg3-k:calc(var(--lg3-shadow-strength,.9) * var(--lg3-mat,1));
+  background:transparent;
+  box-shadow:
+    0 calc(1px * var(--lg3-s)) calc(3px * var(--lg3-s)) rgb(0 0 0 / calc(.15 * var(--lg3-k))),
+    0 calc(10px * var(--lg3-s)) calc(30px * var(--lg3-s) * (1 - .4 * var(--lg3-shadow-hard,0))) calc(-6px * var(--lg3-s))
+      rgb(0 0 0 / calc(.30 * var(--lg3-k) * (1 + .35 * var(--lg3-shadow-hard,0))));
+  transition:box-shadow 300ms linear;
+  -webkit-tap-highlight-color:transparent;
+}
+.lg3[data-lg3-appearance="dark"]{ color:var(--lg3-ink-on-dark); --lg3-spec-opacity:var(--lg3-spec-dark);
+  --lg3-rim:var(--lg3-rim-dark); --lg3-edge-top:var(--lg3-edge-top-dark); --lg3-edge-bottom:var(--lg3-edge-bottom-dark);
+  --lg3-ink-2:var(--lg3-ink-2-on-dark); --lg3-veil-c:var(--lg3-veil-dark); --lg3-wash-base:var(--lg3-wash-dark); }
+.lg3[data-lg3-appearance="light"]{ color:var(--lg3-ink-on-light); --lg3-spec-opacity:var(--lg3-spec-light);
+  --lg3-rim:var(--lg3-rim-light); --lg3-edge-top:var(--lg3-edge-top-light); --lg3-edge-bottom:var(--lg3-edge-bottom-light);
+  --lg3-ink-2:var(--lg3-ink-2-on-light); --lg3-veil-c:var(--lg3-veil-light); --lg3-wash-base:var(--lg3-wash-light); }
+/* a host that carries its own appearance as data-tone resolves the page's
+   roles for it: the veil is then the brand's raised ground */
+.lg3[data-tone="dark"][data-lg3-appearance="dark"]{ --lg3-veil-c:var(--bg-elevated, var(--lg3-veil-dark)); }
+.lg3[data-tone="light"][data-lg3-appearance="light"]{ --lg3-veil-c:var(--bg-elevated, var(--lg3-veil-light)); }
+/* FOCUS ON GLASS — a ring around a control INSIDE a host is drawn on the
+   glass, and the band's accent can be the glass's own hue: light glass in a
+   dark band measured 1.03–1.13:1 (docs' chapter bar, start's platter CTA).
+   It takes the glass's ink, the one colour the engine keeps legible on it.
+   The host's OWN ring is drawn outside, on the band, and stays the band's.
+   :where() — a control that sets its own (an invalid field's --bad) wins. */
+:where(.lg3[data-lg3-kind="glass"], .lg3[data-lg3-kind="clear"])[data-lg3-appearance="dark"] > :where(:not([class^="lg3__"])){ --focus-color:var(--lg3-ink-on-dark); }
+:where(.lg3[data-lg3-kind="glass"], .lg3[data-lg3-kind="clear"])[data-lg3-appearance="light"] > :where(:not([class^="lg3__"])){ --focus-color:var(--lg3-ink-on-light); }
+/* the pill's edge line is softer than the panel's (0.55 vs 0.95, CN1 fits) */
+.lg3[data-lg3-recipe="pill"]{ --lg3-rim-scale:.58; }
+
+.lg3 > .lg3__dim, .lg3 > .lg3__veil, .lg3 > .lg3__tint, .lg3 > .lg3__glow,
+.lg3 > .lg3__spec, .lg3 > .lg3__rim, .lg3 > .lg3__edge{
+  position:absolute; inset:0; display:block; pointer-events:none;
+  border-radius:inherit; corner-shape:inherit; box-sizing:border-box;
+}
+
+/* RASTER HINT — one crisp-edged paint at alpha 1/255 keeps the host's layer
+   out of multisampled raster (lg3-core §7 crisp()): 4 px, centred, under the
+   label, never hit-tested. */
+.lg3 > .lg3__aa{
+  position:absolute; left:50%; top:50%; width:4px; height:4px; margin:-2px 0 0 -2px;
+  z-index:-1; display:block; pointer-events:none;
+}
+.lg3 > .lg3__aa > svg{ display:block; width:4px; height:4px; }
+
+/* VEIL — legibility share and wash. Opacity, not a mixed colour, so the
+   share eases (240 ms) instead of stepping as the reading changes; created
+   first in the host, so it paints under the tint ramp and the glow. */
+.lg3 > .lg3__veil{
+  z-index:-1; background:var(--lg3-veil-c, var(--lg3-rt-dark));
+  opacity:0; transition:opacity 240ms linear;
+}
+.lg3[data-lg3-text] > .lg3__veil{ opacity:calc(var(--lg3-legible, 0) * var(--lg3-mat, 1)); }
+.lg3[data-lg3-wash] > .lg3__veil{
+  opacity:calc(max(var(--lg3-legible, 0), var(--lg3-wash-base, .12) + (1 - var(--lg3-wash-base, .12)) * var(--lg3-density, 0)) * var(--lg3-mat, 1)); }
+
+/* TINT — only the light ramp now: the wash itself is the measured colour
+   transform inside the backdrop pass. z −1: above the pass, below the label
+   (at z ≥ 0 it would cover the host's own text the moment it went light). */
+.lg3 > .lg3__tint{
+  z-index:-1;
+  background:linear-gradient(180deg,
+    rgb(255 255 255 / calc(.09 * var(--lg3-mat,1))) 0%,
+    rgb(255 255 255 / calc(.02 * var(--lg3-mat,1))) 38%,
+    rgb(255 255 255 / 0) 62%,
+    rgb(0 0 0 / calc(.05 * var(--lg3-mat,1))) 100%);
+}
+.lg3[data-lg3-appearance="light"] > .lg3__tint{
+  background:linear-gradient(180deg,
+    rgb(255 255 255 / calc(.32 * var(--lg3-mat,1))) 0%,
+    rgb(255 255 255 / calc(.06 * var(--lg3-mat,1))) 45%,
+    rgb(0 0 0 / calc(.03 * var(--lg3-mat,1))) 100%);
+}
+
+/* GLOW — white, measured 93 pt across, peak ≈ .28; rises in .1 s while
+   pressed, then expands 4× and fades over .5 s */
+.lg3 > .lg3__glow{
+  z-index:-1; mix-blend-mode:plus-lighter;
+  opacity:var(--lg3-glow);
+  background:radial-gradient(circle calc(47px * var(--lg3-glow-r)) at var(--lg3-gx,50%) var(--lg3-gy,50%),
+    rgb(var(--lg3-glow-color) / .30) 0%, rgb(var(--lg3-glow-color) / .12) 45%, rgb(var(--lg3-glow-color) / 0) 100%);
+  transition:opacity 500ms cubic-bezier(0,0,.2,1), --lg3-glow-r 500ms cubic-bezier(0,0,.2,1);
+}
+.lg3[data-lg3-pressed] > .lg3__glow{ transition-duration:100ms, 0s; }
+.lg3[data-lg3-appearance="light"] > .lg3__glow{ --lg3-glow-color:255 255 255; opacity:calc(var(--lg3-glow) * .7); }
+
+/* SPECULAR — Blinn-Phong + Fresnel against the refraction's normal field,
+   lit from above. 9-sliced by border-image (JS writes the source): the 1-px
+   middle strips stretch, so the rim is exact at any size, every frame.
+   Additive: a highlight is light arriving, not paint. */
+.lg3 > .lg3__spec{
+  z-index:6; mix-blend-mode:plus-lighter;
+  border:0 solid transparent;
+  background-repeat:no-repeat; background-size:100% 100%;
+  opacity:calc(var(--lg3-spec-opacity,.85) * var(--lg3-spec-boost,1) * var(--lg3-mat,1));
+  transition:opacity 260ms linear;
+}
+
+/* DARK EDGE — a line that is full on the sides and fades toward the
+   top and bottom. A side-only border on the host's own radius does exactly
+   that: the browser tapers it to zero around each corner. Drawn on the
+   outermost pixel inside (UIKit draws it just outside; a web host clips). */
+.lg3 > .lg3__rim{
+  z-index:7;
+  border:0 solid rgb(0 0 0 / calc(var(--lg3-rim,.5) * var(--lg3-rim-scale,1) * var(--lg3-mat,1)));
+  border-left-width:1px; border-right-width:1px;
+}
+.lg3[data-lg3-merged] > .lg3__rim{ border:0; background-size:100% 100%;
+  opacity:calc(var(--lg3-rim,.5) * 1.6 * var(--lg3-mat,1)); }
+
+/* EDGE — the hairline where glass meets air, bright at the top and
+   the bottom; exactly 1 px, following the silhouette via mask-composite. */
+.lg3 > .lg3__edge{
+  z-index:7; padding:1px;
+  background:linear-gradient(180deg,
+    rgb(255 255 255 / calc(var(--lg3-edge-top,.42) * var(--lg3-mat,1))) 0%,
+    rgb(255 255 255 / calc(var(--lg3-edge-top,.42) * .22 * var(--lg3-mat,1))) 24%,
+    rgb(255 255 255 / 0) 50%,
+    rgb(255 255 255 / calc(var(--lg3-edge-bottom,.16) * .4 * var(--lg3-mat,1))) 78%,
+    rgb(255 255 255 / calc(var(--lg3-edge-bottom,.16) * var(--lg3-mat,1))) 100%);
+  -webkit-mask:linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite:xor;
+          mask:linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+          mask-composite:exclude;
+}
+
+/* ─────────────────────────────────────────────────────────────────────────
+   CLEAR — "highly translucent, not adaptive", only over media, only with
+   bold bright content, and always with its dim (≈35%, deeper over bright
+   media; the sampler writes --lg3-dim). Shipping the dim with the variant is
+   the difference between a variant and a footgun. Never mix with regular.
+   ───────────────────────────────────────────────────────────────────────── */
+.lg3[data-lg3-kind="clear"]{ color:var(--lg3-ink-on-dark); --lg3-spec-opacity:.95; --lg3-rim:.42;
+  --lg3-edge-top:.55; --lg3-edge-bottom:.22; }
+.lg3[data-lg3-kind="clear"] > .lg3__dim{
+  z-index:-2; background:rgb(0 0 0 / calc(var(--lg3-dim,.35) * var(--lg3-mat,1)));
+  transition:background 240ms linear;
+}
+.lg3[data-lg3-kind="clear"] > .lg3__tint{
+  background:linear-gradient(180deg, rgb(255 255 255 / calc(.08 * var(--lg3-mat,1))), rgb(255 255 255 / 0) 55%);
+}
+
+/* ─────────────────────────────────────────────────────────────────────────
+   CHROME and PLATTER — the web materials. No
+   script, no refraction: blur + fill + ring. They follow the core's resolved
+   --mat-* tokens (which re-resolve per [data-tone] band) and fall back to
+   the values here, keyed to the appearance LG3 writes.
+   ───────────────────────────────────────────────────────────────────────── */
+/* tone rides on the band: variables set on every [data-tone] carrier are
+   inherited, so the NEAREST band wins (a selector like :where([data-tone=
+   dark]) [data-lg3] would match a dark <html> around a light band) */
+:root, [data-tone="light"]{
+  --lg3-cf:var(--lg3-chrome-light); --lg3-cr:var(--lg3-chrome-ring-light);
+  --lg3-pf:var(--lg3-platter-light); --lg3-pr:var(--lg3-platter-ring-light);
+}
+[data-tone="dark"]{
+  --lg3-cf:var(--lg3-chrome-dark); --lg3-cr:var(--lg3-chrome-ring-dark);
+  --lg3-pf:var(--lg3-platter-dark); --lg3-pr:var(--lg3-platter-ring-dark);
+}
+[data-lg3="chrome"][data-lg3-appearance="light"]{ --lg3-cf:var(--lg3-chrome-light); --lg3-cr:var(--lg3-chrome-ring-light); }
+[data-lg3="chrome"][data-lg3-appearance="dark"]{ --lg3-cf:var(--lg3-chrome-dark); --lg3-cr:var(--lg3-chrome-ring-dark); }
+[data-lg3="platter"][data-lg3-appearance="light"]{ --lg3-pf:var(--lg3-platter-light); --lg3-pr:var(--lg3-platter-ring-light); }
+[data-lg3="platter"][data-lg3-appearance="dark"]{ --lg3-pf:var(--lg3-platter-dark); --lg3-pr:var(--lg3-platter-ring-dark); }
+[data-lg3="chrome"]{
+  background:var(--mat-chrome-bg, var(--lg3-cf));
+  -webkit-backdrop-filter:var(--mat-chrome-filter, saturate(180%) blur(20px));
+          backdrop-filter:var(--mat-chrome-filter, saturate(180%) blur(20px));
+  box-shadow:var(--mat-chrome-ring, 0 0 0 1px var(--lg3-cr));
+}
+[data-lg3="platter"]{
+  background:var(--mat-platter-bg, var(--lg3-pf));
+  -webkit-backdrop-filter:var(--mat-platter-filter, blur(20px));
+          backdrop-filter:var(--mat-platter-filter, blur(20px));
+  box-shadow:var(--mat-platter-ring, inset 0 0 .5px 0 var(--lg3-pr));
+}
+@supports not ((backdrop-filter:blur(1px)) or (-webkit-backdrop-filter:blur(1px))){
+  [data-lg3="chrome"]{ --lg3-chrome-light:rgba(250,250,252,.92); --lg3-chrome-dark:rgba(22,22,23,.88); }
+  [data-lg3="platter"]{ --lg3-platter-light:rgba(232,232,237,.92); --lg3-platter-dark:rgba(66,66,69,.88); }
+}
+
+/* ─────────────────────────────────────────────────────────────────────────
+   INTERACTION — the press LIFTS on a spring (interactive glass
+   scales up, bounces, lights from the touch point). Held: the "hold" spring
+   (.356 s / .41, measured bar growth). Released: "lift" (.25 s, critically
+   damped). `scale` is its own property, so an author transform survives.
+   ───────────────────────────────────────────────────────────────────────── */
+.lg3[data-lg3-interactive]{
+  transition:scale var(--sp-lift-ms,342ms) var(--sp-lift,var(--lg3-ease-lift)), box-shadow 300ms linear;
+  touch-action:manipulation;
+}
+.lg3[data-lg3-interactive][data-lg3-pressed],
+.lg3[data-lg3-interactive]:active{
+  scale:var(--lg3-press-scale,1.04);
+  --lg3-spec-boost:1.3;
+  transition:scale var(--sp-hold-ms,562ms) var(--sp-hold,var(--lg3-ease-hold)), box-shadow 300ms linear;
+}
+@media (hover:hover){ .lg3[data-lg3-interactive]:hover{ --lg3-spec-boost:1.12; } }
+
+/* ─────────────────────────────────────────────────────────────────────────
+   MORPH / MATERIALIZE / AWAY
+   While morphing the box itself animates; content is frozen at its final
+   layout and translated so it stays put while the glass grows over it.
+   ───────────────────────────────────────────────────────────────────────── */
+.lg3[data-lg3-morphing]{ overflow:hidden; }
+/* the flight is round (lg3-core §14: a superellipse is a path, and a path
+   clip turned the whole box multisampled — an MSAA program per kind of
+   content, compiled mid-flight). The engine writes the circle with the
+   same 45° inset as the radius; !important because FG3's corner pass
+   re-writes the inline corner-shape of every box that resizes. */
+[data-lg3-morphing]{ corner-shape:round !important; }
+/* …and it stays round after landing until the page is still (the engine
+   holds the flight's last radius inline meanwhile): the exact corner's first
+   raster compiles, and at landing it fell inside the highlight's fade-in */
+[data-lg3-landed]{ corner-shape:round !important; }
+.lg3[data-lg3-morphing] > :not([class^="lg3__"]){ translate:var(--lg3-mx,0) var(--lg3-my,0); }
+/* The content is frozen at its final layout for the flight, so it is
+   rastered ONCE, on its own layer: the fade, the ride and the growing clip
+   are the compositor's. Drawn inside the box, every kind of content was
+   re-rastered each frame THROUGH the moving corner clip — a program per kind
+   the first time (patterns' sheet: 57 compiled in flight, one 103–127 ms
+   frame; composited, 29 and none over 56 ms). A glass host inside the
+   content is a backdrop root for the flight's last frames (its fade already
+   made it one until then). */
+[data-lg3-morphing] > :not([class^="lg3__"]), [data-lg3-morphing] > .lg3__ghost{ will-change:opacity; }
+[data-lg3-away]{ visibility:hidden !important; pointer-events:none !important; }
+
+/* merged hosts rebuild after a move settles; until then frost + hairline.
+   A morph flies the same way — frost, hairline, no highlight — and the
+   highlight returns as it lands. Drawn in flight, its first draw doubled the
+   first open's worst frame (docs share 70–85 → 126–165 ms, patterns alert
+   79–109 → 157–180 ms, 1440 and 402) */
+.lg3[data-lg3-resizing] > .lg3__spec,
+.lg3[data-lg3-morphing] > .lg3__spec{ opacity:0; transition:opacity 90ms linear; }
+
+/* ─────────────────────────────────────────────────────────────────────────
+   LAYERS
+   Glass is chrome; content is opaque. Inside a content layer the material is
+   REMOVED, not dimmed — there is no half-strength lens on a card.
+   ───────────────────────────────────────────────────────────────────────── */
+.layer-content .lg3, .lg3[data-lg3-off]{
+  -webkit-backdrop-filter:none !important; backdrop-filter:none !important;
+  background:var(--bg-elevated, #1d1d1f) !important; box-shadow:inset 0 0 0 1px var(--separator, rgba(255,255,255,.12)) !important;
+  mask-image:none !important;
+}
+.layer-content .lg3 > [class^="lg3__"], .lg3[data-lg3-off] > [class^="lg3__"]{ display:none; }
+
+/* dissection, for labs and specimens: data-lg3-hide-{lens,tint,spec,rim,
+   edge,glow,shadow} on <html> takes every host apart; on any ANCESTOR (a
+   specimen card) or on the host itself, only the glass inside it. Pulling
+   the lens removes the backdrop-filter outright (opacity 0 would keep the
+   pass running and the stacking context in place). */
+:is([data-lg3-hide-lens] .lg3, .lg3[data-lg3-hide-lens]){ -webkit-backdrop-filter:none !important; backdrop-filter:none !important; }
+:is([data-lg3-hide-veil] .lg3, .lg3[data-lg3-hide-veil]) > .lg3__veil,
+:is([data-lg3-hide-tint] .lg3, .lg3[data-lg3-hide-tint]) > .lg3__tint,
+:is([data-lg3-hide-spec] .lg3, .lg3[data-lg3-hide-spec]) > .lg3__spec,
+:is([data-lg3-hide-rim] .lg3, .lg3[data-lg3-hide-rim]) > .lg3__rim,
+:is([data-lg3-hide-edge] .lg3, .lg3[data-lg3-hide-edge]) > .lg3__edge,
+:is([data-lg3-hide-glow] .lg3, .lg3[data-lg3-hide-glow]) > .lg3__glow{ display:none; }
+:is([data-lg3-hide-shadow] .lg3, .lg3[data-lg3-hide-shadow]){ box-shadow:none !important; }
+
+/* ─────────────────────────────────────────────────────────────────────────
+   ACCESSIBILITY — modifiers on the material that keep its character
+   ───────────────────────────────────────────────────────────────────────── */
+/* REDUCE TRANSPARENCY: "frostier, hides more of the content behind it".
+   Safari cannot detect the setting, so the single hook is an attribute that
+   LG3.setReduceTransparency() writes; the media query is the no-JS twin and
+   yields to an explicit data-reduce-transparency="off". */
+html[data-reduce-transparency]:not([data-reduce-transparency="off"]) .lg3 > .lg3__tint{ background:var(--lg3-rt-dark); }
+html[data-reduce-transparency]:not([data-reduce-transparency="off"]) .lg3[data-lg3-appearance="light"] > .lg3__tint{ background:var(--lg3-rt-light); }
+html[data-reduce-transparency]:not([data-reduce-transparency="off"]) .lg3 > :is(.lg3__glow,.lg3__veil){ display:none; }
+html[data-reduce-transparency]:not([data-reduce-transparency="off"]) :is([data-lg3="chrome"],[data-lg3="platter"]){
+  background:var(--mat-chrome-fill-solid, #fafafc); }
+html[data-reduce-transparency]:not([data-reduce-transparency="off"]) :is([data-lg3="chrome"],[data-lg3="platter"])[data-lg3-appearance="dark"]{
+  background:var(--mat-chrome-fill-solid, #161617); }
+@media (prefers-reduced-transparency: reduce){
+  html:not([data-reduce-transparency="off"]) :is([data-lg3="chrome"],[data-lg3="platter"]){ background:var(--mat-chrome-fill-solid, #fafafc); }
+  html:not([data-reduce-transparency="off"]) :is([data-lg3="chrome"],[data-lg3="platter"])[data-lg3-appearance="dark"]{ background:var(--mat-chrome-fill-solid, #161617); }
+  html:not([data-reduce-transparency="off"]) .lg3 > .lg3__tint{ background:var(--lg3-rt-dark); }
+  html:not([data-reduce-transparency="off"]) .lg3[data-lg3-appearance="light"] > .lg3__tint{ background:var(--lg3-rt-light); }
+  html:not([data-reduce-transparency="off"]) .lg3 > :is(.lg3__glow,.lg3__veil){ display:none; }
+}
+
+/* INCREASE CONTRAST: "predominantly black or white, with a contrasting
+   border". The highlight goes (contrast noise at this setting); the rim and
+   hairline become a solid 1 px ring. */
+@media (prefers-contrast: more){
+  /* [data-lg3-kind] so it also beats clear's own tint rule */
+  .lg3[data-lg3-kind] > .lg3__tint{ background:var(--lg3-ic-dark); }
+  .lg3[data-lg3-kind][data-lg3-appearance="light"] > .lg3__tint{ background:var(--lg3-ic-light); }
+  .lg3[data-lg3-kind="clear"] > .lg3__dim{ display:none; }
+  :is([data-lg3="chrome"],[data-lg3="platter"]){ background:var(--mat-chrome-fill-solid, #fafafc); box-shadow:inset 0 0 0 1px rgb(0 0 0 / .7); }
+  :is([data-lg3="chrome"],[data-lg3="platter"])[data-lg3-appearance="dark"]{ background:var(--mat-chrome-fill-solid, #161617); box-shadow:inset 0 0 0 1px rgb(255 255 255 / .75); }
+  .lg3 > .lg3__spec, .lg3 > .lg3__glow, .lg3 > .lg3__rim, .lg3 > .lg3__veil{ display:none; }
+  .lg3 > .lg3__edge{ background:rgb(255 255 255 / .75); }
+  .lg3[data-lg3-appearance="light"] > .lg3__edge{ background:rgb(0 0 0 / .7); }
+}
+html[data-contrast="more"] .lg3[data-lg3-kind] > .lg3__tint{ background:var(--lg3-ic-dark); }
+html[data-contrast="more"] .lg3[data-lg3-kind="clear"] > .lg3__dim{ display:none; }
+html[data-contrast="more"] :is([data-lg3="chrome"],[data-lg3="platter"]){ background:var(--mat-chrome-fill-solid, #fafafc); box-shadow:inset 0 0 0 1px rgb(0 0 0 / .7); }
+html[data-contrast="more"] :is([data-lg3="chrome"],[data-lg3="platter"])[data-lg3-appearance="dark"]{ background:var(--mat-chrome-fill-solid, #161617); box-shadow:inset 0 0 0 1px rgb(255 255 255 / .75); }
+html[data-contrast="more"] .lg3[data-lg3-kind][data-lg3-appearance="light"] > .lg3__tint{ background:var(--lg3-ic-light); }
+html[data-contrast="more"] .lg3 > :is(.lg3__spec,.lg3__glow,.lg3__rim,.lg3__veil){ display:none; }
+html[data-contrast="more"] .lg3 > .lg3__edge{ background:rgb(255 255 255 / .75); }
+html[data-contrast="more"] .lg3[data-lg3-appearance="light"] > .lg3__edge{ background:rgb(0 0 0 / .7); }
+
+/* FORCED COLOURS: the UA drops box-shadow but KEEPS backdrop-filter and
+   background-image, so the wrong half survives unless we say so. */
+@media (forced-colors: active){
+  .lg3, [data-lg3]{
+    -webkit-backdrop-filter:none !important; backdrop-filter:none !important;
+    background:Canvas !important; color:CanvasText !important; background-image:none !important;
+    outline:1px solid CanvasText; outline-offset:-1px; mask-image:none !important;
+  }
+  .lg3 > [class^="lg3__"]{ display:none !important; }
+}
+
+/* REDUCED MOTION: "turns off the elastic (gel) properties". The press still
+   confirms (highlight, glow) but no longer flexes. Nothing blanket here —
+   a global duration override is what breaks state indicators. */
+@media (prefers-reduced-motion: reduce){
+  .lg3[data-lg3-interactive][data-lg3-pressed],
+  .lg3[data-lg3-interactive]:active{ scale:none; }
+}

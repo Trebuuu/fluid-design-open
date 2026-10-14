@@ -1,0 +1,537 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Audit &middot; Fluid Design Open</title>
+<!--
+  The Fluid Design Open page template. Every page of the site copies this skeleton VERBATIM
+  (head, site nav, footer, scripts) and replaces only: the <title>, the
+  aria-current link in the nav, the local-nav capsule's title/jump links, and
+  <main>. 
+
+  Do NOT put data-tone on <html> unless the page must be pinned: an author
+  tone beats the reader's appearance toggle (FG3 precedence).
+-->
+<script>
+/* Tone without a flash (fg3.js header): reader's choice › author › host › system. */
+try{var d=document.documentElement,t=localStorage.getItem('fg3-tone');
+if(!d.hasAttribute('data-tone')){d.setAttribute('data-tone',t||d.getAttribute(
+'data-theme')||(matchMedia('(prefers-color-scheme: dark)').matches?'dark':
+'light'));d.setAttribute('data-tone-auto','')}}catch(e){}
+</script>
+<link rel="stylesheet" href="assets/fg3-tokens.css">
+<link rel="stylesheet" href="assets/fg3-color.css">
+<link rel="stylesheet" href="assets/fg3-springs.css">
+<link rel="stylesheet" href="assets/fg3.css">
+<link rel="stylesheet" href="assets/lg3.css">
+<link rel="stylesheet" href="assets/fg3-motion.css">
+<link rel="stylesheet" href="assets/fg3-components.css">
+<link rel="stylesheet" href="assets/fg3-chrome.css">
+<link rel="stylesheet" href="assets/fg3-showcase.css">
+<link rel="stylesheet" href="assets/fg3-symbols.css">
+<link rel="stylesheet" href="assets/fg3-chart.css">
+<link rel="stylesheet" href="assets/fg3-device.css">
+<link rel="stylesheet" href="assets/fg3-docs.css">    <!-- documentation pages only -->
+<style>
+/* Page layout only: roles and tokens, never a colour value (SPEC §2).
+   Page-local classes are prefixed with the page's own short name (e.g. mo- on
+   motion.html) so they can never collide with a system class. */
+
+/* ── hero: the question on the left, the page under measurement on the right */
+.au-hero{display:grid;grid-template-columns:minmax(0,5fr) minmax(0,7fr);gap:var(--s-10);align-items:center}
+.au-hero .t-lede{margin-top:var(--s-5)}
+.au-controls{display:grid;gap:var(--s-5);margin-top:var(--s-9);justify-items:start}
+.au-control{display:grid;gap:var(--s-2)}
+.au-control > span{font-size:var(--t-caption-fs);line-height:var(--t-caption-lh);letter-spacing:var(--t-caption-ls);color:var(--label-2)}
+.au-run{display:flex;flex-wrap:wrap;gap:var(--s-3);align-items:center;margin-top:var(--s-2)}
+.au-stage{display:grid;gap:var(--s-4);justify-items:center;min-width:0}
+.au-stage .device{--device-width:min(100%,680px)}
+.au-stage .device[data-device="phone"]{--device-width:min(100%,300px)}
+.au-stage .device[hidden]{display:none}
+.au-stage iframe{border:0;display:block;background:var(--bg-1)}
+/* the idle screen is drawn at the frame's own size (1440 or 402 logical px)
+   and scaled down with it, so its type is set large */
+.au-idle{display:grid;place-items:center;align-content:center;gap:24px;width:100%;height:100%;
+  padding:64px;text-align:center;background:var(--bg-2);color:var(--label-2)}
+.au-idle .sym{font-size:96px;color:var(--label-3)}
+.au-idle p{max-width:18ch;font-size:44px;line-height:1.2;letter-spacing:0;font-weight:600;color:var(--label-2)}
+#au-screen-phone .au-idle p{font-size:28px}
+.au-status{width:min(100%,680px);display:grid;gap:var(--s-2)}
+.au-status p{font-size:var(--t-caption-fs);line-height:var(--t-caption-lh);letter-spacing:var(--t-caption-ls);color:var(--label-2);
+  text-align:center;font-variant-numeric:tabular-nums;min-height:1.3em}
+.au-status progress{width:100%}
+
+/* ── the count ─────────────────────────────────────────────────────────── */
+.au-count .stat-grid{margin-top:var(--band-header-gap);--stat-min:220px}
+.au-count .stat-value{font-variant-numeric:tabular-nums}
+.au-count .stat-caption{color:var(--label-2)}
+.au-verdict{display:flex;flex-wrap:wrap;align-items:center;gap:var(--s-3);margin-top:var(--s-6)}
+
+/* ── results ───────────────────────────────────────────────────────────── */
+.au-results-head{display:flex;flex-wrap:wrap;align-items:end;justify-content:space-between;gap:var(--s-6)}
+.au-list{display:grid;gap:var(--s-5);margin-top:var(--band-header-gap)}
+.au-page{display:grid;gap:var(--s-5)}
+.au-page[hidden]{display:none}
+.au-page-head{display:flex;flex-wrap:wrap;align-items:center;gap:var(--s-3) var(--s-4)}
+.au-page-name{font-family:var(--t-subtitle-ff);font-size:var(--t-subtitle-fs);line-height:var(--t-subtitle-lh);
+  letter-spacing:var(--t-subtitle-ls);font-weight:600;margin-inline-end:auto;min-width:0;overflow-wrap:anywhere}
+.au-page-name a{color:inherit;text-decoration:none}
+.au-page-name a:hover{text-decoration:underline}
+.au-kv{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,150px),1fr));gap:var(--s-4) var(--s-6);margin:0}
+.au-kv div{display:grid;gap:var(--s-1);min-width:0}
+.au-kv dt{font-size:var(--t-caption-fs);line-height:var(--t-caption-lh);letter-spacing:var(--t-caption-ls);color:var(--label-2)}
+.au-kv dd{margin:0;font-size:var(--t-ui-headline-fs);line-height:var(--t-ui-headline-lh);letter-spacing:var(--t-ui-headline-ls);
+  font-weight:600;font-variant-numeric:tabular-nums;overflow-wrap:anywhere}
+.au-note{font-size:var(--t-caption-fs);line-height:var(--t-caption-lh);letter-spacing:var(--t-caption-ls);color:var(--label-2)}
+.au-sub{font-size:var(--t-ui-headline-fs);line-height:var(--t-ui-headline-lh);letter-spacing:var(--t-ui-headline-ls);font-weight:600}
+.au-table{margin:0}
+.au-table td,.au-table th{vertical-align:top}
+.au-table .num{white-space:nowrap}
+.au-sel{font-family:var(--font-mono);font-size:var(--t-12);line-height:1.5;letter-spacing:0;overflow-wrap:anywhere;color:var(--label-2)}
+.au-ratio{font-variant-numeric:tabular-nums;font-weight:600;white-space:nowrap}
+.au-sw{display:inline-block;width:14px;height:14px;border-radius:4px;vertical-align:-2px;margin-inline-end:6px;
+  box-shadow:inset 0 0 0 1px var(--separator)}
+.au-pair{white-space:nowrap;font-family:var(--font-mono);font-size:var(--t-12);letter-spacing:0;line-height:1.7}
+.au-details summary{cursor:pointer;font-size:var(--t-caption-fs);color:var(--label-2);width:max-content;max-width:100%}
+.au-details ul{margin:var(--s-3) 0 0;padding-inline-start:var(--s-5);display:grid;gap:var(--s-1)}
+.au-details li{font-size:var(--t-caption-fs);line-height:var(--t-caption-lh);color:var(--label-2);overflow-wrap:anywhere}
+.au-empty{margin-top:var(--band-header-gap)}
+/* inline code on a fill reads in the page's ink (fg3-docs' --fill-2 wash under
+   --label-2 measures 4.13:1) */
+main :where(p,li,dd) > code{color:var(--label)}
+/* the device toolbar's address is the page's own caption here: full ink */
+.au-stage .device__url{color:var(--label)}
+
+/* ── method ────────────────────────────────────────────────────────────── */
+.au-method{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:var(--s-9) var(--s-10);margin-top:var(--band-header-gap)}
+.au-method h3{font-family:var(--t-subtitle-ff);font-size:var(--t-subtitle-fs);line-height:var(--t-subtitle-lh);letter-spacing:var(--t-subtitle-ls);font-weight:600}
+.au-method p,.au-method li{font-size:var(--t-body-fs);line-height:var(--t-body-lh);letter-spacing:var(--t-body-ls);color:var(--label-2)}
+.au-method p strong,.au-method li strong{color:var(--label);font-weight:600}
+.au-method > div{display:grid;gap:var(--s-4);align-content:start;min-width:0}
+.au-method ul{margin:0;padding-inline-start:var(--s-5);display:grid;gap:var(--s-2)}
+.au-method .doc-code{white-space:pre-wrap;overflow-wrap:anywhere}
+
+@media (max-width:1068px){
+  .au-hero{grid-template-columns:minmax(0,1fr);gap:var(--s-9)}
+  .au-stage{order:2}
+}
+@media (max-width:734px){
+  .au-method{grid-template-columns:minmax(0,1fr)}
+  .au-table-wrap .table th:nth-child(4),.au-table-wrap .table td:nth-child(4){display:none}
+}
+</style>
+</head>
+<body>
+
+<!-- ═══ SITE NAV (shared — copy verbatim; set aria-current on this page's link) ═══ -->
+<nav class="globalnav" aria-label="Fluid Design">
+  <div class="globalnav__bar">
+    <a class="globalnav__brand" href="index.html" aria-label="Fluid Design Open home"><i data-sym="sparkles"></i></a>
+    <ul class="globalnav__list">
+      <li class="globalnav__item"><a class="globalnav__link" href="index.html">Overview</a></li>
+      <li class="globalnav__item"><a class="globalnav__link" href="start.html">Start</a></li>
+      <li class="globalnav__item"><a class="globalnav__link" href="docs.html">Docs</a></li>
+      <li class="globalnav__item" data-flyout="gn-foundations"><a class="globalnav__link" href="color.html">Foundations</a><button class="globalnav__trigger" type="button"><span class="sr-only">Foundations menu</span></button></li>
+      <li class="globalnav__item" data-flyout="gn-components"><a class="globalnav__link" href="components.html">Components</a><button class="globalnav__trigger" type="button"><span class="sr-only">Components menu</span></button></li>
+      <li class="globalnav__item" data-flyout="gn-instruments"><a class="globalnav__link" href="selftest.html">Instruments</a><button class="globalnav__trigger" type="button"><span class="sr-only">Instruments menu</span></button></li>
+    </ul>
+    <div class="globalnav__tools">
+      <button class="globalnav__icon" type="button" data-tone-toggle aria-label="Switch appearance"><i data-sym="circle-half"></i></button>
+      <button class="globalnav__menu" type="button" aria-label="Menu" aria-expanded="false"><i data-sym="lines"></i></button>
+    </div>
+  </div>
+  <div class="globalnav__flyout" id="gn-foundations" hidden>
+    <div class="globalnav__flyout-content">
+      <div class="globalnav__group" data-elevated>
+        <h2 class="globalnav__group-title">Foundations</h2>
+        <ul><li><a class="globalnav__flyout-link" href="color.html">Colour</a></li><li><a class="globalnav__flyout-link" href="type.html">Type</a></li><li><a class="globalnav__flyout-link" href="layout.html">Layout</a></li><li><a class="globalnav__flyout-link" href="materials.html">Materials</a></li><li><a class="globalnav__flyout-link" href="motion.html">Motion</a></li></ul>
+      </div>
+      <div class="globalnav__group">
+        <h2 class="globalnav__group-title">Content</h2>
+        <ul><li><a class="globalnav__flyout-link" href="symbols.html">Symbols</a></li><li><a class="globalnav__flyout-link" href="data.html">Data</a></li></ul>
+      </div>
+    </div>
+  </div>
+  <div class="globalnav__flyout" id="gn-components" hidden>
+    <div class="globalnav__flyout-content">
+      <div class="globalnav__group" data-elevated>
+        <h2 class="globalnav__group-title">Components</h2>
+        <ul><li><a class="globalnav__flyout-link" href="components.html">Controls</a></li><li><a class="globalnav__flyout-link" href="chrome.html">Chrome</a></li><li><a class="globalnav__flyout-link" href="showcase.html">Product pages</a></li><li><a class="globalnav__flyout-link" href="patterns.html">Patterns</a></li></ul>
+      </div>
+    </div>
+  </div>
+  <div class="globalnav__flyout" id="gn-instruments" hidden>
+    <div class="globalnav__flyout-content">
+      <div class="globalnav__group" data-elevated>
+        <h2 class="globalnav__group-title">Instruments</h2>
+        <ul><li><a class="globalnav__flyout-link" href="selftest.html">Self-test</a></li><li><a class="globalnav__flyout-link" href="audit.html" aria-current="page">Audit</a></li></ul>
+      </div>
+    </div>
+  </div>
+</nav>
+
+<!-- ═══ LOCAL NAV (per page: title, one CTA, jump links to this page's sections) ═══ -->
+<div class="localnav" data-localnav-reveal="#hero">
+  <div class="localnav__capsule" data-lg3 data-lg3-priority="3">
+    <a class="localnav__title" href="#top">Audit</a>
+    <button class="localnav__explore" type="button"><span class="localnav__explore-label">Explore</span></button>
+    <a class="localnav__cta" href="start.html">Adopt</a>
+    <div class="localnav__panel" aria-label="Explore Fluid Design">
+      <ul class="localnav__tiles">
+        <li><a class="localnav__tile" href="materials.html" style="--tile-hue: var(--series-1)"><span class="localnav__thumb"><i data-sym="sparkles"></i></span>Materials</a></li>
+        <li><a class="localnav__tile" href="motion.html" style="--tile-hue: var(--series-2)"><span class="localnav__thumb"><i data-sym="waveform"></i></span>Motion</a></li>
+        <li><a class="localnav__tile" href="chrome.html" style="--tile-hue: var(--series-3)"><span class="localnav__thumb"><i data-sym="sidebar"></i></span>Chrome</a></li>
+        <li><a class="localnav__tile" href="components.html" style="--tile-hue: var(--series-4)"><span class="localnav__thumb"><i data-sym="sliders"></i></span>Controls</a></li>
+        <li><a class="localnav__tile" href="showcase.html" style="--tile-hue: var(--series-5)"><span class="localnav__thumb"><i data-sym="grid"></i></span>Product pages</a></li>
+      </ul>
+      <hr class="localnav__rule">
+      <nav class="localnav__jump" aria-label="On this page">
+        <p class="localnav__jump-label">On this page <i data-sym="chevron-down"></i></p>
+        <ul class="localnav__jump-grid">
+          <li class="localnav__jump-item"><a href="#count">The count</a></li>
+          <li class="localnav__jump-item"><a href="#results">Every page</a></li>
+          <li class="localnav__jump-item"><a href="#method">How it measures</a></li>
+        </ul>
+      </nav>
+    </div>
+  </div>
+</div>
+
+<main id="top">
+  <!-- ═══ HERO: the question, the controls, and the page under measurement ═══ -->
+  <section class="band" data-band="story" id="hero">
+    <div class="viewport-content au-hero">
+      <div>
+        <p class="t-eyebrow">Audit</p>
+        <h1 class="t-headline">Every page, measured as it paints.</h1>
+        <p class="t-lede">Each page loads here for real and is walked twice. Every line of text is measured against <strong>the ground it actually sits on</strong> &mdash; the art canvas&rsquo;s own pixels, a gradient at that point, or the glass and whatever it is bending &mdash; and every control is checked for a keyboard path and a visible ring.</p>
+        <div class="au-controls">
+          <div class="au-control">
+            <span id="au-width-label">Width</span>
+            <div class="segmented" role="radiogroup" aria-labelledby="au-width-label" id="au-width">
+              <button type="button" role="radio" aria-checked="true" data-value="window">This window</button>
+              <button type="button" role="radio" data-value="402">402 px phone</button>
+            </div>
+          </div>
+          <div class="au-control">
+            <span id="au-tone-label">Appearance</span>
+            <div class="segmented" role="radiogroup" aria-labelledby="au-tone-label" id="au-tones">
+              <button type="button" role="radio" aria-checked="true" data-value="light,dark">Light and dark</button>
+              <button type="button" role="radio" data-value="light">Light</button>
+              <button type="button" role="radio" data-value="dark">Dark</button>
+            </div>
+          </div>
+          <div class="au-run">
+            <button class="btn btn-primary btn-l" type="button" id="au-go">Run the audit</button>
+            <a class="btn btn-plain btn-l" href="selftest.html">Self-test</a>
+          </div>
+        </div>
+      </div>
+      <div class="au-stage" aria-live="off">
+        <div class="device" data-device="browser" data-url="audit &middot; the page under measurement" id="au-browser">
+          <div class="device__screen" data-screen-width="1440" id="au-screen-wide">
+            <div class="au-idle"><i data-sym="magnifier"></i><p>The page being measured appears here while the audit runs.</p></div>
+          </div>
+        </div>
+        <div class="device" data-device="phone" id="au-phone" hidden>
+          <div class="device__screen" data-screen-width="402" id="au-screen-phone">
+            <div class="au-idle"><i data-sym="magnifier"></i><p>Phone width: each page at 402 px.</p></div>
+          </div>
+        </div>
+        <div class="au-status">
+          <progress class="progress" id="au-progress" max="1" value="0" aria-label="Audit progress"></progress>
+          <p id="au-status" role="status">Ready.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══ THE COUNT ═══ -->
+  <section class="band au-count" data-band="story" id="count" data-band-seam="collapse">
+    <div class="viewport-content">
+      <h2 class="t-section">The count.</h2>
+      <div class="stat-grid" data-cols="3">
+        <div class="stat-cell"><p class="stat-value" id="au-n-pages">0</p><p class="stat-caption">pages walked</p></div>
+        <div class="stat-cell"><p class="stat-value" id="au-n-text">0</p><p class="stat-caption">text elements measured, both walks</p></div>
+        <div class="stat-cell"><p class="stat-value" id="au-n-fail">0</p><p class="stat-caption">below their contrast threshold</p></div>
+        <div class="stat-cell"><p class="stat-value" id="au-n-worst">&mdash;</p><p class="stat-caption" id="au-n-worst-cap">lowest ratio found</p></div>
+        <div class="stat-cell"><p class="stat-value" id="au-n-kb">0</p><p class="stat-caption">controls reached by keyboard</p></div>
+        <div class="stat-cell"><p class="stat-value" id="au-n-kbbad">0</p><p class="stat-caption">keyboard problems</p></div>
+      </div>
+      <div class="au-verdict">
+        <span class="pill-status" data-state="idle" id="au-verdict">Not run yet</span>
+        <span class="au-note" id="au-verdict-note">On art: 0 &middot; on glass: 0 &middot; unmeasurable: 0 &middot; exempt: 0</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══ EVERY PAGE ═══ -->
+  <section class="band" data-band="utility" id="results">
+    <div class="viewport-content">
+      <div class="au-results-head">
+        <h2 class="t-section">Every page.</h2>
+        <div class="segmented" role="radiogroup" aria-label="Show" id="au-filter">
+          <button type="button" role="radio" aria-checked="true" data-value="all">All pages</button>
+          <button type="button" role="radio" data-value="problems">Problems only</button>
+        </div>
+      </div>
+      <p class="t-lede" style="margin-top:var(--s-5)">The list comes from <a href="tools/pages.json" data-audit-manifest><code>tools/pages.json</code></a> at run time, so a page that lands later is audited the next time you run. A page that is not written yet is listed as missing, not as a failure.</p>
+      <div class="au-list" id="au-list"></div>
+      <div class="empty-state au-empty" id="au-empty">
+        <span class="empty-state-glyph"><i data-sym="list-bullet"></i></span>
+        <h3 class="empty-state-title">No results yet</h3>
+        <p class="empty-state-body">Run the audit to walk every page in the manifest. It takes a few seconds a page.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══ METHOD ═══ -->
+  <section class="band" data-band="story" id="method">
+    <div class="viewport-content">
+      <h2 class="t-section">How it measures.</h2>
+      <div class="au-method">
+        <div>
+          <h3>The ground is the paint stack.</h3>
+          <p>At several points inside every text box the audit asks the browser what is painted there, top to bottom, and composites it: background colours, <strong>linear, radial and conic gradients evaluated at that point</strong>, positioned overlays, SVG fills, and the <strong>ART3 canvas&rsquo;s own pixels</strong> with its mask and opacity. The worst point is the result.</p>
+        </div>
+        <div>
+          <h3>Glass is measured, not skipped.</h3>
+          <p>Under a glass host the ground is sampled across the blur radius, averaged, and passed through that host&rsquo;s own <code>backdrop-filter</code> chain &mdash; or, for the refraction path, through <code>LG3.material()</code>&rsquo;s measured colour transform. Refraction moves pixels only at the rim, so it is left out for text inside the host.</p>
+        </div>
+        <div>
+          <h3>What is not counted as a pass.</h3>
+          <ul>
+            <li><strong>Unmeasurable:</strong> an image or video under the text, glass on glass, a transformed pseudo-element, a canvas that cannot be read. Each is listed with its reason.</li>
+            <li><strong>Exempt:</strong> inactive controls (WCAG names them) and anything marked <code>data-specimen</code>, which shows a colour rather than speaking in it.</li>
+            <li><strong>Thresholds:</strong> 4.5:1, or 3:1 for large text &mdash; 24&nbsp;px, or 19&nbsp;px at semibold (SPEC&rsquo;s rule; WCAG&rsquo;s is 18.66&nbsp;px bold).</li>
+            <li><strong>At rest:</strong> pages load in the base experience, so every reveal sits in its final state &mdash; what a reader with reduced motion sees.</li>
+          </ul>
+        </div>
+        <div>
+          <h3>Checked against the screen.</h3>
+          <p>Driven headless, the audit prints one row per page and exits 1 on any failure. With <code>--verify</code> every failing box, and a sample of passes on art and glass, is <strong>screenshotted and measured again from its pixels</strong>. Where the two disagree it says so &mdash; small type inside a scaled device screen reads low in pixels, and a box half under an overlay differs.</p>
+<pre class="doc-code" data-lang="shell"><code>node tools/run-audit.mjs
+node tools/run-audit.mjs --width 402
+node tools/run-audit.mjs --verify --pages index.html,color.html</code></pre>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <script src="assets/audit.js"></script>
+  <script>
+  (function () {
+    'use strict';
+    var $ = function (id) { return document.getElementById(id); };
+    var DOT = ' &middot; ';
+    var q = new URLSearchParams(location.search);
+    var framed = window.top !== window;
+    var running = false, filter = 'all';
+
+    function esc(s) { return String(s == null ? '' : s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
+    function fmt(n) { return Number(n).toLocaleString('en-US'); }
+    function r2(x) { return x == null ? '&mdash;' : x.toFixed(2) + ':1'; }
+    function roll(id, v, format) {
+      var el = $(id);
+      if (window.FG3 && FG3.rollNumber) FG3.rollNumber(el, v, format ? { format: format } : undefined);
+      else el.textContent = format ? format(v) : fmt(v);
+    }
+    function seg(id) {
+      var host = $(id), on = host.querySelector('[aria-checked="true"]');
+      return on ? on.getAttribute('data-value') : null;
+    }
+    function segSet(id, value) {
+      var host = $(id), items = [].slice.call(host.children).filter(function (c) { return c.tagName === 'BUTTON'; });
+      var i = items.findIndex(function (b) { return b.getAttribute('data-value') === value; });
+      if (i < 0) return;
+      if (host.__uiSeg) host.__uiSeg.select(i, { silent: true });
+      else items.forEach(function (b, k) { b.setAttribute('aria-checked', String(k === i)); });
+    }
+
+    /* ── one card per page ─────────────────────────────────────────────── */
+    function worstOf(pr) {
+      var w = null, tone = null;
+      Object.keys(pr.tones).forEach(function (t) { var c = pr.tones[t]; if (c.worst && (!w || c.worst.ratio < w.ratio)) { w = c.worst; tone = t; } });
+      return w ? { r: w, tone: tone } : null;
+    }
+    function sum(pr, k) { return Object.keys(pr.tones).reduce(function (a, t) { return a + (pr.tones[t][k] || 0); }, 0); }
+    function card(pr) {
+      var el = document.createElement('article');
+      el.className = 'card au-page';
+      var fails = Object.keys(pr.tones).reduce(function (a, t) { return a.concat(pr.tones[t].failures.map(function (f) { return Object.assign({ tone: t }, f); })); }, []);
+      var kb = pr.keyboard ? pr.keyboard.findings : [];
+      var bad = pr.status === 'error' || fails.length || kb.length;
+      el.setAttribute('data-state', pr.status === 'missing' ? 'missing' : bad ? 'bad' : 'ok');
+      var badge = pr.status === 'missing' ? '<span class="badge">Not written yet</span>'
+        : pr.status === 'error' ? '<span class="badge badge-bad">Could not load</span>'
+        : bad ? '<span class="badge badge-bad">' + (fails.length + kb.length) + ' problem' + (fails.length + kb.length === 1 ? '' : 's') + '</span>'
+        : '<span class="badge badge-ok">All pass</span>';
+      var html = '<header class="au-page-head"><h3 class="au-page-name"><a href="' + esc(pr.path) + '">' + esc(pr.path) + '</a></h3>' + badge + '</header>';
+      if (pr.status === 'missing' || pr.status === 'error') {
+        html += '<p class="au-note">' + esc(pr.note || '') + '</p>';
+        el.innerHTML = html;
+        return el;
+      }
+      var w = worstOf(pr), tones = Object.keys(pr.tones);
+      html += '<dl class="au-kv">' +
+        '<div><dt>Measured</dt><dd>' + tones.map(function (t) { return fmt(pr.tones[t].checked) + ' ' + t; }).join(DOT) + '</dd></div>' +
+        '<div><dt>Lowest ratio</dt><dd>' + (w ? r2(w.r.ratio) + ' <span class="au-note">' + w.tone + ', needs ' + w.r.need + '</span>' : '&mdash;') + '</dd></div>' +
+        '<div><dt>On art' + DOT + 'on glass</dt><dd>' + fmt(sum(pr, 'onArt')) + DOT + fmt(sum(pr, 'onGlass')) + '</dd></div>' +
+        '<div><dt>Keyboard</dt><dd>' + (pr.keyboard ? fmt(pr.keyboard.checked) + ' reached' + (kb.length ? DOT + kb.length + ' problem' + (kb.length === 1 ? '' : 's') : '') : '&mdash;') + '</dd></div>' +
+        '</dl>';
+      if (fails.length) {
+        html += '<div class="au-table-wrap doc-table table-scroll"><table class="table au-table"><thead><tr><th>Ratio</th><th>Needs</th><th>Ink on ground</th><th>Size</th><th>Element</th><th>Text</th></tr></thead><tbody>' +
+          fails.slice(0, 14).map(function (f) {
+            return '<tr><td class="num"><span class="au-ratio" style="color:var(--bad-strong,var(--bad))">' + f.ratio.toFixed(2) + ':1</span><br><span class="au-note">' + f.tone + '</span></td>' +
+              '<td class="num">' + f.need + ':1</td>' +
+              '<td class="au-pair"><span class="au-sw" style="background:' + f.fg + '"></span>' + f.fg + '<br><span class="au-sw" style="background:' + f.bg + '"></span>' + f.bg + '</td>' +
+              '<td class="num">' + Math.round(f.size) + '/' + f.weight + (f.flags.art ? '<br><span class="au-note">on art</span>' : '') + (f.flags.glass ? '<br><span class="au-note">on glass</span>' : '') + '</td>' +
+              '<td class="au-sel">' + esc(f.where) + '</td><td>' + esc(f.text) + '</td></tr>';
+          }).join('') + '</tbody></table></div>';
+        if (fails.length > 14) html += '<p class="au-note">' + (fails.length - 14) + ' more not shown.</p>';
+      }
+      if (kb.length) {
+        html += '<p class="au-sub">Keyboard</p><div class="doc-table table-scroll"><table class="table au-table"><thead><tr><th>Problem</th><th>Element</th><th>What is wrong</th></tr></thead><tbody>' +
+          kb.slice(0, 12).map(function (f) {
+            return '<tr><td style="color:var(--bad-strong,var(--bad));font-weight:600">' + esc(f.kind) + '</td><td class="au-sel">' + esc(f.where || '') + '</td><td>' + esc(f.detail) + '</td></tr>';
+          }).join('') + '</tbody></table></div>';
+      }
+      var unm = [], exempt = 0, hidden = 0;
+      tones.forEach(function (t) { var c = pr.tones[t]; exempt += c.exempt; hidden += c.hidden; c.unmeasured.forEach(function (u) { unm.push(t + ': ' + u.unmeasurable + ' ' + DOT + ' ' + u.where + ' ' + DOT + ' ' + u.text); }); });
+      var extra = [];
+      if (unm.length) extra.push(unm.length + ' unmeasurable');
+      if (exempt) extra.push(exempt + ' exempt');
+      if (hidden) extra.push(hidden + ' not visible');
+      if (pr.bootErrors) extra.push(pr.bootErrors.length + ' boot error' + (pr.bootErrors.length === 1 ? '' : 's'));
+      if (extra.length || pr.retried) {
+        html += '<details class="au-details"><summary>' + extra.join(DOT) + (pr.retried ? DOT + 'loaded on the second try' : '') + DOT + (pr.ms / 1000).toFixed(1) + ' s</summary><ul>' +
+          (pr.bootErrors || []).map(function (e) { return '<li>boot: ' + esc(e) + '</li>'; }).join('') +
+          unm.slice(0, 30).map(function (u) { return '<li>' + esc(u).replace(/ &amp;middot; /g, DOT) + '</li>'; }).join('') + '</ul></details>';
+      }
+      el.innerHTML = html;
+      return el;
+    }
+    /* When the filter hides every card, the empty state says why instead of
+       leaving an empty band; it goes back to "No results yet" after. */
+    var EMPTY = null;
+    function applyFilter() {
+      var cards = $('au-list').children, shown = 0;
+      [].forEach.call(cards, function (c) {
+        c.hidden = filter === 'problems' && c.getAttribute('data-state') === 'ok';
+        if (!c.hidden) shown++;
+      });
+      var empty = $('au-empty'), none = cards.length > 0 && !shown;
+      if (!none && !empty.hasAttribute('data-filtered')) return;
+      var title = empty.querySelector('.empty-state-title'), body = empty.querySelector('.empty-state-body');
+      if (!EMPTY) EMPTY = { title: title.textContent, body: body.textContent };
+      title.textContent = none ? 'No problems.' : EMPTY.title;
+      body.textContent = none ? (running ? 'None so far: ' + cards.length + (cards.length === 1 ? ' page' : ' pages') + ' passed.' : 'Every page passed.') : EMPTY.body;
+      if (window.SYM && SYM.replace && none !== empty.hasAttribute('data-filtered')) SYM.replace(empty, none ? 'checkmark-circle' : 'list-bullet');
+      empty.toggleAttribute('data-filtered', none);
+      empty.hidden = !none;
+    }
+
+    /* ── the run ───────────────────────────────────────────────────────── */
+    function totals(rep) {
+      var t = rep.totals;
+      roll('au-n-pages', t.pages);
+      roll('au-n-text', t.checked);
+      roll('au-n-fail', t.failures);
+      $('au-n-worst').textContent = t.worst ? t.worst.ratio.toFixed(2) + ':1' : String.fromCharCode(8212);
+      $('au-n-worst-cap').textContent = t.worst ? 'lowest ratio, ' + t.worst.page + ' in ' + t.worst.tone : 'lowest ratio found';
+      roll('au-n-kb', t.kbChecked);
+      roll('au-n-kbbad', t.kbFindings);
+      $('au-verdict-note').innerHTML = 'On art: ' + fmt(t.onArt) + DOT + 'on glass: ' + fmt(t.onGlass) + DOT + 'unmeasurable: ' + fmt(t.unmeasurable) +
+        DOT + 'exempt: ' + fmt(t.exempt) + (t.missing ? DOT + 'not written yet: ' + t.missing : '') + (t.errors ? DOT + 'could not load: ' + t.errors : '');
+    }
+    async function go() {
+      if (running) return;
+      running = true;
+      var btn = $('au-go');
+      btn.setAttribute('aria-busy', 'true'); btn.disabled = true;
+      $('au-list').innerHTML = '';
+      $('au-empty').hidden = true;
+      var v = $('au-verdict'); v.setAttribute('data-state', 'live'); v.textContent = 'Running';
+      var phone = seg('au-width') === '402' || innerWidth < 600;
+      var width = phone ? 402 : innerWidth, height = phone ? 874 : innerHeight;
+      $('au-phone').hidden = !phone; $('au-browser').hidden = phone;
+      if (window.DEVICE && DEVICE.fit) DEVICE.fit(document);
+      var screen = phone ? $('au-screen-phone') : $('au-screen-wide');
+      screen.setAttribute('data-screen-width', String(width));
+      if (window.DEVICE && DEVICE.fit) DEVICE.fit(document);
+      var host = screen.querySelector('.device__viewport') || screen;
+      var idle = host.querySelector('.au-idle'); if (idle) idle.hidden = true;
+      var pages = q.get('pages') ? q.get('pages').split(/[,\s]+/).filter(Boolean) : null;
+      var rep = await AUDIT.run({
+        pages: pages, width: width, height: height, host: host, raw: q.has('raw'),
+        tones: seg('au-tones').split(','),
+        onStatus: function (msg, i, n) {
+          $('au-status').textContent = msg + '  (' + (i + 1) + ' of ' + n + ')';
+          $('au-progress').value = n ? i / n : 0;
+        },
+        onPage: function (pr, i, n) {
+          $('au-list').appendChild(card(pr));
+          applyFilter();
+          totals(window.__audit);
+          $('au-progress').value = (i + 1) / n;
+        }
+      });
+      totals(rep);
+      if (idle) idle.hidden = false;
+      $('au-progress').value = 1;
+      var bad = rep.totals.failures + rep.totals.kbFindings + rep.totals.errors;
+      v.setAttribute('data-state', bad ? 'bad' : 'ok');
+      v.textContent = bad ? bad + ' problem' + (bad === 1 ? '' : 's') : 'All pass';
+      $('au-status').textContent = rep.totals.pages + ' pages in ' + (rep.ms / 1000).toFixed(1) + ' s' +
+        (rep.totals.missing ? ', ' + rep.totals.missing + ' not written yet' : '') + '.';
+      document.title = (bad ? bad + ' problems' : 'All pass') + ' ' + String.fromCharCode(183) + ' Audit ' + String.fromCharCode(183) + ' Fluid Design Open';
+      btn.removeAttribute('aria-busy'); btn.disabled = false; btn.textContent = 'Run again';
+      running = false;
+      applyFilter();
+      return rep;
+    }
+
+    document.addEventListener('DOMContentLoaded', function () {
+      if (q.get('width') === '402') segSet('au-width', '402');
+      if (q.get('tones')) segSet('au-tones', q.get('tones'));
+      $('au-filter').addEventListener('change', function (e) { filter = e.detail && e.detail.value || seg('au-filter'); applyFilter(); });
+      $('au-go').addEventListener('click', function () { go(); });
+      window.fg3Audit = go;
+      /* Opening the page to READ it never starts the walk (it costs minutes
+         and 300 ms frames); "Run the audit" does, and ?run does for
+         tools/run-audit.mjs. A page inside the audit is being MEASURED, not
+         run: never start a second audit from inside a frame (it would audit
+         itself forever). */
+      if (!framed && q.has('run')) setTimeout(go, 300);
+    });
+  })();
+  </script>
+</main>
+
+<!-- ═══ FOOTER (shared — copy verbatim) ═══ -->
+<footer class="band" data-band="utility" data-band-seam="keep">
+  <div class="viewport-content stack-4">
+    <p class="t-caption" style="color: var(--label-2)">Fluid Design Open 1.0 &middot; An original design language with Fluid&rsquo;s colour. Type follows the system font, with Inter as the fallback. Device art is original.</p>
+    <p class="t-caption"><a href="index.html">Overview</a> &middot; <a href="start.html">Start</a> &middot; <a href="docs.html">Docs</a> &middot; <a href="components.html">Components</a> &middot; <a href="selftest.html">Self-test</a> &middot; <a href="audit.html">Audit</a></p>
+  </div>
+</footer>
+
+<script src="assets/geom.js"></script>
+<script src="assets/spring.js"></script>
+<script src="assets/palette.js"></script>
+<script src="assets/art3.js"></script>
+<script src="assets/lg3-core.js"></script>
+<script src="assets/fg3.js"></script>
+<script src="assets/symbols.js"></script>
+<script src="assets/chart.js"></script>
+<script src="assets/motion.js"></script>
+<script src="assets/anim.js"></script>
+<script src="assets/device.js"></script>
+<script src="assets/ui.js"></script>
+<script src="assets/chrome.js"></script>
+<script src="assets/showcase.js"></script>
+<script src="assets/docs.js"></script>   <!-- documentation pages only -->
+<script>FG3.boot(); if (window.DOCS) DOCS.mount();</script>
+</body>
+</html>

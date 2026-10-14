@@ -1,0 +1,1465 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Start &middot; Fluid Design Open</title>
+<!--
+  The Fluid Design Open page template. Every page of the site copies this skeleton VERBATIM
+  (head, site nav, footer, scripts) and replaces only: the <title>, the
+  aria-current link in the nav, the local-nav capsule's title/jump links, and
+  <main>. 
+
+  Do NOT put data-tone on <html> unless the page must be pinned: an author
+  tone beats the reader's appearance toggle (FG3 precedence).
+-->
+<script>
+/* Tone without a flash (fg3.js header): reader's choice › author › host › system. */
+try{var d=document.documentElement,t=localStorage.getItem('fg3-tone');
+if(!d.hasAttribute('data-tone')){d.setAttribute('data-tone',t||d.getAttribute(
+'data-theme')||(matchMedia('(prefers-color-scheme: dark)').matches?'dark':
+'light'));d.setAttribute('data-tone-auto','')}}catch(e){}
+</script>
+<link rel="stylesheet" href="assets/fg3-tokens.css">
+<link rel="stylesheet" href="assets/fg3-color.css">
+<link rel="stylesheet" href="assets/fg3-springs.css">
+<link rel="stylesheet" href="assets/fg3.css">
+<link rel="stylesheet" href="assets/lg3.css">
+<link rel="stylesheet" href="assets/fg3-motion.css">
+<link rel="stylesheet" href="assets/fg3-components.css">
+<link rel="stylesheet" href="assets/fg3-chrome.css">
+<link rel="stylesheet" href="assets/fg3-showcase.css">
+<link rel="stylesheet" href="assets/fg3-symbols.css">
+<link rel="stylesheet" href="assets/fg3-chart.css">
+<link rel="stylesheet" href="assets/fg3-device.css">
+<link rel="stylesheet" href="assets/fg3-docs.css">    <!-- documentation pages only -->
+<style>
+/* Page layout only: roles and tokens, never a colour value (SPEC §2).
+   Page-local classes are prefixed st- (start.html). The one non-role
+   colour word below is the black of an alpha MASK (only its alpha is read). */
+
+/* ── shared: step headers, stages ───────────────────────────────────────── */
+.st-head{display:grid;gap:var(--s-3);max-width:860px;margin-bottom:var(--band-header-gap)}
+.st-head .t-lede{margin-top:var(--s-2)}
+.st-step{display:flex;align-items:center;gap:var(--s-3);color:var(--label)}
+.st-step::before{content:attr(data-n);display:grid;place-items:center;inline-size:30px;block-size:30px;border-radius:50%;
+  background:var(--label);color:var(--label-inv);font:600 var(--t-14)/1 var(--font-text);letter-spacing:0;font-variant-numeric:tabular-nums}
+.st-frame{position:absolute;inset:0}
+.st-frame > iframe{display:block;inline-size:100%;block-size:100%;border:0;background:var(--bg-1);opacity:0;
+  transition:opacity var(--d-500) var(--ease-standard)}
+.st-frame > iframe[data-ready]{opacity:1}
+.st-card{background:var(--show-surface);border-radius:var(--r-lg);corner-shape:superellipse(var(--k-continuous))}
+.st-link{display:inline-flex;align-items:center;gap:.2em;color:var(--link);text-decoration:none}
+.st-link:hover{text-decoration:underline}
+.st-link .sym{inline-size:.8em;block-size:.8em}
+
+/* ── hero: the kit's .hero, holding a browser window instead of the duo ── */
+.st-hero .hero-media > .device[data-device="browser"]{--device-width:min(100cqw,calc(94cqh * 1280 / 820))}
+/* ≤734: the whole window stays inside the 87.5% column, frame and corners
+   included. At 128vw it bled past both edges, lost its frame and read as a
+   second hero stacked under the first. */
+@media (max-width:734px){
+  .st-hero .hero-media > .device[data-device="browser"]{--device-width:min(87.5vw,420px,calc(94cqh * 1280 / 820));inline-size:var(--device-width);
+    justify-self:start;align-self:center;margin-inline:calc((100% - var(--device-width)) / 2)}
+}
+
+/* ── 1 · copy ───────────────────────────────────────────────────────────── */
+.st-stats{margin-block:var(--s-10) var(--s-12)}
+.st-stats .stat-value{white-space:nowrap}
+.st-weight{margin:0}
+.st-bar{display:flex;gap:2px;block-size:30px;padding:3px;border-radius:var(--r-pill);background:var(--fill-3);overflow:hidden}
+.st-bar > i{flex:var(--w) 1 0;min-inline-size:6px;background:var(--g);border-radius:3px}
+.st-bar > i:first-child{border-start-start-radius:999px;border-end-start-radius:999px}
+.st-bar > i:last-child{border-start-end-radius:999px;border-end-end-radius:999px}
+ul.st-legend{display:flex;flex-wrap:wrap;gap:var(--s-3) var(--s-7);margin-top:var(--s-5)}
+.st-legend li{display:flex;align-items:center;gap:var(--s-2);font-size:var(--t-14);line-height:var(--t-14-lh);color:var(--label-2)}
+.st-legend li::before{content:"";inline-size:10px;block-size:10px;border-radius:50%;background:var(--g)}
+.st-legend b{color:var(--label);font-weight:600}
+.st-groups{margin-top:var(--s-11);row-gap:var(--grid-gap)}
+.st-group{display:flex;flex-direction:column;gap:var(--s-4);padding:var(--s-8) var(--s-7) var(--s-7)}
+.st-group h3{display:flex;align-items:center;gap:var(--s-3);font-size:var(--t-ui-title3-fs);line-height:var(--t-ui-title3-lh);letter-spacing:var(--t-ui-title3-ls)}
+.st-group h3::before{content:"";flex:none;inline-size:12px;block-size:12px;border-radius:50%;background:var(--g)}
+.st-group h3 .badge{margin-inline-start:auto}
+.st-group > p{font-size:var(--t-14);line-height:var(--t-14-lh-loose,1.43);color:var(--label-2)}
+.st-files li{display:flex;justify-content:space-between;align-items:baseline;gap:var(--s-3);padding-block:9px;border-top:1px solid var(--separator);
+  font-size:var(--t-14);line-height:var(--t-14-lh)}
+.st-files li > code{padding:0;background:none;font-size:13px;color:var(--label);overflow-wrap:anywhere}
+.st-files li > span{flex:none;color:var(--label-2);font-variant-numeric:tabular-nums;white-space:nowrap}
+.st-total{display:flex;justify-content:space-between;gap:var(--s-3);margin-top:auto !important;padding-top:var(--s-3);border-top:1px solid var(--separator-opaque);
+  font-size:var(--t-14);line-height:var(--t-14-lh);color:var(--label-2);font-variant-numeric:tabular-nums}
+.st-total b{color:var(--label);font-weight:600}
+.st-optional{margin-top:var(--grid-gap)}
+.st-optional .st-files{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(260px,100%),1fr));column-gap:var(--s-9)}
+.st-measure{margin-top:var(--s-9)}
+@media (max-width:734px){
+  .st-groups{display:flex;gap:12px;overflow-x:auto;scroll-snap-type:x mandatory;scrollbar-width:none;overscroll-behavior-x:contain;
+    margin-inline:calc(50% - 50vw);padding-inline:calc(50vw - 50%);scroll-padding-inline:calc(50vw - 50%);padding-block:2px 6px}
+  .st-groups::-webkit-scrollbar{display:none}
+  .st-groups > .st-group{flex:0 0 min(300px,80vw);scroll-snap-align:start}
+  .st-optional .st-files{grid-template-columns:1fr}
+  .st-groups:focus-visible{outline-offset:-2px}
+}
+
+/* ── 2 · the page ───────────────────────────────────────────────────────── */
+.st-page{align-items:start;row-gap:var(--s-10)}
+.st-page .doc-code{font-size:13px;line-height:1.62}
+.st-live{position:sticky;top:96px;display:grid;justify-items:center;gap:var(--s-4)}
+.st-live .device{--device-width:min(100%,318px)}
+.st-live .doc-specimen__label{text-align:center;max-inline-size:320px}
+ol.st-anatomy{counter-reset:st;display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:var(--s-7) var(--grid-gap);margin-top:var(--s-12)}
+@media (max-width:1068px){ol.st-anatomy{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (max-width:734px){ol.st-anatomy{grid-template-columns:1fr}.st-live{position:static}
+  .st-page > :last-child{order:-1}
+  #st-min{max-block-size:520px;overflow:auto}}
+.st-anatomy li{counter-increment:st;display:grid;align-content:start;gap:var(--s-3);font-size:var(--t-17);line-height:var(--t-17-lh);letter-spacing:var(--t-17-ls);color:var(--label-2)}
+.st-anatomy li::before{content:counter(st);display:grid;place-items:center;inline-size:28px;block-size:28px;border-radius:50%;
+  background:var(--fill-1);color:var(--label);font:600 var(--t-14)/1 var(--font-text);letter-spacing:0}
+.st-anatomy strong{color:var(--label);font-weight:600}
+
+/* ── 3 · brand ──────────────────────────────────────────────────────────── */
+.st-picker{margin-bottom:var(--s-6)}
+.st-picker .swatches-name{font-size:var(--t-14);line-height:var(--t-14-lh);margin-top:var(--s-1)}
+.st-board{position:relative;overflow:clip;min-block-size:420px;background:var(--bg-2);box-shadow:var(--shadow-hairline)}
+.st-board > .st-frame{position:relative;inset:auto}
+.st-board iframe{block-size:var(--st-board-h,560px)}
+.st-brand-foot{display:grid;grid-template-columns:minmax(0,6fr) minmax(0,6fr);gap:var(--s-7) var(--s-10);margin-top:var(--s-9);align-items:start}
+@media (max-width:1068px){.st-brand-foot{grid-template-columns:1fr}}
+.st-brand-foot > div{display:grid;gap:var(--s-4);align-content:start}
+.st-brands td:first-child{white-space:nowrap}
+.st-brands .st-dot{display:inline-block;inline-size:12px;block-size:12px;margin-inline-end:10px;border-radius:50%;vertical-align:-1px;
+  background:var(--swatch,var(--fill-1));box-shadow:inset 0 0 0 1px var(--separator)}
+.st-brands td code{padding:0;background:none;color:var(--label)}
+.st-brands td:last-child code{white-space:normal !important;overflow-wrap:anywhere;font-size:12.5px;color:var(--label-2)}
+.st-brands tr[aria-current="true"] td{background:var(--fill-3)}
+@media (max-width:734px){
+  .st-brands thead th{position:absolute;inline-size:1px;block-size:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap;padding:0;border:0}
+  .st-brands,.st-brands tbody{display:block}
+  .st-brands tr{display:grid;grid-template-columns:minmax(0,1fr) auto;column-gap:12px;padding:12px 0;border-bottom:1px solid var(--separator)}
+  .st-brands tr[aria-current="true"]{background:var(--fill-3)}
+  .st-brands td{padding:0 !important;border:0;background:none !important}
+  .st-brands td:last-child{grid-column:1 / -1;margin-top:4px;padding-inline-start:22px !important}
+}
+
+/* ── 4 · boot ───────────────────────────────────────────────────────────── */
+.st-boot{align-items:start;row-gap:var(--s-9)}
+.st-boot-code{display:grid;gap:var(--s-5)}
+.st-state{display:grid;gap:var(--s-3)}
+.st-state .list-inset{--c-surface:var(--bg-1)}
+.st-state .row{min-block-size:52px}
+.st-state .segmented{min-inline-size:220px}
+ol.st-prec{display:flex;flex-wrap:wrap;align-items:center;gap:var(--s-2);padding:0 var(--s-4)}
+.st-prec li{display:inline-flex;align-items:center;gap:var(--s-2);font-size:var(--t-14);line-height:var(--t-14-lh);color:var(--label-2)}
+.st-prec li > span{padding:5px 13px;border-radius:var(--r-pill);background:var(--fill-2);color:var(--label-2-on-fill)}
+.st-prec li[aria-current="true"] > span{background:var(--label);color:var(--label-inv);font-weight:600}
+.st-prec li + li::before{content:"\203A";color:var(--label-3)}
+.st-mods{display:flex;flex-wrap:wrap;gap:var(--s-2);padding:0 var(--s-4)}
+
+/* ── 5 · the ten rules ──────────────────────────────────────────────────── */
+.st-rules{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:var(--s-12) var(--grid-gap)}
+@media (max-width:734px){.st-rules{grid-template-columns:minmax(0,1fr);gap:var(--s-10)}}
+.st-rule{min-inline-size:0}
+.st-cq{container-type:inline-size}
+.st-rule{display:grid;gap:var(--s-5);align-content:start;margin:0}
+.st-stage{position:relative;display:grid;place-items:center;block-size:280px;padding:var(--s-6);overflow:clip;isolation:isolate}
+.st-stage > :not(canvas){max-inline-size:100%;min-inline-size:0}
+.st-stage > canvas{position:absolute;inset:0;inline-size:100%;block-size:100%;z-index:-1}
+.st-cap{max-inline-size:600px;padding-inline:var(--s-4);font-size:var(--t-17);line-height:var(--t-17-lh-loose,1.47);letter-spacing:var(--t-17-ls);color:var(--label-2)}
+.st-cap strong{color:var(--label);font-weight:600}
+.st-cap .st-n{display:block;margin-bottom:var(--s-1);font-size:var(--t-14);line-height:var(--t-14-lh);font-weight:600;color:var(--label-2);font-variant-numeric:tabular-nums}
+.st-tag{position:absolute;padding:3px 9px;border-radius:var(--r-pill);background:color-mix(in srgb,var(--bg-1) 80%,transparent);color:var(--label);
+  font:600 var(--t-12)/16px var(--font-text);letter-spacing:.01em}
+.st-stage > .st-tag{inset-block-start:var(--s-4);inset-inline-start:var(--s-4);z-index:2}
+.st-btn-row{display:flex;flex-wrap:wrap;justify-content:center;align-items:center;gap:var(--s-3)}
+.st-ctl{position:absolute;inset-block-end:var(--s-4);inset-inline-end:var(--s-4);z-index:3}
+
+/* 1 · glass is chrome */
+.st-r1{inline-size:min(100%,300px);display:grid;gap:var(--s-4);justify-items:center}
+.st-r1-card{inline-size:100%;display:grid;gap:2px;padding:var(--s-5) var(--s-6);background:var(--bg-1);color:var(--label);
+  border-radius:calc(18px * var(--r-scale));corner-shape:superellipse(var(--k-continuous));box-shadow:var(--shadow-tile)}
+.st-r1-card b{font-size:var(--t-ui-title1-fs);line-height:var(--t-ui-title1-lh);font-weight:700;letter-spacing:var(--t-ui-title1-ls);font-variant-numeric:tabular-nums}
+.st-r1-card span{font-size:var(--t-ui-footnote-fs);line-height:var(--t-ui-footnote-lh);color:var(--label-2)}
+.st-r1-bar{display:flex;gap:var(--s-1);padding:6px}
+.st-r1-bar span{display:grid;place-items:center;inline-size:54px;block-size:40px;border-radius:var(--r-pill);font-size:21px}
+.st-r1-bar span[aria-current]{background:color-mix(in srgb,currentColor 16%,transparent)}
+/* 2 · morph */
+.st-r2{--p:var(--progress,0);position:relative;display:block;inline-size:calc(214px + (min(320px,100cqw) - 214px) * var(--p));block-size:calc(56px + 116px * var(--p));
+  border-radius:calc(28px * (1 - var(--p)) + 18px * var(--r-scale) * var(--p));corner-shape:superellipse(calc(1 + .71 * var(--p)));
+  background:var(--mat-platter-bg);-webkit-backdrop-filter:var(--mat-platter-filter);backdrop-filter:var(--mat-platter-filter);
+  box-shadow:var(--mat-platter-ring);overflow:hidden;text-align:start}
+.st-r2-chip{position:absolute;inset-block-start:0;inset-inline-start:0;display:flex;align-items:center;gap:var(--s-3);block-size:56px;padding-inline:10px 22px;
+  font-size:var(--t-17);font-weight:600;color:var(--label);white-space:nowrap;border-radius:var(--r-pill)}
+.st-r2-plus{display:grid;place-items:center;inline-size:36px;block-size:36px;border-radius:50%;background:var(--label);color:var(--label-inv);
+  rotate:calc(45deg * var(--p))}
+.st-r2-plus .sym{inline-size:16px;block-size:16px}
+.st-r2-body{position:absolute;inset-block-start:52px;inset-inline:22px;margin:0;font-size:var(--t-14);line-height:var(--t-14-lh-loose,1.43);color:var(--label-2-on-fill);
+  opacity:calc((var(--p) - .45) * 2.2);inline-size:calc(min(320px,100cqw) - 44px)}
+.st-r2-body strong{color:var(--label);font-weight:600}
+/* 3 · springs */
+.st-r3{inline-size:min(100%,360px);display:grid;gap:var(--s-5)}
+.st-r3-track{position:relative;block-size:44px;border-radius:var(--r-pill);background:var(--fill-2)}
+.st-r3-puck{position:absolute;inset-block-start:4px;inset-inline-start:4px;inline-size:36px;block-size:36px;border-radius:50%;background:var(--label);
+  box-shadow:var(--shadow-tile)}
+.st-r3-plot{inline-size:100%;block-size:84px;overflow:visible}
+.st-r3-plot .ax{stroke:var(--separator-opaque);stroke-width:1;fill:none}
+.st-r3-plot .tg{stroke:var(--label-3);stroke-width:1;stroke-dasharray:3 4;fill:none}
+.st-r3-plot .cv{stroke:var(--accent);stroke-width:2.5;fill:none;stroke-linecap:round}
+.st-r3-meta{display:flex;justify-content:space-between;font-size:var(--t-12);line-height:16px;color:var(--label-2);font-variant-numeric:tabular-nums}
+/* 4 · corners */
+.st-r4{display:flex;align-items:center;gap:var(--s-8)}
+.st-r4 svg{flex:none;inline-size:196px;block-size:196px}
+.st-r4 .ours{fill:var(--fill-1)}
+.st-r4 .ref{fill:none;stroke:var(--label);stroke-width:1.25;vector-effect:non-scaling-stroke}
+.st-r4 .naive{fill:none;stroke:var(--accent);stroke-width:1.75;stroke-dasharray:6 5;vector-effect:non-scaling-stroke}
+.st-r4-side{display:grid;grid-template-columns:minmax(0,1fr);gap:var(--s-4);justify-items:start;min-inline-size:0;flex:0 1 auto}
+.st-r4-key{display:grid;gap:var(--s-2);font-size:var(--t-12);line-height:16px;color:var(--label-2)}
+.st-r4-key > span{display:flex;align-items:center;gap:var(--s-2)}
+.st-r4-key code{padding:0;background:none;font-size:11.5px;color:var(--label-2)}
+.st-r4-key i{flex:none;inline-size:22px;block-size:12px;border-radius:4px}
+.st-r4-key i.k-ours{background:var(--fill-1)}
+.st-r4-key i.k-ref{block-size:0;border-radius:0;border-top:1.25px solid var(--label)}
+.st-r4-key i.k-naive{block-size:0;border-radius:0;border-top:1.75px dashed var(--accent)}
+.st-r4-num{font-size:var(--t-12);line-height:16px;color:var(--label-2);font-variant-numeric:tabular-nums;max-inline-size:230px}
+.st-r4-pill{display:inline-flex;align-items:center;block-size:36px;padding-inline:var(--s-4);background:var(--label);color:var(--label-inv);
+  font-size:var(--t-14);font-weight:600}
+@media (max-width:480px){.st-r4{gap:var(--s-4)}.st-r4 svg{inline-size:112px;block-size:112px}.st-r4-side{flex:1 1 0}}
+/* 5 · roles */
+.st-r5{inline-size:min(100%,340px);display:grid;gap:var(--s-2);padding:var(--s-5);background:var(--bg-1);color:var(--label);
+  border-radius:calc(18px * var(--r-scale));corner-shape:superellipse(var(--k-continuous));box-shadow:var(--shadow-hairline)}
+.st-r5 > p{display:flex;align-items:center;gap:var(--s-3);margin:0;font-size:var(--t-14);line-height:var(--t-14-lh)}
+.st-r5 > p code{padding:0;background:none;font-size:13px;color:var(--label)}
+.st-r5 .doc-swatch{inline-size:24px;block-size:24px}
+.st-r5 > p [data-role]{margin-inline-start:auto;color:var(--label-2);font-size:var(--t-12);font-variant-numeric:tabular-nums}
+/* 6 · one tinted primary */
+.st-r6{inline-size:min(100%,380px);display:grid;gap:var(--s-5);padding:var(--s-6);background:var(--bg-1);
+  border-radius:calc(18px * var(--r-scale));corner-shape:superellipse(var(--k-continuous));box-shadow:var(--shadow-hairline)}
+.st-r6 h4{font-size:var(--t-ui-headline-fs);line-height:var(--t-ui-headline-lh);letter-spacing:var(--t-ui-headline-ls)}
+.st-r6 p{font-size:var(--t-14);line-height:var(--t-14-lh);color:var(--label-2)}
+.st-r6 .st-btn-row{justify-content:flex-end}
+/* 7 · lens needs art */
+.st-r7{position:absolute;inset:0;display:grid;grid-template-columns:1fr 1fr}
+.st-r7 > div{position:relative;display:grid;place-items:center;overflow:clip;isolation:isolate}
+.st-r7 > div + div{background:var(--bg-2)}
+.st-r7 canvas{position:absolute;inset:0;inline-size:100%;block-size:100%;z-index:-1}
+.st-demo{cursor:default}
+.st-r7 .st-tag{inset-block-end:var(--s-4);inset-inline-start:50%;translate:-50% 0;white-space:nowrap}
+/* 8 · density */
+.st-r8{display:grid;justify-items:center;gap:var(--s-4)}
+/* the panel is text-bearing glass over mid-tone art: the same legibility dim components gives .btn-glass */
+@media not (prefers-contrast:more){.st-r8-panel.lg3[data-lg3-appearance="dark"]>.lg3__tint{background:color-mix(in srgb,var(--lg3-rt-dark) 34%,transparent)}.st-r8-panel.lg3[data-lg3-appearance="light"]>.lg3__tint{background:color-mix(in srgb,var(--lg3-rt-light) 40%,transparent)}}
+.st-r8-panel{inline-size:260px;padding:var(--s-5) var(--s-6);display:grid;gap:var(--s-2);border-radius:calc(28px * var(--r-scale))}
+.st-r8-panel p{margin:0;font-size:var(--t-ui-subhead-fs);line-height:var(--t-ui-subhead-lh)}
+.st-r8-panel p + p{font-size:var(--t-ui-footnote-fs);line-height:var(--t-ui-footnote-lh)}
+.st-meter{position:absolute;inset-block-start:var(--s-4);inset-inline-end:var(--s-4);z-index:3;display:grid;gap:2px;justify-items:end;
+  padding:8px 12px;border-radius:14px;background:var(--bg-1);color:var(--label);font-size:var(--t-12);line-height:16px;font-variant-numeric:tabular-nums;box-shadow:var(--shadow-hairline)}
+.st-meter b{font-size:var(--t-17);line-height:20px;font-weight:600}
+.st-meter span{color:var(--label-2)}
+/* 9 · reduced motion keeps state */
+.st-r9{inline-size:min(100%,340px);display:grid;gap:var(--s-4)}
+.st-r9-card{display:grid;gap:var(--s-3);padding:var(--s-5);background:var(--bg-1);border-radius:calc(18px * var(--r-scale));corner-shape:superellipse(var(--k-continuous));
+  box-shadow:var(--shadow-hairline)}
+.st-r9-top{display:flex;justify-content:space-between;align-items:center}
+.st-r9-top b{font-size:var(--t-ui-headline-fs);font-weight:600}
+.st-r9 .m-bar{block-size:6px}
+.st-r9-toast{display:flex;align-items:center;gap:var(--s-3);padding:var(--s-3) var(--s-4);background:var(--bg-1);border-radius:var(--r-pill);
+  box-shadow:var(--shadow-tile);font-size:var(--t-14);line-height:var(--t-14-lh)}
+.st-r9-toast .sym{color:var(--ok);font-size:19px}
+.st-r9-note{font-size:var(--t-12);line-height:16px;color:var(--label-2);text-align:center}
+/* 10 · measured */
+.st-r10{inline-size:min(100%,380px);padding:var(--s-5) var(--s-6);background:var(--bg-1);border-radius:calc(18px * var(--r-scale));
+  corner-shape:superellipse(var(--k-continuous));box-shadow:var(--shadow-hairline)}
+.st-r10 .doc-kv{gap:10px 20px;grid-template-columns:minmax(0,1fr) auto}
+.st-r10 .doc-kv dd{font-variant-numeric:tabular-nums;text-align:end}
+.st-r10-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:var(--s-4);font-size:var(--t-ui-footnote-fs);color:var(--label-2)}
+
+/* ── 6 · traps: FAQ rows ────────────────────────────────────────── */
+.st-faq-bar{display:flex;justify-content:flex-end;margin-bottom:var(--s-4)}
+.st-faq{border-top:1px solid var(--separator-opaque)}
+.st-faq details{border-bottom:1px solid var(--separator-opaque);interpolate-size:allow-keywords}
+.st-faq summary{display:flex;align-items:center;justify-content:space-between;gap:var(--s-7);padding-block:var(--s-8);cursor:pointer;list-style:none;
+  font-family:var(--t-subtitle-ff);font-size:var(--t-subtitle-fs);line-height:var(--t-subtitle-lh);letter-spacing:var(--t-subtitle-ls);font-weight:600}
+.st-faq summary::-webkit-details-marker{display:none}
+.st-faq summary:focus-visible{outline-offset:4px;border-radius:8px}
+.st-faq summary .sym{flex:none;inline-size:22px;block-size:22px;color:var(--label-2);transition:rotate var(--sp-snappy-ms,500ms) var(--sp-snappy,ease)}
+.st-faq details[open] summary .sym{rotate:180deg}
+.st-faq details::details-content{block-size:0;overflow:clip;transition:block-size var(--sp-smooth-ms,500ms) var(--sp-smooth,ease),content-visibility var(--sp-smooth-ms,500ms) allow-discrete}
+.st-faq details[open]::details-content{block-size:auto}
+.st-fix{display:grid;gap:var(--s-4);max-inline-size:900px;padding-bottom:var(--s-9)}
+.st-fix p{font-size:var(--t-17);line-height:var(--t-17-lh-loose,1.47);letter-spacing:var(--t-17-ls);color:var(--label)}
+.st-fix .doc-code{max-inline-size:100%}
+.st-faq summary > span:first-child{display:grid;grid-template-columns:1.4em minmax(0,1fr);column-gap:var(--s-3)}
+.st-sym-n{color:var(--label-2);font-variant-numeric:tabular-nums}
+@media (max-width:734px){.st-faq summary{padding-block:var(--s-6);gap:var(--s-4)}}
+
+/* ── 7 · instruments ───────────────────────────────────────────────────── */
+.st-inst{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:var(--grid-gap)}
+@media (max-width:1068px){.st-inst{grid-template-columns:1fr}}
+.st-inst > article{display:grid;gap:var(--s-3);align-content:start;padding:var(--s-8) var(--s-7)}
+.st-inst > article > .sym{font-size:34px;color:var(--label);margin-bottom:var(--s-2)}
+.st-inst h3{font-size:var(--t-ui-title2-fs);line-height:var(--t-ui-title2-lh);letter-spacing:var(--t-ui-title2-ls)}
+.st-inst p{font-size:var(--t-17);line-height:var(--t-17-lh-loose,1.47);letter-spacing:var(--t-17-ls);color:var(--label-2)}
+.st-inst p strong{color:var(--label);font-weight:600}
+.st-cmds{margin-top:var(--s-9)}
+
+/* ── next ───────────────────────────────────────────────────────────────── */
+.st-next .lockup-ctas{margin-top:var(--s-6)}
+</style>
+</head>
+<body>
+
+<!-- ═══ SITE NAV (shared — copy verbatim; set aria-current on this page's link) ═══ -->
+<nav class="globalnav" aria-label="Fluid Design">
+  <div class="globalnav__bar">
+    <a class="globalnav__brand" href="index.html" aria-label="Fluid Design Open home"><i data-sym="sparkles"></i></a>
+    <ul class="globalnav__list">
+      <li class="globalnav__item"><a class="globalnav__link" href="index.html">Overview</a></li>
+      <li class="globalnav__item"><a class="globalnav__link" href="start.html" aria-current="page">Start</a></li>
+      <li class="globalnav__item"><a class="globalnav__link" href="docs.html">Docs</a></li>
+      <li class="globalnav__item" data-flyout="gn-foundations"><a class="globalnav__link" href="color.html">Foundations</a><button class="globalnav__trigger" type="button"><span class="sr-only">Foundations menu</span></button></li>
+      <li class="globalnav__item" data-flyout="gn-components"><a class="globalnav__link" href="components.html">Components</a><button class="globalnav__trigger" type="button"><span class="sr-only">Components menu</span></button></li>
+      <li class="globalnav__item" data-flyout="gn-instruments"><a class="globalnav__link" href="selftest.html">Instruments</a><button class="globalnav__trigger" type="button"><span class="sr-only">Instruments menu</span></button></li>
+    </ul>
+    <div class="globalnav__tools">
+      <button class="globalnav__icon" type="button" data-tone-toggle aria-label="Switch appearance"><i data-sym="circle-half"></i></button>
+      <button class="globalnav__menu" type="button" aria-label="Menu" aria-expanded="false"><i data-sym="lines"></i></button>
+    </div>
+  </div>
+  <div class="globalnav__flyout" id="gn-foundations" hidden>
+    <div class="globalnav__flyout-content">
+      <div class="globalnav__group" data-elevated>
+        <h2 class="globalnav__group-title">Foundations</h2>
+        <ul><li><a class="globalnav__flyout-link" href="color.html">Colour</a></li><li><a class="globalnav__flyout-link" href="type.html">Type</a></li><li><a class="globalnav__flyout-link" href="layout.html">Layout</a></li><li><a class="globalnav__flyout-link" href="materials.html">Materials</a></li><li><a class="globalnav__flyout-link" href="motion.html">Motion</a></li></ul>
+      </div>
+      <div class="globalnav__group">
+        <h2 class="globalnav__group-title">Content</h2>
+        <ul><li><a class="globalnav__flyout-link" href="symbols.html">Symbols</a></li><li><a class="globalnav__flyout-link" href="data.html">Data</a></li></ul>
+      </div>
+    </div>
+  </div>
+  <div class="globalnav__flyout" id="gn-components" hidden>
+    <div class="globalnav__flyout-content">
+      <div class="globalnav__group" data-elevated>
+        <h2 class="globalnav__group-title">Components</h2>
+        <ul><li><a class="globalnav__flyout-link" href="components.html">Controls</a></li><li><a class="globalnav__flyout-link" href="chrome.html">Chrome</a></li><li><a class="globalnav__flyout-link" href="showcase.html">Product pages</a></li><li><a class="globalnav__flyout-link" href="patterns.html">Patterns</a></li></ul>
+      </div>
+    </div>
+  </div>
+  <div class="globalnav__flyout" id="gn-instruments" hidden>
+    <div class="globalnav__flyout-content">
+      <div class="globalnav__group" data-elevated>
+        <h2 class="globalnav__group-title">Instruments</h2>
+        <ul><li><a class="globalnav__flyout-link" href="selftest.html">Self-test</a></li><li><a class="globalnav__flyout-link" href="audit.html">Audit</a></li></ul>
+      </div>
+    </div>
+  </div>
+</nav>
+
+<!-- ═══ LOCAL NAV (per page: title, one CTA, jump links to this page's sections) ═══ -->
+<div class="localnav" data-localnav-reveal="#hero">
+  <div class="localnav__capsule" data-lg3 data-lg3-priority="3">
+    <a class="localnav__title" href="#top">Start</a>
+    <button class="localnav__explore" type="button"><span class="localnav__explore-label">Explore</span></button>
+    <a class="localnav__cta" href="start.html">Adopt</a>
+    <div class="localnav__panel" aria-label="Explore Fluid Design">
+      <ul class="localnav__tiles">
+        <li><a class="localnav__tile" href="materials.html" style="--tile-hue: var(--series-1)"><span class="localnav__thumb"><i data-sym="sparkles"></i></span>Materials</a></li>
+        <li><a class="localnav__tile" href="motion.html" style="--tile-hue: var(--series-2)"><span class="localnav__thumb"><i data-sym="waveform"></i></span>Motion</a></li>
+        <li><a class="localnav__tile" href="chrome.html" style="--tile-hue: var(--series-3)"><span class="localnav__thumb"><i data-sym="sidebar"></i></span>Chrome</a></li>
+        <li><a class="localnav__tile" href="components.html" style="--tile-hue: var(--series-4)"><span class="localnav__thumb"><i data-sym="sliders"></i></span>Controls</a></li>
+        <li><a class="localnav__tile" href="showcase.html" style="--tile-hue: var(--series-5)"><span class="localnav__thumb"><i data-sym="grid"></i></span>Product pages</a></li>
+      </ul>
+      <hr class="localnav__rule">
+      <nav class="localnav__jump" aria-label="On this page">
+        <p class="localnav__jump-label">On this page <i data-sym="chevron-down"></i></p>
+        <ul class="localnav__jump-grid">
+          <li class="localnav__jump-item"><a href="#copy">1 &middot; Copy the folder</a></li>
+          <li class="localnav__jump-item"><a href="#page">2 &middot; The minimal page</a></li>
+          <li class="localnav__jump-item"><a href="#brand">3 &middot; Pick a palette</a></li>
+          <li class="localnav__jump-item"><a href="#boot">4 &middot; Boot and tone</a></li>
+          <li class="localnav__jump-item"><a href="#rules">5 &middot; The ten rules</a></li>
+          <li class="localnav__jump-item"><a href="#traps">6 &middot; First traps</a></li>
+          <li class="localnav__jump-item"><a href="#instruments">7 &middot; Instruments</a></li>
+        </ul>
+      </nav>
+    </div>
+  </div>
+</div>
+
+<main id="top">
+
+<!-- ═══ HERO · stage band: the minimal page from step 2, running in a window ═══ -->
+<section class="band hero st-hero" data-band="stage" id="hero" aria-labelledby="hero-h">
+  <canvas class="hero-art" data-art="twilight" data-art-seed="11" data-art-contrast="1.26" data-art-vignette=".36" aria-hidden="true"></canvas>
+  <div class="hero-marquee viewport-content">
+    <p class="hero-eyebrow">Fluid Design Open</p>
+    <h1 class="hero-headline" id="hero-h">From zero to ours.</h1>
+    <p class="hero-sub">Copy one folder, link it in order, call FG3.boot()<br>Seven steps, both tones, every width</p>
+    <div class="hero-media">
+      <div class="device" data-device="browser" data-url="fluid.example/hello" role="img" aria-label="The minimal page from step 2, running live in a browser window">
+        <div class="device__screen" data-screen-width="1280"><div class="st-frame" data-st-frame="hero"></div></div>
+      </div>
+    </div>
+    <div class="hero-platter" data-lg3 data-lg3-recipe="pill" data-lg3-tone="light" data-lg3-priority="5" data-lg3-interactive>
+      <p class="hero-price"><span>One folder: <span data-st-sum="files">33</span> files, <span data-st-sum="raw">1.45&nbsp;MB</span></span><span><span data-st-sum="gz">555&nbsp;KB</span> gzipped. No build step, no outside requests.</span></p>
+      <a class="btn btn-primary btn-l hero-cta" href="#page">See the page</a>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ 1 · COPY · story ═══ -->
+<section class="band" data-band="story" id="copy" aria-labelledby="copy-h">
+  <div class="viewport-content">
+    <header class="st-head">
+      <p class="t-eyebrow st-step" data-n="1">Copy the folder</p>
+      <h2 class="t-section" id="copy-h">One folder. Nothing to install.</h2>
+      <p class="t-lede" data-reveal="up">Put <code>assets/</code> beside your page. Every file is a plain stylesheet or script with one global and no imports, so it runs from any static host, <strong>a claude.ai Artifact included</strong>. Link what the page uses and leave the rest in the folder.</p>
+    </header>
+
+    <div class="stat-grid st-stats" data-cols="4">
+      <div class="stat-cell"><p class="stat-value" data-count data-st-sum="files">33</p><p class="stat-caption">files in <code>assets/</code></p></div>
+      <div class="stat-cell"><p class="stat-value" data-count data-st-sum="raw">1.45 MB</p><p class="stat-caption">for the whole folder</p></div>
+      <div class="stat-cell"><p class="stat-value" data-count data-st-sum="gz">555 KB</p><p class="stat-caption">over the wire, gzipped</p></div>
+      <div class="stat-cell"><p class="stat-value">0</p><p class="stat-caption">packages, bundlers or CDNs</p></div>
+    </div>
+
+    <figure class="st-weight" id="st-weights">
+      <div class="st-bar" role="img" aria-label="The folder by weight: core 203 kilobytes, material 205, motion 168, controls and chrome 313, product pages and devices 215, symbols and data 81, optional 330">
+        <i data-g="core" style="--w:196175;--g:var(--series-1)"></i><i data-g="material" style="--w:152028;--g:var(--series-2)"></i><i data-g="motion" style="--w:156565;--g:var(--series-3)"></i><i data-g="controls" style="--w:275264;--g:var(--series-4)"></i><i data-g="product" style="--w:184029;--g:var(--series-5)"></i><i data-g="symdata" style="--w:68405;--g:var(--series-6)"></i><i data-g="optional" style="--w:235599;--g:var(--label-3)"></i>
+      </div>
+      <figcaption>
+        <ul class="st-legend">
+          <li style="--g:var(--series-1)"><b>Core</b> every page</li>
+          <li style="--g:var(--series-2)"><b>Material</b> glass, art</li>
+          <li style="--g:var(--series-3)"><b>Motion</b> springs, scroll</li>
+          <li style="--g:var(--series-4)"><b>Controls</b> and chrome</li>
+          <li style="--g:var(--series-5)"><b>Product pages</b> and devices</li>
+          <li style="--g:var(--series-6)"><b>Symbols</b> and data</li>
+          <li style="--g:var(--label-3)"><b>Optional</b></li>
+        </ul>
+      </figcaption>
+    </figure>
+
+    <div class="grid-12 st-groups">
+      <article class="st-card st-group span-4 span-md-6" data-group="core" style="--g:var(--series-1)" aria-labelledby="g-core">
+        <h3 id="g-core">Core <span class="badge badge-accent">Every page</span></h3>
+        <p>Tokens, one palette, the base styles and the boot. The text font comes with them; keep its licence beside it.</p>
+        <ul class="st-files">
+          <li data-file="fg3-tokens.css"><code>fg3-tokens.css</code><span>24.4 KB</span></li>
+          <li data-file="fg3-color.css"><code>fg3-color.css</code><span>13.3 KB</span></li>
+          <li data-file="fg3.css"><code>fg3.css</code><span>27.8 KB</span></li>
+          <li data-file="fg3.js"><code>fg3.js</code><span>54.4 KB</span></li>
+          <li data-file="inter-latin.woff2"><code>inter-latin.woff2</code><span>72.9 KB</span></li>
+          <li data-file="FONTS-LICENSE.txt"><code>FONTS-LICENSE.txt</code><span>9.3 KB</span></li>
+        </ul>
+        <p class="st-total"><span><b data-total="raw">202.1 KB</b></span><span><span data-total="gz">110.6 KB</span> gzipped</span></p>
+      </article>
+      <article class="st-card st-group span-4 span-md-6" data-group="material" style="--g:var(--series-2)" aria-labelledby="g-material">
+        <h3 id="g-material">Material <span class="badge">Glass</span></h3>
+        <p>The glass engine and the art it bends. <code>geom.js</code> loads before <code>lg3-core.js</code>.</p>
+        <ul class="st-files">
+          <li data-file="geom.js"><code>geom.js</code><span>19.6 KB</span></li>
+          <li data-file="lg3.css"><code>lg3.css</code><span>30.1 KB</span></li>
+          <li data-file="lg3-core.js"><code>lg3-core.js</code><span>139.2 KB</span></li>
+          <li data-file="art3.js"><code>art3.js</code><span>25.2 KB</span></li>
+        </ul>
+        <p class="st-total"><span><b data-total="raw">214.1 KB</b></span><span><span data-total="gz">68.9 KB</span> gzipped</span></p>
+      </article>
+      <article class="st-card st-group span-4 span-md-6" data-group="motion" style="--g:var(--series-3)" aria-labelledby="g-motion">
+        <h3 id="g-motion">Motion <span class="badge">Springs</span></h3>
+        <p>The generated springs, the motion tiers and the scroll-keyframe engine.</p>
+        <ul class="st-files">
+          <li data-file="fg3-springs.css"><code>fg3-springs.css</code><span>22.5 KB</span></li>
+          <li data-file="fg3-motion.css"><code>fg3-motion.css</code><span>26.8 KB</span></li>
+          <li data-file="spring.js"><code>spring.js</code><span>24.7 KB</span></li>
+          <li data-file="motion.js"><code>motion.js</code><span>30.9 KB</span></li>
+          <li data-file="anim.js"><code>anim.js</code><span>62.1 KB</span></li>
+        </ul>
+        <p class="st-total"><span><b data-total="raw">167.1 KB</b></span><span><span data-total="gz">50.6 KB</span> gzipped</span></p>
+      </article>
+      <article class="st-card st-group span-4 span-md-6" data-group="controls" style="--g:var(--series-4)" aria-labelledby="g-controls">
+        <h3 id="g-controls">Controls and chrome <span class="badge">UI</span></h3>
+        <p>Buttons, fields, lists and overlays; the navigation bars, tab bars, sheets and the floating local nav.</p>
+        <ul class="st-files">
+          <li data-file="fg3-components.css"><code>fg3-components.css</code><span>89.5 KB</span></li>
+          <li data-file="ui.js"><code>ui.js</code><span>59.2 KB</span></li>
+          <li data-file="fg3-chrome.css"><code>fg3-chrome.css</code><span>65.4 KB</span></li>
+          <li data-file="chrome.js"><code>chrome.js</code><span>97.7 KB</span></li>
+        </ul>
+        <p class="st-total"><span><b data-total="raw">311.9 KB</b></span><span><span data-total="gz">83.4 KB</span> gzipped</span></p>
+      </article>
+      <article class="st-card st-group span-4 span-md-6" data-group="product" style="--g:var(--series-5)" aria-labelledby="g-product">
+        <h3 id="g-product">Product pages <span class="badge">Marketing</span></h3>
+        <p>The section kit &mdash; hero, gallery, lockups, scenes &mdash; and our own device frames.</p>
+        <ul class="st-files">
+          <li data-file="fg3-showcase.css"><code>fg3-showcase.css</code><span>73.3 KB</span></li>
+          <li data-file="showcase.js"><code>showcase.js</code><span>67.8 KB</span></li>
+          <li data-file="fg3-device.css"><code>fg3-device.css</code><span>30.2 KB</span></li>
+          <li data-file="device.js"><code>device.js</code><span>50.4 KB</span></li>
+        </ul>
+        <p class="st-total"><span><b data-total="raw">221.7 KB</b></span><span><span data-total="gz">64.0 KB</span> gzipped</span></p>
+      </article>
+      <article class="st-card st-group span-4 span-md-6" data-group="symdata" style="--g:var(--series-6)" aria-labelledby="g-symdata">
+        <h3 id="g-symdata">Symbols and data <span class="badge">Content</span></h3>
+        <p>The symbol set, and the charts: sparklines, bars, rings, the day dial and the batch strip.</p>
+        <ul class="st-files">
+          <li data-file="fg3-symbols.css"><code>fg3-symbols.css</code><span>7.0 KB</span></li>
+          <li data-file="symbols.js"><code>symbols.js</code><span>19.0 KB</span></li>
+          <li data-file="fg3-chart.css"><code>fg3-chart.css</code><span>15.2 KB</span></li>
+          <li data-file="chart.js"><code>chart.js</code><span>40.3 KB</span></li>
+        </ul>
+        <p class="st-total"><span><b data-total="raw">81.5 KB</b></span><span><span data-total="gz">26.6 KB</span> gzipped</span></p>
+      </article>
+      </div>
+      <article class="st-card st-group st-optional" data-group="optional" style="--g:var(--label-3)" aria-labelledby="g-optional">
+        <h3 id="g-optional">Optional <span class="badge">Only if needed</span></h3>
+        <p>Documentation furniture, the palette engine for playgrounds, the contrast and keyboard audit behind <code>audit.html</code> and the italic and mono fonts, which load only when used.</p>
+        <ul class="st-files">
+          <li data-file="fg3-docs.css"><code>fg3-docs.css</code><span>11.5 KB</span></li>
+          <li data-file="docs.js"><code>docs.js</code><span>3.6 KB</span></li>
+          <li data-file="palette.js"><code>palette.js</code><span>40.7 KB</span></li>
+          <li data-file="audit.js"><code>audit.js</code><span>91.3 KB</span></li>
+          <li data-file="inter-latin-italic.woff2"><code>inter-latin-italic.woff2</code><span>79.7 KB</span></li>
+          <li data-file="geist-mono-latin.woff2"><code>geist-mono-latin.woff2</code><span>23.1 KB</span></li>
+        </ul>
+        <p class="st-total"><span><b data-total="raw">250.1 KB</b></span><span><span data-total="gz">151.2 KB</span> gzipped</span></p>
+      </article>
+    <p class="doc-note st-measure" data-kind="measured" id="st-measured">Sizes are bytes on disk and zlib gzip at its default level, read from the folder on 28 September 2026. Once the page has loaded it fetches every file again and re-measures it in your browser.</p>
+  </div>
+</section>
+
+<!-- ═══ 2 · THE PAGE · utility ═══ -->
+<section class="band" data-band="utility" id="page" aria-labelledby="page-h">
+  <div class="viewport-content">
+    <header class="st-head">
+      <p class="t-eyebrow st-step" data-n="2">The minimal page</p>
+      <h2 class="t-section" id="page-h">The whole page, in one screen.</h2>
+      <p class="t-lede" data-reveal="up">The template, reduced to what this page uses: <strong>seven stylesheets in the head, six scripts at the end and one boot call.</strong> The phone runs exactly this code, and so does the window at the top of the page.</p>
+    </header>
+    <div class="grid-12 st-page">
+      <div class="span-7 span-md-12">
+<pre class="doc-code" data-lang="html" id="st-min" tabindex="0" aria-label="The minimal page, full source"><code>&lt;!doctype html&gt;
+&lt;html lang="en"&gt;
+&lt;head&gt;
+&lt;meta charset="utf-8"&gt;
+&lt;meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"&gt;
+&lt;title&gt;Hello &amp;middot; Fluid&lt;/title&gt;
+&lt;script&gt;try{var d=document.documentElement,t=localStorage.getItem('fg3-tone');
+if(!d.hasAttribute('data-tone')){d.setAttribute('data-tone',t||d.getAttribute(
+'data-theme')||(matchMedia('(prefers-color-scheme: dark)').matches?'dark':
+'light'));d.setAttribute('data-tone-auto','')}}catch(e){}&lt;/script&gt;
+&lt;link rel="stylesheet" href="assets/fg3-tokens.css"&gt;
+&lt;link rel="stylesheet" href="assets/fg3-color.css"&gt;
+&lt;link rel="stylesheet" href="assets/fg3-springs.css"&gt;
+&lt;link rel="stylesheet" href="assets/fg3.css"&gt;
+&lt;link rel="stylesheet" href="assets/lg3.css"&gt;
+&lt;link rel="stylesheet" href="assets/fg3-motion.css"&gt;
+&lt;link rel="stylesheet" href="assets/fg3-components.css"&gt;
+&lt;style&gt;
+  .hello { min-height: 100svh; display: grid; align-content: space-between;
+           text-align: center; overflow: clip; isolation: isolate; }
+  .hello canvas { position: absolute; inset: 0; width: 100%; height: 100%;
+                  z-index: -1;
+                  mask-image: linear-gradient(transparent 30%, var(--bg-1) 80%); }
+  .hello .t-lede { margin: var(--s-4) auto 0; }
+  .platter { display: flex; align-items: center; gap: var(--s-4);
+             margin: var(--s-10) auto 0; padding: var(--s-2);
+             padding-inline-start: var(--s-6); }
+&lt;/style&gt;
+&lt;/head&gt;
+&lt;body&gt;
+&lt;main&gt;
+  &lt;section class="band hello" data-band="stage"&gt;
+    &lt;canvas data-art="twilight" data-art-seed="11" aria-hidden="true"&gt;&lt;/canvas&gt;
+    &lt;div class="viewport-content"&gt;
+      &lt;p class="t-eyebrow"&gt;Fluid&lt;/p&gt;
+      &lt;h1 class="t-hero"&gt;Hello, fluid.&lt;/h1&gt;
+      &lt;p class="t-lede"&gt;One folder, one boot call, both tones.&lt;/p&gt;
+    &lt;/div&gt;
+    &lt;div class="platter capsule" data-lg3 data-lg3-recipe="pill" data-lg3-tone="light"&gt;
+      &lt;p class="ui-subhead"&gt;Free while in beta&lt;/p&gt;
+      &lt;a class="btn btn-primary btn-l" href="#more"&gt;Get started&lt;/a&gt;
+    &lt;/div&gt;
+  &lt;/section&gt;
+  &lt;section class="band" data-band="story" id="more"&gt;
+    &lt;div class="viewport-content"&gt;
+      &lt;h2 class="t-section" data-reveal="up"&gt;Colour is a role.&lt;/h2&gt;
+      &lt;p class="t-lede" data-reveal="up"&gt;Every value comes from the palette you link,
+        &lt;strong&gt;in both tones&lt;/strong&gt;.&lt;/p&gt;
+    &lt;/div&gt;
+  &lt;/section&gt;
+&lt;/main&gt;
+&lt;script src="assets/geom.js"&gt;&lt;/script&gt;
+&lt;script src="assets/spring.js"&gt;&lt;/script&gt;
+&lt;script src="assets/art3.js"&gt;&lt;/script&gt;
+&lt;script src="assets/lg3-core.js"&gt;&lt;/script&gt;
+&lt;script src="assets/fg3.js"&gt;&lt;/script&gt;
+&lt;script src="assets/anim.js"&gt;&lt;/script&gt;
+&lt;script&gt;FG3.boot();&lt;/script&gt;
+&lt;/body&gt;
+&lt;/html&gt;</code></pre>
+      </div>
+      <div class="span-5 span-md-12">
+        <div class="st-live">
+          <div class="device" data-device="phone" data-island="none" role="img" aria-label="The code beside it, running at 402 pixels wide">
+            <div class="device__screen" data-screen-width="402"><div class="st-frame" data-st-frame="phone"></div></div>
+          </div>
+          <p class="doc-specimen__label"><b>Live, at 402&nbsp;px.</b> The phone renders the code as written; the canvas is painted, the platter bends it.</p>
+        </div>
+      </div>
+    </div>
+    <ol class="st-anatomy">
+      <li><span><strong>Tone before paint.</strong> The head script reads the reader&rsquo;s choice, then the host, then the system, so the first frame is already the right tone.</span></li>
+      <li><span><strong>Tokens, then one palette.</strong> <code>fg3-tokens.css</code> first, then exactly one <code>fg3-color*.css</code>. Everything after them reads roles.</span></li>
+      <li><span><strong>Bands, not sections.</strong> <code>.band</code> with <code>data-band</code> story, utility or stage carries the band padding; a stage band is dark before any script runs.</span></li>
+      <li><span><strong>Scripts last, in order.</strong> <code>geom.js</code> before <code>lg3-core.js</code>, and <code>fg3.js</code> before the modules it mounts.</span></li>
+      <li><span><strong>One boot.</strong> <code>FG3.boot()</code> paints the art, builds the glass and arms the reveals. No module mounts itself.</span></li>
+    </ol>
+  </div>
+</section>
+
+<!-- ═══ 3 · BRAND · story ═══ -->
+<section class="band" data-band="story" id="brand" aria-labelledby="brand-h">
+  <div class="viewport-content">
+    <header class="st-head">
+      <p class="t-eyebrow st-step" data-n="3">Pick a palette</p>
+      <h2 class="t-section" id="brand-h">Your colour. One link.</h2>
+      <p class="t-lede" data-reveal="up">A palette is a generated file, fitted in OKLCH from <strong>your accent</strong> and checked for contrast in both tones. Swap the link and every role follows: fills, links, focus rings, charts and the glow under the primary.</p>
+    </header>
+    <fieldset class="swatches st-picker" id="st-picker">
+      <legend class="sr-only">Palette for the specimen below</legend>
+      <div class="swatches-list">
+        <label class="swatch" data-brand="fluid"><input type="radio" name="st-brand" value="fluid" checked><span class="swatch-disc"></span><span class="sr-only">Fluid (default)</span></label>
+      </div>
+      <p class="swatches-name" aria-hidden="true">Fluid (default)</p>
+    </fieldset>
+    <div class="st-card st-board" id="st-board">
+      <div class="st-frame" data-st-frame="board"></div>
+    </div>
+    <div class="st-brand-foot">
+      <div>
+        <p class="t-caption" style="color:var(--label-2)">The only lines that change &mdash; the palette link, and the art the page paints from the brand:</p>
+<pre class="doc-code" data-lang="html" id="st-brand-code"><code>&lt;link rel="stylesheet" href="assets/fg3-color.css"&gt;
+&lt;canvas data-art="twilight" aria-hidden="true"&gt;&lt;/canvas&gt;</code></pre>
+        <p class="doc-note" data-kind="measured">Every file holds its contrast contracts &mdash; labels 7:1, secondary text, links and accents 4.5:1 &mdash; against the hardest ground each role lands on. <code>node tools/test-color.mjs</code> recomputes them independently of the engine.</p>
+      </div>
+      <div class="doc-table">
+        <table class="table st-brands">
+          <thead><tr><th scope="col">Palette</th><th scope="col">Accent</th><th scope="col">Read from</th></tr></thead>
+          <tbody>
+            <tr data-brand="fluid" aria-current="true"><td><span class="st-dot"></span>Fluid <span class="t-caption" style="color:var(--label-2)">default</span></td><td><code data-accent>#7c5cff</code></td><td><code data-from>the default violet, fitted in OKLCH</code></td></tr>
+          </tbody>
+        </table>
+        <p class="t-caption" style="color:var(--label-2);margin-top:var(--s-4)">The accent is read from the stylesheet, not from memory; the page reads it back out of its palette file. To ship your own, generate a palette from your accent and link that file instead.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ 4 · BOOT · utility ═══ -->
+<section class="band" data-band="utility" id="boot" aria-labelledby="boot-h">
+  <div class="viewport-content">
+    <header class="st-head">
+      <p class="t-eyebrow st-step" data-n="4">Boot and tone</p>
+      <h2 class="t-section" id="boot-h">Boot once. The tone follows the reader.</h2>
+      <p class="t-lede" data-reveal="up">The head snippet paints the first frame in the right tone; <code>FG3.boot()</code> takes over from it. <strong>The reader&rsquo;s choice wins, then the author&rsquo;s <code>data-tone</code>, then the host&rsquo;s <code>data-theme</code>, then the system.</strong></p>
+    </header>
+    <div class="grid-12 st-boot">
+      <div class="span-7 span-md-12 st-boot-code">
+<pre class="doc-code" data-lang="html"><code>&lt;!-- In &lt;head&gt;, before the stylesheets --&gt;
+&lt;script&gt;try{var d=document.documentElement,t=localStorage.getItem('fg3-tone');
+if(!d.hasAttribute('data-tone')){d.setAttribute('data-tone',t||d.getAttribute(
+'data-theme')||(matchMedia('(prefers-color-scheme: dark)').matches?'dark':
+'light'));d.setAttribute('data-tone-auto','')}}catch(e){}&lt;/script&gt;
+
+&lt;!-- At the end of &lt;body&gt;, after the last script --&gt;
+&lt;script&gt;FG3.boot();&lt;/script&gt;</code></pre>
+<pre class="doc-code" data-lang="js"><code>var state = FG3.boot();      // idempotent: a second call returns the same state
+state.mounted;               // ['ART3', 'LG3', ...]: whatever the page loaded
+state.errors;                // any module that threw; the rest still mounted
+
+FG3.setTone('dark');         // 'light' | 'dark' | 'auto', remembered as fg3-tone
+FG3.getTone();               // {tone: 'dark', mode: 'dark', source: 'user'}
+document.addEventListener('fg3:tone', function (e) {
+  console.log(e.detail.tone, e.detail.source);
+});</code></pre>
+<pre class="doc-code" data-lang="html"><code>&lt;!-- A band can carry its own tone; a stage band is dark without being told --&gt;
+&lt;section class="band" data-band="utility" data-tone="dark"&gt;&hellip;&lt;/section&gt;
+
+&lt;!-- Pin a page to one tone only when it must be (a dark-only console) --&gt;
+&lt;html lang="en" data-tone="dark" data-tone-lock&gt;</code></pre>
+      </div>
+      <div class="span-5 span-md-12 st-state" id="st-state">
+        <p class="list-header">This page, right now</p>
+        <ul class="list list-inset">
+          <li><div class="row"><span class="row-title">Appearance</span>
+            <div class="segmented" role="radiogroup" aria-label="Appearance" id="st-tone">
+              <button type="button" role="radio" data-mode="light" aria-checked="false">Light</button>
+              <button type="button" role="radio" data-mode="dark" aria-checked="false">Dark</button>
+              <button type="button" role="radio" data-mode="auto" aria-checked="true">Auto</button>
+            </div></div></li>
+          <li><div class="row"><span class="row-title">Tone</span><span class="row-value" data-st-state="tone">&hellip;</span></div></li>
+          <li><div class="row"><span class="row-title">Decided by</span><span class="row-value" data-st-state="source">&hellip;</span></div></li>
+          <li><div class="row"><span class="row-title">Scroll choreography</span><span class="row-value" data-st-state="gate">&hellip;</span></div></li>
+          <li><div class="row"><span class="row-title">Corners</span><span class="row-value" data-st-state="corners">&hellip;</span></div></li>
+          <li><div class="row"><span class="row-title">Glass</span><span class="row-value" data-st-state="glass">&hellip;</span></div></li>
+          <li><div class="row"><span class="row-title">Version</span><span class="row-value" data-st-state="version">&hellip;</span></div></li>
+        </ul>
+        <p class="list-header" style="margin-top:var(--s-4)">Who decided the tone</p>
+        <ol class="st-prec" aria-label="Tone precedence, the one in force is marked">
+          <li data-src="user"><span>Reader</span></li>
+          <li data-src="author"><span>Author</span></li>
+          <li data-src="host"><span>Host</span></li>
+          <li data-src="system"><span>System</span></li>
+        </ol>
+        <p class="list-header" style="margin-top:var(--s-4)">Mounted by <code>FG3.boot()</code></p>
+        <div class="st-mods" data-st-state="mounted"><span class="badge">&hellip;</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ 5 · THE TEN RULES · story ═══ -->
+<section class="band" data-band="story" id="rules" aria-labelledby="rules-h">
+  <div class="viewport-content">
+    <div class="lockup" style="margin-bottom:var(--band-header-gap)">
+      <p class="lockup-eyebrow st-step" data-n="5" style="justify-content:center">The ten rules</p>
+      <h2 class="lockup-headline" id="rules-h">Ten rules decide whether it looks like ours.</h2>
+      <p class="lockup-copy" data-reveal="up">The classes get you the metrics. These decide the rest. <strong>Each specimen below is live</strong> &mdash; press it, and flip the tone.</p>
+    </div>
+
+    <div class="st-rules">
+      <!-- 1 -->
+      <figure class="st-rule">
+        <div class="st-card st-stage" data-tone="dark">
+          <canvas data-art="aurora" data-art-seed="5" data-art-vignette=".3" aria-hidden="true"></canvas>
+          <div class="st-r1">
+            <div class="st-r1-card" data-tone="light"><span>Landed today</span><b>1,222</b><span>of a 2,160 cap &middot; content, opaque</span></div>
+            <nav class="st-r1-bar capsule" data-lg3 data-lg3-recipe="pill" data-lg3-mode="frost" data-lg3-interactive aria-label="Specimen tab bar">
+              <span aria-current="page"><i data-sym="house"></i><span class="sr-only">Today</span></span>
+              <span><i data-sym="chart-bar"></i><span class="sr-only">Data</span></span>
+              <span><i data-sym="bubble"></i><span class="sr-only">Replies</span></span>
+              <span><i data-sym="gear"></i><span class="sr-only">Settings</span></span>
+            </nav>
+          </div>
+          <span class="st-tag">chrome floats, content stays</span>
+        </div>
+        <figcaption class="st-cap"><span class="st-n">01</span><strong>Glass is chrome.</strong> Bars, capsules and controls that float over media wear glass. Cards, tables, charts and numbers stay opaque, and glass never sits on glass.</figcaption>
+      </figure>
+      <!-- 2 -->
+      <figure class="st-rule">
+        <div class="st-card st-stage st-cq">
+          <div class="st-r2" id="st-r2">
+            <button class="st-r2-chip" type="button" aria-expanded="false" aria-controls="st-r2-body"><span class="st-r2-plus"><i data-sym="plus"></i></span>Foldable design</button>
+            <p class="st-r2-body" id="st-r2-body"><strong>One shape becomes the other.</strong> The chip grows into the card on a spring; nothing fades out to make room, and a second press turns it round mid-flight.</p>
+          </div>
+        </div>
+        <figcaption class="st-cap"><span class="st-n">02</span><strong>Morph, don&rsquo;t swap.</strong> A thing that changes state changes shape: pill to panel, chip to card, button to menu. One <code>--progress</code> on a spring drives radius, size and content.</figcaption>
+      </figure>
+      <!-- 3 -->
+      <figure class="st-rule">
+        <div class="st-card st-stage">
+          <div class="st-r3">
+            <div class="st-r3-track"><button class="st-r3-puck" type="button" id="st-r3" aria-label="Send the puck across; press again to turn it round"></button></div>
+            <svg class="st-r3-plot" id="st-r3-plot" viewBox="0 0 360 84" preserveAspectRatio="none" aria-hidden="true"><path class="ax" d="M0 76H360"/><path class="tg" d="M0 16H360"/><path class="cv" d="M0 76"/></svg>
+            <p class="st-r3-meta"><span><code>--sp-bouncy</code> &middot; .5&nbsp;s, bounce .3</span><span id="st-r3-settle">settles in 730 ms</span></p>
+          </div>
+        </div>
+        <figcaption class="st-cap"><span class="st-n">03</span><strong>Everything a finger touches is a spring.</strong> Duration and bounce, interruptible, carrying its velocity into the next target. Easing curves are only for scroll choreography that nobody touches.</figcaption>
+      </figure>
+      <!-- 4 -->
+      <figure class="st-rule">
+        <div class="st-card st-stage">
+          <div class="st-r4">
+            <svg viewBox="-5 -5 91 91" aria-hidden="true" id="st-r4-svg"><path class="ours" d=""/><path class="ref" d=""/><path class="naive" d=""/></svg>
+            <div class="st-r4-side">
+              <div class="st-r4-key">
+                <span><i class="k-ours"></i><span>ours: <code>superellipse(1.71)</code>, r&nbsp;&times;&nbsp;1.53</span></span>
+                <span><i class="k-ref"></i>reference continuous corner</span>
+                <span><i class="k-naive"></i>superellipse at r: too square</span>
+              </div>
+              <p class="st-r4-num" id="st-r4-num">One corner of a 44&nbsp;px radius, zoomed.</p>
+              <span class="st-r4-pill capsule">A capsule is round</span>
+            </div>
+          </div>
+        </div>
+        <figcaption class="st-cap"><span class="st-n">04</span><strong>Continuous corners, true capsules.</strong> A box&rsquo;s corner eases in before it bends (<code>superellipse(1.71)</code> at 1.53&times; the token); a capsule is a true semicircle. Nothing else is round.</figcaption>
+      </figure>
+      <!-- 5 -->
+      <figure class="st-rule">
+        <div class="st-card st-stage" id="st-r5-stage">
+          <div class="st-r5" id="st-r5">
+            <p><span class="doc-swatch" style="--c:var(--label)"></span><code>--label</code><span data-role="--label"></span></p>
+            <p><span class="doc-swatch" style="--c:var(--label-2)"></span><code>--label-2</code><span data-role="--label-2"></span></p>
+            <p><span class="doc-swatch" style="--c:var(--accent)"></span><code>--accent</code><span data-role="--accent"></span></p>
+            <p><span class="doc-swatch" style="--c:var(--fill-1)"></span><code>--fill-1</code><span data-role="--fill-1"></span></p>
+          </div>
+          <button class="btn btn-s st-ctl" type="button" id="st-r5-flip">Flip this card&rsquo;s tone</button>
+        </div>
+        <figcaption class="st-cap"><span class="st-n">05</span><strong>Colour is a role, never a value.</strong> Pages name <code>--label-2</code>, not a grey. The same names resolve per tone and per band, so this card can flip on its own.</figcaption>
+      </figure>
+      <!-- 6 -->
+      <figure class="st-rule">
+        <div class="st-card st-stage">
+          <div class="st-r6">
+            <h4>Publish the page?</h4>
+            <p>It goes to everyone with the link.</p>
+            <div class="st-btn-row"><button class="btn btn-plain" type="button">Preview</button><button class="btn btn-secondary" type="button">Save draft</button><button class="btn btn-primary" type="button">Publish</button></div>
+          </div>
+        </div>
+        <figcaption class="st-cap"><span class="st-n">06</span><strong>One tinted primary per view.</strong> The accent fill marks the single thing to do next. Everything beside it is an outline, a plain link or ink.</figcaption>
+      </figure>
+      <!-- 7 -->
+      <figure class="st-rule">
+        <div class="st-card st-stage">
+          <div class="st-r7">
+            <div data-tone="dark"><canvas data-art="ember" data-art-seed="9" aria-hidden="true"></canvas>
+              <span class="btn btn-glass btn-l st-demo" data-lg3 data-lg3-recipe="pill" data-lg3-mode="frost"><i data-sym="play"></i>Over art</span>
+              <span class="st-tag">bends</span></div>
+            <div>
+              <span class="btn btn-glass btn-l st-demo" data-lg3 data-lg3-recipe="pill" data-lg3-mode="frost" data-lg3-tone="light"><i data-sym="play"></i>Over flat</span>
+              <span class="st-tag">a bordered box</span></div>
+          </div>
+        </div>
+        <figcaption class="st-cap"><span class="st-n">07</span><strong>A lens needs something to bend.</strong> Put glass over art, media or scrolling content. Over a flat fill the same material is just a bordered box.</figcaption>
+      </figure>
+      <!-- 8 -->
+      <figure class="st-rule">
+        <div class="st-card st-stage" data-tone="dark">
+          <canvas data-art="twilight" data-art-seed="31" data-art-vignette=".3" aria-hidden="true"></canvas>
+          <div class="st-r8">
+            <button class="btn btn-glass btn-l" type="button" id="st-r8-pill" data-lg3 data-lg3-recipe="pill" data-lg3-mode="frost" data-lg3-interactive data-lg3-id="st-r8"><i data-sym="waveform"></i>Now playing</button>
+            <div class="st-r8-panel" id="st-r8-panel" data-lg3 data-lg3-mode="frost" data-lg3-tone="dark" data-lg3-id="st-r8" data-lg3-away hidden>
+              <p><strong>Now playing</strong></p><p>The panel grew out of the pill. Press anywhere on it to fold it back.</p>
+            </div>
+          </div>
+          <div class="st-meter" aria-live="polite"><span>blur, measured</span><b id="st-r8-now">&ndash;</b><span id="st-r8-peak">press the pill</span></div>
+        </div>
+        <figcaption class="st-cap"><span class="st-n">08</span><strong>Density follows motion.</strong> Glass gets denser while it moves and relaxes at rest, as a floating bar does (7 to 14&nbsp;px of blur; this pill rests at 8 and peaks at 16). The meter reads the engine while the pill becomes a panel.</figcaption>
+      </figure>
+      <!-- 9 -->
+      <figure class="st-rule">
+        <div class="st-card st-stage">
+          <div class="st-r9">
+            <div class="st-r9-card">
+              <div class="st-r9-top"><b>Batch</b><span class="pill-status" data-state="live">Live</span></div>
+              <div class="m-bar m-working" role="progressbar" aria-label="Batch progress" aria-valuemin="0" aria-valuemax="100" aria-valuenow="40" style="--m-value:40%"><i></i></div>
+            </div>
+            <div class="st-r9-toast" id="st-r9-toast"><i data-sym="checkmark-circle"></i><span>4 of 10 tasks completed</span></div>
+            <p class="st-r9-note" id="st-r9-note">Reduce Motion is off on this device.</p>
+          </div>
+          <button class="btn btn-s st-ctl" type="button" id="st-r9-replay">Replay</button>
+        </div>
+        <figcaption class="st-cap"><span class="st-n">09</span><strong>Reduced motion keeps the state.</strong> With Reduce Motion on, the toast fades in instead of rising, and the live dot and working bar keep going, slower. Motion that reports something is never deleted.</figcaption>
+      </figure>
+      <!-- 10 -->
+      <figure class="st-rule">
+        <div class="st-card st-stage">
+          <div class="st-r10" id="st-r10">
+            <p class="st-r10-head"><span>Measured on this page, as you read it</span><i data-sym="checkmark-circle"></i></p>
+            <dl class="doc-kv">
+              <dt>Secondary text on the page</dt><dd data-m="contrast">&ndash;</dd>
+              <dt>Corner exponent &middot; radius scale</dt><dd data-m="corner">&ndash;</dd>
+              <dt>Glass bending now</dt><dd data-m="glass">&ndash;</dd>
+              <dt><code>bouncy</code> settles in</dt><dd data-m="spring">&ndash;</dd>
+            </dl>
+          </div>
+        </div>
+        <figcaption class="st-cap"><span class="st-n">10</span><strong>Measured, not asserted.</strong> Every engine claim is an assertion that was seen failing before it was kept, and every number on these pages is read from the running system.</figcaption>
+      </figure>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ 6 · TRAPS · utility, FAQ rows ═══ -->
+<section class="band" data-band="utility" id="traps" aria-labelledby="traps-h">
+  <div class="viewport-content">
+    <header class="st-head">
+      <p class="t-eyebrow st-step" data-n="6">The first traps</p>
+      <h2 class="t-section" id="traps-h">Eight things that fail without an error.</h2>
+      <p class="t-lede" data-reveal="up">Each of these has cost a builder an afternoon. <strong>The symptom is the question; the fix is one press away.</strong></p>
+    </header>
+    <div class="st-faq-bar"><button class="btn btn-plain" type="button" id="st-expand" aria-controls="st-faq">Expand all</button></div>
+    <div class="st-faq" id="st-faq">
+      <details>
+        <summary><span><span class="st-sym-n">1</span>The glyphs are empty, the art is blank and nothing moves.</span><i data-sym="chevron-down"></i></summary>
+        <div class="st-fix">
+          <p>No module mounts itself. Call <code>FG3.boot()</code> once, after the last script. It paints the art, builds the glass, expands the symbols and arms the reveals &mdash; and a module that throws is recorded in <code>state.errors</code> instead of stopping the rest.</p>
+<pre class="doc-code" data-lang="html"><code>&lt;script src="assets/fg3.js"&gt;&lt;/script&gt;
+&lt;!-- &hellip; the other modules &hellip; --&gt;
+&lt;script&gt;FG3.boot();&lt;/script&gt;</code></pre>
+        </div>
+      </details>
+      <details>
+        <summary><span><span class="st-sym-n">2</span>The glass is a flat, grey box.</span><i data-sym="chevron-down"></i></summary>
+        <div class="st-fix">
+          <p>Something above it has become a backdrop root: <code>opacity</code> below 1, a <code>filter</code>, a <code>mask</code> or a <code>mix-blend-mode</code> on an ancestor, often a fade-in. Animate <code>transform</code> on ancestors, never opacity, and bring glass in with <code>LG3.materialize(el)</code>. Then check there is something under it to bend.</p>
+<pre class="doc-code" data-lang="js"><code>LG3.materialize(document.querySelector('.toolbar'));   // not el.style.opacity = 1</code></pre>
+        </div>
+      </details>
+      <details>
+        <summary><span><span class="st-sym-n">3</span>The viewer&rsquo;s light and dark switch does nothing.</span><i data-sym="chevron-down"></i></summary>
+        <div class="st-fix">
+          <p><code>data-tone</code> on <code>&lt;html&gt;</code> is an author pin, and an author tone beats the host&rsquo;s <code>data-theme</code>. Leave <code>&lt;html&gt;</code> bare and let the head snippet choose. Pin only a page that must be one tone, and then add <code>data-tone-lock</code> on purpose.</p>
+        </div>
+      </details>
+      <details>
+        <summary><span><span class="st-sym-n">4</span>The accent colour never shows.</span><i data-sym="chevron-down"></i></summary>
+        <div class="st-fix">
+          <p>A palette generated at run time with <code>PALETTE.install()</code> lands in the head, before an Artifact&rsquo;s body-linked stylesheets, and loses the cascade while reporting success. Link the generated file right after the tokens, and link only one.</p>
+<pre class="doc-code" data-lang="html"><code>&lt;link rel="stylesheet" href="assets/fg3-tokens.css"&gt;
+&lt;link rel="stylesheet" href="assets/fg3-color.css"&gt;</code></pre>
+        </div>
+      </details>
+      <details>
+        <summary><span><span class="st-sym-n">5</span>Small grey text fails the audit.</span><i data-sym="chevron-down"></i></summary>
+        <div class="st-fix">
+          <p><code>--label-3</code> and <code>--label-4</code> are 3:1 roles, for 19&nbsp;px semibold or 24&nbsp;px text and for glyphs. Anything at 17&nbsp;px or below takes <code>--label-2</code>, and text on a fill takes <code>--label-2-on-fill</code>.</p>
+        </div>
+      </details>
+      <details>
+        <summary><span><span class="st-sym-n">6</span>Glass added from a script stays flat.</span><i data-sym="chevron-down"></i></summary>
+        <div class="st-fix">
+          <p>The engines do not watch the DOM. After inserting a glass host, apply it; after inserting a subtree, refresh corners and radii and mount the modules that own what you added.</p>
+<pre class="doc-code" data-lang="js"><code>LG3.apply(host);          // one new [data-lg3]
+FG3.refresh(root);        // continuous corners and concentric radii
+SYM.mount(root);          // then whichever modules own the new markup
+UI.mount(root);</code></pre>
+        </div>
+      </details>
+      <details>
+        <summary><span><span class="st-sym-n">7</span>Scroll choreography never runs in a narrow window.</span><i data-sym="chevron-down"></i></summary>
+        <div class="st-fix">
+          <p>That is the capability gate: windows between 481 and 734&nbsp;px, a small desktop window, reduced motion and text zoom get the base experience, with every element in its final state. Add <code>?fd-enhanced</code> to the URL to test the choreography anyway; <code>html.fd-enhanced</code> or <code>no-fd-enhanced</code> and <code>data-fd-cause</code> say which you got.</p>
+        </div>
+      </details>
+      <details>
+        <summary><span><span class="st-sym-n">8</span>The published page is unstyled, or its dashes are garbled.</span><i data-sym="chevron-down"></i></summary>
+        <div class="st-fix">
+          <p>An Artifact serves only the files in its map, a republish replaces the whole set, and the host may drop the charset. Build with the publishing tool, pass the whole <code>files</code> map every time, and keep displayed non-ASCII as entities such as <code>&amp;mdash;</code>. The build escapes every file and refuses anything it missed.</p>
+<pre class="doc-code" data-lang="sh"><code>node tools/artifact-build.mjs     # dist/ and dist/publish-map.json, or a refusal with the reason</code></pre>
+        </div>
+      </details>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ 7 · INSTRUMENTS · story ═══ -->
+<section class="band" data-band="story" id="instruments" aria-labelledby="inst-h">
+  <div class="viewport-content">
+    <header class="st-head">
+      <p class="t-eyebrow st-step" data-n="7">Instruments</p>
+      <h2 class="t-section" id="inst-h">Looked at is not checked.</h2>
+      <p class="t-lede" data-reveal="up">A design change is done when the instruments have run on it: in both tones, at 402 and 1440, and under reduced motion. <strong>Node 24 and the local Edge are all they need.</strong></p>
+    </header>
+    <div class="st-inst">
+      <article class="st-card">
+        <i data-sym="checkmark-circle"></i>
+        <h3>Self-test</h3>
+        <p>Every engine claim as an assertion, run in the page against the <strong>rendered</strong> result and seen failing once before it was kept.</p>
+        <p><a class="st-link" href="selftest.html">Open the self-test <i data-sym="chevron-right"></i></a></p>
+      </article>
+      <article class="st-card">
+        <i data-sym="magnifier"></i>
+        <h3>Audit</h3>
+        <p>Contrast against the ground as painted &mdash; <strong>text over art and glass included</strong> &mdash; and keyboard reachability, across every page.</p>
+        <p><a class="st-link" href="audit.html">Open the audit <i data-sym="chevron-right"></i></a></p>
+      </article>
+    </div>
+<pre class="doc-code st-cmds" data-lang="sh"><code># from the repository root - serve the tree, with the Artifact host emulated at /a/
+node tools/serve.mjs . 8810
+
+# see it, then read every PNG
+node tools/shoot.mjs http://127.0.0.1:8810/start.html --width 402 --scroll steps:8 --out shots
+node tools/shoot.mjs http://127.0.0.1:8810/start.html --width 1440 --dark --reduced-motion --out shots
+
+# light, dark, reduced motion and transparency, increased contrast, forced colours
+node tools/emulate.mjs http://127.0.0.1:8810/start.html --widths 1440,402 --out shots/emulate
+
+# frame timing on a real wheel gesture, a fresh browser per run
+node tools/perf.mjs http://127.0.0.1:8810/index.html --width 1440,402 --trace
+
+# the engines and the generated files
+node tools/test-color.mjs
+node tools/test-motion.mjs --quick
+node tools/test-geom.mjs assets/geom.js
+node tools/check-vars.mjs
+node tools/gen-springs.mjs --check
+node tools/gen-palettes.mjs --check
+
+# the publishable tree, behind ten gates
+node tools/artifact-build.mjs</code></pre>
+  </div>
+</section>
+
+<!-- ═══ NEXT · story ═══ -->
+<section class="band st-next" data-band="story" aria-labelledby="next-h">
+  <div class="viewport-content">
+    <div class="lockup">
+      <p class="lockup-eyebrow">Next</p>
+      <h2 class="lockup-headline" id="next-h">Now make something.</h2>
+      <p class="lockup-copy" data-reveal="up">The written system is in Docs. <strong>Every control, bar and product-page section has a page of its own</strong>, and the self-test proves the engines on your machine.</p>
+      <div class="lockup-ctas">
+        <a class="lockup-cta" href="docs.html">Read the docs <i data-sym="chevron-right"></i></a>
+        <a class="lockup-cta" href="components.html">Browse the components <i data-sym="chevron-right"></i></a>
+        <a class="lockup-cta" href="selftest.html">Run the self-test <i data-sym="chevron-right"></i></a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<script>
+/* start.html - page behaviour. Runs on 'fg3:ready' (dispatched at the end of
+   FG3.boot), so every module is mounted before any of this touches it. Each
+   part is wrapped: one failure never stops the others. */
+(function () {
+  'use strict';
+  var doc = document, html = doc.documentElement;
+  function $(s, r) { return (r || doc).querySelector(s); }
+  function $$(s, r) { return [].slice.call((r || doc).querySelectorAll(s)); }
+  function mq(q) { try { return matchMedia(q); } catch (e) { return { matches: false, addEventListener: function () {} }; } }
+  var RM = mq('(prefers-reduced-motion: reduce)');
+  var ASSETS = '';
+  var frames = [];
+  function tone() { return html.getAttribute('data-tone') === 'dark' ? 'dark' : 'light'; }
+  function kb(b) { return (b / 1000).toFixed(1) + ' KB'; }
+  function total(b) { return b >= 1e6 ? (b / 1e6).toFixed(2) + ' MB' : Math.round(b / 1000) + ' KB'; }
+  function nbsp(s) { return s.replace(' ', '\u00a0'); }
+
+  /* Before boot: the appearance control starts on the reader's stored choice. */
+  (function () {
+    var mode = 'auto';
+    try { var v = localStorage.getItem('fg3-tone'); if (v === 'light' || v === 'dark') mode = v; } catch (e) {}
+    $$('#st-tone [role="radio"]').forEach(function (b) { b.setAttribute('aria-checked', String(b.getAttribute('data-mode') === mode)); });
+  })();
+
+  /* Run fn once el is near the viewport (IO), with a deadline for pages the
+     compositor treats as hidden, where IO may never report. With idle set,
+     fn also runs in the first idle period after load, so the heavy work (a
+     live frame booting the whole stack) lands before the reader scrolls
+     there rather than during the scroll. */
+  function whenNear(el, fn, margin, idle) {
+    var done = false;
+    function go() { if (done) return; done = true; if (io) io.disconnect(); fn(); }
+    if (idle) {
+      var later = function () {
+        if (window.requestIdleCallback) requestIdleCallback(go, { timeout: 4000 }); else setTimeout(go, 1200);
+      };
+      if (doc.readyState === 'complete') later(); else addEventListener('load', later, { once: true });
+    }
+    var io = 'IntersectionObserver' in window ? new IntersectionObserver(function (es) {
+      if (es.some(function (e) { return e.isIntersecting; })) go();
+    }, { rootMargin: (margin || 900) + 'px 0px' }) : null;
+    if (io) io.observe(el); else go();
+    setTimeout(function () { if (doc.visibilityState === 'hidden') go(); }, 4000);
+  }
+
+  /* -- live frames: the minimal page, as written --------------------------- */
+  function frame(slot, srcdoc, o) {
+    var f = doc.createElement('iframe'), ready = false;
+    f.title = o.title;
+    if (o.inert) { f.setAttribute('inert', ''); f.setAttribute('tabindex', '-1'); f.setAttribute('aria-hidden', 'true'); }
+    function done() {
+      if (ready) return;
+      ready = true;
+      f.setAttribute('data-ready', '');
+      if (o.onReady) { try { o.onReady(f); } catch (e) { console.error('start.html frame', e); } }
+    }
+    f.addEventListener('load', function () {
+      var d = null;
+      try { d = f.contentDocument; } catch (e) {}
+      if (!d || d.documentElement.getAttribute('data-fg3') === 'ready') done();
+      else { d.addEventListener('fg3:ready', done); setTimeout(done, 3000); }
+    });
+    f.srcdoc = srcdoc;
+    slot.appendChild(f);
+    frames.push(f);
+    return f;
+  }
+  function initFrames() {
+    var l = $('link[href$="fg3-tokens.css"]');
+    ASSETS = l ? l.href.replace(/fg3-tokens\.css(?:[?#].*)?$/, '') : '';
+    /* The code block IS the source: its text, with assets/ resolved to where
+       this page found them, and the tone handed over as a host would. */
+    var code = $('#st-min code').textContent;
+    var src = code.replace(/(\s(?:href|src)=")assets\//g, function (m, a) { return a + ASSETS; })
+      .replace('<html lang="en">', function () { return '<html lang="en" data-theme="' + tone() + '">'; });
+    var hero = $('[data-st-frame="hero"]');
+    if (hero) frame(hero, src, { title: 'The minimal page, running live', inert: true });
+    var phone = $('[data-st-frame="phone"]');
+    if (phone) whenNear(phone, function () { frame(phone, src, { title: 'The minimal page at 402 pixels' }); }, 900, true);
+    doc.addEventListener('fg3:tone', function () {
+      frames.forEach(function (f) { try { f.contentDocument.documentElement.setAttribute('data-theme', tone()); } catch (e) {} });
+    });
+  }
+
+  /* -- 1 - weights, measured again in this browser ------------------------ */
+  function gzipSize(name, buf) {
+    if (/\.woff2$/.test(name)) return Promise.resolve(buf.byteLength);          /* already compressed */
+    if (!window.CompressionStream) return Promise.resolve(null);
+    var s = new Blob([buf]).stream().pipeThrough(new CompressionStream('gzip'));
+    return new Response(s).arrayBuffer().then(function (b) { return b.byteLength; });
+  }
+  var GROUP_NAMES = { core: 'core', material: 'material', motion: 'motion', controls: 'controls and chrome',
+    product: 'product pages and devices', symdata: 'symbols and data', optional: 'optional' };
+  /* Once the page has loaded (idle), not when step 1 is reached: the hero
+     quotes these totals on the first screen, so a re-measure on first sight
+     changed a number the reader had already read. */
+  function initWeights() {
+    var host = $('#st-weights');
+    if (!host || !window.fetch || !ASSETS) return;
+    whenNear(host, function () {
+      var rows = $$('.st-files li[data-file]');
+      Promise.all(rows.map(function (li) {
+        var n = li.getAttribute('data-file');
+        return fetch(ASSETS + n).then(function (r) {
+          if (!r.ok) throw new Error(n + ' answered ' + r.status);
+          return r.arrayBuffer();
+        }).then(function (buf) { return gzipSize(n, buf).then(function (g) { return { li: li, raw: buf.byteLength, gz: g }; }); });
+      })).then(function (list) {
+        var all = { raw: 0, gz: 0, gzOk: true, n: list.length }, parts = [];
+        list.forEach(function (x) { $('span', x.li).textContent = kb(x.raw); });
+        $$('.st-group[data-group]').forEach(function (card) {
+          var mine = list.filter(function (x) { return card.contains(x.li); });
+          var raw = mine.reduce(function (s, x) { return s + x.raw; }, 0);
+          var gz = mine.reduce(function (s, x) { return x.gz == null ? NaN : s + x.gz; }, 0);
+          $('[data-total="raw"]', card).textContent = kb(raw);
+          if (isFinite(gz)) $('[data-total="gz"]', card).textContent = kb(gz);
+          var seg = $('.st-bar [data-g="' + card.getAttribute('data-group') + '"]');
+          if (seg) seg.style.setProperty('--w', raw);
+          var g = card.getAttribute('data-group');
+          parts.push((GROUP_NAMES[g] || g) + ' ' + Math.round(raw / 1000) + (parts.length ? '' : ' kilobytes'));
+          all.raw += raw;
+          if (isFinite(gz)) all.gz += gz; else all.gzOk = false;
+        });
+        var bar = $('.st-bar');
+        if (bar) bar.setAttribute('aria-label', 'The folder by weight: ' + parts.join(', '));
+        $$('[data-st-sum="files"]').forEach(function (e) { e.textContent = String(all.n); });
+        $$('[data-st-sum="raw"]').forEach(function (e) { e.textContent = e.closest('.hero-price') ? nbsp(total(all.raw)) : total(all.raw); });
+        if (all.gzOk) $$('[data-st-sum="gz"]').forEach(function (e) { e.textContent = e.closest('.hero-price') ? nbsp(total(all.gz)) : total(all.gz); });
+        $('#st-measured').textContent = 'Measured again in this browser just now: ' + all.n + ' files, ' +
+          all.raw.toLocaleString('en') + ' bytes on disk' + (all.gzOk ? ', ' + all.gz.toLocaleString('en') + ' bytes after gzip.' : '. This browser cannot gzip, so the gzip column is the build-time reading.');
+      }, function (e) {
+        $('#st-measured').textContent = 'The build-time reading stands: this browser could not re-measure the folder (' + e.message + ').';
+      });
+    }, 300, true);
+  }
+
+  /* -- 3 - brand palettes: the specimen board, re-toned by one link --------- */
+  var BRANDS = {
+    fluid: { file: 'fg3-color.css', art: 'twilight', name: 'Fluid' }
+  };
+  function artOf(b) { var B = BRANDS[b]; return B.art || B.accent || 'twilight'; }
+  var RINGS = JSON.stringify([{ label: 'Build', value: 312, max: 400, color: 'series-1' }, { label: 'Test', value: 70, max: 70, color: 'series-2' }, { label: 'Deploy', value: 58, max: 70, color: 'series-3' }]).replace(/"/g, '&quot;');
+  var BOARD_CSS = [
+    'html,body{background:var(--bg-2)}',
+    '.bd{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:20px;padding:20px}',
+    '@media (max-width:640px){.bd{grid-template-columns:1fr;gap:12px;padding:12px}}',
+    '.bd-art{position:relative;isolation:isolate;overflow:clip;display:flex;flex-direction:column;justify-content:flex-end;gap:6px;min-height:360px;padding:32px;',
+    ' border-radius:var(--r-lg);corner-shape:superellipse(var(--k-continuous));background:var(--band-stage-bg);color:var(--label)}',
+    '.bd-art canvas{position:absolute;inset:0;width:100%;height:100%;z-index:-1;mask-image:linear-gradient(var(--bg-1) 25%,transparent 86%)}',
+    '.bd-art .t-eyebrow{color:var(--on-art-2)}',
+    '.bd-art .t-title{color:var(--on-art-1)}',
+    '.bd-art .ui-subhead{color:var(--label-2)}',
+    '.bd-card{display:grid;gap:22px;align-content:start;padding:28px;border-radius:var(--r-lg);corner-shape:superellipse(var(--k-continuous));background:var(--bg-1)}',
+    '.bd-top{display:flex;justify-content:space-between;align-items:flex-start;gap:12px}',
+    '.bd-top .ui-footnote{color:var(--label-2)}',
+    '.bd-rings{display:flex;align-items:center;gap:24px}',
+    '.bd-rings [data-chart]{width:112px;height:112px;flex:none}',
+    '.bd-rings [data-chart-legend]{display:grid;gap:4px;font-size:var(--t-ui-footnote-fs);line-height:var(--t-ui-footnote-lh)}',
+    '.bd-row{display:flex;justify-content:space-between;align-items:center;gap:12px;font-size:var(--t-ui-body-fs)}',
+    '.bd-actions{display:flex;flex-wrap:wrap;align-items:center;gap:12px 20px}',
+    '.bd .progress{width:100%}'
+  ].join('');
+  function boardDoc(b) {
+    var css = ['fg3-tokens.css', BRANDS[b].file, 'fg3-springs.css', 'fg3.css', 'lg3.css', 'fg3-motion.css', 'fg3-components.css', 'fg3-symbols.css', 'fg3-chart.css'];
+    var js = ['geom.js', 'spring.js', 'art3.js', 'lg3-core.js', 'fg3.js', 'symbols.js', 'chart.js', 'motion.js', 'ui.js'];
+    return '<!doctype html><html lang="en" data-theme="' + tone() + '"><head><meta charset="utf-8">' +
+      '<meta name="viewport" content="width=device-width, initial-scale=1"><title>Palette specimen</title>' +
+      css.map(function (n, i) { return '<link rel="stylesheet"' + (i === 1 ? ' id="st-pal"' : '') + ' href="' + ASSETS + n + '">'; }).join('') +
+      '<style>' + BOARD_CSS + '</style></head><body><div class="bd">' +
+      '<section class="bd-art" data-tone="dark"><canvas data-art="' + artOf(b) + '" data-art-seed="23" data-art-contrast="1.2" aria-hidden="true"></canvas>' +
+      '<p class="t-eyebrow" data-st-name>' + BRANDS[b].name + '</p><h2 class="t-title">Hello, colour.</h2>' +
+      '<p class="ui-subhead">The art, the fills, the links and the charts follow one file.</p></section>' +
+      '<section class="bd-card" aria-label="Components in this palette">' +
+      '<div class="bd-top"><div><p class="ui-footnote">aurora today</p><p class="ui-title2">440 completed</p></div><span class="badge badge-accent">New</span></div>' +
+      '<div class="bd-rings"><div data-chart="rings" data-center="82%" data-values="' + RINGS + '" aria-label="aurora today by job kind: 440 of 540"></div><ul data-chart-legend></ul></div>' +
+      '<div class="segmented" role="radiogroup" aria-label="Range"><button type="button" role="radio" aria-checked="true">Day</button><button type="button" role="radio">Week</button><button type="button" role="radio">Month</button></div>' +
+      '<label class="bd-row"><span>Batches</span><input class="switch switch-accent" type="checkbox" role="switch" checked></label>' +
+      '<progress class="progress" value="0.81" max="1" aria-label="aurora today, 81 per cent of its caps"></progress>' +
+      '<div class="bd-actions"><a class="btn btn-primary btn-l" href="#top">Start</a><a class="btn btn-secondary btn-l" href="#top">See plans</a><a class="link-chevron" href="#top">Learn more</a></div>' +
+      '</section></div>' +
+      js.map(function (n) { return '<script src="' + ASSETS + n + '"><\/script>'; }).join('') +
+      '<script>FG3.boot();<\/script></body></html>';
+  }
+  var board = null, current = 'fluid';
+  function fitBoard() {
+    try {
+      var bd = board.contentDocument.querySelector('.bd'), h = bd ? Math.ceil(bd.getBoundingClientRect().height) : 0;
+      if (h > 100) $('#st-board').style.setProperty('--st-board-h', h + 'px');
+    } catch (e) {}
+  }
+  function setBrand(b) {
+    if (!BRANDS[b]) return;
+    current = b;
+    var B = BRANDS[b];
+    $('#st-brand-code code').textContent = '<link rel="stylesheet" href="assets/' + B.file + '">\n' +
+      '<canvas data-art="' + artOf(b) + '" aria-hidden="true"></canvas>';
+    $$('.st-brands tbody tr').forEach(function (tr) { if (tr.getAttribute('data-brand') === b) tr.setAttribute('aria-current', 'true'); else tr.removeAttribute('aria-current'); });
+    if (!board || !board.hasAttribute('data-ready')) return;
+    var w = board.contentWindow, d = board.contentDocument, old = d.getElementById('st-pal');
+    if (!old) return;
+    var link = d.createElement('link');
+    link.rel = 'stylesheet';
+    link.href = ASSETS + B.file;
+    function swap() {
+      if (old.parentNode) old.parentNode.removeChild(old);
+      link.id = 'st-pal';
+      var name = d.querySelector('[data-st-name]');
+      if (name) name.textContent = B.name;
+      var c = d.querySelector('.bd-art canvas');
+      if (c && w.ART3) { c.setAttribute('data-art', artOf(b)); w.ART3.repaint(c); }
+      if (w.LG3 && w.LG3.adapt) w.LG3.adapt();
+      fitBoard();
+    }
+    link.addEventListener('load', swap);
+    link.addEventListener('error', swap);
+    old.parentNode.insertBefore(link, old.nextSibling);
+  }
+  function readPalettes() {
+    if (!window.fetch || !ASSETS) return;
+    Object.keys(BRANDS).forEach(function (b) {
+      fetch(ASSETS + BRANDS[b].file).then(function (r) { if (!r.ok) throw new Error(r.status); return r.text(); }).then(function (t) {
+        var acc = /--accent-base:\s*(#[0-9a-f]{3,8})/i.exec(t), from = /read from:\s*([^\r\n]+)/i.exec(t);
+        if (!acc) return;
+        BRANDS[b].accent = acc[1];
+        var sw = $('#st-picker .swatch[data-brand="' + b + '"]'), tr = $('.st-brands tr[data-brand="' + b + '"]');
+        if (sw) sw.style.setProperty('--swatch', acc[1]);
+        if (tr) {
+          tr.style.setProperty('--swatch', acc[1]);
+          $('[data-accent]', tr).textContent = acc[1];
+          if (from) $('[data-from]', tr).textContent = from[1].trim();
+        }
+        if (b === current) $('#st-brand-code code').textContent = '<link rel="stylesheet" href="assets/' + BRANDS[b].file + '">\n<canvas data-art="' + artOf(b) + '" aria-hidden="true"></canvas>';
+      }).catch(function () { /* the static table stands */ });
+    });
+  }
+  function initBrands() {
+    readPalettes();
+    var slot = $('[data-st-frame="board"]');
+    if (slot) whenNear(slot, function () {
+      board = frame(slot, boardDoc('fluid'), { title: 'Palette specimen: the same components in the chosen palette', onReady: function () { fitBoard(); if (current !== 'fluid') setBrand(current); } });
+    }, 900, true);
+    $$('#st-picker input[type="radio"]').forEach(function (i) { i.addEventListener('change', function () { if (i.checked) setBrand(i.value); }); });
+    addEventListener('resize', function () { if (board) fitBoard(); });
+  }
+  function initRail() {
+    var rail = $('.st-groups'), q = mq('(max-width: 734px)');
+    if (!rail) return;
+    function sync() {
+      if (q.matches) { rail.tabIndex = 0; rail.setAttribute('role', 'region'); rail.setAttribute('aria-label', 'Files by group, scrolls sideways'); }
+      else { rail.removeAttribute('tabindex'); rail.removeAttribute('role'); rail.removeAttribute('aria-label'); }
+    }
+    sync();
+    if (q.addEventListener) q.addEventListener('change', sync);
+  }
+
+  /* -- 4 - the state list ------------------------------------------------- */
+  function paintState() {
+    var t = FG3.getTone(), st = FG3.boot(), cs = FG3.cornerState ? FG3.cornerState() : null;
+    var set = function (k, v) { var e = $('[data-st-state="' + k + '"]'); if (e) e.textContent = v; };
+    set('tone', t.tone === 'dark' ? 'Dark' : 'Light');
+    set('source', { user: 'your choice', author: 'the author', host: 'the host', system: 'the system' }[t.source] || t.source);
+    var on = html.classList.contains('fd-enhanced');
+    set('gate', on ? 'On' : 'Base (' + (html.getAttribute('data-fd-cause') || 'off') + ')');
+    if (cs) { var nS = cs.snapped.length, nF = cs.shaped.length; set('corners', cs.mode === 'native' ? 'Native' + (nS ? ', ' + nS + (nS === 1 ? ' capsule' : ' capsules') + ' snapped' : '') : 'Clip-path fallback, ' + nF + ' shaped'); }
+    var eng = html.getAttribute('data-lg3-engine') || 'none', rf = (html.getAttribute('data-lg3-refracting') || '').split('/');
+    set('glass', eng === 'refraction' ? 'Refracting ' + (rf[0] || 0) + ' of ' + (rf[1] || '?') : 'Frost' + (eng === 'frost' ? '' : ' (' + eng + ')'));
+    set('version', st.version || '3');
+    var mods = $('[data-st-state="mounted"]');
+    if (mods) {
+      mods.textContent = '';
+      (st.mounted || []).forEach(function (m) { var s = doc.createElement('span'); s.className = 'badge'; s.textContent = m; mods.appendChild(s); });
+      if (st.errors && st.errors.length) { var e = doc.createElement('span'); e.className = 'badge badge-bad'; e.textContent = st.errors.length + ' failed'; mods.appendChild(e); }
+    }
+    $$('.st-prec li').forEach(function (li) { if (li.getAttribute('data-src') === t.source) li.setAttribute('aria-current', 'true'); else li.removeAttribute('aria-current'); });
+    var seg = $('#st-tone');
+    if (seg && window.UI && UI.segmented) {
+      var api = UI.segmented(seg), idx = ['light', 'dark', 'auto'].indexOf(t.mode);
+      if (api && idx >= 0 && api.index !== idx) api.select(idx, { silent: true });
+    }
+  }
+  function initState() {
+    var seg = $('#st-tone');
+    if (seg) seg.addEventListener('change', function (e) {
+      var item = e.detail && e.detail.item, mode = item && item.getAttribute('data-mode');
+      if (mode) FG3.setTone(mode);
+    });
+    doc.addEventListener('fg3:tone', function () { setTimeout(paintState, 30); });
+    doc.addEventListener('fg3:capability', paintState);
+    paintState();
+    setTimeout(paintState, 1200);   /* LG3's refraction budget settles after the first adapt */
+  }
+
+  /* -- 5 - the rules' specimens ------------------------------------------- */
+  function initRules() {
+    /* 02 - chip to card on one --progress */
+    var r2 = $('#st-r2'), chip = r2 && $('.st-r2-chip', r2), open2 = false;
+    if (chip && window.MOTION) chip.addEventListener('click', function () {
+      open2 = !open2;
+      chip.setAttribute('aria-expanded', String(open2));
+      MOTION.progress(r2, open2 ? 1 : 0, { spring: 'morph' });
+    });
+
+    /* 03 - a spring you can interrupt, and its curve from the solver */
+    var puck = $('#st-r3'), right = false;
+    if (puck && window.MOTION) puck.addEventListener('click', function () {
+      right = !right;
+      var travel = puck.parentNode.clientWidth - puck.offsetWidth - 8;
+      MOTION.spring(puck, 'x', right ? travel : 0, { spring: 'bouncy' });
+    });
+    if (window.SPRING) {
+      var S = SPRING.Spring('bouncy'), T = Math.max(S.settlingDuration, S.duration) * 1.15, pts = [];
+      for (var i = 0; i <= 90; i++) { var t = T * i / 90, v = S.at(t); pts.push((i / 90 * 360).toFixed(1) + ' ' + (76 - v * 60).toFixed(1)); }
+      var cv = $('#st-r3-plot .cv');
+      if (cv) cv.setAttribute('d', 'M' + pts.join('L'));
+      var st3 = $('#st-r3-settle');
+      if (st3) st3.textContent = 'settles in ' + Math.round(S.settlingDuration * 1000) + ' ms';
+    }
+
+    /* 04 - ours, the reference, and the naive superellipse, on one zoomed corner */
+    var sv4 = $('#st-r4-svg');
+    if (sv4 && window.GEOM && GEOM.outline && GEOM.contPath) {
+      var C4 = GEOM.CONTINUOUS || { k: 1.71, rScale: 1.53 }, R4 = 44;
+      $('.ours', sv4).setAttribute('d', GEOM.outline(160, 160, R4 * C4.rScale, C4.k));
+      $('.ref', sv4).setAttribute('d', GEOM.contPath(160, 160, R4));
+      $('.naive', sv4).setAttribute('d', GEOM.outline(160, 160, R4, C4.k));
+      if (GEOM.contInset && GEOM.superellipseInset) {
+        $('#st-r4-num').textContent = 'Inset at 45\u00b0, r 44: reference ' + GEOM.contInset(R4).toFixed(2) + ', ours ' +
+          GEOM.superellipseInset(R4 * C4.rScale, C4.k).toFixed(2) + ', plain ' + GEOM.superellipseInset(R4, C4.k).toFixed(2) + ' px.';
+      }
+    }
+
+    /* 05 - the same names, resolved per tone */
+    var r5s = $('#st-r5-stage'), r5 = $('#st-r5');
+    function paint5() {
+      var cs = getComputedStyle(r5);
+      $$('[data-role]', r5).forEach(function (s) { s.textContent = cs.getPropertyValue(s.getAttribute('data-role')).trim(); });
+    }
+    if (r5s && r5) {
+      $('#st-r5-flip').addEventListener('click', function () {
+        var now = r5s.getAttribute('data-tone') || tone();
+        r5s.setAttribute('data-tone', now === 'dark' ? 'light' : 'dark');
+        paint5();
+      });
+      doc.addEventListener('fg3:tone', function () { r5s.removeAttribute('data-tone'); setTimeout(paint5, 30); });
+      paint5();
+    }
+
+    /* 08 - the pill morphs into a panel; the meter reads LG3's blur per frame */
+    var pill = $('#st-r8-pill'), panel = $('#st-r8-panel'), nowEl = $('#st-r8-now'), peakEl = $('#st-r8-peak');
+    var rest = null, peak = 0, running = false;
+    function blurOf(el) { try { var m = LG3.material(el); return m && isFinite(m.blur) ? m.blur : null; } catch (e) { return null; } }
+    function watch(el) {
+      var t0 = performance.now();
+      (function tick() {
+        var b = blurOf(el);
+        if (b != null) { nowEl.textContent = b.toFixed(1) + ' px'; if (b > peak) peak = b; }
+        if (running || performance.now() - t0 < 400) setTimeout(tick, 16);
+        else { peakEl.textContent = 'at rest ' + (rest != null ? rest.toFixed(1) : '?') + ' px, peak ' + peak.toFixed(1) + ' px'; }
+      })();
+    }
+    function morph(from, to, kbd) {
+      if (running || !window.LG3 || !LG3.morph) return;
+      running = true; peak = 0;
+      rest = blurOf(from);
+      to.hidden = false;
+      watch(to);
+      LG3.morph(from, to, { spring: 'morph' }).then(function () {
+        from.hidden = true;
+        running = false;
+        if (kbd) to.focus({ preventScroll: true });
+      }, function () { running = false; });
+    }
+    if (pill && panel) {
+      var b0 = blurOf(pill); if (b0 != null) nowEl.textContent = b0.toFixed(1) + ' px';
+      panel.tabIndex = 0;
+      panel.setAttribute('role', 'button');
+      panel.setAttribute('aria-label', 'Now playing panel; press to fold it back into the pill');
+      pill.addEventListener('click', function (e) { morph(pill, panel, e.detail === 0); });
+      panel.addEventListener('click', function (e) { morph(panel, pill, e.detail === 0); });
+      panel.addEventListener('keydown', function (e) { if (e.key === 'Enter' || e.key === ' ' || e.key === 'Escape') { e.preventDefault(); morph(panel, pill, true); } });
+    }
+
+    /* 09 - state survives reduced motion; displacement does not */
+    var toast = $('#st-r9-toast'), note = $('#st-r9-note');
+    function note9() { note.textContent = RM.matches ? 'Reduce Motion is on here: the toast fades, the dot still pulses.' : 'Reduce Motion is off on this device.'; }
+    if (toast && note) {
+      note9();
+      if (RM.addEventListener) RM.addEventListener('change', note9);
+      $('#st-r9-replay').addEventListener('click', function () {
+        toast.classList.remove('m-enter-up');
+        void toast.offsetWidth;                 /* re-adding a class does not restart an animation without a reflow */
+        toast.classList.add('m-enter-up');
+      });
+    }
+
+    /* 10 - numbers read from the running system */
+    var r10 = $('#st-r10');
+    function paint10() {
+      var set = function (k, v) { var e = $('[data-m="' + k + '"]', r10); if (e) e.textContent = v; };
+      var probe = $('.st-cap', $('#rules')), band = $('#rules');
+      if (window.PALETTE && PALETTE.ratio && probe) {
+        var r = PALETTE.ratio(getComputedStyle(probe).color, getComputedStyle(band).backgroundColor);
+        if (isFinite(r)) set('contrast', r.toFixed(2) + ':1');
+      }
+      if (window.GEOM && GEOM.CONTINUOUS) set('corner', 'k ' + GEOM.CONTINUOUS.k + ' \u00b7 \u00d7' + GEOM.CONTINUOUS.rScale);
+      var rf = (html.getAttribute('data-lg3-refracting') || '').split('/');
+      set('glass', html.getAttribute('data-lg3-engine') === 'refraction' ? (rf[0] || 0) + ' of ' + (rf[1] || '?') + ' hosts' : 'frost only');
+      if (window.SPRING) set('spring', Math.round(SPRING.Spring('bouncy').settlingDuration * 1000) + ' ms');
+    }
+    if (r10) { whenNear(r10, paint10, 0); doc.addEventListener('fg3:tone', function () { setTimeout(paint10, 60); }); }
+  }
+
+  /* -- 6 - expand all ----------------------------------------------------- */
+  function initFaq() {
+    var btn = $('#st-expand'), list = $$('#st-faq details');
+    if (!btn) return;
+    function sync() { var all = list.every(function (d) { return d.open; }); btn.textContent = all ? 'Collapse all' : 'Expand all'; }
+    btn.addEventListener('click', function () { var open = !list.every(function (d) { return d.open; }); list.forEach(function (d) { d.open = open; }); sync(); });
+    list.forEach(function (d) { d.addEventListener('toggle', sync); });
+  }
+
+  doc.addEventListener('fg3:ready', function () {
+    [initFrames, initWeights, initBrands, initRail, initState, initRules, initFaq].forEach(function (fn) {
+      try { fn(); } catch (e) { console.error('start.html', e); }
+    });
+  }, { once: true });
+})();
+</script>
+</main>
+
+<!-- ═══ FOOTER (shared — copy verbatim) ═══ -->
+<footer class="band" data-band="utility" data-band-seam="keep">
+  <div class="viewport-content stack-4">
+    <p class="t-caption" style="color: var(--label-2)">Fluid Design Open 1.0 &middot; An original design language with Fluid&rsquo;s colour. Type follows the system font, with Inter as the fallback. Device art is original.</p>
+    <p class="t-caption"><a href="index.html">Overview</a> &middot; <a href="start.html">Start</a> &middot; <a href="docs.html">Docs</a> &middot; <a href="components.html">Components</a> &middot; <a href="selftest.html">Self-test</a> &middot; <a href="audit.html">Audit</a></p>
+  </div>
+</footer>
+
+<script src="assets/geom.js"></script>
+<script src="assets/spring.js"></script>
+<script src="assets/palette.js"></script>
+<script src="assets/art3.js"></script>
+<script src="assets/lg3-core.js"></script>
+<script src="assets/fg3.js"></script>
+<script src="assets/symbols.js"></script>
+<script src="assets/chart.js"></script>
+<script src="assets/motion.js"></script>
+<script src="assets/anim.js"></script>
+<script src="assets/device.js"></script>
+<script src="assets/ui.js"></script>
+<script src="assets/chrome.js"></script>
+<script src="assets/showcase.js"></script>
+<script src="assets/docs.js"></script>   <!-- documentation pages only -->
+<script>FG3.boot(); if (window.DOCS) DOCS.mount();</script>
+</body>
+</html>
