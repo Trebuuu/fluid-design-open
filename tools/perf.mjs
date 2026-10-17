@@ -83,6 +83,8 @@ export async function launch({ gpu = true, width = 1440, height = 900, extraArgs
   const profile = await mkdtemp(path.join(os.tmpdir(), 'fg3-cdp-'));
   const args = ['--headless=new', '--hide-scrollbars', '--no-first-run', '--no-default-browser-check',
     '--disable-extensions', '--disable-component-update', '--disable-sync', '--mute-audio',
+    /* a fresh profile must stay signed out of the user's Windows account (Edge implicit sign-in); ONE --disable-features only */
+    '--disable-features=msImplicitSignin',
     '--disable-renderer-backgrounding', '--disable-background-timer-throttling',
     '--disable-backgrounding-occluded-windows',
     `--window-size=${width},${height}`, '--remote-debugging-port=0', `--user-data-dir=${profile}`,

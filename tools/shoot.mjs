@@ -67,7 +67,7 @@ if (!exe) { console.error('no Edge/Chrome found'); process.exit(2); }
 const port = 9300 + Math.floor(Math.random() * 500);
 const prof = path.join(os.tmpdir(), 'fd3-shoot-' + port);
 const proc = spawn(exe, ['--headless=new', '--hide-scrollbars', '--no-first-run', '--no-default-browser-check',
-  `--remote-debugging-port=${port}`, `--user-data-dir=${prof}`, `--window-size=${W},${H}`, 'about:blank'],
+  '--disable-features=msImplicitSignin', `--remote-debugging-port=${port}`, `--user-data-dir=${prof}`, `--window-size=${W},${H}`, 'about:blank'],
   { stdio: 'ignore' });
 
 const sleep = ms => new Promise(r => setTimeout(r, ms));
